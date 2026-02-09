@@ -1,0 +1,6 @@
+transaction_number,transaction_date,user_id,final_amount,sku_id,quantity,unit_price,line_total,store_id,discount_amount,tax_amount
+TXN20240115001,2024-01-15T10:00:00Z,replace-with-real-user-id,350.00,replace-with-real-sku-id-1,2,120.00,240.00,STORE001,0,0
+TXN20240115001,2024-01-15T10:00:00Z,replace-with-real-user-id,350.00,replace-with-real-sku-id-2,1,110.00,110.00,STORE001,0,0
+TXN20240115002,2024-01-15T11:30:00Z,replace-with-real-user-id,500.00,replace-with-real-sku-id-3,1,500.00,500.00,STORE001,0,0
+TXN20240115003,2024-01-15T14:00:00Z,replace-with-real-user-id,1200.00,replace-with-real-sku-id-1,5,200.00,1000.00,STORE002,0,200.00
+TXN20240115003,2024-01-15T14:00:00Z,replace-with-real-user-id,1200.00,replace-with-real-sku-id-2,2,100.00,200.00,STORE002,0,0

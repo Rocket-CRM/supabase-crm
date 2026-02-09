@@ -1,0 +1,3 @@
+transaction_number,transaction_date,user_id,user_phone,final_amount,sku_id,quantity,quantity_secondary,unit_price,line_total,discount_amount,tax_amount,item_discount_amount,item_tax_amount,store_id,status,payment_status,record_type,processing_method,earn_currency,transaction_source,external_ref,notes
+TXN001,2026-01-15T10:00:00Z,fe64008f-3ce6-49ce-b707-fae1316b9a64,,350.00,37158166-383d-4456-8cf0-e367e5d69d5e,2,,120.00,240.00,0,0,0,0,,completed,paid,credit,queue,true,admin,POS-12345,Coffee order
+TXN001,2026-01-15T10:00:00Z,fe64008f-3ce6-49ce-b707-fae1316b9a64,,350.00,5b0fa2e1-9913-4d3c-9e5e-454e8fa349f7,1,,110.00,110.00,0,0,0,0,,completed,paid,credit,queue,true,admin,POS-12345,Tea add-on

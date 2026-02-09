@@ -1,0 +1,38 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Cursor IDE
+.cursor/mcp.json
+
+# Node modules
+node_modules/
+.npm/
+
+# Supabase CLI temp
+supabase/.temp/
+
+# Test CSV files (keep templates, ignore test data)
+test-*.csv
+*_test*.csv
+CORRECTED_*.csv
+FINAL_*.csv
+bulk-import-test.csv
+syngenta_admins.csv
+rangwan_*.csv
+google-ads-landing-page-content.csv
+wholesaler_test_*.csv
+
+# Backups (local only)
+backups/
+
+# Build artifacts
+dist/
+build/
+.cache/

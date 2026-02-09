@@ -1,0 +1,64 @@
+Feature,Type,Sub-features
+Visual journey builder,Rule-based,"• Drag-and-drop canvas to design customer journeys
+• Define steps and branches without coding
+• Save and edit workflows anytime
+• Duplicate workflows for variants"
+Event triggers,Rule-based,"• New signup
+• Points earned
+• Tier upgraded
+• Points redeemed
+• Form submitted
+• Tag assigned
+• Loyalty-specific events"
+Conditional branching,Rule-based,"• Check tier level (Gold/Silver/etc.)
+• Check purchase history
+• Check points balance
+• Check if customer has a tag
+• Route different paths based on result"
+Wait and timing,Rule-based,"• Wait X days before next step
+• Wait until specific time
+• Control message cadence and spacing"
+Multi-channel messaging,Rule-based,"• Email
+• SMS
+• LINE"
+Message personalization,Rule-based,"• Insert customer name
+• Insert trigger data (points earned, order total)
+• Use saved templates
+• Variable substitution in content"
+CRM actions,Rule-based,"• Award points
+• Award multipliers
+• Push coupons
+• Assign tag to customer
+• Update customer field
+• Call external API or webhook"
+Journey analytics,Rule-based,"• Count of customers who entered
+• Completion rate
+• Funnel: sent → delivered → opened
+• Export customer list by journey stage"
+Static offer selection,Rule-based,"• Pick offer by category (e.g. Shoes)
+• Pick by fixed rule (if tier = Gold)
+• One template per branch"
+Batch-style execution,Rule-based,"• Runs on schedule or after event
+• Same path for all who match rule
+• Delays between steps handled by system"
+Context-aware decision making,Agentic,"• Uses full customer story (what they did, when, why)
+• Considers recent complaints, purchases, and behavior together
+• Decides based on narrative, not just a snapshot value"
+Intent and reasoning,Agentic,"• Understands customer intent (e.g. bought tent → may need camping gear)
+• Reasons about cause-and-effect from event sequence
+• Adapts action to implied need"
+Semantic offer matching,Agentic,"• Search offers by meaning (e.g. 'camping vibe' not just category)
+• AI picks best reward from results
+• Matches tone and context of customer situation"
+Score + context interpretation,Agentic,"• Interprets scores with context (e.g. high churn risk + complaint → different action than high risk alone)
+• Decides when to override template rules
+• Handles edge cases without new rules"
+Dynamic content generation,Agentic,"• AI generates or selects message content in real time
+• Adapts copy to customer situation
+• No fixed template per branch"
+Real-time response,Agentic,"• Decisions in milliseconds when event occurs
+• No batch delay
+• Immediate action when customer acts"
+AI-driven action selection,Agentic,"• AI chooses which action to take (send coupon, SMS, or neither)
+• Can combine multiple actions
+• Learns from context what will work best"

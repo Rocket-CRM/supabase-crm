@@ -1,0 +1,75 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  AJINOMOTO CUSTOMER IMPORT - QUICK REFERENCE               ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─ REQUIRED COLUMNS (at least one) ─────────────────────────────────────────┐
+│ user_accounts_tel          │ +66812345678                                 │
+│ user_accounts_line_id      │ U1234567890abcdef                            │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ PERSONA (REQUIRED for custom fields) ────────────────────────────────────┐
+│ user_accounts_persona_id                                                  │
+│                                                                            │
+│ Wholesaler (ผู้ค้าส่ง):  5f1aa0fb-3e2b-4c60-9bd4-5f7e8a5374cd          │
+│ Retailer (ผู้ค้าปลีก):   ff432547-e7ec-46e8-ba95-f0e5cb79d661          │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ CUSTOM FIELDS ✅ CORRECT NAMES ──────────────────────────────────────────┐
+│                                                                            │
+│ user_profile_shop_code     │ SHOP001              │ ✅ REQUIRED (both)   │
+│ user_profile_shop_name     │ ร้านค้าตัวอย่าง      │ ✅ REQUIRED (both)   │
+│ user_profile_sales_code    │ SALES001             │ ✅ REQUIRED (both)   │
+│ user_profile_sales_name    │ Sales Person Name    │ ✅ REQUIRED (both)   │
+│ user_profile_display_size  │ medium               │ ✅ REQUIRED (Retailer)│
+│                                                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ ❌ OLD INCORRECT NAMES (DO NOT USE) ─────────────────────────────────────┐
+│                                                                            │
+│ ❌ user_profile_store_code       → Use: user_profile_shop_code           │
+│ ❌ user_profile_store_name       → Use: user_profile_shop_name           │
+│ ❌ user_profile_salesman_code    → Use: user_profile_sales_code          │
+│ ❌ user_profile_salesman_name    → Use: user_profile_sales_name          │
+│                                                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ BASIC INFO (optional) ───────────────────────────────────────────────────┐
+│ user_accounts_firstname    │ John                                         │
+│ user_accounts_lastname     │ Doe                                          │
+│ user_accounts_fullname     │ John Doe                                     │
+│ user_accounts_email        │ john@example.com                             │
+│ user_accounts_birth_date   │ 15-03-1985 (DD-MM-YYYY)                      │
+│ user_accounts_gender       │ male / female / other                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ ADDRESS (optional) ──────────────────────────────────────────────────────┐
+│ user_address_addressline_1 │ 123 Main Street                              │
+│ user_address_subdistrict   │ Tambon                                       │
+│ user_address_district      │ Amphoe                                       │
+│ user_address_city          │ Bangkok                                      │
+│ user_address_postcode      │ 10100                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ IMPORT COMMAND ──────────────────────────────────────────────────────────┐
+│                                                                            │
+│ curl -X POST "https://crm-batch-upload.onrender.com/api/import/customers" │
+│   -F "file=@your_file.csv" \                                              │
+│   -F "merchant_id=99e456a2-107c-48c5-a12d-2b8b8b85aa2d" \                 │
+│   -F "batch_name=Your Batch Name" \                                       │
+│   -F "create_wallet_ledger_entry=true"                                    │
+│                                                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ NOTES ───────────────────────────────────────────────────────────────────┐
+│ • Use "-" for empty values (not blank)                                    │
+│ • Persona is REQUIRED for custom fields to work                           │
+│ • Phone must include country code (+66...)                                │
+│ • Boolean values: true/false (lowercase)                                  │
+│ • Email must be unique per merchant                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ Files:                                                                     ║
+║ • Template: csv-templates/ajinomoto_import_template_CORRECTED.csv         ║
+║ • Guide: csv-templates/AJINOMOTO_IMPORT_GUIDE.md                          ║
+╚════════════════════════════════════════════════════════════════════════════╝

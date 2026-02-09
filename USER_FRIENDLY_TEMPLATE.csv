@@ -1,0 +1,4 @@
+transaction_number,transaction_date,user_phone,final_amount,sku_code,quantity_primary,unit_price,line_total,discount_amount,tax_amount,store_code,notes
+TXN001,2026-02-01T10:00:00Z,+66966564526,350.00,AJI-MSG-001-250G,7,50.00,350.00,0,0,BKK-EX-001,Simple example with codes
+TXN002,2026-02-01T11:00:00Z,+66863107599,500.00,SKU-TSH-001-M,5,100.00,500.00,0,0,BKK-FL-001,Another customer
+TXN003,2026-02-01T12:00:00Z,+66631158652,1200.00,AJI-MSG-001-1KG,12,100.00,1200.00,0,0,BKK-ST-001,1KG variant

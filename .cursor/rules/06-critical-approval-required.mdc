@@ -1,0 +1,96 @@
+# Critical Approval Required - Destructive Changes
+
+## Mandatory Pre-Approval for Breaking Changes
+
+The following changes are **PROHIBITED** without explicit thread approval:
+
+### 🔴 Database Deletions
+- **Dropping tables** in Supabase
+- **Deleting cache databases** in Upstash Redis
+- **Removing materialized views** or regular views
+- **Dropping database functions** or triggers
+- **Deleting edge functions**
+
+### 🔴 Schema Breaking Changes
+- **Renaming database columns/fields**
+- **Changing data types** of existing columns
+- **Renaming tables** or views
+- **Changing function signatures** (parameters, return types)
+- **Modifying API response field names** or structure
+
+### 🔴 Cache Architecture Changes
+- **Changing cache key patterns**
+- **Modifying cached data structure**
+- **Removing cache invalidation triggers**
+- **Altering cache TTL strategies**
+
+## Required Pre-Approval Process
+
+Before implementing any of the above changes, you MUST:
+
+1. **Stop and present in chat:**
+   - What will be deleted/changed
+   - Why this change is needed
+   - Full impact analysis (what breaks, who is affected)
+   - Rollback strategy
+
+2. **Highlight breaking changes explicitly:**
+   ```
+   ⚠️ BREAKING CHANGE: This will delete [specific thing]
+   ⚠️ IMPACT: [Frontend/API/Integrations] will break because...
+   ⚠️ DEPENDENCIES: [List what depends on this]
+   ```
+
+3. **Wait for explicit "approved" or "proceed"** from user
+
+4. **Never assume permission** even if change seems "clean" or "minor"
+
+## Real-World Example: Cache Deletion Incident
+
+**What Happened:**
+Assistant automatically deleted an Upstash Redis cache database as part of a "cleanup" operation without prior approval.
+
+**The Impact:**
+- **Production outage**: Reward listing API (`api_get_rewards_full_cached`) immediately failed
+- **Performance degradation**: System fell back to non-cached queries, causing 10x slower response times
+- **Revenue impact**: Promo code redemptions failed during peak hours
+- **Data loss**: Cached aggregations (`mv_reward_promo_code_summary_internal`) required full rebuild
+- **Recovery time**: 2+ hours to restore cache infrastructure and warm up caches
+- **Customer complaints**: Mobile app experienced timeouts and errors
+
+**The Root Cause:**
+The assistant identified "unused" cache keys and proactively deleted the entire database, not realizing:
+- Cache misses appear as "unused" during analysis
+- Production systems depend on cache infrastructure being present
+- TTL expiry ≠ database deletion permission
+- Frontend applications cache API responses based on backend cache behavior
+
+**Why It Should Have Required Approval:**
+This was a **destructive infrastructure change** affecting production availability. Even if the cache appeared "safe to delete," the downstream effects were severe.
+
+## Defensive Principles
+
+1. **Deletion is never reversible** - Always ask first
+2. **You can't see all dependencies** - Production systems have hidden integrations
+3. **"Unused" doesn't mean "safe to delete"** - Cache misses, async jobs, scheduled tasks
+4. **Breaking changes break production** - Field renames cascade through frontend, mobile, webhooks
+5. **When in doubt, ask** - It takes 10 seconds to get approval, but hours to recover from mistakes
+
+## Safe Changes That Don't Require Approval
+
+✅ **Adding new columns** (non-breaking)
+✅ **Creating new functions** with new names
+✅ **Adding new cache keys** without removing old ones
+✅ **Adding new indexes**
+✅ **Creating new views** (non-breaking)
+✅ **Read-only analysis queries**
+
+## Exception: User Explicitly Commands Deletion
+
+If user says:
+- "Delete the cache database"
+- "Drop the table X"
+- "Remove function Y"
+
+Then you may proceed **after confirming**:
+- "Confirming: You want me to delete [X], which will cause [impact]. Proceed?"

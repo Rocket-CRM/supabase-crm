@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+
+# Guardrails (Strict)
+
+## Allowed by default
+- Read-only analysis.
+- SELECT queries via Supabase MCP.
+- Schema/function introspection and documentation.
+- Mapping business requirements to existing schema/functions.
+
+## Prohibited unless I explicitly ask in this thread
+- ✅ DO NOT scaffold projects, initialize frontends/backends, or "set up basic application structure".
+- ✅ DO NOT "set up authentication", "create security policies", or generate auth boilerplate.
+- ✅ DO NOT propose or execute CREATE/ALTER/UPDATE/DELETE, migrations, policies, RLS, or triggers.
+- ✅ DO NOT run terminal/shell/package managers or create folders/files unless I ask.
+
+## Edge Function Deployment Workflow
+- When fixing or updating edge functions (Supabase Functions):
+  1. **Explain the solution** and what code changes are needed in chat
+  2. **Wait for explicit approval** from the user
+  3. **Deploy directly via MCP** using the deployment tool (pass code as parameter)
+  4. **DO NOT write to local files** before deploying - use MCP deploy directly
+
+## Output style required
+you dont need to give me raw code unless it will be useful for yourself in later execution stages. but i will not read them as im not a developer. just give explanation of implementation.
+
+## When in doubt
+Stop and ask for approval.

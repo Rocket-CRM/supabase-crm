@@ -1,0 +1,95 @@
+================================================================================
+CUSTOMER IMPORT – FIELDS AND CURL
+================================================================================
+
+--- CSV FIELDS (all optional except tel or line_id) ---
+
+REQUIRED (at least one):
+  user_accounts_tel           Phone with country code (e.g. +66812345678)
+  user_accounts_line_id       LINE ID (alternative identifier)
+
+BASIC INFO:
+  user_accounts_firstname     First name
+  user_accounts_lastname      Last name
+  user_accounts_fullname      Full name
+  user_accounts_email         Email address
+  user_accounts_birth_date    Birth date (format: DD-MM-YYYY, e.g. 15-03-1985)
+  user_accounts_gender        Gender (male/female/other)
+
+TIER & PERSONA:
+  user_accounts_user_type     "buyer" or "seller" (affects tier eligibility)
+  user_accounts_persona_id    UUID from persona_master (optional)
+  user_accounts_tier_id       UUID from tier_master (to set initial tier)
+  user_accounts_tier_lock_downgrade          true/false (prevent auto-downgrade)
+  user_accounts_tier_locked_downgrade_until  Timestamp when lock expires
+
+CONTACT PREFERENCES:
+  user_accounts_channel_email    true/false (can contact via email)
+  user_accounts_channel_sms      true/false (can contact via SMS)
+  user_accounts_channel_line     true/false (can contact via LINE)
+  user_accounts_channel_push     true/false (can send push notifications)
+
+ADDRESS:
+  user_address_addressline_1     Street address
+  user_address_subdistrict       Subdistrict/Tambon
+  user_address_district          District/Amphoe
+  user_address_city              City/Province
+  user_address_postcode          Postal code
+
+WALLET & PROFILE:
+  user_wallet_points_balance     Initial points balance (integer)
+  user_profile_branch            Branch name
+  
+CUSTOM FIELDS (check merchant-specific field keys):
+  user_profile_{field_key}       Custom field value
+  
+  Example for Ajinomoto:
+    user_profile_shop_code       รหัสร้านค้า (shop code)
+    user_profile_shop_name       ชื่อร้านค้า (shop name)
+    user_profile_sales_code      รหัสพนักงานขาย (sales code)
+    user_profile_sales_name      ชื่อพนักงานขาย (sales name)
+    user_profile_display_size    ขนาดการแสดงผล (display size - for Retailer persona)
+  
+  ⚠️  IMPORTANT: Custom field column names MUST match the field_key in form_fields table
+  ⚠️  OLD INCORRECT NAMES (DO NOT USE):
+      user_profile_store_code, user_profile_store_name,
+      user_profile_salesman_code, user_profile_salesman_name
+
+NOTES:
+  - Use "-" for empty/null values
+  - created_at is always set to NOW() (cannot be imported)
+  - Email must be unique per merchant (use "-" if no email)
+
+--- CURL COMMANDS ---
+
+# Import customers WITH wallet ledger entries (for points audit trail)
+curl -X POST "https://crm-batch-upload.onrender.com/api/import/customers" \
+  -F "file=@csv-templates/customers_sample.csv" \
+  -F "merchant_id=YOUR_MERCHANT_ID" \
+  -F "batch_name=Customer Import Batch 1" \
+  -F "create_wallet_ledger_entry=true"
+
+# Import customers WITHOUT ledger entries (just set wallet balance)
+curl -X POST "https://crm-batch-upload.onrender.com/api/import/customers" \
+  -F "file=@csv-templates/customers_sample.csv" \
+  -F "merchant_id=YOUR_MERCHANT_ID" \
+  -F "batch_name=Customer Import Batch 1" \
+  -F "create_wallet_ledger_entry=false"
+
+# Check batch status
+curl "https://crm-batch-upload.onrender.com/api/import/status/BATCH_ID"
+
+# List recent imports for merchant
+curl "https://crm-batch-upload.onrender.com/api/import/list/YOUR_MERCHANT_ID"
+
+================================================================================
+PURCHASE IMPORT – CURL
+================================================================================
+
+# Import purchase transactions
+curl -X POST "https://crm-batch-upload.onrender.com/api/import/purchases" \
+  -F "file=@csv-templates/purchases_sample.csv" \
+  -F "merchant_id=YOUR_MERCHANT_ID" \
+  -F "batch_name=Purchase Import Batch 1"
+
+================================================================================
