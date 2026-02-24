@@ -183,6 +183,95 @@ router.post('/purchases', upload.single('file'), async (req, res) => {
   }
 });
 
+// Upload CSV and trigger redemption import
+router.post('/redemptions', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const { merchant_id, batch_name, transaction_mode, max_row_errors } = req.body;
+
+    if (!merchant_id) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: 'merchant_id is required' });
+    }
+
+    const mode = transaction_mode || 'per_row';
+    if (mode !== 'per_row' && mode !== 'all_or_nothing') {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: "transaction_mode must be 'per_row' or 'all_or_nothing'" });
+    }
+
+    const fileContent = fs.readFileSync(req.file.path, 'utf-8');
+    const parsed = Papa.parse(fileContent, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header: string) => header.trim().toLowerCase(),
+    });
+
+    if (parsed.errors.length > 0) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: 'CSV parsing failed', details: parsed.errors });
+    }
+
+    const rows = parsed.data as Record<string, string>[];
+
+    if (mode === 'all_or_nothing' && rows.length > 5000) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        error: 'all_or_nothing mode is limited to 5,000 rows. Use per_row for larger imports.',
+        total_rows: rows.length,
+      });
+    }
+
+    const { data: batch, error: batchError } = await supabase
+      .from('bulk_import_batches')
+      .insert({
+        merchant_id,
+        batch_name: batch_name || req.file.originalname,
+        file_name: req.file.originalname,
+        total_rows: rows.length,
+        status: 'pending',
+        import_type: 'redemptions',
+        metadata: { transaction_mode: mode },
+      })
+      .select()
+      .single();
+
+    if (batchError || !batch) {
+      fs.unlinkSync(req.file.path);
+      throw new Error(`Failed to create batch: ${batchError?.message}`);
+    }
+
+    await inngest.send({
+      name: 'import/bulk-redemptions',
+      data: {
+        batch_id: batch.id,
+        merchant_id,
+        transaction_mode: mode,
+        max_row_errors: max_row_errors ? parseInt(max_row_errors) : null,
+        csv_data: rows,
+      },
+    });
+
+    fs.unlinkSync(req.file.path);
+
+    res.json({
+      success: true,
+      batch_id: batch.id,
+      total_rows: rows.length,
+      transaction_mode: mode,
+      message: 'Redemption import started. Check status endpoint for progress.',
+    });
+  } catch (error) {
+    console.error('Redemption upload error:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Upload failed',
+    });
+  }
+});
+
 // Check import status
 router.get('/status/:batch_id', async (req, res) => {
   try {
