@@ -190,7 +190,14 @@ router.post('/redemptions', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const { merchant_id, batch_name, transaction_mode, max_row_errors } = req.body;
+    const {
+      merchant_id,
+      batch_name,
+      transaction_mode,
+      max_row_errors,
+      calc_points,
+      calc_eligibility,
+    } = req.body;
 
     if (!merchant_id) {
       fs.unlinkSync(req.file.path);
@@ -202,6 +209,9 @@ router.post('/redemptions', upload.single('file'), async (req, res) => {
       fs.unlinkSync(req.file.path);
       return res.status(400).json({ error: "transaction_mode must be 'per_row' or 'all_or_nothing'" });
     }
+
+    const doCalcPoints      = calc_points      === 'true' || calc_points      === true;
+    const doCalcEligibility = calc_eligibility  === 'true' || calc_eligibility  === true;
 
     const fileContent = fs.readFileSync(req.file.path, 'utf-8');
     const parsed = Papa.parse(fileContent, {
@@ -234,7 +244,11 @@ router.post('/redemptions', upload.single('file'), async (req, res) => {
         total_rows: rows.length,
         status: 'pending',
         import_type: 'redemptions',
-        metadata: { transaction_mode: mode },
+        metadata: {
+          transaction_mode: mode,
+          calc_points: doCalcPoints,
+          calc_eligibility: doCalcEligibility,
+        },
       })
       .select()
       .single();
@@ -247,22 +261,26 @@ router.post('/redemptions', upload.single('file'), async (req, res) => {
     await inngest.send({
       name: 'import/bulk-redemptions',
       data: {
-        batch_id: batch.id,
+        batch_id:         batch.id,
         merchant_id,
         transaction_mode: mode,
-        max_row_errors: max_row_errors ? parseInt(max_row_errors) : null,
-        csv_data: rows,
+        calc_points:      doCalcPoints,
+        calc_eligibility: doCalcEligibility,
+        max_row_errors:   max_row_errors ? parseInt(max_row_errors) : null,
+        csv_data:         rows,
       },
     });
 
     fs.unlinkSync(req.file.path);
 
     res.json({
-      success: true,
-      batch_id: batch.id,
-      total_rows: rows.length,
+      success:          true,
+      batch_id:         batch.id,
+      total_rows:       rows.length,
       transaction_mode: mode,
-      message: 'Redemption import started. Check status endpoint for progress.',
+      calc_points:      doCalcPoints,
+      calc_eligibility: doCalcEligibility,
+      message:          'Redemption import started. Check status endpoint for progress.',
     });
   } catch (error) {
     console.error('Redemption upload error:', error);
