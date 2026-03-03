@@ -36,3 +36,6 @@ backups/
 dist/
 build/
 .cache/
+
+# Requirements docs (local only - not for GitHub)
+requirements/
