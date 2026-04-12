@@ -1,0 +1,19 @@
+---
+alwaysApply: false
+description: "Guidelines for analyzing database functions, triggers, queues, edge functions, and crons"
+---
+
+# Functions, Queues, Triggers & Crons
+
+> Before analyzing any component, complete the Context Lookup Procedure (`00-overview.mdc` Steps 1–3). This rule provides analysis guidance after context is established.
+
+When analyzing system components, cover:
+- **Database functions**: signatures, parameters, return types, dependencies between functions
+- **Triggers**: timing (BEFORE/AFTER), operations (INSERT/UPDATE/DELETE), cascade effects
+- **Edge functions**: endpoints, auth requirements, external API dependencies
+- **Queues**: consumers, producers, retry policies, message types
+- **Crons**: schedules, business purposes, execution dependencies
+
+Map cross-component relationships and connect each component to business requirements in `/requirements/`.
+
+When discussing components: explain current implementation, connect to business logic, identify dependencies, and assess production criticality.

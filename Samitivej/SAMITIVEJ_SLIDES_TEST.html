@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samitivej CRM Center — Loyalty Platform Proposal</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@1,2,3,4,5,6,7,8,9&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root {
+    --red: #E33334;
+    --magenta: #B81881;
+    --gradient: linear-gradient(-28deg, var(--red) 0%, var(--magenta) 100%);
+    --gradient-text: linear-gradient(135deg, var(--red), var(--magenta));
+    --bg: #FAFAFA;
+    --white: #FFFFFF;
+    --black: #000000;
+    --gray-border: #CFCFCF;
+    --gray-light: #ADADAD;
+    --gray-text: #666666;
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Satoshi', 'Satoshi Variable', sans-serif;
+    background: #ccc;
+    color: var(--black);
+    -webkit-font-smoothing: antialiased;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* ── Slide base ── */
+  .slide {
+    width: var(--slide-w); height: var(--slide-h);
+    margin: 20px auto; position: relative; overflow: hidden;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+    page-break-after: always; page-break-inside: avoid;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+
+  /* ── Gradient helper ── */
+  .text-gradient {
+    background: var(--gradient-text);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ── Rocket logo SVG (chevron) ── */
+  .rocket-logo { display: inline-flex; align-items: center; gap: 8px; }
+  .rocket-logo svg { width: 28px; height: 28px; }
+  .rocket-logo span { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 22px; }
+
+  /* ════════════════════════════════
+     TYPE 1: TITLE / SECTION DIVIDER
+     ════════════════════════════════ */
+  .slide-gradient {
+    background: var(--gradient);
+    color: var(--white);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+  }
+  .slide-gradient .logo-tl {
+    position: absolute; top: 55px; left: 60px; opacity: 0.5;
+  }
+  .slide-gradient .footer-bl {
+    position: absolute; bottom: 40px; left: 60px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .slide-gradient .footer-bl svg { opacity: 0.7; }
+  .slide-gradient .footer-bl span {
+    font-family: 'Poppins', sans-serif; font-weight: 400;
+    font-size: 18px; color: rgba(255,255,255,0.7);
+  }
+  .slide-gradient .legal {
+    position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
+    font-family: 'Satoshi', sans-serif; font-weight: 500;
+    font-size: 16px; opacity: 0.7; text-align: center;
+  }
+
+  /* Section divider variant */
+  .slide-section {
+    background: var(--gradient);
+    color: var(--white);
+    display: flex; align-items: center;
+    padding: 0 120px;
+  }
+  .slide-section .section-title {
+    font-size: 80px; font-weight: 700; line-height: 1.15;
+    border-left: 5px solid rgba(255,255,255,0.6);
+    padding-left: 30px;
+  }
+  .slide-section .footer-bl {
+    position: absolute; bottom: 40px; left: 60px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .slide-section .footer-bl span {
+    font-family: 'Poppins', sans-serif; font-weight: 400;
+    font-size: 18px; color: rgba(255,255,255,0.7);
+  }
+
+  /* ════════════════════════════════
+     TYPE 2: ABOUT US CONTENT SLIDE
+     ════════════════════════════════ */
+  .slide-about {
+    background: var(--bg);
+  }
+  .about-sidebar {
+    position: absolute; left: 68px; top: 0; width: 160px; height: 100%;
+  }
+  .about-sidebar .line-top {
+    position: absolute; left: 0; top: 0;
+    width: 1.5px; height: 137px;
+    background: var(--gradient);
+    box-shadow: 0 0 4px rgba(233, 14, 43, 0.5);
+  }
+  .about-sidebar .line-bottom {
+    position: absolute; left: 0; bottom: 0;
+    width: 1.5px; height: 84px;
+    background: var(--gradient);
+    box-shadow: 0 0 4px rgba(233, 14, 43, 0.5);
+  }
+  .about-sidebar .label {
+    position: absolute; left: 16px; top: 42px;
+    font-family: 'Poppins', sans-serif; font-weight: 600;
+    font-size: 22px;
+  }
+  .about-footer {
+    position: absolute; bottom: 30px; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px;
+  }
+  .about-footer .engage {
+    font-family: 'Poppins', sans-serif; font-weight: 400; font-size: 18px;
+    color: var(--black);
+  }
+  .about-footer .rocket-br {
+    position: absolute; right: 60px; bottom: 0;
+  }
+
+  /* ════════════════════════════════
+     TYPE 3: CONTENT SLIDE (proposal)
+     ════════════════════════════════ */
+  .slide-content {
+    background: var(--bg);
+    padding: 50px 80px 80px;
+  }
+  .slide-content .title-bar {
+    display: flex; align-items: flex-start; gap: 18px;
+    margin-bottom: 24px;
+  }
+  .slide-content .title-bar .vbar {
+    width: 4px; min-height: 50px;
+    background: var(--gradient);
+    border-radius: 2px; flex-shrink: 0; margin-top: 4px;
+  }
+  .slide-content .title-bar h1 {
+    font-size: 52px; font-weight: 700; line-height: 1.15;
+  }
+  .slide-content .title-bar .subtitle {
+    font-size: 20px; color: var(--gray-text); font-weight: 400;
+    margin-top: 4px; font-family: 'Poppins', sans-serif;
+  }
+  .content-footer {
+    position: absolute; bottom: 30px; left: 80px; right: 80px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .content-footer .left {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .content-footer .left span {
+    font-family: 'Poppins', sans-serif; font-weight: 400;
+    font-size: 16px; color: var(--gray-text);
+  }
+  .content-footer .right {
+    font-family: 'Poppins', sans-serif; font-weight: 500;
+    font-size: 14px; color: var(--gray-light);
+  }
+
+  /* ── Shared components ── */
+  .card {
+    background: var(--white); border: 1px solid var(--gray-border);
+    border-radius: 12px; padding: 24px;
+  }
+  .badge-pill {
+    display: inline-block; padding: 6px 20px; border-radius: 20px;
+    font-weight: 700; font-size: 14px; color: var(--white);
+    background: var(--gradient);
+  }
+  .badge-pill-outline {
+    display: inline-block; padding: 5px 18px; border-radius: 20px;
+    font-weight: 600; font-size: 13px; border: 1.5px solid var(--red);
+  }
+  .stat-big { font-size: 64px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 16px; color: var(--gray-text); font-weight: 500; margin-top: 4px; }
+  .icon-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .icon-circle-lg {
+    width: 70px; height: 70px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; flex-shrink: 0;
+    background: var(--gradient); color: white;
+  }
+
+  /* ── Service tags ── */
+  .service-tag {
+    display: inline-block; padding: 10px 24px; border-radius: 6px;
+    background: var(--white); border: 1px solid var(--gray-border);
+    font-weight: 600; font-size: 16px; margin: 4px;
+  }
+
+  /* ── Table styles ── */
+  .tbl {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    font-size: 16px;
+  }
+  .tbl th {
+    text-align: left; padding: 12px 16px; font-weight: 700;
+    border-bottom: 2px solid var(--gray-border);
+    font-size: 14px; color: var(--gray-text); text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tbl td {
+    padding: 10px 16px; border-bottom: 1px solid #eee;
+    vertical-align: top; line-height: 1.5;
+  }
+  .tbl .highlight-row { background: rgba(227, 51, 52, 0.06); }
+
+  /* ── Composability diagram ── */
+  .comp-card-sm {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--white); border: 1px solid #eee;
+    border-radius: 8px; padding: 8px 14px; margin: 3px;
+    font-size: 13px; font-weight: 500;
+  }
+  .comp-card-sm .ic {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; border: 1.5px solid;
+    flex-shrink: 0;
+  }
+  .rule-box {
+    background: var(--white); border: 2px solid var(--red);
+    border-radius: 16px; overflow: hidden;
+  }
+  .rule-box .header {
+    background: var(--gradient); color: white;
+    padding: 14px 24px; text-align: center;
+    font-weight: 700; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .rule-box .body { padding: 20px 24px; }
+  .rule-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 0; font-size: 15px;
+  }
+  .rule-row .label { color: var(--gray-text); }
+  .rule-row .val {
+    padding: 3px 14px; border-radius: 14px; font-weight: 600; font-size: 13px;
+  }
+  .result-item {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+
+  /* ── Timeline comparison ── */
+  .timeline-step {
+    display: flex; align-items: flex-start; gap: 16px; margin-bottom: 10px;
+  }
+  .timeline-dot-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    flex-shrink: 0; width: 44px;
+  }
+  .timeline-dot {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+    background: var(--gradient); color: white; font-weight: 700;
+  }
+  .timeline-line { width: 2px; height: 20px; }
+  .timeline-text { padding-top: 8px; }
+  .timeline-text .t-title { font-size: 16px; font-weight: 600; }
+  .timeline-text .t-desc { font-size: 13px; color: var(--gray-text); line-height: 1.45; margin-top: 2px; }
+  .faded { opacity: 0.4; }
+
+  /* ── Print ── */
+  @media print {
+    @page { size: 1920px 1080px; margin: 0; }
+    body { background: white; margin: 0; padding: 0; }
+    .slide { margin: 0; box-shadow: none; }
+    .no-print { display: none !important; }
+    * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
+  }
+  .export-bar { text-align: center; padding: 20px; }
+  .export-btn {
+    background: var(--gradient); color: white; border: none;
+    padding: 14px 36px; border-radius: 8px; font-size: 16px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+</style>
+</head>
+<body>
+
+<div class="export-bar no-print">
+  <button class="export-btn" onclick="window.print()">Export to PDF</button>
+  <span style="margin-left:16px;color:#888;font-size:14px;">Margins: None · Background graphics: On</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 1 — TITLE (exact Figma)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-gradient">
+  <div class="logo-tl">
+    <svg width="280" height="80" viewBox="0 0 280 80" fill="none">
+      <path d="M8 40L30 15L52 40L30 65Z" stroke="white" stroke-width="4" fill="none"/>
+      <text x="68" y="52" fill="white" font-family="Poppins" font-size="42" font-weight="600">rocket</text>
+    </svg>
+  </div>
+  <h1 style="font-size:150px;font-weight:700;text-align:center;line-height:1em;max-width:1600px;">
+    Rocket<br>Loyalty CRM.
+  </h1>
+  <p style="font-family:'Satoshi',sans-serif;font-size:50px;font-weight:500;margin-top:28px;text-align:center;opacity:0.9;">
+    Engage like a digital giant
+  </p>
+  <p class="legal" style="max-width:1000px;">
+    Rocket Innovation Co. Ltd. Unauthorized use, reproduction, or distribution constitutes a violation of applicable laws.
+  </p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 2 — ABOUT ROCKET (exact Figma layout)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-about">
+  <div class="about-sidebar">
+    <div class="line-top"></div>
+    <div class="line-bottom"></div>
+    <div class="label text-gradient">About Us</div>
+  </div>
+
+  <div style="text-align:center;padding-top:80px;">
+    <h1 style="font-size:80px;font-weight:700;">
+      About <span class="text-gradient" style="font-style:italic;">Rocket</span>
+    </h1>
+  </div>
+
+  <div style="display:flex;padding:40px 80px 0 240px;gap:40px;">
+    <!-- Left stats -->
+    <div style="flex:0 0 180px;">
+      <div style="margin-bottom:30px;">
+        <div style="font-size:15px;color:var(--gray-text);">Product launched in</div>
+        <div class="stat-big text-gradient">2023</div>
+        <div style="font-size:15px;margin-top:4px;">
+          <span class="text-gradient" style="font-weight:700;">Top 3</span> B2C CRM<br>in Thailand
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--gray-light);padding-top:20px;margin-bottom:30px;">
+        <div class="stat-big text-gradient">100+</div>
+        <div class="stat-label">Key Accounts<br>that use our service</div>
+      </div>
+      <div style="border-top:1px solid var(--gray-light);padding-top:20px;">
+        <div class="stat-big text-gradient">60+</div>
+        <div class="stat-label">employees<br>IT, CS/Support, Sales</div>
+      </div>
+    </div>
+
+    <!-- Center: Client grid -->
+    <div style="flex:1;">
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0;border:1px solid #eee;border-radius:12px;overflow:hidden;background:white;">
+        <!-- Column headers -->
+        <div style="padding:10px;text-align:center;font-weight:700;font-size:17px;background:white;border-bottom:1px solid #eee;">Retail</div>
+        <div style="padding:10px;text-align:center;font-weight:700;font-size:17px;background:white;border-bottom:1px solid #eee;">FMCG</div>
+        <div style="padding:10px;text-align:center;font-weight:700;font-size:17px;background:white;border-bottom:1px solid #eee;">Beauty</div>
+        <div style="padding:10px;text-align:center;font-weight:700;font-size:17px;background:white;border-bottom:1px solid #eee;">Autos</div>
+        <div style="padding:10px;text-align:center;font-weight:700;font-size:17px;background:white;border-bottom:1px solid #eee;">BMAT</div>
+        <div style="padding:10px;text-align:center;font-weight:700;font-size:17px;background:white;border-bottom:1px solid #eee;">Others</div>
+        <!-- Row 1 -->
+        <div style="padding:12px;text-align:center;font-size:13px;border-right:1px solid #f0f0f0;color:var(--gray-text);">เซ็นทรัลพัฒนา<br>Pop Mart<br>Seiko<br>TechnoGym<br>Jolly</div>
+        <div style="padding:12px;text-align:center;font-size:13px;border-right:1px solid #f0f0f0;color:var(--gray-text);">Suntory<br>Double A<br>cpYam<br>CP Consumer<br>Jabs<br>Kao<br>Unilever</div>
+        <div style="padding:12px;text-align:center;font-size:13px;border-right:1px solid #f0f0f0;color:var(--gray-text);">LG H&H<br>Dr.PONG<br>ReGroup<br>Herr. Heymans<br>La Prairie<br>Kiss My Body<br>Browit</div>
+        <div style="padding:12px;text-align:center;font-size:13px;border-right:1px solid #f0f0f0;color:var(--gray-text);">Mercedes-Benz<br>Isuzu<br>Ford<br>Eton<br>MG<br>Mazda</div>
+        <div style="padding:12px;text-align:center;font-size:13px;border-right:1px solid #f0f0f0;color:var(--gray-text);">TOA<br>Dulux<br>Pumpkin<br>Urai Paints<br>Kovet</div>
+        <div style="padding:12px;text-align:center;font-size:13px;color:var(--gray-text);">cpYam<br>Syngenta<br>Thai Wah<br>ReignWood<br>Otteri</div>
+      </div>
+    </div>
+
+    <!-- Right: Services & Partners -->
+    <div style="flex:0 0 220px;">
+      <div style="font-weight:700;font-size:18px;margin-bottom:12px;">Services</div>
+      <div class="service-tag">Loyalty CRM</div>
+      <div class="service-tag">Campaign Automation</div>
+      <div class="service-tag">1st party Commerce</div>
+      <div style="font-weight:700;font-size:18px;margin-top:30px;margin-bottom:12px;">Official partners</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+        <div style="padding:8px 16px;border:1px solid #eee;border-radius:8px;font-size:14px;font-weight:600;">LINE Developer Partner</div>
+        <div style="padding:8px 16px;border:1px solid #eee;border-radius:8px;font-size:14px;font-weight:600;">aws</div>
+        <div style="padding:8px 16px;border:1px solid #eee;border-radius:8px;font-size:14px;font-weight:600;">Coil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="about-footer">
+    <span class="engage"><span class="text-gradient" style="font-weight:600;">Engage</span> like a digital giant</span>
+    <div class="about-footer rocket-br">
+      <svg width="120" height="32" viewBox="0 0 120 32" fill="none">
+        <path d="M4 16L14 6L24 16L14 26Z" stroke="url(#rg1)" stroke-width="2.5" fill="none"/>
+        <text x="30" y="22" fill="#333" font-family="Poppins" font-size="20" font-weight="600">rocket</text>
+        <defs><linearGradient id="rg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#E33334"/><stop offset="100%" stop-color="#B81881"/></linearGradient></defs>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 3 — PROVEN SUCCESS (Figma style)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-about">
+  <div class="about-sidebar">
+    <div class="line-top"></div><div class="line-bottom"></div>
+    <div class="label text-gradient">About Us</div>
+  </div>
+
+  <div style="text-align:center;padding:70px 240px 0;">
+    <h1 style="font-size:60px;font-weight:700;line-height:1.2;">
+      Number <span class="text-gradient">1</span> most likely to use in 2025<br>
+      Number <span class="text-gradient">2</span> most popular CRM in 2024
+    </h1>
+  </div>
+
+  <div style="display:flex;gap:40px;padding:40px 240px 0;align-items:flex-start;">
+    <!-- Left: Bar chart -->
+    <div style="flex:1;background:#1a1a2e;border-radius:16px;padding:30px;color:white;">
+      <div style="font-size:14px;opacity:0.8;margin-bottom:16px;">CRM (for B2C) — Top 10 MarTech Thailand</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:14px;width:110px;text-align:right;">ChocoCRM</span><div style="height:20px;border-radius:4px;background:#555;width:195px;"></div><span style="font-size:14px;font-weight:600;">13%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:14px;width:110px;text-align:right;">Buzzebees</span><div style="height:20px;border-radius:4px;background:#555;width:150px;"></div><span style="font-size:14px;font-weight:600;">10%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;border:2px solid var(--red);border-radius:6px;padding:4px 0;"><span style="font-size:14px;width:110px;text-align:right;font-weight:700;color:var(--red);">Rocket CRM</span><div style="height:20px;border-radius:4px;background:var(--gradient);width:150px;"></div><span style="font-size:14px;font-weight:700;color:var(--red);">10%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:14px;width:110px;text-align:right;">EX10</span><div style="height:20px;border-radius:4px;background:#555;width:60px;"></div><span style="font-size:14px;">4%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:14px;width:110px;text-align:right;">SellStory</span><div style="height:20px;border-radius:4px;background:#555;width:45px;"></div><span style="font-size:14px;">3%</span></div>
+        <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:14px;width:110px;text-align:right;">Primo</span><div style="height:20px;border-radius:4px;background:#555;width:30px;"></div><span style="font-size:14px;">2%</span></div>
+      </div>
+    </div>
+
+    <!-- Right: Table -->
+    <div style="flex:1;background:#1a1a2e;border-radius:16px;padding:30px;color:white;">
+      <div style="font-size:14px;opacity:0.8;margin-bottom:16px;">B2C CRM Usage 2024 vs Projected 2025</div>
+      <table style="width:100%;font-size:14px;border-collapse:collapse;">
+        <thead><tr style="border-bottom:1px solid #333;">
+          <th style="text-align:left;padding:8px;font-weight:600;">Top 3</th>
+          <th style="text-align:center;padding:8px;">Current</th>
+          <th style="text-align:center;padding:8px;">Future</th>
+          <th style="text-align:center;padding:8px;">%Diff</th>
+        </tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #222;"><td style="padding:6px 8px;">ChocoCRM</td><td style="text-align:center;">7%</td><td style="text-align:center;">7%</td><td style="text-align:center;color:#4CAF50;">+0%</td></tr>
+          <tr style="border-bottom:1px solid #222;"><td style="padding:6px 8px;">Buzzebees</td><td style="text-align:center;">6%</td><td style="text-align:center;">7%</td><td style="text-align:center;color:#4CAF50;">+1%</td></tr>
+          <tr style="border-bottom:1px solid #222;background:rgba(227,51,52,0.15);"><td style="padding:6px 8px;font-weight:700;color:var(--red);">Rocket CRM</td><td style="text-align:center;font-weight:700;">6%</td><td style="text-align:center;font-weight:700;">13%</td><td style="text-align:center;font-weight:700;color:var(--red);">+7%</td></tr>
+          <tr style="border-bottom:1px solid #222;"><td style="padding:6px 8px;">Hootsuite</td><td style="text-align:center;">8%</td><td style="text-align:center;">10%</td><td style="text-align:center;color:#4CAF50;">+2%</td></tr>
+          <tr><td style="padding:6px 8px;">Buffer</td><td style="text-align:center;">5%</td><td style="text-align:center;">4%</td><td style="text-align:center;color:var(--red);">-1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="about-footer">
+    <span class="engage"><span class="text-gradient" style="font-weight:600;">Engage</span> like a digital giant</span>
+    <div class="about-footer rocket-br">
+      <svg width="120" height="32" viewBox="0 0 120 32" fill="none"><path d="M4 16L14 6L24 16L14 26Z" stroke="url(#rg1)" stroke-width="2.5" fill="none"/><text x="30" y="22" fill="#333" font-family="Poppins" font-size="20" font-weight="600">rocket</text></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 4 — WHY WE WIN (Figma style, 3 circles)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-about">
+  <div class="about-sidebar">
+    <div class="line-top"></div><div class="line-bottom"></div>
+    <div class="label text-gradient">About Us</div>
+  </div>
+
+  <div style="text-align:center;padding-top:60px;">
+    <h1 style="font-size:60px;font-weight:700;">Why we win</h1>
+  </div>
+
+  <svg width="1920" height="700" viewBox="0 0 1920 700" style="position:absolute;top:180px;left:0;">
+    <!-- Arc path connecting the circles -->
+    <path d="M 200 550 Q 960 -50 1720 550" fill="none" stroke="url(#arc-grad)" stroke-width="2" stroke-dasharray="8,6" opacity="0.5"/>
+    <defs>
+      <linearGradient id="arc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#E33334"/>
+        <stop offset="100%" stop-color="#B81881"/>
+      </linearGradient>
+      <radialGradient id="circle-grad" cx="50%" cy="30%" r="60%">
+        <stop offset="0%" stop-color="#E33334"/>
+        <stop offset="100%" stop-color="#B81881"/>
+      </radialGradient>
+    </defs>
+    <!-- Circle 1: Composability -->
+    <circle cx="480" cy="340" r="140" fill="url(#circle-grad)"/>
+    <text x="480" y="345" text-anchor="middle" fill="white" font-family="Satoshi" font-size="30" font-weight="600">Composability</text>
+    <!-- Circle 2: AI-native -->
+    <circle cx="960" cy="200" r="160" fill="url(#circle-grad)"/>
+    <text x="960" y="205" text-anchor="middle" fill="white" font-family="Satoshi" font-size="32" font-weight="600">AI-native</text>
+    <!-- Circle 3: Focus -->
+    <circle cx="1440" cy="340" r="140" fill="url(#circle-grad)"/>
+    <text x="1440" y="345" text-anchor="middle" fill="white" font-family="Satoshi" font-size="30" font-weight="600">Focus</text>
+  </svg>
+
+  <div class="about-footer">
+    <span class="engage"><span class="text-gradient" style="font-weight:600;">Engage</span> like a digital giant</span>
+    <div class="about-footer rocket-br">
+      <svg width="120" height="32" viewBox="0 0 120 32" fill="none"><path d="M4 16L14 6L24 16L14 26Z" stroke="url(#rg1)" stroke-width="2.5" fill="none"/><text x="30" y="22" fill="#333" font-family="Poppins" font-size="20" font-weight="600">rocket</text></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 5 — SECTION: Samitivej Proposal
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="section-title">Samitivej CRM Center<br>Loyalty Platform</div>
+  <div class="footer-bl">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="rgba(255,255,255,0.5)" stroke-width="2.5" fill="none"/></svg>
+    <span>Rocket Loyalty CRM 4.0</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 6 — EXECUTIVE SUMMARY (content style)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="title-bar">
+    <div class="vbar"></div>
+    <div>
+      <h1>Executive Summary</h1>
+      <p class="subtitle">Four pillars transforming patient loyalty — from fragmented to unified</p>
+    </div>
+  </div>
+
+  <!-- Executive grid in Figma card style -->
+  <div style="display:grid;grid-template-columns:200px 240px 44px 240px 240px;gap:0;margin-top:8px;">
+    <div style="padding:10px;text-align:center;"><span class="badge-pill" style="font-size:13px;">Objectives</span></div>
+    <div style="padding:10px;text-align:center;"><span class="badge-pill" style="background:#333;">Current State</span></div>
+    <div></div>
+    <div style="padding:10px;text-align:center;"><span class="badge-pill" style="background:var(--magenta);">Future State</span></div>
+    <div style="padding:10px;text-align:center;"><span class="badge-pill" style="background:#E65100;">Business Impact</span></div>
+
+    <!-- Row 1 -->
+    <div class="card" style="margin:4px;text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;"><span class="text-gradient">Unified Member<br>Type Management</span></div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;">Member types across HIS, insurers, HR — separate systems. No automated resolution when benefits overlap.</div>
+    <div style="display:flex;align-items:center;justify-content:center;">
+      <svg width="36" height="28" viewBox="0 0 36 28"><path d="M4 14h24M22 6l8 8-8 8" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(184,24,129,0.05);">6 types coexist on one profile. HIS queries platform → highest benefit auto-selected at every visit.</div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(227,51,52,0.05);"><span class="text-gradient" style="font-weight:700;">▲</span> One API call resolves right discount. Zero manual override.</div>
+
+    <!-- Row 2 -->
+    <div class="card" style="margin:4px;text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;"><span class="text-gradient">Unified Privileges<br>& Packages</span></div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;">eCoupons, entitlements, packages follow different workflows per channel. No single patient wallet.</div>
+    <div style="display:flex;align-items:center;justify-content:center;">
+      <svg width="36" height="28" viewBox="0 0 36 28"><path d="M4 14h24M22 6l8 8-8 8" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(184,24,129,0.05);">All privileges in one wallet with QR. Package purchase → auto-issue all items across channels.</div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(227,51,52,0.05);"><span class="text-gradient" style="font-weight:700;">▲</span> Buy → receive → use → track digitally. Any new type = config.</div>
+
+    <!-- Row 3 -->
+    <div class="card" style="margin:4px;text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;"><span class="text-gradient">Omni-Channel<br>Coin Economy</span></div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;">Hospital visits, marketplace, online engagement disconnected. No shared currency across touchpoints.</div>
+    <div style="display:flex;align-items:center;justify-content:center;">
+      <svg width="36" height="28" viewBox="0 0 36 28"><path d="M4 14h24M22 6l8 8-8 8" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(184,24,129,0.05);">Single coin from hospital, Shopee, E-Commerce, content, behavior. Spend on privileges & discounts.</div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(227,51,52,0.05);"><span class="text-gradient" style="font-weight:700;">▲</span> Every interaction rewardable. Marketplace builds hospital loyalty.</div>
+
+    <!-- Row 4 -->
+    <div class="card" style="margin:4px;text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;"><span class="text-gradient">Intelligent<br>Marketing</span></div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;">Campaigns planned manually. Limited ability to personalize at scale across lifecycle stages.</div>
+    <div style="display:flex;align-items:center;justify-content:center;">
+      <svg width="36" height="28" viewBox="0 0 36 28"><path d="M4 14h24M22 6l8 8-8 8" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(184,24,129,0.05);">Rule-based journeys across LINE, SMS, Email, Push + AI Decisioning per patient.</div>
+    <div class="card" style="margin:4px;font-size:14px;line-height:1.5;background:rgba(227,51,52,0.05);"><span class="text-gradient" style="font-weight:700;">▲</span> Continuous intelligent engagement. AI learns from outcomes.</div>
+  </div>
+
+  <div class="content-footer">
+    <div class="left">
+      <svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="url(#rg1)" stroke-width="2" fill="none"/></svg>
+      <span>Rocket Loyalty CRM 4.0</span>
+    </div>
+    <div class="right">6</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 7 — SECTION: Coin Economy
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-section">
+  <div class="section-title">Coin Economy &<br>Privilege Platform</div>
+  <div class="footer-bl">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="rgba(255,255,255,0.5)" stroke-width="2.5" fill="none"/></svg>
+    <span>Rocket Loyalty CRM 4.0</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 8 — COMPOSABILITY (exact Figma Slide 95 style)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="title-bar">
+    <div class="vbar"></div>
+    <div><h1>Composable Earning Rules</h1><p class="subtitle">Configure any earning scenario by combining actions, conditions, and results — no code required</p></div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start;gap:0;margin-top:10px;padding:0 20px;">
+    <!-- LEFT: Actions -->
+    <div style="flex:0 0 280px;">
+      <div style="text-align:center;margin-bottom:14px;"><span class="badge-pill">Action</span></div>
+      <div class="card" style="padding:16px;">
+        <div style="margin-bottom:10px;"><span class="badge-pill-outline text-gradient" style="font-size:12px;">Purchase</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          <div class="comp-card-sm"><div class="ic" style="border-color:#E33334;color:#E33334;">🏥</div>Hospital Visit</div>
+          <div class="comp-card-sm"><div class="ic" style="border-color:#E33334;color:#E33334;">🛒</div>Marketplace</div>
+          <div class="comp-card-sm"><div class="ic" style="border-color:#E33334;color:#E33334;">💳</div>E-Commerce</div>
+          <div class="comp-card-sm"><div class="ic" style="border-color:#E33334;color:#E33334;">📱</div>Well App</div>
+        </div>
+        <div style="margin:12px 0 8px;"><span class="badge-pill-outline text-gradient" style="font-size:12px;">Non-Purchase</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          <div class="comp-card-sm"><div class="ic" style="border-color:#B81881;color:#B81881;">📖</div>Article Read</div>
+          <div class="comp-card-sm"><div class="ic" style="border-color:#B81881;color:#B81881;">📝</div>Survey</div>
+          <div class="comp-card-sm"><div class="ic" style="border-color:#B81881;color:#B81881;">📋</div>Check-in</div>
+          <div class="comp-card-sm"><div class="ic" style="border-color:#B81881;color:#B81881;">👥</div>Referral</div>
+          <div class="comp-card-sm"><div class="ic" style="border-color:#B81881;color:#B81881;">💬</div>LINE Share</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div style="flex:0 0 50px;display:flex;align-items:center;justify-content:center;min-height:500px;">
+      <svg width="44" height="50"><path d="M8 25 Q22 25 36 25" fill="none" stroke="url(#rg1)" stroke-width="2" stroke-linecap="round"/><path d="M30 18l8 7-8 7" fill="none" stroke="url(#rg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- CENTER: Rule Engine -->
+    <div style="flex:0 0 320px;">
+      <div class="rule-box">
+        <div class="header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 12L12 4L20 12L12 20Z" stroke="white" stroke-width="2.5" fill="none"/></svg>
+          Rule-Engine
+        </div>
+        <div class="body">
+          <div style="font-weight:700;font-size:16px;margin-bottom:12px;">Condition</div>
+          <div class="rule-row"><span class="label">Purchase above:</span><span class="val" style="background:rgba(227,51,52,0.1);color:var(--red);">500 THB</span></div>
+          <div class="rule-row"><span class="label">Category:</span><span class="val" style="background:rgba(184,24,129,0.1);color:var(--magenta);">OPD</span></div>
+          <div class="rule-row"><span class="label">In the past:</span><span class="val" style="background:rgba(0,137,123,0.1);color:#00897B;">12 months</span></div>
+          <div class="rule-row"><span class="label">Never purchased:</span><span class="val" style="background:#f5f5f5;color:#555;">Dental package</span></div>
+          <div class="rule-row"><span class="label">Tier:</span><span class="val" style="background:rgba(245,127,23,0.1);color:#F57F17;">Gold+</span></div>
+          <div style="border-top:2px solid #eee;margin-top:14px;padding-top:14px;">
+            <div style="font-weight:700;font-size:16px;margin-bottom:12px;">Result</div>
+            <div class="rule-row"><span class="label">Earn multiplier:</span><span class="val" style="background:rgba(227,51,52,0.1);color:var(--red);">2× coins</span></div>
+            <div class="rule-row"><span class="label">Issue privilege:</span><span class="val" style="background:rgba(184,24,129,0.1);color:var(--magenta);">Dental 20% off</span></div>
+            <div class="rule-row"><span class="label">Send survey:</span><span class="val" style="background:rgba(21,101,192,0.1);color:#1565C0;">NPS post-visit</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div style="flex:0 0 50px;display:flex;align-items:center;justify-content:center;min-height:500px;">
+      <svg width="44" height="50"><path d="M8 25 Q22 25 36 25" fill="none" stroke="url(#rg1)" stroke-width="2" stroke-linecap="round"/><path d="M30 18l8 7-8 7" fill="none" stroke="url(#rg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <!-- RIGHT: End Results -->
+    <div style="flex:0 0 280px;">
+      <div style="text-align:center;margin-bottom:14px;"><span class="badge-pill">End Result</span></div>
+      <div style="display:flex;flex-direction:column;gap:16px;padding-top:20px;">
+        <div class="result-item">
+          <div class="icon-circle" style="background:rgba(227,51,52,0.1);border:2px solid var(--red);">💰</div>
+          <div><div style="font-weight:600;font-size:15px;">Points / Coins</div><div style="font-size:13px;color:var(--gray-text);">45 coins → wallet instantly</div></div>
+        </div>
+        <div class="result-item">
+          <div class="icon-circle" style="background:rgba(184,24,129,0.1);border:2px solid var(--magenta);">🎁</div>
+          <div><div style="font-weight:600;font-size:15px;">Privilege Issued</div><div style="font-size:13px;color:var(--gray-text);">Dental 20% coupon to wallet</div></div>
+        </div>
+        <div class="result-item">
+          <div class="icon-circle" style="background:rgba(21,101,192,0.1);border:2px solid #1565C0;">📊</div>
+          <div><div style="font-weight:600;font-size:15px;">Survey Triggered</div><div style="font-size:13px;color:var(--gray-text);">NPS + follow-up journey</div></div>
+        </div>
+        <div class="result-item">
+          <div class="icon-circle" style="background:rgba(230,81,0,0.1);border:2px solid #E65100;">💬</div>
+          <div><div style="font-weight:600;font-size:15px;">Notification Sent</div><div style="font-size:13px;color:var(--gray-text);">LINE + Push confirmation</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-footer">
+    <div class="left"><svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="url(#rg1)" stroke-width="2" fill="none"/></svg><span>Rocket Loyalty CRM 4.0</span></div>
+    <div class="right">8</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 9 — CLICKS NOT CODE (Figma Slide 105 style)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="title-bar">
+    <div class="vbar"></div>
+    <div>
+      <h1>Launch campaigns with<br><span class="text-gradient" style="font-style:italic;">clicks not code</span></h1>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:80px;margin-top:20px;padding: 0 100px;justify-content:center;">
+    <!-- Left: Composable -->
+    <div style="width:380px;">
+      <div style="background:var(--gradient);color:white;padding:16px 28px;border-radius:14px 14px 0 0;text-align:center;font-weight:700;font-size:18px;">
+        Composable Campaign Creation
+      </div>
+      <div style="background:rgba(227,51,52,0.04);border:1.5px solid rgba(227,51,52,0.15);border-top:0;border-radius:0 0 14px 14px;padding:30px 40px;">
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">💡</div><div class="timeline-line" style="background:var(--gradient);"></div></div>
+          <div class="timeline-text"><div class="t-title">Marketing Idea</div><div class="t-desc">Select target segment from dynamic audiences</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">✏️</div><div class="timeline-line" style="background:var(--gradient);"></div></div>
+          <div class="timeline-text"><div class="t-title">Build with Blocks</div><div class="t-desc">Drag-and-drop: trigger → condition → message → action</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">👁️</div><div class="timeline-line" style="background:var(--gradient);"></div></div>
+          <div class="timeline-text"><div class="t-title">Preview & Simulate</div><div class="t-desc">Test on staff accounts, approval queue, gradual rollout</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot">🚀</div></div>
+          <div class="timeline-text"><div class="t-title" style="color:var(--red);">Go Live 30 minutes</div><div class="t-desc">Real-time metrics, A/B testing built in</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Traditional (faded) -->
+    <div style="width:340px;" class="faded">
+      <div style="background:#ddd;color:#888;padding:16px 28px;border-radius:14px 14px 0 0;text-align:center;font-weight:700;font-size:17px;font-style:italic;">
+        Traditional Campaign Creation
+      </div>
+      <div style="background:#f8f8f8;border:1.5px solid #e0e0e0;border-top:0;border-radius:0 0 14px 14px;padding:30px 40px;">
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot" style="background:#ccc;">💡</div><div class="timeline-line" style="background:#ccc;"></div></div>
+          <div class="timeline-text"><div class="t-title">Marketing Idea</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot" style="background:#ccc;">📋</div><div class="timeline-line" style="background:#ccc;"></div></div>
+          <div class="timeline-text"><div class="t-title">Requirements Document</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot" style="background:#ccc;">🔍</div><div class="timeline-line" style="background:#ccc;"></div></div>
+          <div class="timeline-text"><div class="t-title" style="text-decoration:line-through;">IT Review 2 weeks</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot" style="background:#ccc;">💻</div><div class="timeline-line" style="background:#ccc;"></div></div>
+          <div class="timeline-text"><div class="t-title" style="text-decoration:line-through;">Development 8 weeks</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot" style="background:#ccc;">🧪</div><div class="timeline-line" style="background:#ccc;"></div></div>
+          <div class="timeline-text"><div class="t-title" style="text-decoration:line-through;">Testing 2 weeks</div></div>
+        </div>
+        <div class="timeline-step">
+          <div class="timeline-dot-wrap"><div class="timeline-dot" style="background:#ccc;">🐌</div></div>
+          <div class="timeline-text"><div class="t-title" style="text-decoration:line-through;">Go Live 12 weeks</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-footer">
+    <div class="left"><svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="url(#rg1)" stroke-width="2" fill="none"/></svg><span>Rocket Loyalty CRM 4.0</span></div>
+    <div class="right">9</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 10 — INTEGRATION ARCHITECTURE (D3.js)
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="title-bar">
+    <div class="vbar"></div>
+    <div><h1>Integration Architecture</h1><p class="subtitle">Bidirectional data flow between hospital systems, channels, and the loyalty platform</p></div>
+  </div>
+  <div style="display:flex;justify-content:center;">
+    <svg id="d3-arch" width="1760" height="700"></svg>
+  </div>
+  <div class="content-footer">
+    <div class="left"><svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="url(#rg1)" stroke-width="2" fill="none"/></svg><span>Rocket Loyalty CRM 4.0</span></div>
+    <div class="right">10</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 11 — 6 MEMBER TYPES
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="title-bar">
+    <div class="vbar"></div>
+    <div><h1>6 Member Types — One Patient Profile</h1><p class="subtitle">Each type has its own tier structure. Precedence engine auto-resolves best benefit at every visit.</p></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;">
+    <div class="card" style="border-left:4px solid var(--red);"><h4 style="font-size:18px;margin-bottom:6px;">🏥 VIP (Star)</h4><div style="margin-bottom:6px;"><span class="badge-pill" style="font-size:11px;padding:3px 10px;">Connex</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;">Cheva</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;">VIP Ins</span></div><div style="font-size:14px;color:var(--gray-text);line-height:1.5;">Contractual — assigned by hospital. Auto-issue privileges + activate standing discounts. HIS queries → highest applied.</div></div>
+
+    <div class="card" style="border-left:4px solid var(--magenta);"><h4 style="font-size:18px;margin-bottom:6px;">💎 Paid (Divine Elite)</h4><div style="margin-bottom:6px;"><span class="badge-pill" style="font-size:11px;padding:3px 10px;background:var(--magenta);">50K</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:var(--magenta);">100K</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:var(--magenta);">200K</span></div><div style="font-size:14px;color:var(--gray-text);line-height:1.5;">Purchase plans. 3 categories: mandatory (auto), elective (pick 3 of 8), standing (15% OPD, 10% pharmacy).</div></div>
+
+    <div class="card" style="border-left:4px solid #1565C0;"><h4 style="font-size:18px;margin-bottom:6px;">📈 Engagement / Tier</h4><div style="margin-bottom:6px;"><span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#1565C0;">Silver</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#1565C0;">Gold</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#1565C0;">Platinum</span></div><div style="font-size:14px;color:var(--gray-text);line-height:1.5;">ALL channels count. 5 evaluation windows. Immediate upgrade. Better earn rates + lower privilege costs.</div></div>
+
+    <div class="card" style="border-left:4px solid #E65100;"><h4 style="font-size:18px;margin-bottom:6px;">🏢 Corporate</h4><div style="margin-bottom:6px;"><span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#E65100;">C-Level</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#E65100;">Executive</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#E65100;">General</span></div><div style="font-size:14px;color:var(--gray-text);line-height:1.5;">B2B agreements. Admin creates company → HR sends roster (CSV/API) → employees auto-assigned with level benefits.</div></div>
+
+    <div class="card" style="border-left:4px solid #00897B;"><h4 style="font-size:18px;margin-bottom:6px;">🛡️ Insurance</h4><div style="margin-bottom:6px;"><span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#00897B;">Premium</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#00897B;">Standard</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#00897B;">Basic</span></div><div style="font-size:14px;color:var(--gray-text);line-height:1.5;">Auto-assignment from HIS. Per-package stackability: some allow Insurance + Coins, others Insurance-only.</div></div>
+
+    <div class="card" style="border-left:4px solid #F57F17;"><h4 style="font-size:18px;margin-bottom:6px;">🤝 Exclusive Partner</h4><div style="margin-bottom:6px;"><span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#F57F17;">Gold</span> <span class="badge-pill" style="font-size:11px;padding:3px 10px;background:#F57F17;">Platinum</span></div><div style="font-size:14px;color:var(--gray-text);line-height:1.5;">Marriott, airlines send member lists. Dedicated landing pages. Partner activity API → auto-upgrade tiers.</div></div>
+  </div>
+
+  <!-- Precedence bar -->
+  <div style="margin-top:16px;background:white;padding:14px 24px;border-radius:12px;border:1px solid #eee;display:flex;align-items:center;gap:12px;font-size:15px;">
+    <span style="font-weight:700;">Precedence:</span>
+    <span class="badge-pill" style="font-size:12px;padding:4px 12px;">VIP 30%</span> <span style="color:#ccc;">></span>
+    <span class="badge-pill" style="font-size:12px;padding:4px 12px;background:#E65100;">Corp 25%</span> <span style="color:#ccc;">></span>
+    <span class="badge-pill" style="font-size:12px;padding:4px 12px;background:#00897B;">Ins 20%</span> <span style="color:#ccc;">></span>
+    <span class="badge-pill" style="font-size:12px;padding:4px 12px;background:var(--magenta);">Paid 15%</span> <span style="color:#ccc;">></span>
+    <span class="badge-pill" style="font-size:12px;padding:4px 12px;background:#1565C0;">Tier 5%</span>
+    <span style="margin-left:12px;">→ <strong class="text-gradient">30% applied automatically.</strong> Every decision audit-logged.</span>
+  </div>
+
+  <div class="content-footer">
+    <div class="left"><svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="url(#rg1)" stroke-width="2" fill="none"/></svg><span>Rocket Loyalty CRM 4.0</span></div>
+    <div class="right">11</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SLIDE 12 — PLATFORM STATS
+     ═══════════════════════════════════════════════════ -->
+<div class="slide slide-content">
+  <div class="title-bar">
+    <div class="vbar"></div>
+    <div><h1>Platform Performance Guarantees</h1><p class="subtitle">Hospital-scale architecture with real-time event processing</p></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:30px;padding:0 40px;">
+    <div class="card" style="text-align:center;padding:40px 24px;">
+      <div class="stat-big text-gradient">99.9%</div>
+      <div style="font-size:20px;font-weight:600;margin-top:10px;">System Uptime</div>
+      <div style="font-size:14px;color:var(--gray-text);margin-top:6px;">< 9 hours unplanned downtime per year</div>
+    </div>
+    <div class="card" style="text-align:center;padding:40px 24px;">
+      <div class="stat-big text-gradient">< 50ms</div>
+      <div style="font-size:20px;font-weight:600;margin-top:10px;">Eligibility Query</div>
+      <div style="font-size:14px;color:var(--gray-text);margin-top:6px;">Redis-cached wallet & benefit resolution</div>
+    </div>
+    <div class="card" style="text-align:center;padding:40px 24px;">
+      <div class="stat-big text-gradient">< 1s</div>
+      <div style="font-size:20px;font-weight:600;margin-top:10px;">Coin Earn End-to-End</div>
+      <div style="font-size:14px;color:var(--gray-text);margin-top:6px;">From HIS event to wallet credit via Kafka</div>
+    </div>
+    <div class="card" style="text-align:center;padding:40px 24px;">
+      <div class="stat-big text-gradient">10K+</div>
+      <div style="font-size:20px;font-weight:600;margin-top:10px;">Concurrent Users</div>
+      <div style="font-size:14px;color:var(--gray-text);margin-top:6px;">Flash reward concurrency, fair first-come-first-served</div>
+    </div>
+    <div class="card" style="text-align:center;padding:40px 24px;">
+      <div class="stat-big text-gradient">85%</div>
+      <div style="font-size:20px;font-weight:600;margin-top:10px;">TOR Standard Modules</div>
+      <div style="font-size:14px;color:var(--gray-text);margin-top:6px;">15% = integration adapters + Samitivej config</div>
+    </div>
+    <div class="card" style="text-align:center;padding:40px 24px;">
+      <div class="stat-big text-gradient">50+</div>
+      <div style="font-size:20px;font-weight:600;margin-top:10px;">Open API Endpoints</div>
+      <div style="font-size:14px;color:var(--gray-text);margin-top:6px;">REST API with OAuth 2.0, full documentation</div>
+    </div>
+  </div>
+
+  <div class="content-footer">
+    <div class="left"><svg width="28" height="28" viewBox="0 0 36 36" fill="none"><path d="M6 18L16 8L26 18L16 28Z" stroke="url(#rg1)" stroke-width="2" fill="none"/></svg><span>Rocket Loyalty CRM 4.0</span></div>
+    <div class="right">12</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<script>
+// D3.js Integration Architecture
+(function() {
+  const svg = d3.select('#d3-arch').attr('viewBox', '0 0 1760 700');
+  const defs = svg.append('defs');
+
+  ['E33334','B81881','546E7A','00897B','1565C0','E65100'].forEach(c => {
+    defs.append('marker').attr('id',`a-${c}`).attr('viewBox','0 0 10 10')
+      .attr('refX',9).attr('refY',5).attr('markerWidth',6).attr('markerHeight',6)
+      .attr('orient','auto').append('path').attr('d','M1 2L9 5L1 8Z').attr('fill',`#${c}`);
+  });
+
+  const grad = defs.append('linearGradient').attr('id','grd').attr('x1','0%').attr('y1','0%').attr('x2','100%').attr('y2','100%');
+  grad.append('stop').attr('offset','0%').attr('stop-color','#E33334');
+  grad.append('stop').attr('offset','100%').attr('stop-color','#B81881');
+
+  const shadow = defs.append('filter').attr('id','sh').attr('x','-8%').attr('y','-8%').attr('width','120%').attr('height','130%');
+  shadow.append('feDropShadow').attr('dx',0).attr('dy',2).attr('stdDeviation',3).attr('flood-opacity',0.08);
+
+  const groups = [
+    { label:'EXTERNAL SYSTEMS', color:'#546E7A', bg:'#ECEFF1', x:10, y:10, w:260, h:660,
+      nodes:[
+        {id:'his',l:'🏥 HIS / Data Center',y:80},{id:'cdp',l:'📊 CDP Hospital',y:155},
+        {id:'pay',l:'💳 Payment Gateway',y:230},{id:'ecom',l:'🌐 Hospital E-Commerce',y:305},
+        {id:'shop',l:'🛒 Shopee / Lazada',y:380},{id:'partner',l:'🤝 Partners',y:455},
+        {id:'well',l:'📱 Well App',y:530},{id:'line',l:'💬 LINE',y:605},
+      ]},
+    { label:'API GATEWAY', color:'#00897B', bg:'#E0F2F1', x:380, y:160, w:220, h:340,
+      nodes:[{id:'lb',l:'Load Balancer',y:220},{id:'waf',l:'WAF + DDoS + Rate Limit',y:290},{id:'tls',l:'TLS 1.3 + OAuth 2.0',y:360},{id:'sso',l:'Well SSO Validation',y:430}]},
+    { label:'CORE SERVICES', color:'#E33334', bg:'rgba(227,51,52,0.05)', x:710, y:40, w:220, h:540,
+      nodes:[{id:'ma',l:'📣 Marketing Engine',y:100},{id:'auth',l:'🔐 Auth Service',y:170},{id:'elig',l:'📋 Eligibility API',y:240},{id:'priv',l:'🎫 Privilege Service',y:310},{id:'wallet',l:'💰 Wallet Service',y:380},{id:'tier',l:'🏆 Tier Engine',y:450},{id:'pkg',l:'📦 Package Service',y:520}]},
+    { label:'EVENT PROCESSING', color:'#E65100', bg:'#FFF3E0', x:1040, y:120, w:220, h:280,
+      nodes:[{id:'kafka',l:'Apache Kafka',y:185},{id:'cdc',l:'CDC / Debezium',y:255},{id:'temp',l:'Temporal (Durable)',y:325}]},
+    { label:'DATA LAYER', color:'#1565C0', bg:'#E3F2FD', x:1040, y:440, w:220, h:220,
+      nodes:[{id:'pg',l:'PostgreSQL (RLS)',y:505},{id:'redis',l:'Redis (< 50ms)',y:575},{id:'s3',l:'Object Storage',y:620}]},
+    { label:'ANALYTICS', color:'#B81881', bg:'rgba(184,24,129,0.06)', x:1380, y:180, w:220, h:240,
+      nodes:[{id:'dw',l:'Analytics Database',y:250},{id:'dash',l:'10+20 Dashboards',y:320},{id:'mcp',l:'Rocket MCP (AI)',y:370}]},
+  ];
+
+  const np = {};
+  groups.forEach(g => {
+    svg.append('rect').attr('x',g.x).attr('y',g.y).attr('width',g.w).attr('height',g.h)
+      .attr('rx',14).attr('fill',g.bg).attr('stroke',g.color).attr('stroke-width',1.5).attr('stroke-opacity',0.3);
+    svg.append('text').attr('x',g.x+14).attr('y',g.y+22).attr('font-size',11).attr('font-weight',700)
+      .attr('fill',g.color).attr('letter-spacing','0.5px').text(g.label);
+
+    g.nodes.forEach(n => {
+      const cx = g.x + g.w/2, cy = n.y;
+      np[n.id] = {x:cx, y:cy, gx:g.x, gw:g.w};
+      const nd = svg.append('g');
+      nd.append('rect').attr('x',cx-95).attr('y',cy-18).attr('width',190).attr('height',36)
+        .attr('rx',8).attr('fill','white').attr('stroke',g.color).attr('stroke-width',1.5).attr('filter','url(#sh)');
+      nd.append('text').attr('x',cx).attr('y',cy+1).attr('text-anchor','middle').attr('dominant-baseline','middle')
+        .attr('font-size',13).attr('font-weight',500).attr('fill','#333').text(n.l);
+    });
+  });
+
+  function conn(from,to,col,lbl) {
+    const f=np[from], t=np[to]; if(!f||!t) return;
+    const fx=f.gx+f.gw, tx=t.gx, cp=Math.max(30,Math.abs(tx-fx)*0.3);
+    svg.append('path')
+      .attr('d',`M${fx} ${f.y} C${fx+cp} ${f.y},${tx-cp} ${t.y},${tx} ${t.y}`)
+      .attr('fill','none').attr('stroke',`#${col}`).attr('stroke-width',1.5).attr('stroke-opacity',0.4)
+      .attr('marker-end',`url(#a-${col})`);
+    if(lbl){
+      const mx=(fx+tx)/2, my=(f.y+t.y)/2-10;
+      svg.append('text').attr('x',mx).attr('y',my).attr('text-anchor','middle')
+        .attr('font-size',9.5).attr('font-weight',500).attr('fill',`#${col}`).attr('opacity',0.7).text(lbl);
+    }
+  }
+
+  // External → Gateway
+  conn('his','lb','546E7A','Purchases, Visits');
+  conn('cdp','lb','546E7A','Service Catalog');
+  conn('pay','waf','546E7A','Payment Callbacks');
+  conn('ecom','waf','546E7A','Purchase Events');
+  conn('shop','tls','546E7A','Order Webhooks');
+  conn('partner','tls','546E7A','Activity Events');
+  conn('well','sso','546E7A','SSO Token');
+  conn('line','sso','546E7A','OAuth + LIFF');
+
+  // Gateway → Core
+  conn('lb','elig','00897B'); conn('waf','wallet','00897B');
+  conn('tls','priv','00897B'); conn('sso','auth','00897B');
+
+  // Core → Events
+  conn('wallet','kafka','E65100'); conn('tier','cdc','E65100');
+  conn('ma','temp','E65100');
+
+  // Core → Data
+  conn('wallet','pg','1565C0'); conn('elig','redis','1565C0','Cache Lookup');
+  conn('priv','pg','1565C0');
+
+  // Data → Analytics
+  conn('pg','dw','B81881'); conn('dw','dash','B81881');
+
+  // Return path: Eligibility → HIS
+  svg.append('path')
+    .attr('d',`M710 ${np.elig.y} C600 ${np.elig.y},400 80,270 80`)
+    .attr('fill','none').attr('stroke','#E33334').attr('stroke-width',1.5).attr('stroke-opacity',0.35)
+    .attr('stroke-dasharray','6,4').attr('marker-end','url(#a-E33334)');
+  svg.append('text').attr('x',480).attr('y',130).attr('text-anchor','middle')
+    .attr('font-size',10).attr('font-weight',600).attr('fill','#E33334').attr('opacity',0.6)
+    .text('← Eligibility + Entitlements + Status');
+})();
+</script>
+
+</body>
+</html>

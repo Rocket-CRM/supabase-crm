@@ -206,7 +206,7 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
 7. Link missing auth methods to existing user
 8. Generate JWT with merchant context
 9. **Early return optimization:** if required auth method is still missing (`verify_line` / `verify_tel`), return immediately (still includes `access_token` + `refresh_token`) and **skip** profile template evaluation
-10. Check profile completion using `bff_get_user_profile_template` (only when auth methods are satisfied)
+10. Check profile completion using `bff_get_user_profile_template` (only when auth methods are satisfied); returned field lists are **persona-filtered** for the session JWT—see §5
 11. Determine `next_step` based on profile completion
 12. Build `missing_data` payload (full form or missing-only)
 13. Generate refresh token
@@ -215,14 +215,35 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
 
 ---
 
-### 5. `bff_get_user_profile_template(p_language, p_mode)`
-**Purpose:** Get profile form template with translations
+### 5. `bff_get_user_profile_template(p_mode, p_language, p_merchant_code, p_event_code)`
+**Purpose:** Build the user profile form schema (default fields, custom form fields, persona picker structure, PDPA/consent shell, channels/topics items) with translations, then return only the slices appropriate for the **current JWT** and **persona**.
 
-**Input:**
-- `p_language`: `'en'` | `'th'` | `'zh'` | `'ja'`
-- `p_mode`: `'new'` | `'edit'`
+**Where it is used (not only edit profile):**
+- **Signup / post-login profile completion:** After `bff-auth-complete` has issued a session and all required auth methods are satisfied, that flow evaluates profile completion and may call this RPC (or equivalent server-side logic) so `missing_data` reflects the same template the client should render—see step 10 in `bff-auth-complete` above.
+- **Edit profile (standalone screen):** The app may call this RPC directly with `p_mode = 'edit'` and the user’s bearer token so the form is pre-filled from `user_accounts` / `user_address` / `form_responses` / consents / channel flags.
 
-**Output:**
+**Input (Postgres parameter order):**
+| Parameter | Default | Role |
+|-----------|---------|------|
+| `p_mode` | `'new'` | `'new'` = empty values (plus optional event pre-fill); `'edit'` = overlay stored user data for fields still present after filtering |
+| `p_language` | `'en'` | Resolved UI language (with fallback to merchant default) |
+| `p_merchant_code` | `null` | If set, resolves merchant via config cache; if `null`, uses session merchant context (`get_current_merchant_id()`) |
+| `p_event_code` | `null` | Optional Syngenta-style event: pre-fills address admin IDs on matching default fields when `p_mode = 'new'` |
+
+**Persona and field visibility (server-side, JWT-driven):**
+- The function reads **`auth.uid()`** and loads **`user_accounts.persona_id`** for that auth user and **current merchant**.
+- Each default field (`user_field_config`) and custom field (`form_fields`) carries **`persona_ids`** in the JSON.
+  - **Universal field:** `persona_ids` is missing, JSON `null`, or an **empty** array → returned for every caller (subject to other flags such as `visible_to_user`).
+  - **Persona-scoped field:** non-empty `persona_ids` → returned only if the user’s `persona_id` is in that list.
+  - **User has no `persona_id`:** only universal fields are returned; persona-scoped fields are omitted.
+- **Field groups:** If, after filtering, a group has **no** remaining fields, that **entire group is omitted** from `default_fields_config` and `custom_fields_config`.
+- **Persona metadata:** The response still includes the full **`persona`** object (groups, personas, `persona_attain`, etc.) so the client can render persona selection; filtering applies to **fields**, not to hiding the persona catalog unless the product layer does so.
+
+**Caching vs filtering:**
+- Redis stores the **full** merchant template (all languages) under `merchant:{merchant_id}:user_profile_template:all_languages` for **5 minutes**.
+- After cache hit or miss, the pipeline runs **`fn_extract_user_profile_language`**, then **persona field filtering**, then event pre-fill (`new` only), then **`edit`** overlays. So **persona filtering is not baked into the cache**; it depends on the caller’s JWT on every request.
+
+**Output (shape; keys vary by merchant):**
 ```json
 {
   "persona": {
@@ -235,28 +256,23 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
   "pdpa": [ ... ],
   "selected_section": null,
   "mode": "new",
+  "event_code": null,
   "cache_hit": true,
   "language": "th",
+  "default_language": "en",
   "timestamp": "2025-12-08T00:00:00Z"
 }
 ```
 
 **Mode behavior:**
-- `'new'`: All `value` fields are `null`, `isAccepted: false`, `selected: false`
-- `'edit'`: Overlays user's actual data from DB
+- `'new'`: Field `value` entries are empty unless event pre-fill applies; PDPA/channel/topic acceptance flags start unset/false as defined by the function.
+- `'edit'`: Overlays the caller’s data from DB for fields that remain **after** persona filtering (same auth user / merchant).
 
-**Caching:**
-- Static structure cached for 5 minutes in Redis
-- User data fetched fresh (never cached)
-- Cache key: `merchant:{merchant_id}:user_profile_template:all_languages`
+**Important for clients:**
+- Call with the **end-user’s JWT** (not only a service role with no `auth.uid()`), otherwise persona cannot be resolved and **only universal fields** are returned.
+- **`phone` / `line_id`:** Still governed by merchant field config and product rules (often treated as auth-managed rather than free-text profile fields).
 
-**Frontend usage:** 
-- Called internally by `bff-auth-complete`
-- Can be called directly for profile edit page
-
-**Deactivated fields:**
-- `phone` - managed via auth flow, not shown in form
-- `line_id` - managed via auth flow, not shown in form
+**Related RPC:** `bff_save_user_profile` accepts the filled payload; ensure saves validate required fields in line with what this template exposed for that user’s persona.
 
 ---
 
@@ -890,12 +906,10 @@ All user data filtered by `get_current_merchant_id()` extracted from:
 │  bff_get_auth_config(merchant_code)                             │
 │  └─> Returns auth_methods from merchant_master                  │
 │                                                                 │
-│  bff_get_user_profile_template(language, mode)                  │
-│  └─> Get from Redis cache (if exists)                           │
-│  └─> Or build from DB (form templates + translations)           │
-│  └─> Store in cache (5 min TTL)                                 │
-│  └─> Extract requested language                                 │
-│  └─> If mode='edit': Overlay user data from DB                  │
+│  bff_get_user_profile_template(mode, language, merchant, event) │
+│  └─> Redis: full merchant template (5 min), then per-request:     │
+│  └─> Extract language → filter fields by JWT persona → optional   │
+│      event pre-fill (new) → overlay user values (edit)            │
 │                                                                 │
 │  bff_save_user_profile(form_data)                               │
 │  └─> UPSERT user_accounts                                       │

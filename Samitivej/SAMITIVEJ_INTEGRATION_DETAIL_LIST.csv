@@ -1,0 +1,50 @@
+#,Function,Topic,Type,Data From,Data To,Rocket Open API,Frequency
+,,HIS → Rocket (Inbound Events),,,,,
+1.1,Coin earning from hospital visit,"HIS sends purchase event after patient payment. Rocket processes earn rules and credits coins to wallet.",Webhook (POST),HIS,Rocket,POST /webhooks/events,Real-time
+1.2,Service delivery event,"HIS sends service completion event (lab done, consultation done). Rocket deducts entitlement uses and triggers post-service journeys.",Webhook (POST),HIS,Rocket,POST /webhooks/events,Real-time
+1.3,Insurance data sync,"HIS sends insurance information when recorded at check-in. Rocket auto-assigns insurance member type.",Webhook (POST),HIS,Rocket,POST /webhooks/events,Real-time
+1.4,OrderSet verification,"Hospital staff confirms marketplace OrderSet code + patient identity. Rocket creates/links patient, issues package privileges, earns coins.",Webhook (POST),HIS,Rocket,POST /webhooks/events,Real-time
+,,Rocket → HIS (Outbound Queries),,,,,
+2.1,Eligibility query,"HIS queries patient's active benefits at billing counter. Rocket returns highest discount with precedence reasoning + stackability.",REST GET,HIS,Rocket,GET /eligibility,Real-time
+2.2,Standing benefits query,"HIS queries all standing discounts for a patient. Rocket returns ranked list with precedence.",REST GET,HIS,Rocket,GET /eligibility/standing-benefits,Real-time
+2.3,Entitlement status,HIS checks remaining uses for a multi-use entitlement.,REST GET,HIS,Rocket,GET /entitlements/{id},Real-time
+2.4,Entitlement mark-use,"Hospital staff deducts one use from entitlement (via QR scan or HIS). Anti-double-spend with row locking.",REST POST,HIS,Rocket,POST /entitlements/{id}/use,Real-time
+2.5,Member status query,HIS queries all active member types and tier for a patient.,REST GET,HIS,Rocket,GET /member-types/status,Real-time
+,,Well App Integration,,,,,
+3.1,SSO token validation,"Well authenticates user, passes token to Rocket for session establishment.",REST POST,Well App,Rocket,POST /auth/sso/validate,Real-time
+3.2,All loyalty data,"Well App reads wallet, privileges, tier, missions, packages via API.",REST GET,Rocket,Well App,Multiple GET endpoints,Real-time
+3.3,Package purchase,"Patient purchases package via Well App. Rocket handles payment, coin discount, privilege issuance.",REST POST,Well App,Rocket,POST /packages/{id}/purchase,Real-time
+3.4,Privilege redemption,Patient redeems privilege from catalog using coins.,REST POST,Well App,Rocket,POST /privileges/{id}/redeem,Real-time
+,,Marketplace Integration,,,,,
+4.1,Shopee order webhook,"Shopee sends order data when patient purchases a health package. Rocket stores pending order for hospital verification.",Webhook (POST),Shopee,Rocket,POST /webhooks/events,Real-time
+4.2,Lazada order webhook,Same as Shopee flow for Lazada orders.,Webhook (POST),Lazada,Rocket,POST /webhooks/events,Real-time
+,,LINE Integration,,,,,
+5.1,LINE OAuth registration,"Patient registers/logs in via LINE. Rocket links LINE ID to patient profile.",OAuth + LIFF,LINE,Rocket,POST /auth/line/callback,Real-time
+5.2,LINE message delivery,"Rocket sends LINE messages (text, flex, image) as part of marketing journeys.",REST POST,Rocket,LINE,LINE Messaging API,Real-time
+5.3,LINE webhook events,LINE sends delivery/read confirmations and follow/unfollow events.,Webhook (POST),LINE,Rocket,LINE webhook endpoint,Real-time
+,,Payment Gateway,,,,,
+6.1,Create payment session,Rocket creates a payment session for package purchase or membership payment.,REST POST,Rocket,Payment GW,Payment provider API,Real-time
+6.2,Payment callback,"Payment gateway confirms successful/failed payment. Rocket completes purchase flow.",Webhook (POST),Payment GW,Rocket,POST /webhooks/payment-callback,Real-time
+,,Partner Integration,,,,,
+7.1,Partner member roster import,"Partner sends member list (batch CSV or API). Rocket creates/links patient profiles and assigns partner member type.",REST POST / Batch,Partner,Rocket,POST /member-types/contracts/import,Batch / On-demand
+7.2,Partner activity event,"Partner sends activity event (e.g. ""10 hotel stays completed""). Rocket upgrades partner level → new benefits.",Webhook (POST),Partner,Rocket,POST /webhooks/events,Real-time
+7.3,Partner eligibility query,Partner queries whether a patient qualifies for specific deals.,REST GET,Partner,Rocket,GET /eligibility,Real-time
+,,Corporate / Insurance Roster,,,,,
+8.1,Corporate roster import,"Company HR uploads employee CSV. Rocket assigns corporate member type per employment level.",REST POST / Batch,Company HR,Rocket,POST /member-types/contracts/{id}/roster,Batch
+8.2,Corporate roster update,"Delta import: new hires assigned, terminated employees deactivated.",REST POST / Batch,Company HR,Rocket,POST /member-types/contracts/{id}/roster/update,Batch
+8.3,Insurance roster import,"Same as corporate, for insurer rosters. Also auto-assigned from HIS insurance events (1.3).",REST POST / Batch,Insurer,Rocket,POST /member-types/contracts/{id}/roster,Batch
+,,Package Management,,,,,
+9.1,Package extension,"Admin extends package validity and all child entitlements. Approval required for >30 days.",REST POST (Admin),Admin,Rocket,POST /packages/{id}/extend,On-demand
+9.2,Package branch transfer,"Admin transfers package to a different hospital branch. All entitlements follow.",REST POST (Admin),Admin,Rocket,POST /packages/{id}/transfer,On-demand
+9.3,Package swap,"Admin swaps one package for another. Old entitlements cancelled, new issued with adjusted balance.",REST POST (Admin),Admin,Rocket,POST /packages/{id}/swap,On-demand
+,,CDP / Data Center,,,,,
+10.1,Service catalog sync,"Hospital CDP sends master product/price catalog for package building and earn rule configuration.",API / Batch,CDP,Rocket,POST /catalog/sync,Daily / On-demand
+,,Website Integration,,,,,
+11.1,Article tracking events,"Website JS SDK sends article read/like/share events for logged-in patients. Rocket awards coins per earn rules.",REST POST,Website,Rocket,POST /activities/track,Real-time
+11.2,Website authentication,"Patient logs in via LINE OAuth or phone OTP on hospital website.",OAuth / OTP,Website,Rocket,"POST /auth/otp/send, POST /auth/otp/verify",Real-time
+,,Notification & Messaging,,,,,
+12.1,SMS delivery,"Journey automation sends SMS via provider (fallback channel for patients without LINE).",REST POST,Rocket,SMS Provider,SMS Provider API,Real-time
+12.2,Email delivery,Journey automation sends transactional and marketing emails.,REST POST,Rocket,Email Provider,Email Provider API,Real-time
+12.3,App push notification,"Journey automation pushes notifications to Well App via Firebase/APNs.",REST POST,Rocket,FCM / APNs,Push notification API,Real-time
+,,Partner Loyalty Transfer,,,,,
+13.1,Inbound point transfer,"Partner loyalty programs (The1 / M Card / K Point) transfer points to Samitivej Coins at configured exchange rate. Activated per partner when commercial agreement is signed.",REST POST,Partner,Rocket,POST /wallet/transfer,Real-time

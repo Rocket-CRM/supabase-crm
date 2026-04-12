@@ -1197,11 +1197,167 @@ CREATE TABLE merchant_languages (
 
 ---
 
+## Admin UI Translations (Separate System)
+
+### CRITICAL: Two Separate Static UI Tables
+
+The system has **two independent tables** for static UI text. Using the wrong table is a common mistake.
+
+| Aspect | User-Facing | Admin Dashboard |
+|--------|-------------|-----------------|
+| **Table** | `ui_translations` | `ui_translation_admin` |
+| **API Function** | `get_ui_translations` | `get_admin_ui_translations` |
+| **Endpoint** | `/rpc/get_ui_translations` | `/rpc/get_admin_ui_translations` |
+| **Purpose** | End-user app (LINE LIFF, web) | Admin dashboard pages |
+| **Auth** | Public (no auth required) | Admin auth required |
+
+### `ui_translation_admin` Table
+
+```sql
+CREATE TABLE ui_translation_admin (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    merchant_id UUID DEFAULT NULL,
+    page_key TEXT NOT NULL,
+    field_key TEXT NOT NULL,
+    language_code TEXT NOT NULL,
+    translated_value TEXT NOT NULL,
+    category TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Admin API Function
+
+**Signature:** `get_admin_ui_translations(p_language_code TEXT, p_page_key TEXT)`
+
+**⚠️ Parameter order:** `p_language_code` first, then `p_page_key` (different from user-facing API)
+
+```bash
+# Single page
+POST /rest/v1/rpc/get_admin_ui_translations
+{
+  "p_language_code": "en",
+  "p_page_key": "reward_settings"
+}
+
+# All pages
+POST /rest/v1/rpc/get_admin_ui_translations
+{
+  "p_language_code": "en",
+  "p_page_key": null
+}
+```
+
+**Response:**
+```json
+{
+  "reward_settings": {
+    "header_reward_settings": "Reward settings",
+    "section_header_general": "General settings",
+    "section_header_display_settings": "Display settings",
+    "button_add_conditions": "Add conditions"
+  }
+}
+```
+
+### Admin Naming Conventions
+
+Admin field_key and category naming differs from user-facing pages:
+
+| Element | field_key Pattern | category | Example |
+|---------|-------------------|----------|---------|
+| Page header | `header_{page_key}` | `page_header` | `header_reward_settings` |
+| Section header | `section_header_{description}` | `section_header` | `section_header_general_settings` |
+| Page sub-header | `sub_header_{description}` | `page_sub_header` | `sub_header_tier` |
+| Page description | `description_{description}` | `page_description` | `description_tiers_personas` |
+| Sub-description | `sub_description_{description}` | `page_sub_description` | `sub_description_earn_factor_group` |
+| Button | `button_{action}` | `button` | `button_add_field` |
+| Section button | `section_button_{action}` | `button` | `section_button_add_tier` |
+| Grid column | `grid_{column_name}` | `grid_header` | `grid_reward_name` |
+| Tab | `tab_{tab_name}` | `tab` | `tab_team` |
+| Popup header | `popup_header_{description}` | `popup` | `popup_header_edit` |
+| Text/label | `text_{description}` | `text` | `text_page_description` |
+| Display field | `display_field_{name}` | `label` | `display_field_status` |
+
+### Comparison: User-Facing vs Admin Naming
+
+| Element | User-Facing (`ui_translations`) | Admin (`ui_translation_admin`) |
+|---------|--------------------------------|-------------------------------|
+| Page header field_key | `header_page_title` | `header_{page_key}` (e.g. `header_reward_settings`) |
+| Page header category | `title` | `page_header` |
+| Section header field_key | `section_{name}` | `section_header_{name}` |
+| Section header category | `section` | `section_header` |
+| Page key style | `signup_form`, `rewards` | `reward_settings`, `mission_settings`, `tier_settings` |
+
+### Current Admin Pages
+
+| page_key | Description |
+|----------|-------------|
+| `approve_activities_upload` | Activity upload approval |
+| `display_settings` | Display/block settings |
+| `earn_channel` | Earn channel list |
+| `earn_condition_group` | Earn condition group settings |
+| `earn_factor_group` | Earn factor group list |
+| `earn_factor_group_settings` | Earn factor group detail |
+| `edit_admin` | Admin user edit |
+| `edit_role` | Role permissions edit |
+| `global_settings` | Merchant global settings |
+| `manage_team` | Team management |
+| `marketplace` | Marketplace orders |
+| `mission_list` | Mission list |
+| `mission_settings` | Mission detail settings |
+| `persona` | Persona management |
+| `profile_form_settings` | Profile form field configuration |
+| `promo_codes_create` | Create promo codes |
+| `promo_codes_lots` | Promo code lots list |
+| `promo_codes_records` | Promo code records |
+| `reward_list` | Rewards list |
+| `reward_settings` | Reward detail settings |
+| `roles_list` | Admin roles list |
+| `store_attributes_master` | Store attributes master data |
+| `store_attributes_set` | Store attribute set detail |
+| `store_attributes_sets_list` | Store attribute sets list |
+| `survey` | Survey list |
+| `tier_settings` | Tier detail settings |
+| `tiers_personas` | Tiers & personas overview |
+| `utility` | Shared buttons (Save, Cancel, etc.) |
+| `utilities` | Shared action buttons (Approve, Reject, Submit) |
+
+### Adding Admin UI Translations
+
+```sql
+-- Always use ui_translation_admin (NOT ui_translations)
+INSERT INTO ui_translation_admin (merchant_id, page_key, field_key, language_code, translated_value, category)
+VALUES
+-- English
+(NULL, 'new_admin_page', 'header_new_admin_page', 'en', 'New Admin Page', 'page_header'),
+(NULL, 'new_admin_page', 'section_header_general_settings', 'en', 'General settings', 'section_header'),
+(NULL, 'new_admin_page', 'button_add_item', 'en', 'Add item', 'button'),
+
+-- Thai
+(NULL, 'new_admin_page', 'header_new_admin_page', 'th', 'หน้าแอดมินใหม่', 'page_header'),
+(NULL, 'new_admin_page', 'section_header_general_settings', 'th', 'ตั้งค่าทั่วไป', 'section_header'),
+(NULL, 'new_admin_page', 'button_add_item', 'th', 'เพิ่มรายการ', 'button'),
+
+-- Japanese
+(NULL, 'new_admin_page', 'header_new_admin_page', 'ja', '新しい管理ページ', 'page_header'),
+(NULL, 'new_admin_page', 'section_header_general_settings', 'ja', '一般設定', 'section_header'),
+(NULL, 'new_admin_page', 'button_add_item', 'ja', 'アイテムを追加', 'button'),
+
+-- Chinese
+(NULL, 'new_admin_page', 'header_new_admin_page', 'zh', '新管理页面', 'page_header'),
+(NULL, 'new_admin_page', 'section_header_general_settings', 'zh', '常规设置', 'section_header'),
+(NULL, 'new_admin_page', 'button_add_item', 'zh', '添加项目', 'button');
+```
+
+---
+
 ## Conclusion
 
 The translation system provides comprehensive multi-language support through:
 
-1. **Dual Architecture:** Dynamic entity translations + static UI text
+1. **Triple Architecture:** Dynamic entity translations + user-facing static UI + admin dashboard static UI
 2. **Merchant Flexibility:** Configurable default languages per merchant
 3. **Performance:** Isolated Redis caching with <100ms response times
 4. **Scalability:** Handles high traffic with 99%+ cache hit rates
@@ -1210,14 +1366,15 @@ The translation system provides comprehensive multi-language support through:
 
 **Current Coverage:**
 - 4 languages fully supported
-- 483 total translations (251 dynamic + 232 static)
-- 2 pages (signup_form, rewards) with complete UI coverage
+- 3 translation tables: `translations`, `ui_translations`, `ui_translation_admin`
+- User-facing: signup_form, rewards, profile, missions, history, and more
+- Admin dashboard: 30+ pages with complete UI coverage
 - Ready for expansion to additional pages and languages
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: January 6, 2026*  
+*Document Version: 1.1*  
+*Last Updated: March 11, 2026*  
 *System: Supabase CRM - Translation System*
 
 

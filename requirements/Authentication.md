@@ -597,6 +597,79 @@ CREATE TABLE user_accounts (
 
 ---
 
+## Bot / Automated Testing Authentication
+
+### Purpose
+
+Allows bots and automated test runners to authenticate as end-users **without OTP or LINE OAuth**. Once the bot obtains a JWT, it can call all other APIs identically to a real user.
+
+### How It Works
+
+`bff-auth-complete` accepts an optional `bot_secret` field. When provided and valid:
+1. OTP validation is **completely skipped**
+2. The phone number (`tel`) is treated as verified
+3. A real JWT is issued — identical to what a normal user would receive
+4. The rest of the flow (user lookup/create, profile check, etc.) runs normally
+
+### Configuration
+
+**Environment Variable:** `BOT_SECRET` on the Supabase project
+
+- If `BOT_SECRET` is **not set**, the feature is disabled. Any request with `bot_secret` returns 403.
+- If `BOT_SECRET` is set, only requests with a matching `bot_secret` value bypass OTP.
+
+### Bot Authentication Flow
+
+```
+Bot → POST bff-auth-complete
+      {
+        "merchant_code": "newcrm",
+        "tel": "+66966564526",
+        "bot_secret": "<BOT_SECRET value>"
+      }
+      (Authorization: Bearer <supabase-anon-key>)
+      
+    ← JWT + refresh_token (same as normal user)
+
+Bot → Use JWT for all subsequent API calls
+      (wallet-api, claim-codes, receipts, RPC, etc.)
+```
+
+**No need to call `auth-send-otp`** — the bot skips directly to `bff-auth-complete`.
+
+### Input (Bot Mode)
+
+```json
+{
+  "merchant_code": "newcrm",
+  "tel": "+66966564526",
+  "bot_secret": "<secret>"
+}
+```
+
+Optionally include `line_user_id` if the merchant requires LINE auth.
+
+### Error Responses
+
+| Scenario | Status | Error |
+|----------|--------|-------|
+| `BOT_SECRET` env var not set | 403 | `Bot authentication is not configured on this project` |
+| `bot_secret` value doesn't match | 403 | `Invalid bot_secret` |
+
+### Security
+
+- `bot_secret` is compared using constant-time comparison (prevents timing attacks)
+- The feature is completely dormant when `BOT_SECRET` env var is absent
+- All bot authentications are logged: `[BOT_AUTH] Bot authentication bypass for merchant=... tel=... line=...`
+- `BOT_SECRET` should be a strong random string (32+ characters)
+- **Never expose `BOT_SECRET` in frontend code or public repositories**
+
+### Scope
+
+`bot_secret` is currently used only in `bff-auth-complete` (OTP bypass). The same env var can be reused by other edge functions in the future for bot-specific behavior (rate limit bypass, test mode flags, etc.).
+
+---
+
 ## Admin Authentication Details
 
 ### Supabase Auth (Standard)

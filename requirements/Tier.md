@@ -1,8 +1,10 @@
 # Tier Management System - Complete Business Description
 
-**Version**: 4.2  
-**Last Updated**: February 2026  
+**Version**: 4.4  
+**Last Updated**: March 2026  
 **Architecture**: CDC → Render Consumer → Inngest (Upgrades) + pg_cron Batch (Maintains)  
+**New in 4.4**: Tier Benefits Display — configurable benefit lines (icon + header + description) per tier, separate display management function, and enriched user-facing tier progress API  
+**New in 4.3**: Burn Rate - Direct point-to-discount conversion with tier-based rates and future extensibility  
 **New in 4.2**: Persona-based tier segmentation with independent optional dimensions  
 **New in 4.1**: Calendar Month & Calendar Quarter window types + Critical bug fixes
 
@@ -49,6 +51,11 @@ This table defines the available tiers for each merchant. Key fields include:
 | `persona_id` | uuid | **NEW v4.2**: Optional persona filter. References persona_master. NULL means applies to all personas |
 | `ranking` | smallint | Numerical rank used for tier hierarchy (higher rank = higher tier) |
 | `entry_tier` | boolean | Indicates if this is the default tier for new users. Only one entry tier allowed per merchant/user_type/persona combination |
+| `burn_rate` | numeric | **NEW v4.3**: Points-to-currency conversion rate for direct point-to-discount. e.g., `0.50` means 1 point = 0.50 THB. NULL means feature not enabled for this tier |
+| `icon` | text | Image URL for the tier icon (e.g., `"https://project.supabase.co/storage/v1/object/public/images/gold-tier.svg"`) |
+| `color` | text | Hex color for tier accent (e.g., `"#FFD700"` for gold) |
+| `benefits` | jsonb | **NEW v4.4**: Array of benefit display lines. See [Benefits JSONB Schema](#benefits-jsonb-schema) |
+| `card_design` | jsonb | **NEW v4.4**: Optional JSONB for advanced card styling (background image, gradient, etc.) |
 | `created_at` | timestamptz | Timestamp of tier creation |
 
 ### 2. tier_conditions Table
@@ -589,6 +596,182 @@ Manual tier assignments can include downgrade protection:
 
 - On user signup: Create `tier_progress` record with entry-level tier
 - Entry tier must be designated in the system (see requirements below)
+
+### Burn Rate - Direct Point-to-Discount Conversion (v4.3)
+
+#### Core Concept
+The burn rate enables users to convert points directly into monetary discount at checkout, without going through the reward catalog. The conversion rate is tier-dependent, incentivizing users to maintain higher tiers for better point value.
+
+**This is NOT the same as reward redemption.** Reward redemption exchanges points for specific items (vouchers, products). Burn rate converts points into a direct monetary discount on any purchase.
+
+#### How It Works
+
+1. Each tier has an optional `burn_rate` on `tier_master` (e.g., Gold = 1.00, Silver = 0.50, Bronze = 0.25)
+2. FE calls `get_user_burn_rate()` with no parameters (merchant from token, user from `auth.uid()`)
+3. Function resolves the user's tier, retrieves the base burn rate, applies any multipliers (Phase 2), and returns the effective rate plus wallet balance
+4. FE shows: "You have 800 points worth up to 400 THB discount"
+5. User chooses how many points to burn, discount = `points_used × effective_rate`
+
+#### Burn Rate Configuration
+
+| Tier | `burn_rate` | Meaning | 100 points = |
+|------|------------|---------|-------------|
+| Bronze | `0.25` | 1 point = 0.25 THB | 25 THB discount |
+| Silver | `0.50` | 1 point = 0.50 THB | 50 THB discount |
+| Gold | `1.00` | 1 point = 1.00 THB | 100 THB discount |
+| Platinum | `1.50` | 1 point = 1.50 THB | 150 THB discount |
+| Diamond | `2.00` | 1 point = 2.00 THB | 200 THB discount |
+| (Not enabled) | `NULL` | Feature disabled for this tier | N/A |
+
+#### Function: `get_user_burn_rate()`
+
+**Purpose**: Returns the effective burn rate for the authenticated user  
+**Category**: Public API  
+**Parameters**: None (merchant from `get_current_merchant_id()`, user from `auth.uid()`)  
+**Returns**: JSON
+
+**Response shape**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `effective_rate` | numeric | Final calculated rate after all factors (base × multiplier) |
+| `base_rate` | numeric | Tier-based burn rate from `tier_master.burn_rate` |
+| `multiplier` | numeric | Combined multiplier from all additional factors (Phase 1: always 1.0) |
+| `is_enabled` | boolean | Whether burn-to-discount is enabled for this user's tier |
+| `tier_name` | text | User's current tier name |
+| `available_points` | numeric | User's current points balance |
+| `max_discount` | numeric | `available_points × effective_rate` |
+| `factors` | json[] | Breakdown of all factors contributing to the rate |
+
+**Factor breakdown example (Phase 1 - tier only)**:
+```json
+{
+  "factors": [
+    { "source": "tier", "name": "Gold", "value": 1.00, "type": "base" }
+  ]
+}
+```
+
+**Factor breakdown example (Phase 2 - tier + personalized)**:
+```json
+{
+  "factors": [
+    { "source": "tier", "name": "Gold", "value": 1.00, "type": "base" },
+    { "source": "personalized", "name": "VIP Boost", "value": 1.5, "type": "multiplier" }
+  ]
+}
+```
+
+#### Extensibility Design (Phase 2 - Future)
+
+The function is designed to be extended with additional burn factors without changing the API contract:
+
+**Phase 1 (Current)**: `effective_rate = tier burn_rate × 1.0`  
+**Phase 2 (Future)**: `effective_rate = tier burn_rate × burn_factor_multipliers`
+
+Future `burn_factor` table will support:
+- **Personalized multipliers**: Assigned to specific users (like earn_factor_user)
+- **Campaign multipliers**: Time-bound burn rate boosts
+- **Persona-based multipliers**: Different rates for different personas
+- **Tag-based multipliers**: Behavioral segment-based adjustments
+
+The `factors[]` array in the response grows as new factor types are added. FE only ever uses `effective_rate` for calculations -- the factors are for display/transparency.
+
+### Tier Benefits Display (v4.4)
+
+#### Core Concept
+Each tier can have a list of **benefit display lines** stored in the `benefits` JSONB column on `tier_master`. These are purely for **display purposes** — they describe what the tier offers in human-readable terms on the user-facing tier card. They do NOT enforce any logic; actual tier evaluation comes from `tier_conditions`.
+
+#### Benefits JSONB Schema
+
+The `benefits` field stores an array of benefit line objects:
+
+```json
+[
+  { "icon": "https://cdn.example.com/icons/shipping.svg", "header": "Free Shipping", "description": "On all orders over 500 THB", "sort_order": 1 },
+  { "icon": "https://cdn.example.com/icons/points.svg", "header": "2x Points Earning", "description": "Earn double points on every purchase", "sort_order": 2 },
+  { "icon": "https://cdn.example.com/icons/birthday.svg", "header": "Birthday Reward", "description": "Special reward on your birthday month", "sort_order": 3 }
+]
+```
+
+| Field | Type | Required | Purpose |
+|-------|------|----------|---------|
+| `icon` | string | Yes | Image URL for the benefit line icon (e.g., `"https://cdn.example.com/icons/shipping.svg"`) |
+| `header` | string | Yes | Bold title text displayed prominently (e.g., "Free Shipping") |
+| `description` | string | No | Supporting detail text below the header |
+| `sort_order` | number | Yes | Display ordering (ascending) |
+
+Both `tier_master.icon` and the benefit line `icon` are image URLs (e.g., hosted in Supabase Storage or a CDN).
+
+#### Admin Configuration: Two-Tab Architecture
+
+Tier configuration uses **two separate tabs** in the admin panel, each saving independently:
+
+| Tab | Content | Save Function |
+|-----|---------|---------------|
+| **Tab 1: Conditions** | Upgrade/maintain conditions, metrics, window types, frequencies | `bff_upsert_tier_with_conditions` |
+| **Tab 2: Display** | Icon, color, benefit lines, card design | `bff_upsert_tier_display` |
+
+This separation ensures that editing display settings cannot accidentally affect tier evaluation logic, and vice versa.
+
+#### Function: `bff_upsert_tier_display(p_tier_id, p_display)`
+
+**Purpose**: Updates tier display settings (icon, color, benefits, card_design)  
+**Category**: Admin Display Management  
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `p_tier_id` | uuid | Tier to update (must exist and belong to current merchant) |
+| `p_display` | jsonb | Display fields to update (only provided fields are changed) |
+
+**`p_display` fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `icon` | text | Emoji or image URL for tier icon |
+| `color` | text | Hex color for tier accent |
+| `benefits` | jsonb | Array of benefit line objects (see schema above) |
+| `card_design` | jsonb | Optional advanced card styling |
+
+**Key behavior**: Uses COALESCE — only fields present in the payload are updated. Omitting `benefits` won't wipe existing values.
+
+**Response shape**:
+```json
+{
+  "success": true,
+  "code": "UPDATED",
+  "title": "Display Updated",
+  "description": "Display settings for \"Gold\" updated successfully",
+  "data": { "tier_id": "uuid" }
+}
+```
+
+#### User-Facing Display: `get_user_tier_progress`
+
+**Updated in v4.4** to include display fields. The function now returns tier display information alongside progress data, so the FE can render the full tier card without a separate call.
+
+**New return columns** (added to existing progress columns):
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `current_tier_icon` | text | Icon for the user's current tier |
+| `current_tier_color` | text | Color for the user's current tier |
+| `current_tier_benefits` | jsonb | Benefit lines for the user's current tier |
+| `current_tier_card_design` | jsonb | Card styling for the user's current tier |
+| `next_tier_icon` | text | Icon for the next tier (aspiration) |
+| `next_tier_color` | text | Color for the next tier |
+| `next_tier_benefits` | jsonb | Benefit lines for the next tier ("unlock these when you reach Gold") |
+| `next_tier_card_design` | jsonb | Card styling for the next tier |
+
+Existing columns (`upgrade_progress_percent`, `maintain_progress`, deadlines, etc.) are unchanged.
+
+#### Admin Display Read: `get_tier_display_config()`
+
+**Purpose**: Returns all tiers for the current merchant with display fields  
+**Category**: Admin Read  
+**Parameters**: None (merchant from auth token)  
+**Returns**: JSON array of tiers with `tier_id`, `tier_name`, `ranking`, `entry_tier`, `icon`, `color`, `card_design`, `benefits`
 
 ---
 
@@ -1675,6 +1858,80 @@ All tier evaluations are logged to `inngest_workflow_log`:
 
 ---
 
+## What's New in v4.4
+
+### Key Changes from v4.3
+
+1. **Tier Benefits Display**
+   - New `benefits` JSONB column on `tier_master` — array of display lines with `icon`, `header`, `description`, `sort_order`
+   - New `card_design` JSONB column on `tier_master` — optional advanced card styling
+   - Existing `icon` and `color` columns already present but now formally documented
+   - Purely for display — does not affect tier evaluation logic
+
+2. **New Function: `bff_upsert_tier_display(p_tier_id, p_display)`**
+   - Separate admin function for updating tier display settings (Tab 2 in admin)
+   - Updates icon, color, benefits, card_design independently from conditions
+   - COALESCE logic — only provided fields are updated, omitted fields are preserved
+   - Zero risk to existing tier condition logic
+
+3. **Updated Function: `get_user_tier_progress`**
+   - Now returns 8 additional display columns: icon, color, benefits, card_design for both current and next tier
+   - FE can render the full tier card from a single API call
+   - Existing progress/metric/deadline columns unchanged — backward compatible for FE code that only reads the original columns
+
+4. **Two-Tab Admin Architecture**
+   - Tab 1 (Conditions): Uses existing `bff_upsert_tier_with_conditions` — unchanged
+   - Tab 2 (Display): Uses new `bff_upsert_tier_display` — independent save
+   - Saves are completely independent — editing display cannot affect evaluation logic
+
+### Migration Notes (v4.3 → v4.4)
+
+**No Breaking Changes**:
+- `benefits` and `card_design` columns default to NULL
+- `get_user_tier_progress` adds new columns but preserves all existing ones — FE code that only reads old columns continues to work
+- `bff_upsert_tier_with_conditions` is completely unchanged
+- New `bff_upsert_tier_display` is additive
+
+**To Configure Tier Benefits**:
+- Call `bff_upsert_tier_display` with `p_tier_id` and `p_display` containing `benefits` array
+- Each benefit line: `{ "icon": "https://cdn.example.com/icons/shipping.svg", "header": "Free Shipping", "description": "On orders over 500 THB", "sort_order": 1 }`
+
+---
+
+## What's New in v4.3
+
+### Key Changes from v4.2
+
+1. **Burn Rate - Direct Point-to-Discount Conversion**
+   - New `burn_rate` column on `tier_master` for tier-based point-to-currency conversion
+   - e.g., Gold tier `burn_rate = 1.00` means 1 point = 1.00 THB discount at checkout
+   - NULL means feature not enabled for that tier
+   - Completely separate from the reward redemption system
+
+2. **New Function: `get_user_burn_rate()`**
+   - Public API function, no parameters needed (merchant + user from auth token)
+   - Returns effective rate, base rate, multiplier, available points, max discount, and factor breakdown
+   - Response shape is future-proof: `factors[]` array will grow as new factor types are added
+   - FE only needs `effective_rate` for calculations
+
+3. **Extensibility Architecture**
+   - Phase 1 (current): `effective_rate = tier burn_rate × 1.0`
+   - Phase 2 (future): Additional `burn_factor` table for personalized, campaign, persona, and tag-based multipliers
+   - API contract does not change between phases -- FE code stays the same
+
+### Migration Notes (v4.2 → v4.3)
+
+**No Breaking Changes**:
+- New column `burn_rate` on `tier_master` defaults to NULL (disabled)
+- New function `get_user_burn_rate()` is additive
+- Existing tier logic completely unaffected
+
+**To Enable Burn Rate**:
+- Set `burn_rate` value on desired tiers (e.g., `UPDATE tier_master SET burn_rate = 0.50 WHERE tier_name = 'Silver' AND merchant_id = '...'`)
+- FE calls `get_user_burn_rate()` via Supabase RPC
+
+---
+
 ## What's New in v4.1
 
 ### Key Changes from v4.0
@@ -1853,6 +2110,10 @@ The tier management system demonstrates **production-ready reliability** with co
 | `calculate_maintain_deadline` | Calculates maintenance deadline | Default |
 | `evaluate_and_apply_chunk` | Bulk evaluation and application for batch | 60s |
 | `ensure_tier_progress` | Progress display updates | Default |
+| `get_user_burn_rate` | **NEW v4.3**: Returns effective burn rate for authenticated user (tier-based, extensible) | Default |
+| `bff_upsert_tier_display` | **NEW v4.4**: Updates tier display settings (icon, color, benefits, card_design) | Default |
+| `get_user_tier_progress` | **UPDATED v4.4**: Returns tier progress + display fields (icon, color, benefits, card_design) for current and next tier | Default |
+| `get_tier_display_config` | Returns all tiers with display fields for admin | Default |
 
 ### Tables
 

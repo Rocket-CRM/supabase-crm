@@ -1,0 +1,164 @@
+Estimate Project Investment,,,,,,,,,,,,,,,,,,,
+Project,"Samitivej CRM Center
+Member / Coins / eCoupon / Tier / Privilege / Omni-channel API",,,,,,,,,,,,,,,,,,
+Phase,Phase 1:  Loyalty Program eCoupon & Coins Management ,,,,,,,,,,,,,,,,,,
+,Phase 2: Membership Management & Marketing Automation,,,,,,,,,,,,,,,,,,
+Date,20-Mar-26,,,,,,,,,,,,,,,,,,
+Note,SVNH พิจารณางบการลงทุนเริ่มต้น ครอบคลุมที่ 2 สาขา,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,
+PHASE,,Name,,,,,,,,,,,,,,,,,
+,,"One-Time
+Development Cost","Yearly Subscription
+and Maintenance",Details,,,,,,,,,,,,,,,
+Phase 1,Loyalty Program eCoupon & Coins Management ,"  980,000 ","  1,712,000 ",,,,,,,,,,,,,,,,
+1,"หมวด: Project & Design Setup
+Standard Project Setup 
+Support / SLA / Operations", FREE , FREE ,"- จัดทำ Project Timeline & Go-Live Checklist ครบวงจร
+- ทดสอบ HIS Integration, Well SSO, Payment Gateway, Shopee/Lazada Webhook ก่อน Go-Live
+- Configuration ธุรกิจ: Tier Threshold, Earn Rule, Privilege Catalog, Communication Template ให้ครบ
+- อบรมเจ้าหน้าที่แผนก (50+ แผนก) ใช้ระบบออก Privilege และค้นหาคนไข้
+- Performance Test ทุก Target (Eligibility <50ms, Earn <1s, 10k Concurrent)
+- Pentest + Security Audit ก่อน Production
+- L1 Technical Support 7 วัน 9:00–21:00 / L2 Engineering On-call สำหรับ P1
+- SLA: P1 Critical ตอบ 15 นาที แก้ 4 ชม. / P2 High ตอบ 30 นาที แก้ 8 ชม.
+- Campaign Support รอบ 3 วัน (รับ Brief → Configure → Deploy)
+- Monthly Report: Member Analytics, Coin Economy, Campaign Performance, Redemption
+- Monthly Review: System Health, Campaign, Privilege Stock, Security
+- Change Management 5 ขั้นตอน: Request → Assessment → Approval → Implement → Monitor
+- Disaster Recovery: Backup + Failover Test",,,,,,,,,,,,,,,
+2,"หมวด Module & System
+ระบบ สมัครสมาชิก/เข้าสู่ระบบ (Register/Login/SSO/OTP)
+ระบบ Coin Wallet & ยอดคะแนนสะสม
+ระบบ แลก Coins เป็น eCoupon / Privilege / Reward Catalog
+ระบบ Coins Rule Engine
+ระบบ Earn Coins จากพฤติกรรม (Content/Social)
+ระบบ eCoupon สำหรับโรงพยาบาล (เดี่ยว/ชุด/Seasonal)
+ระบบ eCoupon แพ็กเกจหลายครั้ง (Package Entitlement ตัดใช้ทีละครั้ง)
+ระบบ Mission & Gamification
+ระบบ ซื้อ Health Package เชื่อม Well by Samitivej เป็น eCoupon
+ระบบ Transfer Coin/Point (E-commerce & Partners) ","  390,000 ","  1,712,000 ","- สมัครสมาชิก: Well SSO Token Validation / LINE OAuth / OTP / Multi-channel Registration / Identity Matching (บัตรประชาชน+เบอร์โทร+HN+LINE ID+Well ID) รวมเป็น Profile เดียว
+- Coin Wallet: ยอด Real-time แสดงเหมือนกันทุกช่องทาง (Well App, LINE, เว็บไซต์) / ประวัติ Transaction พร้อม Source Attribution / 3 โหมด Expiry (Days After Earn, Fixed Calendar, End of Period) / แจ้งเตือนล่วงหน้า 30/7/1 วัน
+- แลก Coins: eCoupon ครั้งเดียว+หลายครั้ง / Partner Reward (Starbucks, Grab, After You) / Flash Reward รองรับ 10,000+ คนพร้อมกัน / Dynamic Pricing ตาม Tier / QR Code สำหรับใช้งาน
+- Coins Rule Engine: Visual Rule Builder / Base Rate + Multiplier + Bonus / เงื่อนไขตาม สาขา แผนก Tier ช่วงเวลา / Stacking Toggle (ทบหรือใช้ตัวสูงสุด) / Cap & Safeguard / Delayed Award ป้องกันยกเลิก
+- Earn จากพฤติกรรม: อ่านบทความ (5 Coin) / แชร์ LINE (10 Coin) / ทำแบบสอบถาม (50 Coin) / แนะนำเพื่อน (200 Coin) / Health Assessment (30 Coin) / On-site Gamification (500 Coin) / First Purchase (100 Coin)
+- eCoupon โรงพยาบาล: เดี่ยว/ชุด/Seasonal (วันเกิด ครบรอบ หลังพบแพทย์) / Auto-issuance หลังใช้บริการ (OPD→Café Voucher, Discharge→Follow-up) / 3 Visibility Mode (Public, Admin-only, Campaign)
+- Package Entitlement: Multi-use ตัดทีละครั้ง (เช่น กายภาพบำบัด 5 ครั้ง) / Anti-double-spend Row Lock / ข้ามสาขาได้ / Admin Adjustment+Extension พร้อม Approval / Audit Trail ครบ
+- Mission & Gamification: Standard + Milestone Mission / AND/OR Logic เงื่อนไข / Progress Bar / Overflow อัตโนมัติ / Recurring+Always-on / Reward ต่อ Level (Coin, Privilege, Tag, Tier Boost)
+- Health Package: Bundle Mandatory+Elective+Standing Benefit / Online Store (Well App, E-Commerce, Counter, LINE) / Coin Discount Toggle คำนวณราคาสุทธิ Live / Package Change (Extend, Transfer, Swap) พร้อม Approval
+- Transfer Coin/Point: Purchase-based Earning จาก Shopee/Lazada / Direct Transfer API สำหรับ Partner (The1, M Card, K Point) พร้อม Conversion Rate เฉพาะ Partner",,,,,,,,,,,,,,,
+3,"หมวด Back Office
+Back Office จัดการ eCoupon (อัตโนมัติ/Manual/สิทธิ์กลาง-แผนก)
+Back Office Dashboard & Analytics
+Back Office Reward Catalog Management
+Back Office สิทธิ์ผู้ใช้งาน (Role/Permission/Multi-Factor Authentication)
+Back Office Campaign & Privilege Management Console",  -   ,,"- จัดการ eCoupon: สร้าง+แก้ไข+จัดการ Stock+Scheduling+Bulk Import / Auto-Issuance Rule จาก HIS Event / Department-scoped Access (ทีมกลางสร้าง Template + 50 แผนกเลือกจาก Pool) / Maker-Checker Approval Flow
+- Dashboard & Analytics: Standard Dashboard 10 ตัว (Member Overview, Coin Economy, Privilege & Redemption, Package Sales, Tier Movement, Campaign Performance, Department Usage, Corporate & Insurance, Entitlement Tracking, Marketing Automation) / Custom Dashboard สูงสุด 20 ตัวออกแบบตามความต้องการ / Rocket MCP AI Data Assistant ถามคำถามภาษาธรรมชาติ
+- Reward Catalog: Browse Partner Catalog 2,000+ SKU / ตั้ง Coin Pricing ตาม Tier / Stock Monitor + Reorder Alert / Redemption Report ต่อ Partner / Monthly Reconciliation
+- สิทธิ์ผู้ใช้งาน: 4 Role (Superadmin, Marketing Manager, Department Admin, Viewer) / MFA บังคับ Admin ทุกคน / Maker-Checker สำหรับ Bulk Change ที่กระทบ >1,000 คนไข้ / Audit Trail ทุก Action (ใคร เมื่อไร ทำอะไร เหตุผล สถานะก่อน/หลัง)
+- Campaign & Privilege Console: Visual Drag-and-drop Journey Builder / สร้าง Campaign (กำหนดวัตถุประสงค์+Segment+Privilege+Journey+Approval) / Approval Queue Dashboard รวม Pending Action ทุกส่วน / Multi-language Content (TH/EN/JA/ZH)",,,,,,,,,,,,,,,
+4,"หมวด Data Integration
+Single Customer View & Dynamic Segmentation
+Data Migration for Existing Member
+Data Strategy & Infrastructure
+Security / PDPA / Audit / Anti-fraud
+เชื่อมต่อ Well by Samitivej (SuperApp — Full Loop)
+เชื่อมต่อ Data Center-HIS (API)
+เชื่อมต่อ E-commerce (Shopee/Lazada/LINE MyShop/Hospital)","  590,000 ",,"- Single Customer View: รวมข้อมูลจาก 6 แหล่ง (HIS/Data Center, Well App, Website, LINE, E-Commerce, CDP Hospital) ใน Profile เดียว / เก็บ Transaction, Visit History, Department Usage, Feature Usage, Article Read, Order History
+- Dynamic Segmentation: Static Import (CSV) + Dynamic Rule-based อัปเดต Real-time อัตโนมัติ / เงื่อนไขหลายมิติ (Tier+แผนก+พฤติกรรม+Coin Balance+Tag+Member Type+ระยะเวลา)
+- Data Migration: 4 Phase (Discovery 1 สัปดาห์ / Development 2 สัปดาห์ / Test 1 สัปดาห์ / Production 1 สัปดาห์) / Duplicate Detection (บัตรประชาชน+เบอร์โทร) / Delta Sync / Zero-downtime / 100% Validation
+- Data Strategy: Event-driven Architecture (ไม่ใช่ Batch) / PostgreSQL + Sharding + RLS / Redis Cache <50ms / Apache Kafka / Durable Execution (Temporal) / แยก 2 Layer (Transactional + Analytics)
+- Security: Defense-in-depth 7 ชั้น / WAF + DDoS + TLS 1.3 / AES-256 At Rest / JWT + OAuth 2.0 + MFA / IDS/IPS + SIEM 24/7
+- PDPA: Consent ต่อช่องทาง+ต่อวัตถุประสงค์ / Data Subject Access Request / Right to Erasure / PII Tokenization / Secrets Management (HashiCorp Vault)
+- Anti-fraud: Idempotency Key / Anti-double-spend / Rate Limiting / Velocity Check / ทุก Mutation บันทึก Audit (Actor, Timestamp, Before/After)
+- เชื่อมต่อ Well: SSO Token Validation / Identity Matching (NID+Phone+HN+LINE ID+Well ID) / Embedded Webview / Full Loyalty Loop (Wallet, Privilege, Package, Mission, Referral)
+- เชื่อมต่อ HIS: API Event รับ Purchase, Visit, Service Delivery, Insurance, OrderSet / Eligibility Query <50ms พร้อม Precedence Reasoning / Coin Earn <1 วินาที / Guaranteed Delivery ไม่มี Transaction สูญหาย
+- เชื่อมต่อ E-Commerce: Shopee Webhook (ทำงานแล้ว) / Lazada / LINE MyShop / Hospital E-Commerce / Order Matching 3 วิธี (เบอร์โทร, OrderSet Code, คนไข้กรอกเอง)",,,,,,,,,,,,,,,
+6,"หมวด Reward Management
+Reward Pool System
+Reward Sourcing (จัดหาของรางวัล / Pay-per-use)", 8-12% ,,"- Reward Pool: SKU 2,000+ รายการพร้อมใช้งาน / Digital E-voucher ส่งเข้า Wallet ทันที / Physical จัดส่ง 2-5 วันทำการ / Hospital-owned Privilege (ส่วนลด, Service Voucher) ไม่มีต้นทุนจัดซื้อ
+- 7 หมวด Reward: Hospital Service (ส่วนลดปรึกษาแพทย์, Lab, ร้านยา) / Hospital Amenity (จอดรถ, ร้านอาหาร, Lounge) / Wellness (สปา, ฟิตเนส, IV Drip) / Dining (Starbucks, After You, MK, S&P) / Lifestyle (Grab, Shopee Gift Card, โรงภาพยนตร์) / Health Product (อาหารเสริม, Skincare) / Premium Flash (Dyson, Apple, Luxury Retreat)
+- Reward Sourcing: Pay-per-use จ่ายเฉพาะที่ Redeem / Partner Network 100+ ราย / Onboarding Partner ใหม่ 5 วันทำการ / Monthly Reconciliation Report ต่อ Partner / Seasonal Partner (Holiday, Collaboration) / Stock Reorder Alert อัตโนมัติ
+- Flash Reward: Limited Drop สินค้า Premium จำนวนจำกัด / รองรับ 10,000+ คนแย่งพร้อมกัน / First-come-first-served ยุติธรรม / สร้าง Engagement + Viral",,,,,,,,,,,,,,,
+7,"หมวด Omni Channel 
+เว็บไซต์สมิติเวช (เริ่มต้น 2 สาขา: ศรีนครินทร์ & สุขุมวิท)
+LINE OA แต่ละสาขา (เริ่มต้น 2 สาขา: ศรีนครินทร์ & สุขุมวิท)","  480,000 ","  90,000 ","- เว็บไซต์ 2 สาขา (สุขุมวิท+ศรีนครินทร์): เพิ่มหน้า Loyalty บนเว็บไซต์เดิม / Login + Wallet + Privilege + Consent / Article Tracking (JS Snippet ติดตามการอ่านบทความ+ให้ Coin) / Block-based Design Configuration สร้าง Landing Page เฉพาะ Campaign ได้ / Multi-language (TH/EN/JA/ZH+เพิ่มภาษาได้ไม่จำกัดไม่มีค่าใช้จ่ายเพิ่ม) / Web Push Notification
+- LINE OA 2 สาขา (สุขุมวิท+ศรีนครินทร์): LIFF Web App ใน LINE / Register + ดูยอด Coin & Tier + Redeem Privilege ผ่าน Webview / LINE OAuth สมัครสมาชิก / LINE Message Delivery สำหรับ Journey Automation / Rich Menu Integration / รับ Notification Campaign ผ่าน LINE",,,,,,,,,,,,,,,
+5,"หมวด Automation
+Journey Automation & Multi-channel Messaging
+SMS (ส่งข้อความ SMS)
+Lifestage / Hyperpersonalization
+AI Decisioning (ระบบ AI สำหรับตัดสินใจอัตโนมัติ)",0,"  250,000 ","- Journey Automation: Visual Drag-and-drop Builder / Node: Trigger, Condition, Wait, Message, Action / 3 Core Journey (Welcome, Upsell Post-Visit, Win-back 180 วัน) / Template เพิ่มเติม 6 ตัว (Birthday, Post-Surgery, Chronic Care, Tier Maintenance, Prenatal, Coin Expiry)
+- Guardrail ป้องกันส่งเกิน: Frequency Cap ข้าม Journey ทั้งหมด / Suppression List ตามเงื่อนไข / Consent Enforcement ส่งเฉพาะช่องที่ยินยอม / Cooldown ระหว่างข้อความ / Global Cap (เช่น ไม่เกิน 5 ข้อความ/สัปดาห์) / Auto-prioritize ข้อความมูลค่าสูง
+- Multi-channel: LINE + SMS + Email + Push / Fallback อัตโนมัติ (LINE ไม่เชื่อม→ส่ง SMS) / A/B Testing เปรียบเทียบ Variant / Gradual Rollout
+- Journey Report: Funnel (เข้า→แต่ละ Step→Convert), Channel Delivery (Sent/Open/Click), Revenue Attribution, Drop-off Analysis, A/B Result, Cost per Journey
+- SMS: Free SMS 200,000 ข้อความ/ปี / OTP Cost 0.28 บาท/ข้อความ (แยกต่างหาก)
+- Lifestage Detection: Auto-assign Tag จาก HIS Event (ฝากครรภ์, Discharge, ตรวจประจำปี, โรคเรื้อรัง, คนไข้ใหม่, นัดหมายล่วงหน้า) / Dynamic Segment ตาม Tag+เงื่อนไข / Journey Trigger อัตโนมัติเมื่อเข้า Segment
+- Hyperpersonalization: Persona Assignment (Wellness Seeker, Chronic Care, Family Care, Corporate Executive) / AI หรือ Marketing กำหนดเอง / Homepage Layout ตาม Member Type / Privilege Eligibility + Campaign Targeting ตาม Persona
+- AI Decisioning: AI Agent ประเมินคนไข้รายบุคคลทุก Event / Observe-Wait-Act Loop (Act 15-20%, Wait 60-70%, Skip 10-20%) / 3 Building Block (Asset พร้อม Variable Range + Guardrail ที่ก้าวข้ามไม่ได้ + Goal พร้อม Attribution Window) / Budget Ceiling + Frequency Cap 2 ชั้น / เรียนรู้จากผลลัพธ์ปรับกลยุทธ์อัตโนมัติ",,,,,,,,,,,,,,,
+Phase 2,Membership Management ,,,,,,,,,,,,,,,,,,
+1,"หมวด Member แบ่งเป็น 6 ประเภทระบบ และรองรับการจัดการ One-to-Many 
+(ประเภทให้ดาว VIP) Star with Entitlement 
+(ประเภทจ่ายเงิน) Paid คือ คนที่ซื้อ Membership หรือ Subsciption Plan 
+(ประเภทไม่จ่ายเงิน) Engagement / Tier (Membership Tier) 
+(ประเภท Corporate) กลุ่มสมาชิกบริษัทตามคู่สัญญา 
+(ประเภท Insuracnce) กลุ่มสมาชิกคู่สัญญาบริษัทประกันในแต่ละระดับ 
+(ประเภท Exclusive Partner) กลุ่มสมาชิกพันธมิตร ","  150,000 ","  500,000 ","- สมาชิก 6 ประเภทอยู่บน Profile คนไข้เดียวกัน — คนไข้ถือได้หลายประเภทพร้อมกัน ระบบ Resolve สิทธิ์อัตโนมัติ
+- VIP (Star with Entitlement): โรงพยาบาลกำหนด ไม่ได้จากการสะสม / Tier: Connex, Cheva, BDMS / Standing Discount (OPD 30%, ร้านยา 20%, ทันตกรรม 15%) / Consumable Privilege อัตโนมัติ (Lounge Pass, จอดรถ, ตรวจสุขภาพ) / จอง Priority + Coordinator เฉพาะ
+- Paid (จ่ายเงิน): ซื้อ Plan (เช่น Divine Elite) ผ่าน Well App/E-Commerce/เคาน์เตอร์ / 3 หมวด Benefit: Mandatory (คูปองร้านอาหาร 12×, จอดรถ 2×, ตรวจสุขภาพ 1×) + Elective (เลือก 3 จาก 8) + Standing (OPD 15%, ร้านยา 10%) / ยอดซื้อสะสม → Tier ภายใน Paid Type
+- Engagement/Tier (ไม่จ่ายเงิน): Earn-based จากยอดใช้จ่ายทุกช่องทาง / Silver → Gold (50k บาท) → Platinum (150k บาท) / 5 รูปแบบ Evaluation Window (Rolling, Fixed, Anniversary, Calendar Month, Calendar Quarter) / Upgrade ทันที ข้าม Tier ได้ / Earn Rate+Burn Rate+Privilege ราคาต่างกันต่อ Tier
+- Corporate (บริษัท): B2B Contract ตามบริษัท / Level: Executive, General, Other / HR Import Roster (CSV/API) + Delta Import รายไตรมาส / Benefit ตาม Level (Consumable+Standing) / Approval Flow Roster >50 คน / Usage Report สำหรับต่อสัญญา
+- Insurance (ประกัน): โครงสร้าง Contract→Level→Roster→Benefit เหมือน Corporate / Auto-assignment จาก HIS เมื่อบันทึกข้อมูลประกัน / Stackability Rule ตาม Package (Insurance+Coin ใช้ร่วมได้ หรือ Insurance อย่างเดียว)
+- Exclusive Partner (พันธมิตร): Partner ส่ง Member List ผ่าน API / Partner Activity Event → Auto-upgrade Level / Partner-specific Landing Page + Deal เฉพาะ / Tier Configure ได้ (Gold, Platinum) เพิ่มได้ในอนาคต",,,,,,,,,,,,,,,
+2,"หมวด Advance Management
+รองรับการสร้างเงื่อนไขกติกาข้ามประเภทสมาชิก (Precedence/Stackability/Audit)
+รองรับการ Deeplink Partner Privileges to Tier-based Exclusive Landing Pages","70,000","  250,000 ","- Precedence Engine: เมื่อหลาย Member Type ให้สิทธิ์หมวดเดียวกัน (เช่น ส่วนลด OPD) ระบบจัดลำดับ+เลือกค่าสูงสุดอัตโนมัติ / Response มี Reasoning ครบ (เช่น ""VIP 30% > Corporate 25% > Insurance 20% > Tier 5%"") / HIS นำไปใช้ที่ Billing ไม่ต้องตัดสินใจด้วยมือ
+- Stackability Engine: Configure ตาม Package ว่า Benefit ใดใช้ซ้อนกันได้ / เช่น Annual Checkup: Insurance+Coin ใช้ร่วมได้ / Premium Surgery: Insurance อย่างเดียว / เปลี่ยน Rule ต้องผ่าน Approval Flow
+- Audit Trail: ทุก Precedence+Stackability Decision ถูกบันทึก — Benefit ไหนถูกประเมิน ตัวไหนถูกเลือก เหตุผล ตัวไหนถูกตัดออก
+- Deeplink Partner: Partner-specific Landing Page ด้วย Block-based Design / Content แตกต่างตาม Partner Level (Gold vs Platinum เห็น Deal ต่างกัน) / Partner Activity API → Level Update → หน้า Auto-refresh / Match API ตอบ ""User คนนี้มีสิทธิ์อะไร?"" / Manager Approval ก่อน Publish",,,,,,,,,,,,,,,
+Advance / Differentiation Point (โปรดขยายส่วนนี้เพิ่มเติม และแยกราคาออกมาให้เห็นชัดเจน),,,,,,,,,,,,,,,,,,,
+1,"CDP (อธิบาย Key Feature ว่า Basic / Advance หรือได้แค่ไหน)
+",0,"  300,000 ","ระดับ Advance
+- Unified Patient Profile: รวบรวมข้อมูลจาก 6 แหล่ง (HIS/Data Center, Well App, Website, LINE, E-Commerce/Marketplace, CDP Hospital) เข้า Profile คนไข้เดียว
+- Identity Resolution: จับคู่ตัวตนจากหลายช่องทาง ด้วย บัตรประชาชน/Passport, เบอร์โทร+OTP, HN, LINE ID, Well ID — คนไข้ที่สมัครจากช่องทางต่างกันถูกรวมเป็นคนเดียว
+- Real-time Data Ingestion: Event-driven ไม่ใช่ Batch — ข้อมูลเข้า Profile ทันทีที่เกิด Event (ชำระเงิน, Visit, อ่านบทความ, ซื้อผ่าน Marketplace)
+- Data Source ครบทุกช่องทาง: HIS Push Event (Purchase, Visit, Service Delivery, Insurance Status) / Well App (Feature Usage, Login, Purchase History) / Website JS Tracker (Article Read, Like, Share, Page Visit) / LINE (Registration, Message Engagement) / E-Commerce Webhook (Order History, Product Preference) / CDP Hospital (Service Catalog, Product/Price Master)
+- Dynamic Segmentation (Rule-based): Populate+Update อัตโนมัติ Real-time / เงื่อนไขหลายมิติ (Tier+แผนก+พฤติกรรม+Coin Balance+Tag+Member Type+ระยะเวลา) / คนไข้เข้า-ออก Segment อัตโนมัติเมื่อข้อมูลเปลี่ยน
+- Static Segmentation: Admin Import รายชื่อ CSV สำหรับ Campaign เฉพาะกลุ่ม (เช่น VIP 500 คน)
+- Tag System: Auto-assign Tag จาก HIS Event (lifestage:prenatal, lifestage:post_surgical, lifestage:chronic, checkup_due, new_patient) / Manual Tag โดย Admin / Tag ขับเคลื่อน Segment Membership + Journey Trigger
+- Persona Assignment: Label เดียวต่อคนไข้แทน Healthcare Profile หลัก (Wellness Seeker, Chronic Care, Family Care, Corporate Executive) / Auto-assign โดย AI ตาม Behavioral Pattern หรือ Marketing กำหนดเอง / ขับเคลื่อน Homepage Layout, Privilege Eligibility, Campaign Targeting
+- Profile Enrichment ผ่านแบบสอบถาม: คำตอบจากแบบสอบถาม Enrich Profile อัตโนมัติ + Trigger Journey ต่อเนื่อง (เช่น NPS ต่ำ → Service Recovery Workflow)
+- AI-driven Adaptive Survey: AI ประเมินความสมบูรณ์ของ Profile แล้วเลือกคำถามที่ตรงกับช่องว่างข้อมูลของคนไข้แต่ละคน → แบบสอบถามแต่ละชุดแตกต่างกันเพราะช่องว่างต่างกัน
+- Cross-channel Behavior Tracking: ติดตามพฤติกรรมข้ามช่องทาง (Hospital Visit + Online Purchase + Content Engagement + LINE Interaction + Marketplace Order) ใน Profile เดียว
+- Customer 360 View: แสดง Coin Balance, Tier Status, Member Type ทั้งหมดที่ Active, Privilege ที่ Active, Mission Progress, Transaction History, Segment Membership ใน Profile เดียว
+- Segment → Action: Segment Membership เป็น Trigger ของ Journey Automation / ใช้เป็นเงื่อนไข Eligibility ของ Privilege, Campaign, Content, Homepage Layout
+- Data Governance: Row-Level Security (RLS) แยกข้อมูลระดับ Infrastructure / PDPA Consent ต่อช่องทาง+ต่อวัตถุประสงค์ / Data Subject Access Request / Right to Erasure / PII Tokenization
+- Analytics Pipeline: ข้อมูลจาก CDP ไหลเข้า Analytics Database สำหรับ Dashboard+Report โดยไม่กระทบ Transactional Layer / Real-time Segment Count สำหรับ Campaign Planning
+- Performance: รองรับ Concurrent Active User 10,000+ / Wallet+Eligibility Query <50ms / Event Processing <1 วินาที / Database Sharding+RLS แยกข้อมูล
+- Lifestage Detection: Auto-assign Lifestage Tag จาก HIS Event (ฝากครรภ์ตามไตรมาส, Discharge หลังผ่าตัด, โรคเรื้อรัง, ถึงเวลาตรวจประจำปี, คนไข้ใหม่, นัดหมายล่วงหน้า) → เข้า Dynamic Segment → Trigger Journey อัตโนมัติ
+- Lifestage ขยายได้: เพิ่ม Care Pathway ใหม่ (Post-COVID Recovery, Elderly Wellness) ด้วยการสร้าง Tag+Segment+Journey ไม่ต้องแก้ระบบ",,,,,,,,,,,,,,,
+2,AI / AI Agent  (อธิบาย Key Feature ว่า Basic / Advance หรือได้แค่ไหน),FREE, FREE ,"ระดับ Advance — รวมอยู่ในแพลตฟอร์มไม่มีค่าใช้จ่ายเพิ่ม
+- AI Decisioning: AI Agent ประเมินคนไข้แต่ละคนเป็นรายบุคคลในทุก Event แล้วเลือก Action ที่เหมาะสมที่สุด — ต่างจาก Rule-based ที่ใช้เงื่อนไขเหมือนกันทั้ง Segment / Personalization ระดับบุคคล ไม่ใช่ระดับกลุ่ม / Timing Optimize ต่อคนไข้ / ค้นพบ Pattern ที่ Rule ไม่เคยคิดถึง
+- Observe-Wait-Act Loop: Observe บริบทครบ (Visit History, แผนก, Coin Balance, Privilege ที่ Active, Engagement Pattern, Member Type, ข้อความล่าสุด) → Act 15-20% (มั่นใจสูง) / Wait 60-70% (กำหนด Re-evaluation ภายหลัง) / Skip 10-20% (ไม่มี Action ที่เป็นประโยชน์)
+- 3 Building Block ที่ Marketing ตั้งค่าครั้งเดียว: Asset (เครื่องมือที่ AI ใช้ได้ พร้อม Variable Range เช่น ""ให้ 50-500 Coin"" + Eligibility + Limit) / Guardrail (Frequency Cap, Budget Ceiling, Quiet Hour, Cooldown ที่ก้าวข้ามไม่ได้ — บังคับ 2 ชั้น AI+ระบบ) / Goal (Event ที่ติดตาม + Attribution Window + Classification Best/Good/Negative)
+- Goal Tracking เฉพาะโรงพยาบาล: Attribution (AI Action → คนไข้กลับมาใน 30 วัน = นับผล) / ประสิทธิภาพต่อ Action (""200 Coin + LINE"" = 18% Return vs ""ลด 10% อย่างเดียว"" = 8%) / Cross-department (OPD Offer → คนไข้มา Dermatology = Cross-sell) / Negative Outcome Monitoring (ไม่มาใน 90 วัน → ลองแนวทางอื่น)
+- AI เรียนรู้+ปรับตัว: Action ใดทำให้กลับมา Offer ใด Convert ช่วงเวลาใดเหมาะ → ปรับกลยุทธ์อัตโนมัติต่อเนื่อง
+- AI เลือกสิ่งที่จะหลีกเลี่ยง: ไม่ใช่แค่เลือกว่า ""จะส่งอะไร"" แต่ยังเลือก ""จะหลีกเลี่ยงอะไร"" (เช่น คนไข้ NPS ต่ำจากแผนกทันตกรรม → AI หลีกเลี่ยงทันตกรรม นำด้วย Wellness ที่เธอชอบ)
+- AI-driven Adaptive Survey: AI ประเมินความสมบูรณ์ของ Profile + เป้าหมาย Data Enrichment แล้วเลือกคำถามแบบสอบถามเฉพาะบุคคล → แต่ละคนได้คำถามต่างกันตามช่องว่างข้อมูล
+- Rocket MCP AI Data Assistant: ถาม-ตอบข้อมูล Loyalty เป็นภาษาธรรมชาติใน Admin Console (เช่น ""Gold กี่คนแลก Privilege เดือนที่แล้ว?"" / ""แผนกไหน Cross-sell สูงสุด?"" / ""Top 10 Corporate ตาม Utilization?"") ไม่ต้องเขียน SQL ไม่ต้องสร้าง Report",,,,,,,,,,,,,,,
+,Total,"  1,680,000 ","  3,102,000 ",,,,,,,,,,,,,,,,
+,VAT 7%,,,,,,,,,,,,,,,,,,
+,Grand Total,,,,,,,,,,,,,,,,,,
+,GRAND TOTAL (1st Year),,,,,,,,,,,,,,,,,,
+Note,Reward Sourcing Fee & Delivery Fee ,8-12%,,,,,,,,,,,,,,,,,
+,Additional Mandaytory Charge (per-man-day),"  8,000 ",,,,,,,,,,,,,,,,,
+,Not included OTP Messages Cost , 0.28 per message ,,,,,,,,,,,,,,,,,
+,Free SMS (Free SMS Name)," 200,000 message per year ",,,,,,,,,,,,,,,,,
+,Run Rate (Monthly System Fee),  -   ,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,
+Optional,Project Expansion,"One-Time
+Development Cost","Yearly Subscription
+and Maintenance",,,,,,,,,,,,,,,,
+1,เว็บไซต์สมิติเวช (Optional: เพิ่มสาขา — ราคาต่อสาขา),"  50,000 ","  30,000 ",,,,,,,,,,,,,,,,
+2,LINE OA (Optional: เพิ่มสาขา — ราคาต่อสาขา),  -   ,"  30,000 ",,,,,,,,,,,,,,,,
+3,Transfer Coin/Point Partners (ราคาต่อเจ้า) หรือรวมแล้ว,  -   ,  -   ,,,,,,,,,,,,,,,,
+4,Deeplink Partner Privileges to Tier-based Exclusive Landing Pages (ราคาต่อเจ้า) หรือรวมแล้ว,  -   ,  -   ,,,,,,,,,,,,,,,,

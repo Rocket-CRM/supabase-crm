@@ -1,0 +1,122 @@
+---
+alwaysApply: false
+description: "Database conventions for creating/modifying tables, columns, types. Covers: table naming, column naming (id, code, is_active, window_start/end, merchant_id), data types (uuid, timestamptz, numeric, jsonb), RLS, triggers. Read when creating tables, writing migrations, or reviewing schema."
+---
+
+# Database Conventions
+
+Extracted from the actual Supabase schema. Follow these when creating or modifying tables.
+
+**Applies in both plan mode and agent mode.** Reference these conventions when proposing schema and when executing migrations.
+
+## Table Naming
+
+| Pattern | Purpose | Examples |
+|---|---|---|
+| `<domain>_master` | Primary entity definition | `reward_master`, `tier_master`, `campaign_master`, `workflow_master`, `persona_master` |
+| `<domain>` (no suffix) | Simpler primary entities | `mission`, `checkin`, `codes`, `multiplier` |
+| `<domain>_ledger` | Immutable transaction/event log | `wallet_ledger`, `purchase_ledger`, `checkin_ledger`, `tier_change_ledger`, `referral_ledger` |
+| `<domain>_log_<type>` | Alternative log pattern | `mission_log_completion`, `mission_log_outcome_distribution` |
+| `<domain>_conditions` | Rules/criteria attached to entity | `mission_conditions`, `tier_conditions`, `earn_conditions`, `checkin_conditions`, `reward_points_conditions` |
+| `<domain>_progress` | User progress/tracking | `mission_progress`, `tier_progress`, `tier_progression_metrics` |
+| `<domain>_config` | Configuration | `activity_currency_config`, `feature_config`, `admin_menu_config` |
+| `user_<entity>` | Per-user records | `user_wallet`, `user_tags`, `user_benefit`, `user_sessions`, `user_accounts` |
+| `cs_<entity>` | CS module tables | `cs_conversations`, `cs_messages`, `cs_brand_config` |
+| `<domain>_import_jobs` | Bulk import tracking | `codes_import_jobs`, `card_import_batches`, `bulk_import_batches` |
+| `<domain>_staging` | Temporary staging data | `codes_staging`, `reward_promo_code_staging` |
+
+**Shared tables** (used by both loyalty and CS): `workflow_master`, `workflow_node`, `workflow_edge`, `workflow_trigger`, `workflow_log` — use `domain` column ('loyalty' or 'cs') to filter.
+
+## Standard Columns — Every Table
+
+| Column | Type | Default | Notes |
+|---|---|---|---|
+| `id` | `uuid` | `gen_random_uuid()` | Always PK. Never bigint for new tables. |
+| `merchant_id` | `uuid NOT NULL` | — | Every multi-tenant table. FK to `merchant_master`. Used in RLS. |
+| `created_at` | `timestamptz` | `now()` | Always present. |
+| `updated_at` | `timestamptz` | `now()` | On master/config tables. Maintained by `trigger_set_updated_at`. |
+
+## Standard Columns — By Purpose
+
+### Identity & Naming
+| Column | Type | When to use |
+|---|---|---|
+| `<entity>_code` | `text` | Human-readable identifier (mission_code, store_code, reward_code, workflow_code). Distinct from uuid `id`. |
+| `<entity>_name` | `text` | Display name when prefixed (mission_name, tier_name, persona_name, store_name). |
+| `name` | `text` | Display name for simpler tables (reward_master, workflow_master, form_templates). |
+| `description` | `text` | Single description. Use `description_<variant>` when multiple needed (description_headline, description_body, description_tc). |
+
+### Status & Flags
+| Column | Type | Default | Notes |
+|---|---|---|---|
+| `is_active` | `boolean` | `true` | **Standard for new tables.** On/off toggle. Legacy tables may use `active_status` — do not rename, but use `is_active` for all new work. |
+| `is_<state>` | `boolean` | varies | State flags: `is_claimed`, `is_milestone`, `is_featured`, `is_custom_answer`. Always `is_` prefix. |
+| `has_<feature>` | `boolean` | `false` | Feature presence: `has_time_conditions`. |
+| `status` | `enum` | varies | When lifecycle states are needed (form_status, purchase_status). Use PostgreSQL enum types. |
+
+### Time Windows
+| Column | Type | Notes |
+|---|---|---|
+| `window_start` | `timestamptz` | Eligibility/availability start. Pair with `window_end`. |
+| `window_end` | `timestamptz` | Eligibility/availability end. |
+| `window_start_time` / `window_end_time` | `time` | Time-of-day restrictions (without date). |
+| `<action>_at` | `timestamptz` | Action timestamps: `claimed_at`, `activated_at`, `completed_at`, `performed_at`, `expired_at`. |
+
+### Foreign Keys & References
+| Column | Type | Notes |
+|---|---|---|
+| `<entity>_id` | `uuid` | FK to another table (user_id, mission_id, tier_id, store_id, reward_id). |
+| `source_type` + `source_id` | `text` + `uuid` | Polymorphic reference — what triggered this record. |
+| `external_ref` | `text` | Reference to external system. |
+| `dedup_key` | `text` | Idempotency key to prevent duplicate processing. |
+
+### Arrays (Filter Lists)
+| Column | Type | Notes |
+|---|---|---|
+| `allowed_<entity>` | `uuid[]` | Eligibility filter arrays: `allowed_tier`, `allowed_persona`, `allowed_tags`. |
+| `<entity>_ids` | `uuid[]` | Multi-select references: `product_ids`, `sku_ids`, `category_ids`, `brand_ids`, `tier_ids`, `tag_ids`. |
+
+### Amounts & Metrics
+| Column | Type | Notes |
+|---|---|---|
+| `amount` | `numeric` | Monetary or point amounts. Never `float`. |
+| `<prefix>_amount` | `numeric` | Qualified amounts: `total_amount`, `final_amount`, `discount_amount`, `outcome_amount`. |
+| `balance_before` / `balance_after` | `integer` | Ledger balance snapshots. |
+| `points_required` | `numeric` | Cost in points. |
+
+### Flexible Data
+| Column | Type | Default | Notes |
+|---|---|---|---|
+| `metadata` | `jsonb` | `'{}'` | Generic extensible data. |
+| `config` | `jsonb` | `'{}'` | Structured configuration. |
+| `field_definitions` | `jsonb` | `'{}'` | Dynamic schema definitions. |
+| `images` | `text[]` or `jsonb` | — | Image URLs. Prefer `text[]` for simple lists, `jsonb` for structured. |
+
+## Data Type Rules
+
+- **IDs**: `uuid` with `gen_random_uuid()`. Never serial/bigint for new tables.
+- **Timestamps**: Always `timestamptz`. Never `timestamp without time zone`.
+- **Money/points**: `numeric`. Never `float` or `real`.
+- **Counts**: `integer`.
+- **Text**: `text`. Avoid `varchar` unless there's a real length constraint.
+- **Booleans**: `boolean` with meaningful default.
+- **Enums**: PostgreSQL `CREATE TYPE` enums for fixed status values.
+- **Arrays**: `uuid[]` or `text[]` for typed lists.
+- **Flexible**: `jsonb` with `'{}'::jsonb` default.
+
+## RLS Pattern
+
+Every multi-tenant table:
+```sql
+ALTER TABLE <table> ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "merchant_isolation" ON <table>
+  FOR ALL USING (merchant_id = get_current_merchant_id());
+```
+
+## Trigger Pattern
+
+Master/config tables get an `updated_at` trigger:
+```sql
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON <table>
+  FOR EACH ROW EXECUTE FUNCTION trigger_set_updated_at();
+```

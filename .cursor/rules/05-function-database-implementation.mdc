@@ -1,0 +1,35 @@
+---
+alwaysApply: false
+description: "View naming, materialized views, anon role policies, CS module cross-domain rules. Supplements 09/10/11 rules."
+---
+
+# Additional Implementation Patterns
+
+For core conventions, see:
+- `09-db-conventions.mdc` — table naming, column naming, data types
+- `10-function-conventions.mdc` — function naming, BFF patterns, response format
+- `11-auth-conventions.mdc` — auth patterns, merchant resolution, roles
+
+This file covers topics not in those rules.
+
+## Views
+
+- Regular views: `v_<domain>_<purpose>` (real-time, on-demand)
+- Materialized views: `mv_<domain>_<purpose>` (cached, requires explicit refresh)
+- BFF views: `bff_<purpose>` (enriched for frontend)
+- Views inherit RLS from underlying tables; materialized views need SECURITY DEFINER wrapper functions
+
+## Anon Role Policies
+
+Anon role policies must check `get_current_merchant_id() IS NOT NULL` to prevent unauthenticated access.
+
+## CS Module — Cross-Domain Rules
+
+### Shared Workflow Tables
+`workflow_master`, `workflow_node`, `workflow_edge`, `workflow_trigger`, `workflow_log` — shared by loyalty and CS. Use `domain` column to filter: `'loyalty'` or `'cs'`.
+
+### Cross-Domain Access
+When CS functions need loyalty data (user tier, points, tags):
+- Read via existing loyalty functions — look them up in INDEX_FUNCTION.md
+- NEVER write to loyalty tables directly from CS functions
+- For writes: use bridge functions that route through existing loyalty logic (e.g., `post_wallet_transaction` for points, `fn_execute_amp_action` for tags)

@@ -39,3 +39,9 @@ build/
 
 # Requirements docs (local only - not for GitHub)
 requirements/
+
+# Local service repos (maintained separately)
+crm-agent-service/
+
+# Miscellaneous local files
+Gallery3DOrbit.tsx

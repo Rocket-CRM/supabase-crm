@@ -1,0 +1,8 @@
+# Historical summaries - not needed for AI context
+API_FIELD_RENAME_SUMMARY.md
+PROMO_CODE_REDEMPTION_FIX.md
+QUANTITY_LIMIT_INCREASE.md
+
+# Reference/migration docs - include explicitly when needed
+docs/SYNGENTA_MIGRATION_GUIDE.md
+docs/shopify-admin-flow-curls.md

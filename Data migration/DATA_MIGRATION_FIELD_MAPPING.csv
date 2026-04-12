@@ -1,0 +1,563 @@
+area,mongo_source,mongo_field,mongo_type,supabase_table,supabase_column,supabase_type,transform,notes
+
+### user_accounts — Core user identity. One row per end-user per merchant. Profile / tier FK / persona FK / notification toggles. Admin users are NOT migrated here — they will be re-invited via admin_users.,,,,,,,,
+
+## Area 1: Accounts — loyaltydb.users → user_accounts,,,,,,,,
+Accounts,loyaltydb.users,_id,ObjectId,user_accounts,mongo_id,text,direct,Original MongoDB ObjectId for traceability
+Accounts,—,—,—,user_accounts,id,uuid,gen_random_uuid(),New Supabase primary key
+Accounts,loyaltydb.users,merchantId,ObjectId,user_accounts,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Accounts,loyaltydb.users,lineUserId,String|Null,user_accounts,line_id,text,direct,
+Accounts,loyaltydb.users,phoneNumber,String,user_accounts,tel,text,direct,
+Accounts,loyaltydb.users,id_card,String,user_accounts,id_card,text,direct,
+Accounts,loyaltydb.users,email,String|Null,user_accounts,email,text,direct,Prefer contacts.email if non-null
+Accounts,loyaltydb.users,fullName,String,user_accounts,fullname,text,direct,Fallback; prefer contacts.firstName+lastName
+Accounts,loyaltydb.users,avatar,String,user_accounts,image,text,direct,Prefer contacts.imageUrl if non-empty
+Accounts,loyaltydb.users,userType,String,user_accounts,user_type,user_type,direct,CUSTOMER→buyer / MERCHANT→seller
+Accounts,loyaltydb.users,status,String,user_accounts,user_stage,text,direct,ACTIVE→member / INACTIVE→lead / FREEZE→frozen
+Accounts,loyaltydb.users,memberCode,String,user_accounts,external_user_id,text,direct,Legacy member code
+Accounts,loyaltydb.users,memberTier.tierId,ObjectId,user_accounts,tier_id,uuid,resolve_fk,FK → tier_master via mongo_id
+Accounts,loyaltydb.users,notifSetting.channels.email,Boolean,user_accounts,channel_email,boolean,direct,
+Accounts,loyaltydb.users,notifSetting.channels.lineChat,Boolean,user_accounts,channel_line,boolean,direct,
+Accounts,loyaltydb.users,createdAt,Date,user_accounts,created_at,timestamptz,direct,
+
+## Area 1: Skipped — loyaltydb.users,,,,,,,,
+Accounts,loyaltydb.users,isLoyaltyAdmin,Boolean,,,,skip,Admin users not migrated to user_accounts; will re-invite via admin_users
+Accounts,loyaltydb.users,isPosAdmin,Boolean,,,,skip,Admin users not migrated to user_accounts; will re-invite via admin_users
+Accounts,loyaltydb.users,isLoyaltyAdminEditor,Boolean,,,,skip,Admin users not migrated
+Accounts,loyaltydb.users,isPosAdminEditor,Boolean,,,,skip,Admin users not migrated
+Accounts,loyaltydb.users,__v,Number,,,,skip,Mongoose version key
+Accounts,loyaltydb.users,contactId,ObjectId,,,,skip,Internal ref; join via users._id
+Accounts,loyaltydb.users,updatedAt,Date,,,,skip,No updated_at column
+Accounts,loyaltydb.users,lastActive,Date,,,,skip,Derived from activity
+Accounts,loyaltydb.users,verifyPhone,Null,,,,skip,Always null
+Accounts,loyaltydb.users,staffId,String,,,,skip,No target; consider JSONB
+Accounts,loyaltydb.users,studentId,String,,,,skip,No target; consider JSONB
+Accounts,loyaltydb.users,signupMethod,String,,,,skip,No target; consider adding for analytics
+Accounts,loyaltydb.users,isVerified,Boolean,,,,skip,No target
+Accounts,loyaltydb.users,isFreeze,Boolean,,,,skip,Captured via status→user_stage
+Accounts,loyaltydb.users,isSocial,Boolean,,,,skip,No target
+Accounts,loyaltydb.users,phoneVerified,Boolean,,,,skip,No target
+Accounts,loyaltydb.users,emailVerified,Boolean,,,,skip,No target
+Accounts,loyaltydb.users,isLinePhone,Boolean,,,,skip,No target
+Accounts,loyaltydb.users,isFriendInvite,Boolean,,,,skip,Referral flags
+Accounts,loyaltydb.users,isFriendPoint,Boolean,,,,skip,Referral flags
+Accounts,loyaltydb.users,friendInviteId,String,,,,skip,Referral data
+Accounts,loyaltydb.users,friendInviteType,String,,,,skip,Referral data
+Accounts,loyaltydb.users,isSellerInvite,Boolean,,,,skip,Referral data
+Accounts,loyaltydb.users,isSellerPoint,Boolean,,,,skip,Referral data
+Accounts,loyaltydb.users,sellerInviteId,String,,,,skip,Referral data
+Accounts,loyaltydb.users,sellerInviteType,String,,,,skip,Referral data
+Accounts,loyaltydb.users,loginDate[],Array[Date],,,,skip,No target
+Accounts,loyaltydb.users,trafficSourceIds[],Array[ObjectId],,,,skip,Not migrated
+Accounts,loyaltydb.users,storeIds[],Array,,,,skip,Empty
+Accounts,loyaltydb.users,adminAuthorizationChangeClientNameList[],Array,,,,skip,Empty
+Accounts,loyaltydb.users,areaPosOperationsIds[],Array,,,,skip,Empty
+Accounts,loyaltydb.users,areaOperationsIds[],Array,,,,skip,Empty
+Accounts,loyaltydb.users,pointSnapShotByMonth[],Array[Document],,,,skip,Derive from wallet_ledger
+Accounts,loyaltydb.users,memberTier.tierName,String,,,,skip,Denormalized; on tier_master
+Accounts,loyaltydb.users,memberTier.iconUrl,String,,,,skip,Denormalized; on tier_master
+Accounts,loyaltydb.users,memberTier.sum,Null,,,,skip,Always null
+Accounts,loyaltydb.users,memberTier.memberCurrentMaintainTierDate,Null,,,,skip,Always null
+Accounts,loyaltydb.users,memberTier._id,ObjectId,,,,skip,Subdocument ID
+Accounts,loyaltydb.users,notifSetting.channels.adminPanel,Boolean,,,,skip,Admin UI preference
+Accounts,loyaltydb.users,notifSetting._id,ObjectId,,,,skip,Subdocument ID
+Accounts,loyaltydb.users,roleId,ObjectId,,,,skip,Legacy RBAC; rebuilt in new system
+
+## Area 1: Accounts — loyaltydb.contacts → user_accounts,,,,,,,,
+Accounts,loyaltydb.contacts,firstName,String,user_accounts,firstname,text,direct,Primary source
+Accounts,loyaltydb.contacts,lastName,String,user_accounts,lastname,text,direct,Primary source
+Accounts,loyaltydb.contacts,fullName,String,user_accounts,fullname,text,direct,Primary source for display name
+Accounts,loyaltydb.contacts,imageUrl,String,user_accounts,image,text,direct,Prefer over users.avatar
+Accounts,loyaltydb.contacts,phoneNumber,String,user_accounts,tel,text,direct,Prefer non-empty
+Accounts,loyaltydb.contacts,email,String|Null,user_accounts,email,text,direct,Prefer non-null
+Accounts,loyaltydb.contacts,dateOfBirth,Date|Null,user_accounts,birth_date,date,direct,Strip time component
+Accounts,loyaltydb.contacts,gender,String|Null,user_accounts,gender,text,direct,
+Accounts,loyaltydb.contacts,id_card,String,user_accounts,id_card,text,direct,Prefer non-empty
+Accounts,loyaltydb.contacts,memberTierId,ObjectId,user_accounts,tier_id,uuid,resolve_fk,FK → tier_master via mongo_id; prefer over users.memberTier.tierId
+Accounts,loyaltydb.contacts,memberTypeGroupNameId,String|Null,user_accounts,persona_id,uuid,resolve_fk,FK → persona_group_master
+Accounts,loyaltydb.contacts,memberTypeNameId,String|Null,user_accounts,type_id,uuid,resolve_fk,FK → persona_master
+Accounts,loyaltydb.contacts,thirdPartyUserId,String,user_accounts,marketplace_external_ids,jsonb,jsonb,Store as {"tiktok": "value"}
+Accounts,loyaltydb.contacts,shopeeUserId,String,user_accounts,marketplace_external_ids,jsonb,jsonb,Merge as {"shopee": "value"}
+
+## Area 1: Skipped — loyaltydb.contacts,,,,,,,,
+Accounts,loyaltydb.contacts,_id,ObjectId,,,,skip,Contact doc ID; user identity from users._id
+Accounts,loyaltydb.contacts,userId,ObjectId,,,,skip,FK back to users._id; used for join only
+Accounts,loyaltydb.contacts,__v,Number,,,,skip,Mongoose version key
+Accounts,loyaltydb.contacts,createdAt,Date,,,,skip,Use users.createdAt
+Accounts,loyaltydb.contacts,updatedAt,Date,,,,skip,No target
+Accounts,loyaltydb.contacts,status,String,,,,skip,Duplicate of users.status
+Accounts,loyaltydb.contacts,lineUserId,String|Null,,,,skip,Duplicate of users.lineUserId
+Accounts,loyaltydb.contacts,isLinePhone,Boolean,,,,skip,No target
+Accounts,loyaltydb.contacts,isFreeze,Boolean,,,,skip,Covered via users.status
+Accounts,loyaltydb.contacts,merchantId,ObjectId,,,,skip,Duplicate of users.merchantId
+Accounts,loyaltydb.contacts,staffId,String,,,,skip,No target
+Accounts,loyaltydb.contacts,studentId,String,,,,skip,No target
+Accounts,loyaltydb.contacts,sellerId,String,,,,skip,No target
+Accounts,loyaltydb.contacts,memberChannelId,String,,,,skip,No target
+Accounts,loyaltydb.contacts,memberStoreId,String,,,,skip,No target
+Accounts,loyaltydb.contacts,trafficName,String,,,,skip,Not migrated
+Accounts,loyaltydb.contacts,trafficId,ObjectId|Null,,,,skip,Not migrated
+Accounts,loyaltydb.contacts,registerAt,Date|Null,,,,skip,Use users.createdAt
+Accounts,loyaltydb.contacts,memberTierName,String,,,,skip,Denormalized
+Accounts,loyaltydb.contacts,memberPreviousTierId,ObjectId|Null,,,,skip,Historical; in tier_change_ledger
+Accounts,loyaltydb.contacts,memberPreviousTierName,String|Null,,,,skip,Denormalized
+Accounts,loyaltydb.contacts,memberNextTierName,String,,,,skip,Denormalized
+Accounts,loyaltydb.contacts,memberNextScheduledDowngradeDate,Null,,,,skip,Always null
+Accounts,loyaltydb.contacts,memberTierColor,String,,,,skip,Denormalized
+Accounts,loyaltydb.contacts,memberTypeApplyDate,Null,,,,skip,Always null
+Accounts,loyaltydb.contacts,memberTypeExpireDate,Null,,,,skip,Always null
+Accounts,loyaltydb.contacts,address._id,ObjectId,,,,skip,Subdocument ID
+Accounts,loyaltydb.contacts,fullAddress,String,,,,skip,Concatenated; reconstruct from parts
+Accounts,loyaltydb.contacts,staffArea,String,,,,skip,No target
+Accounts,loyaltydb.contacts,memberTypeId,String,,,,skip,Possibly deprecated
+Accounts,loyaltydb.contacts,customFields[].displayName,String,,,,skip,Denormalized; on form_fields
+Accounts,loyaltydb.contacts,customFields[].fieldName,String,,,,skip,Denormalized; on form_fields
+Accounts,loyaltydb.contacts,customFields[]._id,ObjectId,,,,skip,Subdocument ID
+Accounts,loyaltydb.contacts,surveyQuestions[].questionId,ObjectId,,,,skip,No direct FK
+Accounts,loyaltydb.contacts,surveyQuestions[].isAnswer,Boolean,,,,skip,Implied by answer presence
+Accounts,loyaltydb.contacts,surveyQuestions[]._id,ObjectId,,,,skip,Subdocument ID
+Accounts,loyaltydb.contacts,memberTypeQuestion[],Array[Document],,,,skip,Deprecated
+Accounts,loyaltydb.contacts,surveyNewAnswer[],Array,,,,skip,Empty
+Accounts,loyaltydb.contacts,contactNotes[],Array,,,,skip,Empty
+Accounts,loyaltydb.contacts,leaderboardJoin[],Array,,,,skip,Separate
+Accounts,loyaltydb.contacts,eventActivitiesJoin[],Array,,,,skip,Separate
+Accounts,loyaltydb.contacts,lastLoginDate,Date|Null,,,,skip,Derived
+Accounts,loyaltydb.contacts,lastActivityDate,Date|Null,,,,skip,Derived
+Accounts,loyaltydb.contacts,lastRewardUsedDate,Date|Null,,,,skip,Aggregate from ledger
+Accounts,loyaltydb.contacts,totalRewardUsed,Number,,,,skip,Aggregate from ledger
+Accounts,loyaltydb.contacts,lastBenefitUsedDate,Date|Null,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,totalBenefitUsed,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,lastLuckDrawUsedDate,Null,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,totalLuckDrawUsed,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,lastCouponUsedDate,Date|Null,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,totalCouponUsed,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,couponBalance,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,lastCouponCollectDate,Date|Null,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,totalSaleAmount,Number,,,,skip,Aggregate from purchase_ledger
+Accounts,loyaltydb.contacts,lastSaleAmount,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,lastSaleDate,Date|Null,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,avgSaleAmountPerOrder,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,totalOrder,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,pointBalance,Number,,,,skip,Migrated via crm_wallet_db
+Accounts,loyaltydb.contacts,totalPointCollect,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,lastPointCollectDate,Date|Null,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,lastPointUsedDate,Date|Null,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,totalPointUsed,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,importSaleAmount,Number,,,,skip,Aggregate
+Accounts,loyaltydb.contacts,loyaltyGiveSaleAmount,Number,,,,skip,Aggregate
+
+## Area 1: Accounts — crm_user_db.users → user_accounts (fallback only),,,,,,,,
+Accounts,crm_user_db.users,type,String,user_accounts,user_type,user_type,direct,CUSTOMER→buyer / MERCHANT→seller; fallback
+Accounts,crm_user_db.users,first_name,String,user_accounts,firstname,text,direct,Fallback if contacts missing
+Accounts,crm_user_db.users,last_name,String,user_accounts,lastname,text,direct,Fallback
+Accounts,crm_user_db.users,display_name,String,user_accounts,fullname,text,direct,Fallback
+Accounts,crm_user_db.users,tier.id,String,user_accounts,tier_id,uuid,resolve_fk,FK → tier_master; fallback
+Accounts,crm_user_db.users,is_special_condition,Boolean,user_accounts,tier_lock_downgrade,boolean,direct,Special condition = tier lock
+Accounts,crm_user_db.users,member_code,String,user_accounts,external_user_id,text,direct,Fallback
+
+## Area 1: Skipped — crm_user_db.users,,,,,,,,
+Accounts,crm_user_db.users,_id,ObjectId,,,,skip,Microservice copy; use loyaltydb.users._id
+Accounts,crm_user_db.users,merchant_id,String,,,,skip,Duplicate
+Accounts,crm_user_db.users,phone_number,String,,,,skip,Duplicate
+Accounts,crm_user_db.users,middle_name,Null,,,,skip,Always null
+Accounts,crm_user_db.users,tags,Null,,,,skip,Always null
+Accounts,crm_user_db.users,tier.name,String,,,,skip,Denormalized
+Accounts,crm_user_db.users,tier.settings.is_apply_up_tier_condition,Boolean,,,,skip,Tier config; on tier_master
+Accounts,crm_user_db.users,tier.settings.is_apply_down_tier_condition,Boolean,,,,skip,Tier config; on tier_master
+
+## Area 1: Accounts — user_accounts columns with no MongoDB source,,,,,,,,
+Accounts,—,—,—,user_accounts,auth_user_id,uuid,default,null; end-users use custom auth (auth_user_id = id)
+Accounts,—,—,—,user_accounts,channel_sms,boolean,default,false
+Accounts,—,—,—,user_accounts,channel_push,boolean,default,true
+Accounts,—,—,—,user_accounts,is_signup_form_complete,boolean,derive,true if contacts.customFields non-empty
+Accounts,—,—,—,user_accounts,role,role,default,'user' for all migrated end-users
+
+### user_address — Structured Thai postal address. Province/district/subdistrict codes linked to geo reference tables.,,,,,,,,
+
+## Area 1: Accounts — loyaltydb.contacts.address → user_address,,,,,,,,
+Accounts,loyaltydb.contacts,address.address,String,user_address,addressline_1,text,direct,Free-text address line
+Accounts,loyaltydb.contacts,address.province,String,user_address,province_code,varchar,direct,Numeric code (e.g. "1")
+Accounts,loyaltydb.contacts,address.province,String,user_address,state,text,resolve_lookup,Look up name from address_th_province.name_th
+Accounts,loyaltydb.contacts,address.district,String,user_address,district_code,varchar,direct,Numeric code (e.g. "18")
+Accounts,loyaltydb.contacts,address.district,String,user_address,district,text,resolve_lookup,Look up name from address_th_district.name_th
+Accounts,loyaltydb.contacts,address.subDistrict,String,user_address,subdistrict_code,varchar,direct,Numeric code (e.g. "120")
+Accounts,loyaltydb.contacts,address.subDistrict,String,user_address,subdistrict,text,resolve_lookup,Look up name from address_th_subdistrict.name_th
+Accounts,loyaltydb.contacts,address.postCode,String,user_address,postcode,text,direct,
+
+## Area 1: Accounts — user_address columns with no MongoDB source,,,,,,,,
+Accounts,—,—,—,user_address,code,smallint,generate,Address sequence per user (start at 1)
+Accounts,—,—,—,user_address,city,text,derive,From province code lookup or null
+Accounts,—,—,—,user_address,country_code,text,default,'TH'
+Accounts,—,—,—,user_address,addressline_2,text,default,null
+
+### tier_progress — Current tier standing snapshot. Tracks upgrade/maintain progress and deadlines.,,,,,,,,
+
+## Area 1: Accounts — loyaltydb.users.memberTier + contacts tier fields → tier_progress,,,,,,,,
+Accounts,loyaltydb.users,memberTier.initDate,Date,tier_progress,created_at,timestamptz,direct,When tier was assigned
+Accounts,loyaltydb.contacts,memberNextTierId,ObjectId|Null,tier_progress,next_tier_id,uuid,resolve_fk,FK → tier_master via mongo_id
+Accounts,loyaltydb.contacts,memberDowngradeThreshold,Number,tier_progress,maintain_progress,numeric,cast::numeric,Progress toward maintain threshold
+Accounts,loyaltydb.contacts,memberLastChangeTierDate,Date|Null,tier_progress,updated_at,timestamptz,direct,
+Accounts,loyaltydb.contacts,memberCurrentMaintainTierDate,Date|Null,tier_progress,maintain_deadline,date,direct,
+
+## Area 1: Accounts — tier_progress columns with no MongoDB source,,,,,,,,
+Accounts,—,—,—,tier_progress,current_tier_id,uuid,derive,Same as user_accounts.tier_id
+Accounts,—,—,—,tier_progress,upgrade_metric_needed,metric,derive,From tier_master configuration (points/ticket/sales/orders)
+Accounts,—,—,—,tier_progress,maintain_metric_needed,metric,derive,From tier_master configuration (points/ticket/sales/orders)
+Accounts,—,—,—,tier_progress,upgrade_progress_percent,numeric,derive,accumulativePoints / upgradeThreshold × 100
+Accounts,—,—,—,tier_progress,upgrade_deadline,date,derive,From tier rules configuration
+Accounts,—,—,—,tier_progress,merchant_id,uuid,derive,Same as user_accounts.merchant_id
+
+## Area 1: Skipped — tier_progress source fields,,,,,,,,
+Accounts,loyaltydb.users,memberTier.initPoint,Number,,,,skip,Used in upgrade_progress_percent calculation only
+Accounts,loyaltydb.users,memberTier.accumulativePoints,Number,,,,skip,Used in upgrade_progress_percent calculation only
+Accounts,loyaltydb.users,memberTier.bahtSpent,Number,,,,skip,Spending metric; used in derive only
+Accounts,loyaltydb.contacts,memberUpgradeThreshold,Number,,,,skip,Used in upgrade_progress_percent calculation only
+
+### user_communication_preferences — Per-topic notification opt-in/out.,,,,,,,,
+
+## Area 1: Accounts — loyaltydb.users.notifSetting.events → user_communication_preferences,,,,,,,,
+Accounts,loyaltydb.users,notifSetting.events[],Array[String],user_communication_preferences,topic_id,uuid,normalize,Each event string → one row; requires topic_id lookup
+
+### form_submissions + form_responses — Normalized form system for custom fields.,,,,,,,,
+
+## Area 1: Accounts — loyaltydb.contacts.customFields[] → form_submissions + form_responses,,,,,,,,
+Accounts,loyaltydb.contacts,customFields[],Array[Document],form_submissions,—,—,normalize,One submission per user linked to USER_PROFILE form
+Accounts,loyaltydb.contacts,customFields[].contactCustomFieldId,ObjectId,form_responses,field_id,uuid,resolve_fk,FK → form_fields via mongo_id
+Accounts,loyaltydb.contacts,customFields[].answers,String|Number,form_responses,text_value,text,direct,Single answer value; cast Number→text
+
+### survey_answers — Survey question+answer pairs.,,,,,,,,
+
+## Area 1: Accounts — loyaltydb.contacts.surveyQuestions[] → survey_answers,,,,,,,,
+Accounts,loyaltydb.contacts,surveyQuestions[].propertyName,String,survey_answers,question_code,text,direct,
+Accounts,loyaltydb.contacts,surveyQuestions[].question,String,survey_answers,question_text,text,direct,
+Accounts,loyaltydb.contacts,surveyQuestions[].answers[],Array[String],survey_answers,answer,jsonb,jsonb,Multi-select → JSONB array
+Accounts,loyaltydb.contacts,surveyQuestions[].freeTextAnswer,String,survey_answers,answer_1,text,direct,
+Accounts,loyaltydb.contacts,surveyQuestions[].starPointAnswer,String,survey_answers,answer_2,text,direct,Star rating
+
+### user_wallet — Current currency balance. Live points_balance and ticket_balance.,,,,,,,,
+
+## Area 2: Points Balance — crm_wallet_db.wallets → user_wallet,,,,,,,,
+Points Balance,crm_wallet_db.wallets,_id,ObjectId,user_wallet,mongo_id,text,direct,Original MongoDB ObjectId
+Points Balance,—,—,—,user_wallet,id,uuid,gen_random_uuid(),New Supabase primary key
+Points Balance,crm_wallet_db.wallets,merchant_id,String,user_wallet,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Points Balance,crm_wallet_db.wallets,user_id,String,user_wallet,user_id,uuid,resolve_fk,FK → user_accounts via mongo_id
+Points Balance,crm_wallet_db.wallets,point_balance,Number,user_wallet,points_balance,integer,direct,
+Points Balance,crm_wallet_db.wallets,created_at,Date,user_wallet,created_at,timestamptz,direct,
+Points Balance,crm_wallet_db.wallets,ticket_ids,Array,user_wallet,ticket_balance,integer,derive,Count of array → balance; empty in samples
+Points Balance,—,—,—,user_wallet,ticket_balance,integer,default,0
+
+## Area 2: Skipped — crm_wallet_db.wallets,,,,,,,,
+Points Balance,crm_wallet_db.wallets,updated_at,Date,,,,skip,No updated_at; balance is live
+
+### wallet_ledger — Immutable point transaction log. Every earn / burn is one row.,,,,,,,,
+
+## Area 3: Points History — loyaltydb.points → wallet_ledger,,,,,,,,
+Points History,loyaltydb.points,_id,ObjectId,wallet_ledger,mongo_id,text,direct,Original MongoDB ObjectId
+Points History,—,—,—,wallet_ledger,id,uuid,gen_random_uuid(),New Supabase primary key
+Points History,loyaltydb.points,merchantId,ObjectId,wallet_ledger,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Points History,loyaltydb.points,userId,ObjectId,wallet_ledger,user_id,uuid,resolve_fk,FK → user_accounts via mongo_id
+Points History,loyaltydb.points,point,Number,wallet_ledger,amount,integer,direct,Absolute value
+Points History,loyaltydb.points,point,Number,wallet_ledger,signed_amount,integer,derive,If type=DEDUCT → negative
+Points History,loyaltydb.points,balance,Number,wallet_ledger,balance_after,integer,direct,
+Points History,loyaltydb.points,sale,Number,wallet_ledger,metadata,jsonb,jsonb,{"sale_amount": value}
+Points History,loyaltydb.points,type,String,wallet_ledger,transaction_type,currency_transaction_type,direct,GIVEN→earn / DEDUCT→burn / EXPIRED→burn (store original in metadata)
+Points History,loyaltydb.points,expiredDate,Number,wallet_ledger,expiry_date,date,epoch→timestamptz,Epoch ms; -1 means no expiry → null
+Points History,loyaltydb.points,giveFrom,String,wallet_ledger,source_type,wallet_transaction_source_type,direct,SALE→purchase / ADMIN→manual
+Points History,loyaltydb.points,productOrderId,String,wallet_ledger,source_id,uuid,resolve_fk,Order reference; if null use record's own id
+Points History,loyaltydb.points,note,String,wallet_ledger,description,text,direct,
+Points History,loyaltydb.points,referenceId,String,wallet_ledger,reference_id,uuid,resolve_fk,If UUID-shaped; else store in metadata
+Points History,loyaltydb.points,createdAt,Date,wallet_ledger,created_at,timestamptz,direct,
+Points History,loyaltydb.points,imageUrl,String,wallet_ledger,metadata,jsonb,jsonb,{"image_url": value}
+Points History,loyaltydb.points,merchantUserId,ObjectId|Null,wallet_ledger,created_by,text,direct,Admin who performed action (as text)
+
+## Area 3: Skipped — loyaltydb.points,,,,,,,,
+Points History,loyaltydb.points,__v,Number,,,,skip,Mongoose version key
+Points History,loyaltydb.points,updatedAt,Date,,,,skip,No target
+Points History,loyaltydb.points,orderCode,String|Null,,,,skip,Redundant with productOrderId
+Points History,loyaltydb.points,lastSaleDate,Date,,,,skip,Denormalized
+Points History,loyaltydb.points,imageUrlList[],Array[String],,,,skip,In metadata via imageUrl
+
+## Area 3: Points History — crm_point_db.point_transactions → wallet_ledger,,,,,,,,
+Points History,crm_point_db.point_transactions,_id,ObjectId,wallet_ledger,mongo_id,text,direct,Original MongoDB ObjectId (prefix with 'crm_point:' to avoid collision)
+Points History,—,—,—,wallet_ledger,id,uuid,gen_random_uuid(),New Supabase primary key
+Points History,crm_point_db.point_transactions,merchant_id,String,wallet_ledger,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Points History,crm_point_db.point_transactions,user_id,String,wallet_ledger,user_id,uuid,resolve_fk,FK → user_accounts via mongo_id
+Points History,crm_point_db.point_transactions,summary_point,Number,wallet_ledger,amount,integer,direct,
+Points History,crm_point_db.point_transactions,summary_point,Number,wallet_ledger,signed_amount,integer,derive,DEDUCTED → negative
+Points History,crm_point_db.point_transactions,deductible_balance,Number,wallet_ledger,deductible_balance,numeric,direct,
+Points History,crm_point_db.point_transactions,type,String,wallet_ledger,transaction_type,currency_transaction_type,direct,EARNED→earn / DEDUCTED→burn / VOIDED→burn (store original in metadata)
+Points History,crm_point_db.point_transactions,expired_at,Date|Null,wallet_ledger,expiry_date,date,direct,
+Points History,crm_point_db.point_transactions,source,String,wallet_ledger,source_type,wallet_transaction_source_type,direct,SYSTEM→manual / CRM_USER→manual
+Points History,crm_point_db.point_transactions,channel,String,wallet_ledger,metadata,jsonb,jsonb,{"channel": "RECEIPT_UPLOADED"}
+Points History,crm_point_db.point_transactions,reference_id,String,wallet_ledger,reference_id,uuid,resolve_fk,
+Points History,crm_point_db.point_transactions,effective_at,Date,wallet_ledger,created_at,timestamptz,direct,Business-effective timestamp
+Points History,crm_point_db.point_transactions,action_by,String,wallet_ledger,created_by,text,direct,
+Points History,crm_point_db.point_transactions,remark,String,wallet_ledger,description,text,direct,
+Points History,crm_point_db.point_transactions,earned_item.receipt_id,String,wallet_ledger,source_id,uuid,resolve_fk,Receipt that triggered earn
+Points History,crm_point_db.point_transactions,earned_item.store_property.id,String,wallet_ledger,target_entity_id,uuid,resolve_fk,Store FK
+Points History,crm_point_db.point_transactions,earned_item.* (rest),Document,wallet_ledger,metadata,jsonb,jsonb,Tier/earn-rate/purchase-amount/store-name
+Points History,crm_point_db.point_transactions,redemption_item.*,Document,wallet_ledger,metadata,jsonb,jsonb,Burn txns only: qty + discount
+
+## Area 3: Skipped — crm_point_db.point_transactions,,,,,,,,
+Points History,crm_point_db.point_transactions,reference_image_urls,Null|Array,,,,skip,Always null or empty
+Points History,crm_point_db.point_transactions,created_at,Date,,,,skip,effective_at used as created_at
+
+### currency_transactions_schedule — Deferred/scheduled point transactions.,,,,,,,,
+
+## Area 3: Points History — crm_point_db.point_delay_transactions → wallet_ledger + currency_transactions_schedule,,,,,,,,
+Points History,crm_point_db.point_delay_transactions,(same as point_transactions above),,wallet_ledger,(same mappings),,,
+Points History,crm_point_db.point_delay_transactions,delayed_to,Date,currency_transactions_schedule,execution_datetime,timestamptz,direct,When delayed points become active
+
+## Area 3: wallet_ledger columns with no MongoDB source,,,,,,,,
+Points History,—,—,—,wallet_ledger,currency,currency,default,'points'
+Points History,—,—,—,wallet_ledger,component,currency_component,default,'base'
+Points History,—,—,—,wallet_ledger,balance_before,integer,derive,Running balance per user or null
+Points History,—,—,—,wallet_ledger,dedup_key,text,derive,'legacy:{mongo_id}' or 'crm_point:{mongo_id}'
+Points History,—,—,—,wallet_ledger,expired_amount,integer,default,0
+Points History,—,—,—,wallet_ledger,expiry_processed_at,timestamptz,default,null
+
+### tier_change_ledger — Immutable tier movement history. One row per tier change event.,,,,,,,,
+
+## Area 4: Tier Movement — crm_tier_db.user_tier_transactions → tier_change_ledger,,,,,,,,
+Tier Movement,crm_tier_db.user_tier_transactions,_id,ObjectId,tier_change_ledger,mongo_id,text,direct,Original MongoDB ObjectId
+Tier Movement,—,—,—,tier_change_ledger,id,uuid,gen_random_uuid(),New Supabase primary key
+Tier Movement,crm_tier_db.user_tier_transactions,merchant_id,String,tier_change_ledger,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Tier Movement,crm_tier_db.user_tier_transactions,user_id,String,tier_change_ledger,user_id,uuid,resolve_fk,FK → user_accounts via mongo_id
+Tier Movement,crm_tier_db.user_tier_transactions,previous_tier_id,String,tier_change_ledger,from_tier_id,uuid,resolve_fk,FK → tier_master via mongo_id; empty string → null
+Tier Movement,crm_tier_db.user_tier_transactions,current_tier_id,String,tier_change_ledger,to_tier_id,uuid,resolve_fk,FK → tier_master via mongo_id
+Tier Movement,crm_tier_db.user_tier_transactions,type,String,tier_change_ledger,change_type,tier_change_type,direct,ASSIGN→initial / UPGRADE→upgrade / DOWNGRADE→downgrade
+Tier Movement,crm_tier_db.user_tier_transactions,action_by,String,tier_change_ledger,created_by,uuid,resolve_fk,System or admin UUID
+Tier Movement,crm_tier_db.user_tier_transactions,created_at,Date,tier_change_ledger,created_at,timestamptz,direct,
+Tier Movement,crm_tier_db.user_tier_transactions,user_display_name,String,tier_change_ledger,metadata,jsonb,jsonb,{"user_display_name": value}
+Tier Movement,—,—,—,tier_change_ledger,change_reason,text,default,null
+Tier Movement,—,—,—,tier_change_ledger,triggered_by_condition_id,uuid,default,null
+
+### reward_master — Reward/coupon/benefit definitions. Both rewards and QR coupons unify here.,,,,,,,,
+
+## Area 5: Reward Master — loyaltydb.rewards → reward_master,,,,,,,,
+Reward Master,loyaltydb.rewards,_id,ObjectId,reward_master,mongo_id,text,direct,Original MongoDB ObjectId
+Reward Master,—,—,—,reward_master,id,uuid,gen_random_uuid(),New Supabase primary key
+Reward Master,loyaltydb.rewards,merchantId,ObjectId,reward_master,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Reward Master,loyaltydb.rewards,name,String,reward_master,name,text,direct,
+Reward Master,loyaltydb.rewards,type,String,reward_master,visibility,reward_visibility,direct,REWARD→user / BENEFIT→admin
+Reward Master,loyaltydb.rewards,code,String,reward_master,reward_code,text,direct,
+Reward Master,loyaltydb.rewards,description,String,reward_master,description_body,text,direct,
+Reward Master,loyaltydb.rewards,noticeText,String,reward_master,description_headline,text,direct,
+Reward Master,loyaltydb.rewards,imageUrl[],Array[String],reward_master,image,text[],direct,
+Reward Master,loyaltydb.rewards,point,Number,reward_master,fallback_points,numeric,direct,Default point cost
+Reward Master,loyaltydb.rewards,isPointByTier,Boolean,reward_master,require_points_match,boolean,direct,If true → use reward_points_conditions
+Reward Master,loyaltydb.rewards,startDate,Date,reward_master,redeem_window_start,timestamptz,direct,
+Reward Master,loyaltydb.rewards,endDate,Date,reward_master,redeem_window_end,timestamptz,direct,
+Reward Master,loyaltydb.rewards,status,String,reward_master,active_status,boolean,direct,ACTIVE→true / else false
+Reward Master,loyaltydb.rewards,shipType,String,reward_master,fulfillment_method,reward_fulfillment_method,direct,TAKEAWAY→pickup / DELIVERY→shipping
+Reward Master,loyaltydb.rewards,isRewardStock,Boolean,reward_master,stock_control,boolean,direct,
+Reward Master,loyaltydb.rewards,isAlienReward,Boolean,reward_master,assign_promocode,boolean,direct,Uses alien/promo codes
+Reward Master,loyaltydb.rewards,levelIds[],Array[String],reward_master,allowed_tier,uuid[],resolve_fk,Tier ObjectIds → resolve to UUIDs via tier_master.mongo_id
+Reward Master,loyaltydb.rewards,birthMonths[],Array,reward_master,allowed_birthmonth,text[],direct,
+Reward Master,loyaltydb.rewards,memberType[],Array,reward_master,allowed_persona,uuid[],resolve_fk,Persona refs → resolve to UUIDs
+Reward Master,loyaltydb.rewards,rewardCategoryId,ObjectId|Null,reward_master,category_id,uuid[],resolve_fk,FK → reward_category via mongo_id; wrap in array
+Reward Master,loyaltydb.rewards,autoUseTime.time,Number,reward_master,use_expire_ttl,numeric,direct,TTL value (convert hours to minutes if timeUnit=HOUR)
+Reward Master,loyaltydb.rewards,autoUseTime.timeUnit,String,reward_master,use_expire_mode,reward_expire_mode,direct,DAY→relative_days / MINUTE→relative_mins / HOUR→relative_mins
+Reward Master,loyaltydb.rewards,isPinned,Boolean,reward_master,ranking,smallint,derive,Pinned → 0 (top)
+Reward Master,loyaltydb.rewards,createdAt,Date,reward_master,created_at,timestamptz,direct,
+
+## Area 5: Skipped — loyaltydb.rewards,,,,,,,,
+Reward Master,loyaltydb.rewards,__v,Number,,,,skip,Mongoose version key
+Reward Master,loyaltydb.rewards,updatedAt,Date,,,,skip,No target
+Reward Master,loyaltydb.rewards,isAllmember,Boolean,,,,skip,Logic flag; if true → allowed_tier/persona empty
+Reward Master,loyaltydb.rewards,isMissionOnly,Boolean,,,,skip,No target
+Reward Master,loyaltydb.rewards,isDelivery,Boolean,,,,skip,Redundant with shipType
+Reward Master,loyaltydb.rewards,isPhysicalDraw,Boolean,,,,skip,No target
+Reward Master,loyaltydb.rewards,displayAt,String,,,,skip,No target
+Reward Master,loyaltydb.rewards,quantityUnit,String,,,,skip,No target
+Reward Master,loyaltydb.rewards,limitUnit,String,,,,skip,No target
+Reward Master,loyaltydb.rewards,variants[],Array,,,,skip,Empty
+Reward Master,loyaltydb.rewards,partnerIds[],Array,,,,skip,Empty
+Reward Master,loyaltydb.rewards,pinnedDate,Null,,,,skip,Always null
+Reward Master,loyaltydb.rewards,alienRewards[],Array,,,,skip,Superseded
+Reward Master,loyaltydb.rewards,alienCodePartner[],Array[Document],,,,skip,Superseded
+Reward Master,loyaltydb.rewards,forThirdParty,Document,,,,skip,No target
+
+## Area 5: Reward Master — loyaltydb.rewards nested arrays → child tables,,,,,,,,
+Reward Master,loyaltydb.rewards,tierPointList[],Array[Document],reward_points_conditions,—,—,normalize,Each tier-point combo → one row with reward_id / tier_id / points_required
+Reward Master,loyaltydb.rewards,alienCodePartnerList[].alienList[].alienCode,String,reward_promo_code,promo_code,text,direct,The actual code
+Reward Master,loyaltydb.rewards,alienCodePartnerList[].alienList[].isUsed,Boolean,reward_promo_code,redeemed_status,boolean,direct,
+Reward Master,loyaltydb.rewards,alienCodePartnerList[].partnerId,String,reward_promo_code,lot_code,text,direct,Partner/lot identifier
+Reward Master,loyaltydb.rewards,quotaLimitList[],Array[Document],—,—,—,jsonb,Per-tier limits; store in metadata
+
+## Area 5: Reward Master — loyaltydb.qrtables → reward_master,,,,,,,,
+Reward Master,loyaltydb.qrtables,_id,ObjectId,reward_master,mongo_id,text,direct,Original MongoDB ObjectId
+Reward Master,—,—,—,reward_master,id,uuid,gen_random_uuid(),New Supabase primary key
+Reward Master,loyaltydb.qrtables,qrToken,String,reward_master,promo_code,text,direct,QR token as master code
+Reward Master,loyaltydb.qrtables,guideline,String,reward_master,description_body,text,direct,Usage guideline
+Reward Master,loyaltydb.qrtables,benefit,Number,reward_master,fallback_points,numeric,direct,Discount/benefit amount
+Reward Master,loyaltydb.qrtables,quantity,Number,reward_master,stock_total,integer,direct,Total stock
+Reward Master,loyaltydb.qrtables,isAlienCoupon,Boolean,reward_master,assign_promocode,boolean,direct,
+Reward Master,loyaltydb.qrtables,qrImageLink,String,reward_master,—,—,jsonb,Store in metadata
+Reward Master,loyaltydb.qrtables,url,String,reward_master,—,—,jsonb,Store in metadata
+Reward Master,loyaltydb.qrtables,limit,Number,reward_master,—,—,jsonb,Per-user limit; store in metadata
+
+## Area 5: Skipped — loyaltydb.qrtables,,,,,,,,
+Reward Master,loyaltydb.qrtables,__v,Number,,,,skip,Mongoose version key
+Reward Master,loyaltydb.qrtables,updatedAt,Date,,,,skip,No target
+Reward Master,loyaltydb.qrtables,isTrafficSource,Boolean,,,,skip,No target
+Reward Master,loyaltydb.qrtables,trafficSourceId,String,,,,skip,No target
+Reward Master,loyaltydb.qrtables,isDisplayed,String,,,,skip,No target
+Reward Master,loyaltydb.qrtables,isNewMemberOnly,Boolean,,,,skip,No target
+Reward Master,loyaltydb.qrtables,isDelivery,Boolean,,,,skip,Redundant
+Reward Master,loyaltydb.qrtables,isExpiryNoti,Boolean,,,,skip,No target
+Reward Master,loyaltydb.qrtables,ExpiryMonthNoti[],Array[Document],,,,skip,No target
+Reward Master,loyaltydb.qrtables,ExpiryMonth,String,,,,skip,No target
+Reward Master,loyaltydb.qrtables,totalClick,Number,,,,skip,Analytics
+Reward Master,loyaltydb.qrtables,clientTrafficSignClick,Number,,,,skip,Analytics
+Reward Master,loyaltydb.qrtables,minOrder,Number|Null,,,,skip,No target
+Reward Master,loyaltydb.qrtables,maxDiscount,Number|Null,,,,skip,No target
+Reward Master,loyaltydb.qrtables,alienCodeTxts,String,,,,skip,Legacy
+Reward Master,loyaltydb.qrtables,alienCoupons[],Array,,,,skip,Superseded
+Reward Master,loyaltydb.qrtables,alienCodePartner[],Array[Document],,,,skip,Legacy
+Reward Master,loyaltydb.qrtables,memberTypeIds[],Array,,,,skip,Empty
+Reward Master,loyaltydb.qrtables,pinnedDate,Date|Null,,,,skip,No target
+Reward Master,loyaltydb.qrtables,forThirdParty,Document,,,,skip,No target
+Reward Master,loyaltydb.qrtables,memberType[],Array[Document],,,,skip,Complex; differs from rewards
+
+## Area 5: Reward Master — loyaltydb.rewardcategories → reward_category,,,,,,,,
+Reward Master,loyaltydb.rewardcategories,_id,ObjectId,reward_category,mongo_id,text,direct,Original MongoDB ObjectId
+Reward Master,—,—,—,reward_category,id,uuid,gen_random_uuid(),New Supabase primary key
+Reward Master,loyaltydb.rewardcategories,merchantId,ObjectId,reward_category,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Reward Master,loyaltydb.rewardcategories,name,String,reward_category,name,text,direct,
+Reward Master,loyaltydb.rewardcategories,createdAt,Date,reward_category,created_at,timestamptz,direct,
+Reward Master,—,—,—,reward_category,category_code,text,generate,Slug from name or sequential code
+
+## Area 5: Skipped — loyaltydb.rewardcategories,,,,,,,,
+Reward Master,loyaltydb.rewardcategories,__v,Number,,,,skip,Mongoose version key
+Reward Master,loyaltydb.rewardcategories,updatedAt,Date,,,,skip,No target
+Reward Master,loyaltydb.rewardcategories,icon,String,,,,skip,No column
+Reward Master,loyaltydb.rewardcategories,clickIcon,String,,,,skip,No target
+
+### reward_redemptions_ledger — Immutable redemption transaction log. Full lifecycle: redeemed → used → cancelled.,,,,,,,,
+
+## Area 6: Redemptions — loyaltydb.histories → reward_redemptions_ledger,,,,,,,,
+Redemptions,loyaltydb.histories,_id,ObjectId,reward_redemptions_ledger,mongo_id,text,direct,Original MongoDB ObjectId
+Redemptions,—,—,—,reward_redemptions_ledger,id,uuid,gen_random_uuid(),New Supabase primary key
+Redemptions,loyaltydb.histories,merchantId,ObjectId,reward_redemptions_ledger,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+Redemptions,loyaltydb.histories,userId,ObjectId,reward_redemptions_ledger,user_id,uuid,resolve_fk,FK → user_accounts via mongo_id
+Redemptions,loyaltydb.histories,objectId,ObjectId,reward_redemptions_ledger,reward_id,uuid,resolve_fk,FK → reward_master via mongo_id
+Redemptions,loyaltydb.histories,ticketCode,String,reward_redemptions_ledger,code,text,direct,Redemption ticket code
+Redemptions,loyaltydb.histories,alienCode,String,reward_redemptions_ledger,promo_code,text,direct,Assigned promo/alien code
+Redemptions,loyaltydb.histories,quantity,Number,reward_redemptions_ledger,qty,numeric,direct,
+Redemptions,loyaltydb.histories,points,Number,reward_redemptions_ledger,points_deducted,numeric,direct,Points spent
+Redemptions,loyaltydb.histories,pointBefore,Number|Null,reward_redemptions_ledger,points_calculation,jsonb,jsonb,{"points_before": value}
+Redemptions,loyaltydb.histories,status,String,reward_redemptions_ledger,redeemed_status,boolean,derive,REDEEMED/USED→true / CANCELLED→false
+Redemptions,loyaltydb.histories,status,String,reward_redemptions_ledger,used_status,boolean,derive,USED→true / else false
+Redemptions,loyaltydb.histories,status,String,reward_redemptions_ledger,cancelled,boolean,derive,CANCELLED→true / else false
+Redemptions,loyaltydb.histories,status,String,reward_redemptions_ledger,fulfillment_status,rewards_redemption_fulfillment_status,derive,REDEEMED→pending / USED→completed / CANCELLED→cancelled
+Redemptions,loyaltydb.histories,type,String,reward_redemptions_ledger,source_type,wallet_transaction_source_type,direct,REWARD/BENEFIT→reward_redemption / COUPON→code
+Redemptions,loyaltydb.histories,isMission,Boolean,reward_redemptions_ledger,source_type,wallet_transaction_source_type,derive,If true → source_type='mission'
+Redemptions,loyaltydb.histories,shippingAddress,String,reward_redemptions_ledger,delivery_address_code,text,direct,
+Redemptions,loyaltydb.histories,redeemedNo,String,reward_redemptions_ledger,external_ref_id,text,direct,External reference number
+Redemptions,loyaltydb.histories,createdAt,Date,reward_redemptions_ledger,created_at,timestamptz,direct,
+Redemptions,loyaltydb.histories,createdAt,Date,reward_redemptions_ledger,redeemed_at,timestamptz,direct,Same as created_at
+Redemptions,loyaltydb.histories,spendProcessTimeSec,Number,reward_redemptions_ledger,processing_time_ms,integer,derive,Multiply by 1000 (sec→ms)
+Redemptions,loyaltydb.histories,redeemedStoreId,ObjectId|Null,reward_redemptions_ledger,source_id,uuid,resolve_fk,FK → store_master via mongo_id
+Redemptions,loyaltydb.histories,note,String,reward_redemptions_ledger,points_calculation,jsonb,jsonb,{"note": value}
+Redemptions,loyaltydb.histories,remark,String,reward_redemptions_ledger,points_calculation,jsonb,jsonb,{"remark": value}
+Redemptions,—,—,—,reward_redemptions_ledger,success,boolean,default,true for migrated records
+
+## Area 6: Skipped — loyaltydb.histories,,,,,,,,
+Redemptions,loyaltydb.histories,exchangedType,String,,,,skip,Old delivery method (TAKEAWAY/DELIVERY); fulfillment_status derived from status instead
+Redemptions,loyaltydb.histories,__v,Number,,,,skip,Mongoose version key
+Redemptions,loyaltydb.histories,updatedAt,Date,,,,skip,No target
+Redemptions,loyaltydb.histories,clientName,String,,,,skip,Denormalized; from user_accounts
+Redemptions,loyaltydb.histories,adminId,ObjectId|Null,,,,skip,No direct column
+Redemptions,loyaltydb.histories,adminName,String,,,,skip,Denormalized
+Redemptions,loyaltydb.histories,usedAdminId,ObjectId|Null,,,,skip,No direct column
+Redemptions,loyaltydb.histories,usedAdminName,String,,,,skip,Denormalized
+Redemptions,loyaltydb.histories,redeemedStoreName,String,,,,skip,Denormalized
+Redemptions,loyaltydb.histories,usedStoreId,ObjectId|Null,,,,skip,No separate column
+Redemptions,loyaltydb.histories,usedStoreName,String,,,,skip,Denormalized
+Redemptions,loyaltydb.histories,storeName,String,,,,skip,Denormalized
+Redemptions,loyaltydb.histories,usedNo,String,,,,skip,No target
+Redemptions,loyaltydb.histories,tierId,ObjectId|Null,,,,skip,No target
+Redemptions,loyaltydb.histories,variants[],Array,,,,skip,Empty
+Redemptions,loyaltydb.histories,NotiExpiryDate[],Array,,,,skip,Empty
+Redemptions,loyaltydb.histories,rewardGroupId,Null,,,,skip,Always null
+Redemptions,loyaltydb.histories,spendProcessTimeStep,String,,,,skip,Diagnostic
+
+### order_ledger_mkp — Unified marketplace order header. Lazada/Shopee/TikTok.,,,,,,,,
+### order_items_ledger_mkp — Marketplace order line items. Child of order_ledger_mkp.,,,,,,,,
+
+## Area 7: Marketplace Orders — all platforms → order_ledger_mkp,,,,,,,,
+Mkp Orders,*_order_transactions,_id,ObjectId,order_ledger_mkp,mongo_id,text,direct,Original MongoDB ObjectId
+Mkp Orders,—,—,—,order_ledger_mkp,id,uuid,gen_random_uuid(),New Supabase primary key
+Mkp Orders,*_order_transactions,shop_id,String,order_ledger_mkp,shop_id,text,direct,
+Mkp Orders,*_order_transactions,shop_id,String,order_ledger_mkp,merchant_id,uuid,resolve_fk,Look up by shop_id + platform → merchant_master
+Mkp Orders,*_order_transactions,order_id,String,order_ledger_mkp,order_sn,text,direct,
+Mkp Orders,*_order_transactions,buyer_user_id,String,order_ledger_mkp,external_user_id,text,direct,Platform buyer ID
+Mkp Orders,*_order_transactions,currency,String,order_ledger_mkp,currency,text,direct,
+Mkp Orders,*_order_transactions,total_amount,Decimal128,order_ledger_mkp,total_amount,numeric,cast::numeric,
+Mkp Orders,*_order_transactions,order_status,String,order_ledger_mkp,order_status,text,direct,
+Mkp Orders,*_order_transactions,order_created_at,Date,order_ledger_mkp,transaction_date,timestamptz,direct,
+Mkp Orders,*_order_transactions,order_updated_at,Date,order_ledger_mkp,update_time,timestamptz,direct,
+Mkp Orders,—,—,—,order_ledger_mkp,platform,text,derive,'lazada'/'shopee'/'tiktok' from source collection
+Mkp Orders,shopee_order_transactions,buyer_username,String,order_ledger_mkp,buyer_username,text,direct,Shopee only
+Mkp Orders,shopee_order_transactions,actual_shipping_fee,Decimal128,order_ledger_mkp,shipping_fee,numeric,cast::numeric,Shopee only
+Mkp Orders,shopee_order_transactions,is_cod,Boolean,order_ledger_mkp,payment_method,text,derive,true→'cod'
+Mkp Orders,tiktok_order_transactions,seller_discount + platform_discount,Decimal128,order_ledger_mkp,discount_amount,numeric,derive,Sum both
+Mkp Orders,tiktok_order_transactions,shipping_fee,Decimal128,order_ledger_mkp,shipping_fee,numeric,cast::numeric,TikTok only
+Mkp Orders,tiktok_order_transactions,tax,Decimal128,order_ledger_mkp,tax_amount,numeric,cast::numeric,TikTok only
+Mkp Orders,—,—,—,order_ledger_mkp,final_amount,numeric,derive,Platform-specific calculation
+Mkp Orders,—,—,—,order_ledger_mkp,synced_to_transaction,boolean,default,false
+
+## Area 7: Marketplace Orders — items[] → order_items_ledger_mkp,,,,,,,,
+Mkp Orders,*_order_transactions,items[].sku,String,order_items_ledger_mkp,platform_sku,text,direct,
+Mkp Orders,*_order_transactions,items[].name,String,order_items_ledger_mkp,item_name,text,direct,
+Mkp Orders,*_order_transactions,items[].original_price,Decimal128,order_items_ledger_mkp,unit_price,numeric,cast::numeric,
+Mkp Orders,*_order_transactions,items[].net_price,Decimal128,order_items_ledger_mkp,line_total,numeric,cast::numeric,
+Mkp Orders,lazada_order_transactions,items[].voucher_amount,Decimal128,order_items_ledger_mkp,discount_amount,numeric,cast::numeric,
+Mkp Orders,shopee_order_transactions,items[].quantity_purchased,Number,order_items_ledger_mkp,quantity,numeric,direct,Lazada/TikTok default to 1
+Mkp Orders,shopee_order_transactions,items[].model_sku,String,order_items_ledger_mkp,variant_sku,text,direct,
+Mkp Orders,shopee_order_transactions,items[].seller_discount + others,Decimal128,order_items_ledger_mkp,discount_amount,numeric,derive,Sum all discount fields
+Mkp Orders,—,—,—,order_items_ledger_mkp,order_id,uuid,derive,FK → parent order_ledger_mkp.id
+Mkp Orders,—,—,—,order_items_ledger_mkp,platform,text,derive,Same as parent
+Mkp Orders,—,—,—,order_items_ledger_mkp,merchant_id,uuid,derive,Same as parent
+
+## Area 7: Skipped — Marketplace order collections,,,,,,,,
+Mkp Orders,shopee_order_transactions,items[].recipient_address,Document,,,,skip,Per-item address; discard
+Mkp Orders,shopee_order_transactions,items[].selling_price,Decimal128,,,,skip,Redundant
+Mkp Orders,shopee_order_transactions,items[].discounted_price,Decimal128,,,,skip,Redundant
+Mkp Orders,shopee_order_transactions,items[].discount_from_coin,Decimal128,,,,skip,Aggregated
+Mkp Orders,shopee_order_transactions,items[].discount_from_voucher_shopee,Decimal128,,,,skip,Aggregated
+Mkp Orders,shopee_order_transactions,items[].discount_from_voucher_seller,Decimal128,,,,skip,Aggregated
+Mkp Orders,tiktok_order_transactions,sub_total,Decimal128,,,,skip,Used in derive only
+
+## Area 8: Marketplace Claims — *_order_claimed_transactions → order_ledger_mkp (UPDATE only),,,,,,,,
+Mkp Claimed,*_order_claimed_transactions,order_id,String,order_ledger_mkp,order_sn,text,match,Match existing row by order_sn + shop_id
+Mkp Claimed,*_order_claimed_transactions,shop_id,String,order_ledger_mkp,shop_id,text,match,Used for matching
+Mkp Claimed,*_order_claimed_transactions,user_id,String,order_ledger_mkp,external_user_id,text,direct,CRM user who claimed
+Mkp Claimed,*_order_claimed_transactions,created_at,Date,order_ledger_mkp,synced_at,timestamptz,direct,When claim happened
+Mkp Claimed,—,—,—,order_ledger_mkp,status,text,derive,Set to 'claimed'
+Mkp Claimed,—,—,—,order_ledger_mkp,synced_to_transaction,boolean,derive,Set to true
+
+## Area 8: Skipped — *_order_claimed_transactions,,,,,,,,
+Mkp Claimed,*_order_claimed_transactions,_id,ObjectId,,,,skip,UPDATE operation; no new row
+
+### user_consent_ledger — PDPA consent audit trail. Immutable log of consent actions.,,,,,,,,
+
+## Area 9: PDPA Consent — loyaltydb.clientpdpas → user_consent_ledger,,,,,,,,
+PDPA Consent,loyaltydb.clientpdpas,_id,ObjectId,user_consent_ledger,mongo_id,text,direct,Original MongoDB ObjectId
+PDPA Consent,—,—,—,user_consent_ledger,id,uuid,gen_random_uuid(),New Supabase primary key
+PDPA Consent,loyaltydb.clientpdpas,userId,ObjectId,user_consent_ledger,user_id,uuid,resolve_fk,FK → user_accounts via mongo_id
+PDPA Consent,loyaltydb.clientpdpas,merchantId,ObjectId,user_consent_ledger,merchant_id,uuid,resolve_fk,FK → merchant_master via mongo_id
+PDPA Consent,loyaltydb.clientpdpas,pdpaId,ObjectId,user_consent_ledger,consent_version_id,uuid,resolve_fk,FK → consent_versions via mongo_id
+PDPA Consent,loyaltydb.clientpdpas,isAccept,Boolean,user_consent_ledger,action,enum,direct,true→'accept' / false→'reject'
+PDPA Consent,loyaltydb.clientpdpas,createdAt,Date,user_consent_ledger,created_at,timestamptz,direct,
+PDPA Consent,—,—,—,user_consent_ledger,ip_address,inet,default,null
+PDPA Consent,—,—,—,user_consent_ledger,user_agent,text,default,null
+
+## Area 9: Skipped — loyaltydb.clientpdpas,,,,,,,,
+PDPA Consent,loyaltydb.clientpdpas,__v,Number,,,,skip,Mongoose version key
+PDPA Consent,loyaltydb.clientpdpas,updatedAt,Date,,,,skip,No target
+PDPA Consent,loyaltydb.clientpdpas,nameForm,String,,,,skip,Denormalized
+PDPA Consent,loyaltydb.clientpdpas,titleForm,String,,,,skip,Denormalized
+PDPA Consent,loyaltydb.clientpdpas,detail,String,,,,skip,Denormalized
+PDPA Consent,loyaltydb.clientpdpas,pdpaType,String,,,,skip,Implicit in consent_version_id

@@ -1,0 +1,123 @@
+---
+alwaysApply: false
+description: "Function conventions for writing DB functions. Covers: bff_*/api_*/fn_*/trigger_* naming, BFF skeleton (merchant check, response format), upsert pattern (parent+children), get pattern (new/edit mode), fn_response_success/error helpers, p_/v_ variable naming. Read when creating or modifying any function."
+---
+
+# Function Conventions
+
+Extracted from ~400 live functions. Follow these when creating or modifying functions.
+
+**Applies in both plan mode and agent mode.** Reference these patterns when proposing function designs and when writing SQL.
+
+## Naming Prefixes
+
+| Prefix | Caller | Auth | SECURITY | Returns |
+|---|---|---|---|---|
+| `bff_*` | Admin panel (FE) | `get_current_merchant_id()` from JWT | DEFINER | jsonb |
+| `bff_admin_*` | Admin panel (admin-specific) | Same as bff | DEFINER | jsonb |
+| `api_*` | External integrations | Explicit `p_merchant_id` param (API key) | DEFINER | jsonb |
+| `fn_*` | Internal — other functions, triggers, edge functions | Service role or inherited | INVOKER or DEFINER | varies |
+| `trigger_*` | Database triggers | N/A (trigger context) | DEFINER | trigger |
+| `admin_*` | Older admin ops (prefer `bff_admin_*` for new) | `get_current_merchant_id()` | DEFINER | varies |
+| `superadmin_*` | Cross-merchant ops | Superadmin role check | DEFINER | jsonb |
+| `cs_bff_*` | CS admin panel | `get_current_merchant_id()` | DEFINER | jsonb |
+| `cs_fn_*` | CS internal logic | Service role | INVOKER or DEFINER | varies |
+
+## BFF Verb Patterns
+
+| Pattern | Purpose | Example |
+|---|---|---|
+| `bff_get_<entity>_details` | Load single entity + children for edit form | `bff_get_reward_details` |
+| `bff_upsert_<entity>` | Create or update entity | `bff_upsert_mission` |
+| `bff_upsert_<entity>_with_<children>` | Create/update entity with nested children | `bff_upsert_reward_with_conditions_and_limits` |
+| `bff_list_<entities>` | List for table/grid views | `bff_list_agents`, `bff_list_audiences` |
+| `bff_approve_*` / `bff_reject_*` | Approval workflows | `bff_approve_receipt_upload` |
+| `bff_delete_*` | Delete entity | `bff_delete_agent` |
+
+## fn_* Sub-Patterns
+
+| Pattern | Purpose | Example |
+|---|---|---|
+| `fn_evaluate_*` | Evaluate conditions/rules | `fn_evaluate_mission_conditions`, `fn_evaluate_amp_condition_group` |
+| `fn_process_*` | Execute business logic | `fn_process_referral_purchase`, `fn_process_mission_outcomes` |
+| `fn_check_*` | Validation checks (returns boolean or error) | `fn_check_claim_limits`, `fn_check_activity_approval_limits` |
+| `fn_get_*_cached` | Cached read helpers | `fn_get_agent_config_cached`, `fn_get_active_triggers_cached` |
+| `fn_invalidate_*` | Cache invalidation | `fn_invalidate_display_blocks_cache`, `fn_invalidate_merchant_rewards_cache` |
+
+## Variable Naming
+
+- **Parameters**: `p_` prefix — `p_reward_id`, `p_name`, `p_mode`, `p_merchant_id`
+- **Local variables**: `v_` prefix — `v_merchant_id`, `v_reward_id`, `v_result`
+- **Counters**: `v_<entity>_created`, `v_<entity>_updated`, `v_<entity>_deleted`, `v_<entity>_skipped`
+
+## BFF Standard Structure
+
+Every BFF function follows this skeleton:
+
+```sql
+CREATE OR REPLACE FUNCTION public.bff_<verb>_<entity>(
+    p_entity_id uuid DEFAULT NULL,
+    p_field1 text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $function$
+DECLARE
+    v_merchant_id UUID;
+BEGIN
+    -- 1. Auth: always first line
+    v_merchant_id := get_current_merchant_id();
+    IF v_merchant_id IS NULL THEN
+        RETURN fn_response_error('Error', 'No merchant context found', 'NO_MERCHANT_CONTEXT');
+    END IF;
+
+    -- 2. Business logic (all queries filter by merchant_id)
+    ...
+
+    -- 3. Return success
+    RETURN fn_response_success('Title', 'Description', jsonb_build_object(...));
+
+EXCEPTION WHEN OTHERS THEN
+    RETURN fn_response_error('Error', SQLERRM, 'ERROR');
+END;
+$function$;
+```
+
+## BFF Upsert Pattern (parent + children)
+
+1. `p_entity_id IS NULL` → INSERT (create new), else UPDATE (edit existing)
+2. Children passed as `jsonb` array parameters (e.g., `p_conditions jsonb`)
+3. Loop through children:
+   - Child has `id` → UPDATE existing
+   - Child has no `id` → INSERT new
+   - Track kept IDs in `uuid[]` array
+4. Delete orphans: `DELETE FROM children WHERE parent_id = v_id AND id != ALL(v_kept_ids)`
+5. Return summary: `{success, code: 'CREATED'|'UPDATED', title, description, entity_id, conditions_created, conditions_updated, conditions_deleted, ...}`
+
+## BFF Get Pattern (for edit forms)
+
+- `p_mode = 'new'` → return empty template with NULLs and empty arrays
+- `p_mode = 'edit'` → load entity + children as jsonb arrays
+- Children loaded via `jsonb_agg(jsonb_build_object(...) ORDER BY ...)` with `COALESCE(..., '[]'::jsonb)`
+
+## Response Helpers
+
+Two standardized helpers exist — use them in new functions:
+
+```sql
+fn_response_success(p_title, p_description, p_data)
+-- Returns: {success: true, title, description, data}
+
+fn_response_error(p_title, p_description, p_code, p_data)
+-- Returns: {success: false, title, description, data: {error_code, ...}}
+```
+
+Newer BFFs sometimes inline the response structure with extra fields alongside `success`, `title`, `description`. Both patterns are acceptable.
+
+## Language & Security
+
+- Always `LANGUAGE plpgsql` (unless pure SQL helper, then `LANGUAGE sql IMMUTABLE`)
+- BFF and API functions: `SECURITY DEFINER`
+- Internal fn_* helpers: `SECURITY INVOKER` unless they need elevated access
+- Trigger functions: `SECURITY DEFINER`, return `trigger`

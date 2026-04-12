@@ -1,0 +1,90 @@
+---
+description: How to look up domain context, business rules, and function signatures from indexes and MCP. Use for any backend task.
+alwaysApply: false
+---
+
+> **This rule supplements `00-overview.mdc`.** The 5-Step Context Lookup Procedure in `00-overview.mdc` is the authoritative sequence. Layer 2 (MCP) is ALWAYS required — do NOT stop early. Workflow examples below must follow the Step 1→2→3 order.
+
+## 3-Layer Context Lookup
+
+Follow these layers in order. Layers 1 and 2 are always required. Layer 3 only when needed for complex business rules.
+
+### Layer 1 — Domain Index (always start here)
+
+Read ONLY your domain's section from `requirements/INDEX_DOMAIN.md` using offset + limit. NEVER read the full file.
+
+Extract:
+- **Keywords** — confirm you're in the right domain
+- **Tables** — which tables this domain uses
+- **Functions** — which functions exist, their types (BFF/Backend/Trigger)
+- **Business rules** — key rules summarized inline
+
+This layer alone is often enough for simple tasks.
+
+### Layer 2 — Supabase MCP (for live schema and function details)
+
+When you need exact column types, function signatures, or return shapes:
+
+**Project ID:** `wkevmsedchftztoolkmi`
+
+Function signature (lightweight):
+```sql
+SELECT proname, pg_get_function_arguments(oid), pg_get_function_result(oid)
+FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public' AND p.proname = 'FUNCTION_NAME';
+```
+
+Full function body (when you need logic):
+```sql
+SELECT pg_get_functiondef(p.oid)
+FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public' AND p.proname = 'FUNCTION_NAME';
+```
+
+Table schema:
+```sql
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'TABLE_NAME'
+ORDER BY ordinal_position;
+```
+
+This layer gives live, accurate data. Prefer MCP over doc reading for schema/function details.
+
+### Layer 3 — Requirement Doc Sections (complex business rules only)
+
+Only read the source doc when Layers 1-2 don't cover detailed business rules, state machines, or edge cases. NEVER read a full doc — use offset + limit with line ranges from Layer 1.
+
+### Function Index — When to Use
+
+Read `requirements/INDEX_FUNCTION.md` (specific domain section only, never full file) when you need to:
+- Find ALL functions in a domain (not just the key ones from INDEX_DOMAIN)
+- Understand function types: BFF (frontend-facing), Backend (internal), Trigger, Edge, Inngest
+- Find related functions for a data flow: trigger → backend function → edge function → Inngest
+- Check if a function already exists before creating a new one
+
+### Typical Workflows
+
+**Bug fix** (e.g., "wallet balance is wrong"):
+1. Layer 1: Read Currency domain in INDEX_DOMAIN → get tables, key functions, business rules
+2. Layer 2: MCP — read `post_wallet_transaction` function body → find the logic bug
+3. Fix the function
+
+**New function** (e.g., "add a BFF to get CS conversations"):
+1. Layer 1: Read CS Conversations in INDEX_DOMAIN → get existing functions, tables
+2. Layer 2: MCP — check table schema, check if function already exists
+3. Layer 2: MCP — read a similar BFF function body to match patterns
+4. Write the function following existing patterns
+
+**Analysis** (e.g., "how does tier evaluation work?"):
+1. Layer 1: Read Tier domain in INDEX_DOMAIN → get business rules summary
+2. Layer 2: MCP — read `evaluate_user_tier_status` function body
+3. Layer 3: Read Tier.md specific sections if MCP output isn't enough
+4. Present findings
+
+### Rules
+
+- NEVER guess business rules — look them up
+- NEVER read a full requirement doc — use indexes + line ranges
+- Prefer MCP over docs for schema and function details (MCP is always current)
+- When user mentions a table or function name, match it to a domain first

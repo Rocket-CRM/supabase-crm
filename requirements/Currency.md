@@ -61,7 +61,13 @@ The architecture consists of two primary services:
 - `product_category`: Category-wide earning rules
 - `tier`: Customer loyalty tier benefits
 
-**Earn Conditions**: Qualifying criteria that must be met for an earn factor to apply (e.g., "only for Gold tier members" or "only for Nike products")
+**Earn Conditions**: Qualifying criteria that must be met for an earn factor to apply (e.g., "only for Gold tier members" or "only for Nike products"). Each condition has an `exclude` flag:
+- `exclude = false` (default): **Include** — only items/users matching this condition are eligible
+- `exclude = true`: **Exclude** — items matching this condition are removed from the eligible set
+
+**Condition Exclude Flag**: A boolean on each `earn_condition` row that inverts its role from an include gate to an exclusion filter. Only meaningful for product entity types (`product_sku`, `product_product`, `product_brand`, `product_category`). Tier, persona, and store conditions are always include-only transaction-wide gates.
+
+**Credit Ticket Type**: A special `ticket_type` designation (`is_credit = true`) identifying a ticket type whose redemption triggers an external platform credit API call rather than a standard wallet burn. The `credit_platform` field specifies which platform (`shopify`, `woocommerce`, etc.) receives the credit API call at redemption time. One credit ticket type per platform per merchant is enforced at the database level.
 
 **UOM (Unit of Measure)**: Standardized measurement units for products, supporting multi-tier quantity tracking:
 - **Primary UOM**: Standard retail units (e.g., BAG, PIECE, BOTTLE, SACHET)
@@ -685,6 +691,34 @@ Customer buys 60 bags (min threshold: 50)
 - Rules with no conditions → Apply to entire transaction
 - Rules with thresholds → Must meet minimum to activate, capped at maximum if specified
 
+**Product Exclusions** (`exclude = true` on `earn_condition`):
+
+Exclusion conditions allow specific products, SKUs, brands, or categories to be removed from an otherwise eligible set. The evaluation engine uses a two-pass approach:
+
+*Pass 1 — Include conditions (`exclude = false`):*
+- Product include conditions: build the eligible item set from matching items
+- If no include product conditions exist: base = all items in the transaction
+- Tier / persona / store conditions: transaction-wide gates, unchanged
+
+*Pass 2 — Exclude conditions (`exclude = true`, product entities only):*
+- Find item_ids matching any exclude condition
+- Remove them from the eligible item set built in Pass 1
+- If eligible set becomes empty after exclusion → factor does not apply
+
+**Exclusion examples**:
+```
+Earn on everything except gift cards:
+  conditions_group:
+    → earn_condition: entity=product_sku, entity_ids=[gift_card_sku_id], exclude=true
+
+Earn on Shoes collection, except sale items:
+  conditions_group:
+    → earn_condition: entity=product_category, entity_ids=[shoes_cat_id], exclude=false  (include)
+    → earn_condition: entity=product_sku, entity_ids=[sale_sku_1, sale_sku_2], exclude=true  (exclude)
+```
+
+**Backward compatibility**: All existing `earn_condition` rows default to `exclude = false`. Pass 2 is skipped when no exclude conditions exist, producing identical results to previous behaviour.
+
 **Condition Evaluation Process**:
 ```mermaid
 graph LR
@@ -698,6 +732,51 @@ graph LR
     G -->|No| H[Factor Not Applicable]
     F --> I[Apply to Specific Items]
 ```
+
+#### Shared Earn Conditions Groups
+
+Multiple earn factors may reference the same `earn_conditions_group`. This is intentional and supported — a conditions group defines an eligibility gate that can be reused across factors without duplicating condition rows.
+
+**When sharing is valid:**
+
+| Pattern | Valid? | Reason |
+|---|---|---|
+| Rate + Multiplier, different windows | ✅ | Same eligibility gate, different temporal scope |
+| Rate + Multiplier (points) + Rate (tickets) | ✅ | Same eligibility, different target currencies |
+| Rate + Rate, same target currency | ❌ | Only one rate per currency applies — one is silently ignored |
+| Rate + Multiplier, identical windows | ⚠️ | Works but semantically redundant — equivalent to a single higher rate |
+
+**Scenario 1 — Always-on rate + time-scoped multiplier (most common)**
+```
+Factor A: rate 100THB = 1pt    window: always on  ┐
+                                                    ├→ conditions_group: tier=Gold
+Factor B: 3x multiplier        window: Dec 1–31   ┘
+```
+Gold members always earn at the base rate. During December they also receive the 3x bonus. Both factors share the same tier condition — editing Gold tier eligibility once correctly updates both. This is the canonical valid sharing pattern.
+
+**Scenario 2 — Points rate + tickets rate, shared product condition**
+```
+Factor A: rate 100THB = 1pt    target: points  ┐
+                                                 ├→ conditions_group: category=Shoes
+Factor B: rate 500THB = 1 ticket target: ticket ┘
+```
+Buying shoes earns both points and tickets simultaneously. Sharing the conditions group means the product eligibility is a single source of truth — if the Shoes collection changes, both currency rules update together. Safe because `DISTINCT ON` partitions by `(target_currency, target_entity_id)` separately.
+
+**Scenario 3 — Invalid: two rate factors, same currency**
+```
+Factor A: rate 100THB = 1pt ┐
+                              ├→ conditions_group: tier=Gold   ❌
+Factor B: rate 50THB = 1pt  ┘
+```
+The calc engine applies `DISTINCT ON (target_currency, target_entity_id)` and picks only one rate (the best). Factor A is silently ignored. This is not a crash — but the intent is not expressed correctly. Use separate conditions groups, or remove the redundant factor.
+
+**Operational risk of sharing:**
+When a conditions group is shared, editing it affects all linked earn factors simultaneously. Admins must be aware of this coupling. The admin UI should surface all earn factors linked to a conditions group before allowing edits.
+
+**Implication for simplified UI mode detection:**
+The presence of shared conditions groups does not disqualify a merchant config from simplified UI rendering. Detection logic must inspect the *content* of each conditions group (entity types used), not whether groups are shared.
+
+---
 
 #### Step 3: Calculate Base Currency (Rates)
 Rate factors define the basic conversion from spending to currency:
@@ -1167,6 +1246,116 @@ graph LR
 - All transactions recorded in `wallet_ledger` with proper `target_entity_id`
 - Ticket types can have validity periods and expiration dates
 - System prevents earning expired ticket types
+
+#### Credit Ticket Types (`is_credit = true`)
+
+A ticket type can be designated as a **credit type** — meaning redemption of this ticket triggers an external platform credit API call instead of a standard wallet burn.
+
+**Schema additions to `ticket_type`:**
+
+| Column | Type | Purpose |
+|---|---|---|
+| `is_credit` | `boolean NOT NULL DEFAULT false` | Marks this ticket type as a platform credit |
+| `credit_platform` | `text` | Which platform receives the credit call: `shopify`, `woocommerce`, etc. |
+
+**Constraint**: `UNIQUE INDEX ON (merchant_id, credit_platform) WHERE is_credit = true` — one credit ticket type per platform per merchant.
+
+**`ticket_type.metadata` for credit types:**
+```json
+{
+  "shopify_currency": "THB",
+  "ticket_to_credit_rate": 1
+}
+```
+`ticket_to_credit_rate` = how many tickets equal 1 unit of platform credit.
+
+**Earn path**: Completely unchanged. The engine awards credit tickets by `target_entity_id` like any other ticket. The `is_credit` flag is invisible to the earn engine.
+
+**Redemption path**: The redemption service checks `ticket_type.is_credit` and `credit_platform` to route the burn:
+```
+is_credit = false  →  standard wallet burn
+is_credit = true, credit_platform = 'shopify'
+  →  call storeCreditAccountCredit(customerId, amount × rate, currency)
+  →  record burn in wallet_ledger as normal
+  →  store Shopify transaction ID in redemption metadata
+```
+
+**Merchant init (Shopify onboarding):**
+One `ticket_type` row is created per merchant when connecting Shopify:
+```
+name:             "Shopify Store Credit"
+ticket_code:      "shopify_credit"
+is_credit:        true
+credit_platform:  "shopify"
+metadata:         { "shopify_currency": "THB", "ticket_to_credit_rate": 1 }
+```
+Idempotent — the unique index prevents duplicates on re-onboarding.
+
+#### Ticket Codes (Unique Code per Ticket Earned)
+
+For use cases like lucky draws, raffles, and event campaigns, each ticket earned can be assigned a **unique printable code** (e.g., `SYN-A7X3B2`). This extends the ticket system from a pure balance model to an individually identifiable code model — following the same pattern as `reward_promo_code`.
+
+**Table: `ticket_code`**
+
+| Column | Type | Purpose |
+|---|---|---|
+| `id` | UUID PK | |
+| `merchant_id` | UUID | Merchant isolation |
+| `ticket_type_id` | UUID FK → ticket_type | Which ticket type pool (one pool per campaign) |
+| `code` | TEXT UNIQUE per merchant | The unique printable code |
+| `assigned_status` | BOOLEAN DEFAULT false | false = available in pool, true = assigned |
+| `assigned_to_user_id` | UUID | Who received this code |
+| `wallet_ledger_id` | UUID FK → wallet_ledger | Which earning event triggered assignment |
+| `source_id` | UUID | Order/purchase that triggered it (purchase_ledger.id) |
+| `assigned_at` | TIMESTAMPTZ | When assigned |
+| `created_at` | TIMESTAMPTZ | |
+
+**Code Generation Configuration** (stored in `ticket_type.metadata`):
+```json
+{
+  "code_prefix": "SYN-",
+  "code_length": 6,
+  "code_charset": "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+}
+```
+
+Ambiguous characters (0/O, 1/I/L) are excluded from the default charset.
+
+**Code Generation Function: `fn_generate_ticket_codes()`**
+
+Pre-generates a pool of unique random codes for a ticket type:
+- Input: merchant_id, ticket_type_id, quantity (1–100,000), prefix, code_length
+- Generates codes in format `{prefix}{random}` (e.g., `SYN-A7X3B2`)
+- Handles collisions via retry (up to 3x quantity attempts)
+- Returns count of successfully generated codes
+
+**Code Assignment Function: `fn_assign_ticket_codes()`**
+
+Assigns codes from the pool to a user when tickets are earned. Mirrors the `reward_promo_code` assignment pattern:
+1. Checks pool has enough available codes
+2. Reserves N codes atomically using `FOR UPDATE SKIP LOCKED`
+3. Stamps each code: `assigned_status = true`, `assigned_to_user_id`, `wallet_ledger_id`, `source_id`
+4. Stamps the assigned codes back onto `wallet_ledger.metadata.ticket_codes[]`
+5. Returns the assigned codes
+6. If insufficient codes in pool, fails cleanly (no partial assignment)
+
+**Bidirectional Stamping** (same as reward promo codes):
+- `ticket_code` → stamped with user, wallet_ledger_id, source_id
+- `wallet_ledger.metadata` → stamped with `ticket_codes: ["SYN-A7X3B2", ...]`
+
+This enables lookups from either direction: "which codes does this user have?" and "which earning event generated this code?"
+
+**Assignment Trigger**: Configurable per ticket type. Can be triggered:
+- On purchase completion (normal flow via currency award service)
+- On pending order creation (event booking flow, called explicitly)
+- Manually by admin
+
+**RLS**: Users can see their own assigned codes. Service role has full access for generation and assignment operations.
+
+**Indexes**:
+- Pool availability: `(ticket_type_id, assigned_status) WHERE assigned_status = false`
+- User lookup: `(assigned_to_user_id, ticket_type_id) WHERE assigned_to_user_id IS NOT NULL`
+- Source lookup: `(source_id) WHERE source_id IS NOT NULL`
 
 ### Idempotency Protection
 The system prevents duplicate awards at multiple levels:
@@ -2406,6 +2595,15 @@ This is the financial engine that:
 
 ### Database Functions
 
+#### calc_currency_core
+**Purpose**: Pure calculation engine — returns what a user would earn without writing anything
+- Input: `(merchant_id, user_id, amount, store_id, items_jsonb)`
+- Returns TABLE of `(currency_type, component, amount, earn_factor_id, target_entity_id)`
+- Status-agnostic: does not check purchase status, purely evaluates earn factors and multipliers
+- Use as a **preview endpoint**: call with draft order data to show "You'll earn X points and Y tickets" before committing
+- Evaluates eligible rate factors (best rate wins per currency type) and multiplier factors (stackable/non-stackable)
+- For tickets: returns `target_entity_id` = ticket_type.id to identify which ticket type
+
 #### calc_currency_for_source
 **Purpose**: Central dispatcher for currency calculation
 - Routes to appropriate calculation based on source_type
@@ -2413,15 +2611,29 @@ This is the financial engine that:
 
 #### calc_currency_for_transaction
 **Purpose**: Purchase-specific calculation with earn factors
-- Evaluates eligible earn factors via materialized views
-- Applies "best rate wins" logic for rate factors
-- Handles stackable/non-stackable multiplier groups
+- Loads purchase from purchase_ledger, validates status = completed and earn_currency = true
+- Calls `calc_currency_core` internally for the actual calculation
+- Then calls `post_wallet_transaction` to award the currency
+- This is the "calculate AND post" function, unlike `calc_currency_core` which is preview-only
 
 #### post_wallet_transaction
 **Purpose**: Atomic wallet update with ledger entry
 - Updates balance with row-level locking
 - Calculates expiry dates inline
 - Creates audit trail in wallet_ledger
+
+#### fn_generate_ticket_codes
+**Purpose**: Pre-generate a pool of unique random codes for a ticket type
+- Input: `(merchant_id, ticket_type_id, quantity, prefix, code_length)`
+- Generates codes in format `{prefix}{random}` using charset excluding ambiguous characters
+- Handles collisions via retry; returns count of successfully generated codes
+
+#### fn_assign_ticket_codes
+**Purpose**: Assign codes from pool to a user when tickets are earned
+- Input: `(merchant_id, ticket_type_id, user_id, quantity, wallet_ledger_id, source_id)`
+- Atomic reservation using `FOR UPDATE SKIP LOCKED` (same pattern as reward promo codes)
+- Bidirectional stamping: marks `ticket_code.assigned_status = true` AND stamps codes into `wallet_ledger.metadata.ticket_codes`
+- Fails cleanly if insufficient codes in pool (no partial assignment)
 
 ### External Services
 
@@ -2575,6 +2787,338 @@ graph LR
 
 ---
 
+## Shopify Plugin: Simplified vs Advanced UI Mode
+
+### Overview
+
+The earn engine is a single unified system. The Shopify plugin exposes it through two UI modes — **Simple** and **Advanced** — to serve both SME merchants who want a Smile.io-like setup experience and power users who need granular control.
+
+The backend data model is identical in both modes. Simple mode is a constrained form that creates the same objects as Advanced mode, with sensible defaults filling in everything the merchant does not need to think about. The distinction is purely a UI responsibility.
+
+---
+
+### Simple Mode — Scope and Configuration
+
+Simple mode covers the earning configuration that the majority of Shopify merchants need. It exposes two sections: **Earn Rate** and **Points Multiplier**.
+
+#### Supported Currencies
+
+| Currency | Maps to | Redeemed as |
+|---|---|---|
+| Points | `target_currency = points` | Loyalty points (standard redemption) |
+| Store Credit | `target_currency = ticket` where `ticket_type.is_credit = true` and `credit_platform = 'shopify'` | Shopify `storeCreditAccountCredit` API call at redemption |
+
+Each merchant has one designated credit `ticket_type` row (`is_credit = true, credit_platform = 'shopify'`), created during Shopify onboarding. Simple mode hides the UUID — it just knows "store credit = that ticket type."
+
+---
+
+#### Section 1 — Earn Rate
+
+**What the merchant configures:**
+
+```
+┌──────────────────────────────────────────┐
+│  Purchase amount to earn 1 point         │
+│                                          │
+│  ○ Toggle: Diff rate per tier            │
+│                                          │
+│  [OFF] → single rate field               │
+│  [ON]  → one rate field per tier         │
+│           Gold     [ ___ ] Baht          │
+│           Silver   [ ___ ] Baht          │
+│           Platinum [ ___ ] Baht          │
+│                                          │
+│  [ Products exclusion picker ]           │
+└──────────────────────────────────────────┘
+```
+
+**What gets created in the backend:**
+
+| Config | earn_factor rows created |
+|---|---|
+| Single rate (no tier toggle) | 1 `rate` factor, no conditions |
+| Diff rate per tier (N tiers) | N `rate` factors, each with 1 `earn_conditions_group` → 1 `earn_condition` (entity=`tier`) |
+| Product exclusions | Adds an `earn_condition` (entity=`product_sku` / `product_category`, `exclude=true`) to each rate factor's conditions group. The eval engine's two-pass approach removes matching items from the eligible set before calculating currency. |
+
+The same rate structure is replicated for store credit if the merchant has enabled it, producing a parallel set of `rate` factors with `target_currency = ticket`.
+
+---
+
+#### Section 2 — Points Multiplier
+
+**What the merchant configures:**
+
+```
+┌──────────────────────────────────────────┐
+│  Points multiplier                       │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ ○ Active toggle                    │  │
+│  │ [ ___ ] X                          │  │
+│  │ [ Tier ▾ ] [ Product inc ▾ ] [ Time ]│  │
+│  └────────────────────────────────────┘  │
+│                                          │
+│  ┌────────────────────────────────────┐  │
+│  │ ○ Active toggle                    │  │
+│  │ [ ___ ] X                          │  │
+│  │ [ Tier ▾ ] [ Product inc ▾ ] [ Time ]│  │
+│  └────────────────────────────────────┘  │
+│                                          │
+│  + Add multiplier                        │
+│                                          │
+│  Stackable  ○ Yes  ○ No                  │
+└──────────────────────────────────────────┘
+```
+
+Each multiplier rule exposes three optional condition pills:
+
+| Pill | Maps to | `earn_condition` entity |
+|---|---|---|
+| Tier | Tier membership gate | `tier` |
+| Product inc | Specific products or collections | `product_sku`, `product_product`, `product_brand`, `product_category` |
+| Time | `window_start` / `window_end` on the `earn_factor` row | — (field on factor, not a condition) |
+
+**Stackable config** maps to `earn_factor_group.stackable`.
+
+**What gets created per multiplier rule:**
+
+- If applies to points only: 1 `multiplier` earn_factor (`target_currency = points`)
+- If applies to both points and store credit: 2 `multiplier` earn_factor rows (one per currency), **sharing the same `earn_conditions_group`** — valid pattern since target currencies differ
+
+---
+
+### Simple Mode — Backend Object Summary
+
+For a fully configured merchant (tiered rates + two multipliers + store credit enabled):
+
+```
+earn_factor_group (×1)
+│   stackable: merchant config
+│   window: null (no group-level window)
+│
+├── earn_factor: rate, points,  Gold tier   → earn_conditions_group → earn_condition(tier=Gold)
+├── earn_factor: rate, points,  Silver tier → earn_conditions_group → earn_condition(tier=Silver)
+├── earn_factor: rate, ticket,  Gold tier   → earn_conditions_group → earn_condition(tier=Gold)  ← shared
+├── earn_factor: rate, ticket,  Silver tier → earn_conditions_group → earn_condition(tier=Silver) ← shared
+│
+├── earn_factor: multiplier, points, 2x, Gold+Shoes, Dec 1-31  → earn_conditions_group → earn_condition(tier=Gold)
+│                                                                                        → earn_condition(category=Shoes)
+├── earn_factor: multiplier, ticket, 2x, Gold+Shoes, Dec 1-31  → same earn_conditions_group ← shared (diff currency)
+│
+├── earn_factor: multiplier, points, 1.5x, always-on, no conditions
+└── earn_factor: multiplier, ticket, 1.5x, always-on, no conditions
+```
+
+**All factors live in 1 `earn_factor_group`.** This is the invariant of simple mode.
+
+---
+
+### Simple Mode — Constraints
+
+A merchant's earn configuration is renderable in Simple mode **only if all of the following are true:**
+
+| Constraint | Rule |
+|---|---|
+| Earn factor groups | Exactly **1** group exists for the merchant |
+| Currencies | Only `points` and/or the designated store credit `ticket` type — no other ticket types |
+| Rate factor windows | Rate factors have **no** `window_start` / `window_end` — rates are always-on |
+| Condition entity types | Every `earn_condition` row uses only: `tier`, `product_sku`, `product_product`, `product_brand`, `product_category` |
+| Forbidden entities | No `persona`, `store_attribute`, or any other entity type |
+| Shared conditions groups | Allowed — sharing is valid when currencies differ (see Shared Earn Conditions Groups section) |
+
+If **any** constraint is violated → force **Advanced Mode**. Do not attempt to reverse-parse a complex config into the simple form.
+
+---
+
+### Simple → Advanced Promotion
+
+Once a merchant touches any Advanced setting, flag the config as advanced. The recommended approach is a boolean `ui_mode` field on `earn_factor_group`:
+
+```
+earn_factor_group.ui_mode = 'simple' | 'advanced'
+```
+
+Set to `'advanced'` the first time the merchant saves from the Advanced editor. Never automatically revert to `'simple'`. This prevents the UI from misrepresenting a complex config as simple.
+
+---
+
+### Advanced Mode
+
+Advanced mode surfaces the full earn engine with no constraints:
+
+- Multiple `earn_factor_group` rows (each with independent stackable and window config)
+- Any `earn_factor_type` (`rate`, `multiplier`, and future `fixed`)
+- Any `target_currency` including multiple distinct ticket types
+- Any `earn_condition` entity type (persona, store attributes, custom)
+- Full threshold config (`min_threshold`, `max_threshold`, `threshold_unit`, `apply_to_excess_only`)
+- Personalized offers (`public = false`, assigned via `earn_factor_user`)
+- Time conditions (`earn_factor_time_conditions` — specific days/hours)
+- Cross-group stacking and non-stackable group interactions
+
+Advanced mode is the full admin UI — not scoped to the Shopify plugin simplified experience.
+
+---
+
+### Detection Logic (Read-Time)
+
+On load, the UI calls a detection check before deciding which mode to render:
+
+```
+is_simple_mode(merchant_id):
+
+  groups = earn_factor_groups WHERE merchant_id = ?
+  IF count(groups) ≠ 1           → ADVANCED
+  IF groups[0].ui_mode = 'advanced' → ADVANCED
+
+  factors = earn_factors WHERE earn_factor_group_id = groups[0].id
+
+  FOR each factor:
+    IF factor.target_currency = 'ticket'
+      AND NOT EXISTS (
+        SELECT 1 FROM ticket_type
+        WHERE id = factor.target_entity_id
+          AND is_credit = true
+          AND credit_platform = 'shopify'
+      )                            → ADVANCED
+
+    IF factor.earn_factor_type = 'rate'
+      AND (factor.window_start IS NOT NULL OR factor.window_end IS NOT NULL)
+                                   → ADVANCED
+
+    IF factor.earn_conditions_group_id IS NOT NULL:
+      conditions = earn_conditions WHERE earn_conditions_group_id = ?
+      FOR each condition:
+        IF condition.entity NOT IN (tier, product_sku, product_product, product_brand, product_category)
+                                   → ADVANCED
+
+  → SIMPLE ✅
+```
+
+---
+
+## Basic Currency Config — BFF Functions (Implemented)
+
+### Overview
+
+Two RPC functions provide a simplified interface for configuring earn rates and multipliers per currency type. They abstract the underlying `earn_factor_group`, `earn_factor`, `earn_conditions_group`, and `earn_conditions` tables into a single JSON blob that the FE stores as a local variable, edits, and sends back.
+
+The same page serves points, store credit (ticket with `is_credit = true`), and other ticket types — the FE passes the appropriate `(target_currency, target_entity_id)` pair.
+
+### Architecture: 1 Group Per Currency Type
+
+Each `(target_currency, target_entity_id)` pair gets its own `earn_factor_group`. This ensures independent `stackable` settings and clean orphan cleanup without cross-currency interference.
+
+### Functions
+
+#### `bff_get_basic_currency_config(p_target_currency TEXT, p_target_entity_id UUID DEFAULT NULL)`
+
+Returns the current basic config for a merchant + currency type.
+
+**Detection logic:**
+1. Finds groups containing factors matching the currency type
+2. If 0 groups → returns empty skeleton (new mode)
+3. If 1 group → validates basic constraints → returns populated data
+4. If multiple groups → returns `{ "mode": "not_basic" }`
+
+**Validation constraints (must all pass for basic mode):**
+- Exactly 1 group for the currency type
+- Group contains only factors for this currency type (no mixed currencies)
+- All condition entity types are in: `tier`, `product_sku`, `product_product`, `product_brand`, `product_category`
+- Rate factors have no `window_start` / `window_end`
+
+#### `bff_upsert_basic_currency_config(p_config JSONB)`
+
+Creates or updates the full basic config in one transaction.
+
+**Operations performed:**
+- Upserts `earn_factor_group` (creates on first save, updates `stackable` on subsequent)
+- For per-tier rates: creates one `earn_factor` (type=rate) per tier, each with its own `earn_conditions_group` containing a tier condition and any excluded product conditions
+- For single rate: creates one `earn_factor` (type=rate) with optional excluded product conditions
+- For multipliers: creates one `earn_factor` (type=multiplier) per item, with optional conditions group for tiers and product includes
+- Handles `earn_factor_time_conditions` for multiplier timing (day_of_week, hour_start, hour_end)
+- Deletes factors no longer in the config
+- Cleans up orphaned conditions groups
+- Auto-deletes the group if all factors are removed
+
+### Shared JSON Shape (GET returns it, UPSERT accepts it)
+
+```json
+{
+  "target_currency": "points",
+  "target_entity_id": null,
+  "earn_factor_group_id": "uuid | null",
+  "earn_rate": {
+    "different_rate_per_tier": true,
+    "single_rate": null,
+    "single_rate_factor_id": "uuid | null",
+    "rates": [
+      {
+        "factor_id": "uuid | null",
+        "tier_id": "uuid",
+        "tier_name": "Gold",
+        "earn_factor_amount": 35,
+        "earn_conditions_group_id": "uuid | null"
+      }
+    ],
+    "excluded_products": [
+      {
+        "condition_id": "uuid | null",
+        "entity": "product_sku",
+        "entity_ids": ["uuid"]
+      }
+    ]
+  },
+  "multipliers": {
+    "stackable": true,
+    "items": [
+      {
+        "factor_id": "uuid | null",
+        "active_status": true,
+        "earn_factor_amount": 3,
+        "window_start": "2024-07-20T00:00:00Z",
+        "window_end": "2024-07-20T23:59:59Z",
+        "earn_conditions_group_id": "uuid | null",
+        "timing": {
+          "day_of_week": [0, 6],
+          "hour_start": 0,
+          "hour_end": 23
+        },
+        "tiers": [
+          { "tier_id": "uuid", "tier_name": "Gold" }
+        ],
+        "include_products": [
+          {
+            "condition_id": "uuid | null",
+            "entity": "product_product",
+            "entity_ids": ["uuid"]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Read-only fields** (returned by GET, ignored by UPSERT): `tier_name`, `entity_names`.
+
+### Backend Object Mapping
+
+| UI Element | Backend Object |
+|---|---|
+| Earn rate (single) | 1 `earn_factor` (type=rate), optional `earn_conditions_group` for excluded products |
+| Earn rate (per-tier) | N `earn_factor` (type=rate), each with `earn_conditions_group` containing tier + excluded product conditions |
+| Excluded products | `earn_conditions` rows with `exclude = true` in each rate factor's conditions group |
+| Multiplier card | 1 `earn_factor` (type=multiplier) with optional `earn_conditions_group` for tiers + product includes |
+| Multiplier timing | `earn_factor_time_conditions` row linked to the multiplier factor |
+| Stackable toggle | `earn_factor_group.stackable` |
+
+### Also Updated: `exclude` Support in Existing Functions
+
+- `bff_get_earn_conditions_group` now returns `exclude` field per condition
+- `bff_upsert_earn_conditions_group` now accepts and writes `exclude` field (backward compatible — defaults to `false` if omitted)
+
+---
+
 ## Conclusion
 
 This currency rewards system provides merchants with a powerful, flexible platform for multi-currency loyalty programs. The architecture ensures accuracy through three-level idempotency protection (QStash, Inngest, Database), scales via durable execution with flow control, and maintains complete audit trails for all currency movements including reversals.
@@ -2659,7 +3203,7 @@ The system supports multiple earning methods for customers to accumulate currenc
 **1. Natural Gating Through Configuration**
 - **Marketplace**: Works if credentials configured in `merchant_credentials`, otherwise disabled
 - **Code claiming**: Works if codes exist in system, otherwise disabled
-- **Receipt upload**: Controlled via `earning_channels.active` flag
+- **Receipt upload**: Controlled via `earn_channel.active` flag
 - **POS**: Works if API credentials configured
 - Each method naturally disabled if not set up
 
@@ -2670,8 +3214,8 @@ Adding explicit flags would require updating:
 - Validation logic in each entry point
 - Risk of inconsistency if some functions not updated
 
-**3. UI Control via earning_channels Table**
-- `earning_channels.active` controls frontend display
+**3. UI Control via earn_channel Table**
+- `earn_channel.active` controls frontend display
 - Merchants can hide/show earning methods from users
 - Operational state implicit (configured = enabled)
 
@@ -2685,7 +3229,7 @@ Adding explicit flags would require updating:
 **UI Visibility:**
 ```sql
 -- Control what users see
-UPDATE earning_channels SET active = false WHERE channel_code = 'code_claiming';
+UPDATE earn_channel SET active = false WHERE channel_code = 'code_claiming';
 ```
 
 **Operational State:**

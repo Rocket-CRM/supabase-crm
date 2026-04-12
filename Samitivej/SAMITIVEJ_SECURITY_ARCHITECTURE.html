@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Architecture — Rocket Loyalty CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F8F9FB;
+  color: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.slide {
+  width: 1120px;
+  background: white;
+  border-radius: 0;
+  padding: 44px 56px 36px;
+}
+
+.slide-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 36px;
+  border-left: 5px solid #0F4C81;
+  padding-left: 20px;
+}
+
+.slide-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0F4C81;
+  letter-spacing: -0.5px;
+}
+.slide-header .subtitle {
+  font-size: 13px;
+  color: #6B7280;
+  margin-top: 3px;
+}
+
+.architecture {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.connector {
+  display: flex;
+  justify-content: center;
+  height: 22px;
+  position: relative;
+}
+.connector::before {
+  content: '';
+  width: 2px;
+  height: 100%;
+  background: #CBD5E1;
+}
+.connector::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #94A3B8;
+}
+
+.entry-point {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.entry-pill {
+  background: linear-gradient(135deg, #1E3A5F, #0F4C81);
+  color: white;
+  padding: 9px 28px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-family: 'Space Mono', monospace;
+  box-shadow: 0 3px 10px rgba(15,76,129,0.25);
+}
+
+.layer {
+  border-radius: 10px;
+  padding: 14px 20px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.5s ease-out forwards;
+}
+.layer:nth-child(3)  { animation-delay: 0.05s; }
+.layer:nth-child(5)  { animation-delay: 0.10s; }
+.layer:nth-child(7)  { animation-delay: 0.15s; }
+.layer:nth-child(9)  { animation-delay: 0.20s; }
+.layer:nth-child(11) { animation-delay: 0.25s; }
+.layer:nth-child(13) { animation-delay: 0.30s; }
+.layer:nth-child(15) { animation-delay: 0.35s; }
+
+@keyframes fadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.layer-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.layer-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: white;
+}
+
+.layer-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.layer-items {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-left: 40px;
+}
+
+.item {
+  background: white;
+  border: 1.5px solid;
+  border-radius: 7px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: default;
+}
+.item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+}
+.item .label { font-weight: 600; font-size: 12px; }
+.item .detail { font-size: 10.5px; color: #6B7280; font-weight: 400; margin-top: 1px; }
+
+/* Layer themes */
+.l-perimeter { background: #FEF2F2; border: 1.5px solid #FECACA; }
+.l-perimeter .layer-icon { background: #DC2626; }
+.l-perimeter .layer-title { color: #991B1B; }
+.l-perimeter .item { border-color: #FECACA; }
+
+.l-app { background: #FFF7ED; border: 1.5px solid #FED7AA; }
+.l-app .layer-icon { background: #EA580C; }
+.l-app .layer-title { color: #9A3412; }
+.l-app .item { border-color: #FED7AA; }
+
+.l-identity { background: #EFF6FF; border: 1.5px solid #BFDBFE; }
+.l-identity .layer-icon { background: #2563EB; }
+.l-identity .layer-title { color: #1E40AF; }
+.l-identity .item { border-color: #BFDBFE; }
+
+.l-data { background: #ECFDF5; border: 1.5px solid #A7F3D0; }
+.l-data .layer-icon { background: #059669; }
+.l-data .layer-title { color: #065F46; }
+.l-data .item { border-color: #A7F3D0; }
+
+.l-fraud { background: #F5F3FF; border: 1.5px solid #C4B5FD; }
+.l-fraud .layer-icon { background: #7C3AED; }
+.l-fraud .layer-title { color: #5B21B6; }
+.l-fraud .item { border-color: #C4B5FD; }
+
+.l-monitor { background: #F0F9FF; border: 1.5px solid #BAE6FD; }
+.l-monitor .layer-icon { background: #0284C7; }
+.l-monitor .layer-title { color: #075985; }
+.l-monitor .item { border-color: #BAE6FD; }
+
+.l-compliance { background: #F8FAFC; border: 1.5px solid #CBD5E1; }
+.l-compliance .layer-icon { background: #475569; }
+.l-compliance .layer-title { color: #334155; }
+.l-compliance .item { border-color: #CBD5E1; }
+
+.endpoint {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+}
+.endpoint-pill {
+  background: linear-gradient(135deg, #065F46, #059669);
+  color: white;
+  padding: 9px 28px;
+  border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-family: 'Space Mono', monospace;
+  box-shadow: 0 3px 10px rgba(5,150,105,0.25);
+}
+
+.footer {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.footer-left {
+  font-size: 11px;
+  color: #9CA3AF;
+  font-family: 'Space Mono', monospace;
+}
+.footer-right {
+  font-size: 11px;
+  color: #9CA3AF;
+  font-family: 'Space Mono', monospace;
+}
+
+/* Side labels */
+.side-labels {
+  position: absolute;
+  right: -120px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <h1>Multi-Level Security Architecture</h1>
+      <div class="subtitle">Defense in depth — every request passes through 7 security layers before reaching data</div>
+    </div>
+  </div>
+
+  <div class="architecture">
+
+    <div class="entry-point">
+      <div class="entry-pill">&#8599; Inbound API Request / User Session</div>
+    </div>
+    <div class="connector"></div>
+
+    <!-- 1: Perimeter -->
+    <div class="layer l-perimeter">
+      <div class="layer-header">
+        <div class="layer-icon">1</div>
+        <div class="layer-title">Perimeter Security</div>
+      </div>
+      <div class="layer-items">
+        <div class="item"><div><div class="label">Web Application Firewall</div><div class="detail">OWASP Top 10 protection</div></div></div>
+        <div class="item"><div><div class="label">DDoS Protection</div><div class="detail">Volumetric & app-layer mitigation</div></div></div>
+        <div class="item"><div><div class="label">CDN + Edge Security</div><div class="detail">TLS 1.3 termination at edge</div></div></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <!-- 2: Application -->
+    <div class="layer l-app">
+      <div class="layer-header">
+        <div class="layer-icon">2</div>
+        <div class="layer-title">Application Security</div>
+      </div>
+      <div class="layer-items">
+        <div class="item"><div><div class="label">Rate Limiting</div><div class="detail">Per-endpoint throttling</div></div></div>
+        <div class="item"><div><div class="label">API Key Scoping</div><div class="detail">Per-client key isolation</div></div></div>
+        <div class="item"><div><div class="label">Input Validation</div><div class="detail">Schema enforcement on all payloads</div></div></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <!-- 3: Identity -->
+    <div class="layer l-identity">
+      <div class="layer-header">
+        <div class="layer-icon">3</div>
+        <div class="layer-title">Identity & Access Control</div>
+      </div>
+      <div class="layer-items">
+        <div class="item"><div><div class="label">Authentication</div><div class="detail">JWT / OAuth 2.0 / MFA</div></div></div>
+        <div class="item"><div><div class="label">Authorization</div><div class="detail">RBAC + ABAC policies</div></div></div>
+        <div class="item"><div><div class="label">Row-Level Security</div><div class="detail">Database-enforced tenant isolation</div></div></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <!-- 4: Data -->
+    <div class="layer l-data">
+      <div class="layer-header">
+        <div class="layer-icon">4</div>
+        <div class="layer-title">Data Security</div>
+      </div>
+      <div class="layer-items">
+        <div class="item"><div><div class="label">Encryption at Rest</div><div class="detail">AES-256</div></div></div>
+        <div class="item"><div><div class="label">Encryption in Transit</div><div class="detail">TLS 1.3 end-to-end</div></div></div>
+        <div class="item"><div><div class="label">PII Tokenization</div><div class="detail">Hashed for analytics layer</div></div></div>
+        <div class="item"><div><div class="label">Secrets Management</div><div class="detail">Vault-backed key rotation</div></div></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <!-- 5: Fraud -->
+    <div class="layer l-fraud">
+      <div class="layer-header">
+        <div class="layer-icon">5</div>
+        <div class="layer-title">Fraud Prevention</div>
+      </div>
+      <div class="layer-items">
+        <div class="item"><div><div class="label">Idempotency Keys</div><div class="detail">No duplicate processing</div></div></div>
+        <div class="item"><div><div class="label">Anti-Double-Spend</div><div class="detail">Row-level locking on wallet</div></div></div>
+        <div class="item"><div><div class="label">Velocity Checks</div><div class="detail">Anomaly & abuse detection</div></div></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <!-- 6: Monitoring -->
+    <div class="layer l-monitor">
+      <div class="layer-header">
+        <div class="layer-icon">6</div>
+        <div class="layer-title">Monitoring & Incident Response</div>
+      </div>
+      <div class="layer-items">
+        <div class="item"><div><div class="label">SIEM</div><div class="detail">Centralized log analysis</div></div></div>
+        <div class="item"><div><div class="label">IDS / IPS</div><div class="detail">Real-time intrusion detection</div></div></div>
+        <div class="item"><div><div class="label">24/7 Security Operations</div><div class="detail">Alert triage & response</div></div></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <!-- 7: Compliance -->
+    <div class="layer l-compliance">
+      <div class="layer-header">
+        <div class="layer-icon">7</div>
+        <div class="layer-title">Compliance & Audit</div>
+      </div>
+      <div class="layer-items">
+        <div class="item"><div><div class="label">Full Audit Trail</div><div class="detail">Actor, timestamp, before/after state</div></div></div>
+        <div class="item"><div><div class="label">PDPA Compliance</div><div class="detail">Consent, data access, right to erasure</div></div></div>
+        <div class="item"><div><div class="label">Maker-Checker</div><div class="detail">Two-admin approval for sensitive ops</div></div></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="endpoint">
+      <div class="endpoint-pill">&#9607; Isolated Database — Sharded + Row-Level Security</div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">Rocket Loyalty CRM 4.0</div>
+    <div class="footer-right">7 layers &middot; Defense in Depth</div>
+  </div>
+</div>
+</body>
+</html>

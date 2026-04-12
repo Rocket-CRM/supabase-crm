@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "crm-tester": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-crm-server/dist/index.js"],
+      "env": {
+        "SUPABASE_URL": "https://wkevmsedchftztoolkmi.supabase.co",
+        "SUPABASE_ANON_KEY": "your_anon_key_here",
+        "CRM_EMAIL": "tester@yourmerchant.internal",
+        "CRM_PASSWORD": "your_password_here"
+      }
+    }
+  }
+}

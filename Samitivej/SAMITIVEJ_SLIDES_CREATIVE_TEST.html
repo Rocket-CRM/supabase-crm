@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samitivej Slides — Creative Diagram Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root {
+    --green-primary: #00875A;
+    --green-dark: #004D40;
+    --green-light: #E8F5E9;
+    --green-mint: #F0FBF4;
+    --teal: #00897B;
+    --teal-dark: #006064;
+    --teal-light: #E0F2F1;
+    --red: #D32F2F;
+    --red-light: #FFEBEE;
+    --red-accent: #E53935;
+    --blue: #1565C0;
+    --blue-light: #E3F2FD;
+    --orange: #E65100;
+    --orange-light: #FFF3E0;
+    --purple: #6A1B9A;
+    --purple-light: #F3E5F5;
+    --amber: #F57F17;
+    --amber-light: #FFF8E1;
+    --gray-100: #F5F5F5;
+    --gray-200: #EEEEEE;
+    --gray-300: #E0E0E0;
+    --gray-500: #9E9E9E;
+    --gray-600: #757575;
+    --gray-700: #616161;
+    --gray-800: #424242;
+    --gray-900: #212121;
+    --white: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #E0E0E0;
+    color: var(--gray-900);
+    -webkit-font-smoothing: antialiased;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .slide {
+    width: 1280px; height: 720px;
+    margin: 30px auto;
+    background: var(--white);
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    page-break-after: always;
+    page-break-inside: avoid;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .slide-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 44px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 48px;
+    background: var(--white); border-top: 1px solid var(--gray-200);
+  }
+  .slide-footer .logo {
+    font-weight: 700; font-size: 13px; color: var(--green-primary);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .slide-footer .page-num { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+  .footer-logo { width: 18px; height: 18px; }
+
+  .slide-title-bar {
+    padding: 32px 48px 14px 48px;
+    display: flex; align-items: flex-start; gap: 16px;
+  }
+  .slide-title-bar .accent {
+    width: 5px; min-height: 32px; background: var(--green-primary);
+    border-radius: 3px; flex-shrink: 0; margin-top: 3px;
+  }
+  .slide-title-bar h1 { font-size: 30px; font-weight: 700; line-height: 1.2; }
+  .slide-title-bar .subtitle {
+    font-size: 14px; color: var(--gray-600); margin-top: 3px; font-weight: 400;
+  }
+  .slide-body { padding: 0 48px; }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    body { background: white; margin: 0; padding: 0; }
+    .slide { margin: 0; box-shadow: none; }
+    .no-print { display: none !important; }
+    * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
+  }
+
+  .export-bar { text-align: center; padding: 24px; }
+  .export-btn {
+    background: var(--green-primary); color: white; border: none;
+    padding: 12px 32px; border-radius: 8px; font-size: 15px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .export-btn:hover { background: var(--green-dark); }
+
+  /* ── D3 diagram ── */
+  #d3-arch { width: 1184px; height: 530px; }
+  #d3-arch .node-box {
+    cursor: default;
+  }
+
+  /* ── Composability ── */
+  .comp-section { text-align: center; }
+  .comp-section .section-badge {
+    display: inline-block; padding: 6px 20px; border-radius: 20px;
+    font-weight: 700; font-size: 13px; color: var(--white); margin-bottom: 14px;
+  }
+  .comp-card {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--white); border: 1.5px solid var(--gray-200);
+    border-radius: 10px; padding: 10px 16px; margin: 4px;
+    font-size: 12px; font-weight: 500; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: transform 0.15s;
+  }
+  .comp-card:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+  .comp-card .card-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .comp-rule-box {
+    background: var(--white); border: 2px solid; border-radius: 14px;
+    padding: 20px; text-align: left; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .comp-rule-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 0; border-bottom: 1px solid var(--gray-100);
+    font-size: 12.5px;
+  }
+  .comp-rule-row:last-child { border-bottom: none; }
+  .comp-rule-label { color: var(--gray-600); font-weight: 500; }
+  .comp-rule-value {
+    padding: 3px 12px; border-radius: 14px; font-weight: 600; font-size: 11px;
+  }
+
+  .result-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin: 0 auto 6px;
+  }
+  .result-label { font-size: 11.5px; font-weight: 500; text-align: center; line-height: 1.3; }
+
+  /* ── Timeline comparison ── */
+  .timeline-col { flex: 1; }
+  .timeline-header {
+    text-align: center; padding: 12px 16px; border-radius: 10px;
+    font-weight: 700; font-size: 15px; margin-bottom: 16px;
+  }
+  .timeline-step {
+    display: flex; align-items: flex-start; gap: 14px;
+    margin-bottom: 6px; position: relative;
+  }
+  .timeline-dot-col {
+    display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+    width: 40px;
+  }
+  .timeline-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; flex-shrink: 0;
+  }
+  .timeline-line {
+    width: 2px; height: 28px; flex-shrink: 0;
+  }
+  .timeline-content { padding-top: 6px; }
+  .timeline-content .step-title { font-size: 13px; font-weight: 600; }
+  .timeline-content .step-desc { font-size: 11.5px; color: var(--gray-600); line-height: 1.4; margin-top: 2px; }
+  .timeline-content .step-time {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; margin-top: 3px;
+  }
+  .strikethrough { text-decoration: line-through; opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<div class="export-bar no-print">
+  <button class="export-btn" onclick="window.print()">Export to PDF</button>
+  <span style="margin-left:16px;color:#666;font-size:13px;">Margins: None · Background graphics: On</span>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 1 — D3.js Integration Architecture
+     ══════════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="slide-title-bar">
+    <div class="accent"></div>
+    <div>
+      <h1>Integration Architecture</h1>
+      <p class="subtitle">Bidirectional data flow between hospital systems, channels, and the loyalty platform</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <svg id="d3-arch"></svg>
+  </div>
+  <div class="slide-footer">
+    <div class="logo">
+      <svg class="footer-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Rocket Loyalty CRM 4.0
+    </div>
+    <span class="page-num">1</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 2 — Composability (Creative)
+     ══════════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="slide-title-bar">
+    <div class="accent"></div>
+    <div>
+      <h1>Composable Earning Rules</h1>
+      <p class="subtitle">Configure any earning scenario by combining actions, conditions, and results — no code required</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <div style="display:flex; align-items:flex-start; gap:0; margin-top:4px; position:relative;" id="composability-diagram">
+      <!-- LEFT: Actions -->
+      <div style="flex:0 0 240px;" class="comp-section">
+        <div class="section-badge" style="background:var(--green-primary);">Action</div>
+        <div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--green-dark);margin-bottom:6px;text-align:left;padding-left:8px;">Purchase</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <div class="comp-card" style="border-color:#C8E6C9;"><div class="card-icon" style="background:#E8F5E9;">🏥</div><span>Hospital Visit</span></div>
+              <div class="comp-card" style="border-color:#C8E6C9;"><div class="card-icon" style="background:#E8F5E9;">🛒</div><span>Marketplace</span></div>
+              <div class="comp-card" style="border-color:#C8E6C9;"><div class="card-icon" style="background:#E8F5E9;">🌐</div><span>E-Commerce</span></div>
+              <div class="comp-card" style="border-color:#C8E6C9;"><div class="card-icon" style="background:#E8F5E9;">💳</div><span>Package Buy</span></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--green-dark);margin-bottom:6px;text-align:left;padding-left:8px;">Non-Purchase</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <div class="comp-card" style="border-color:#B2DFDB;"><div class="card-icon" style="background:#E0F2F1;">📖</div><span>Article Read</span></div>
+              <div class="comp-card" style="border-color:#B2DFDB;"><div class="card-icon" style="background:#E0F2F1;">📝</div><span>Survey</span></div>
+              <div class="comp-card" style="border-color:#B2DFDB;"><div class="card-icon" style="background:#E0F2F1;">📋</div><span>Check-in</span></div>
+              <div class="comp-card" style="border-color:#B2DFDB;"><div class="card-icon" style="background:#E0F2F1;">👥</div><span>Referral</span></div>
+              <div class="comp-card" style="border-color:#B2DFDB;"><div class="card-icon" style="background:#E0F2F1;">💬</div><span>LINE Share</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER: Rule Engine -->
+      <div style="flex:0 0 44px;display:flex;align-items:center;justify-content:center;height:440px;">
+        <svg width="44" height="60" viewBox="0 0 44 60"><path d="M6 30h28M28 22l8 8-8 8" fill="none" stroke="var(--green-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <div style="flex:0 0 300px;display:flex;flex-direction:column;align-items:center;justify-content:center;" class="comp-section">
+        <div class="section-badge" style="background:var(--red);">⚡ Rule Engine</div>
+        <div class="comp-rule-box" style="border-color:var(--red);width:100%;">
+          <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:12px;text-align:center;">Condition</div>
+          <div class="comp-rule-row">
+            <span class="comp-rule-label">Purchase above:</span>
+            <span class="comp-rule-value" style="background:var(--red-light);color:var(--red);">500 THB</span>
+          </div>
+          <div class="comp-rule-row">
+            <span class="comp-rule-label">Category:</span>
+            <span class="comp-rule-value" style="background:var(--blue-light);color:var(--blue);">OPD</span>
+          </div>
+          <div class="comp-rule-row">
+            <span class="comp-rule-label">In the past:</span>
+            <span class="comp-rule-value" style="background:var(--teal-light);color:var(--teal);">12 months</span>
+          </div>
+          <div class="comp-rule-row">
+            <span class="comp-rule-label">Never purchased:</span>
+            <span class="comp-rule-value" style="background:var(--gray-100);color:var(--gray-700);">Dental package</span>
+          </div>
+          <div class="comp-rule-row">
+            <span class="comp-rule-label">Tier:</span>
+            <span class="comp-rule-value" style="background:var(--amber-light);color:var(--amber);">Gold+</span>
+          </div>
+
+          <div style="border-top:2px solid var(--gray-200);margin-top:12px;padding-top:12px;">
+            <div style="font-size:14px;font-weight:700;color:var(--green-primary);margin-bottom:10px;text-align:center;">Result</div>
+            <div class="comp-rule-row">
+              <span class="comp-rule-label">Award:</span>
+              <span class="comp-rule-value" style="background:var(--green-light);color:var(--green-dark);">2× coins</span>
+            </div>
+            <div class="comp-rule-row">
+              <span class="comp-rule-label">Issue:</span>
+              <span class="comp-rule-value" style="background:var(--purple-light);color:var(--purple);">Dental 20% off</span>
+            </div>
+            <div class="comp-rule-row">
+              <span class="comp-rule-label">Duration:</span>
+              <span class="comp-rule-value" style="background:var(--orange-light);color:var(--orange);">Next 30 days</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: End Results -->
+      <div style="flex:0 0 44px;display:flex;align-items:center;justify-content:center;height:440px;">
+        <svg width="44" height="60" viewBox="0 0 44 60"><path d="M6 30h28M28 22l8 8-8 8" fill="none" stroke="var(--green-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <div style="flex:0 0 260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;" class="comp-section">
+        <div class="section-badge" style="background:var(--green-primary);">End Result</div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <div class="result-circle" style="background:var(--green-light);border:2px solid var(--green-primary);">💰</div>
+            <div class="result-label" style="color:var(--green-dark);">Coins Credited<br><strong>45 coins → wallet</strong></div>
+          </div>
+          <div>
+            <div class="result-circle" style="background:var(--purple-light);border:2px solid var(--purple);">🎫</div>
+            <div class="result-label" style="color:var(--purple);">Privilege Issued<br><strong>Dental 20% coupon</strong></div>
+          </div>
+          <div>
+            <div class="result-circle" style="background:var(--blue-light);border:2px solid var(--blue);">📊</div>
+            <div class="result-label" style="color:var(--blue);">Survey Triggered<br><strong>NPS + follow-up</strong></div>
+          </div>
+          <div>
+            <div class="result-circle" style="background:var(--orange-light);border:2px solid var(--orange);">💬</div>
+            <div class="result-label" style="color:var(--orange);">Notification Sent<br><strong>LINE + Push</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <div class="logo">
+      <svg class="footer-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Rocket Loyalty CRM 4.0
+    </div>
+    <span class="page-num">2</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 3 — Campaign Launch Comparison (Creative)
+     ══════════════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="slide-title-bar">
+    <div class="accent"></div>
+    <div>
+      <h1>Launch Campaigns with Clicks, Not Code</h1>
+      <p class="subtitle">Composable platform vs traditional custom development — from idea to live in minutes, not months</p>
+    </div>
+  </div>
+  <div class="slide-body">
+    <div style="display:flex; gap:40px; margin-top:8px;">
+
+      <!-- LEFT: Rocket Platform -->
+      <div class="timeline-col">
+        <div class="timeline-header" style="background:var(--green-light);color:var(--green-dark);border:2px solid var(--green-primary);">
+          ⚡ Rocket Loyalty CRM Platform
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--green-primary);color:white;">1</div>
+            <div class="timeline-line" style="background:var(--green-primary);"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="step-title" style="color:var(--green-dark);">Define Campaign Goal</div>
+            <div class="step-desc">Select target segment from pre-built dynamic audiences. "Gold tier + visited dermatology + last 90 days."</div>
+            <div class="step-time" style="background:var(--green-light);color:var(--green-dark);">🖱️ 5 minutes</div>
+          </div>
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--green-primary);color:white;">2</div>
+            <div class="timeline-line" style="background:var(--green-primary);"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="step-title" style="color:var(--green-dark);">Build with Clicks</div>
+            <div class="step-desc">Drag-and-drop journey builder: trigger → condition → wait → message → action. Pick privileges from catalog, set coin rewards.</div>
+            <div class="step-time" style="background:var(--green-light);color:var(--green-dark);">🖱️ 15 minutes</div>
+          </div>
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--green-primary);color:white;">3</div>
+            <div class="timeline-line" style="background:var(--green-primary);"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="step-title" style="color:var(--green-dark);">Preview & Schedule</div>
+            <div class="step-desc">Test on staff accounts. Approval queue (maker-checker). Schedule or gradual rollout (10% → 100%).</div>
+            <div class="step-time" style="background:var(--green-light);color:var(--green-dark);">🖱️ 10 minutes</div>
+          </div>
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--green-primary);color:white;">🚀</div>
+          </div>
+          <div class="timeline-content">
+            <div class="step-title" style="color:var(--green-dark);">Go Live</div>
+            <div class="step-desc">Campaign runs automatically. Real-time metrics. A/B testing built in. Modify anytime.</div>
+            <div class="step-time" style="background:var(--green-primary);color:white;">✅ Live in 30 minutes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div style="width:2px;background:var(--gray-200);border-radius:2px;align-self:stretch;margin:0 -10px;"></div>
+
+      <!-- RIGHT: Traditional -->
+      <div class="timeline-col">
+        <div class="timeline-header" style="background:var(--gray-100);color:var(--gray-600);border:2px solid var(--gray-300);">
+          🐌 Traditional Custom Build
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--gray-300);color:var(--gray-600);">1</div>
+            <div class="timeline-line" style="background:var(--gray-300);"></div>
+          </div>
+          <div class="timeline-content strikethrough">
+            <div class="step-title" style="color:var(--gray-600);">Write Marketing Brief</div>
+            <div class="step-desc">Document requirements. Email to IT team. Wait for sprint planning. Join the backlog queue.</div>
+            <div class="step-time" style="background:var(--gray-100);color:var(--gray-600);">📋 3–5 days</div>
+          </div>
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--gray-300);color:var(--gray-600);">2</div>
+            <div class="timeline-line" style="background:var(--gray-300);"></div>
+          </div>
+          <div class="timeline-content strikethrough">
+            <div class="step-title" style="color:var(--gray-600);">Requirements & Estimation</div>
+            <div class="step-desc">Meetings between marketing, product, and engineering. Scope negotiation. Resource allocation.</div>
+            <div class="step-time" style="background:var(--gray-100);color:var(--gray-600);">📋 1–2 weeks</div>
+          </div>
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--gray-300);color:var(--gray-600);">3</div>
+            <div class="timeline-line" style="background:var(--gray-300);"></div>
+          </div>
+          <div class="timeline-content strikethrough">
+            <div class="step-title" style="color:var(--gray-600);">Development & Testing</div>
+            <div class="step-desc">Custom code for earn rules, segment queries, notification logic. QA testing. Bug fixes. Re-deploy.</div>
+            <div class="step-time" style="background:var(--gray-100);color:var(--gray-600);">📋 2–4 weeks</div>
+          </div>
+        </div>
+
+        <div class="timeline-step">
+          <div class="timeline-dot-col">
+            <div class="timeline-dot" style="background:var(--gray-300);color:var(--gray-600);">😓</div>
+          </div>
+          <div class="timeline-content strikethrough">
+            <div class="step-title" style="color:var(--gray-600);">Go Live (Maybe)</div>
+            <div class="step-desc">Deploy during maintenance window. Hope nothing breaks. Modifications require another dev cycle.</div>
+            <div class="step-time" style="background:var(--red-light);color:var(--red);">⏱️ 6–12 weeks total</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:14px;display:flex;justify-content:center;gap:40px;">
+      <div style="background:var(--green-light);padding:8px 24px;border-radius:8px;border:1.5px solid var(--green-primary);font-size:13px;">
+        <strong style="color:var(--green-dark);font-size:20px;">30 min</strong>
+        <span style="color:var(--green-dark);margin-left:8px;">idea to live campaign</span>
+      </div>
+      <div style="font-size:24px;color:var(--gray-300);display:flex;align-items:center;">vs</div>
+      <div style="background:var(--gray-100);padding:8px 24px;border-radius:8px;border:1.5px solid var(--gray-300);font-size:13px;text-decoration:line-through;opacity:0.6;">
+        <strong style="color:var(--gray-600);font-size:20px;">6–12 weeks</strong>
+        <span style="color:var(--gray-600);margin-left:8px;">requirements → code → deploy</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <div class="logo">
+      <svg class="footer-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Rocket Loyalty CRM 4.0
+    </div>
+    <span class="page-num">3</span>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════════════════════
+// D3.js — Integration Architecture Diagram
+// Hand-positioned nodes + clean bezier curves
+// ══════════════════════════════════════════════════════════
+(function() {
+  const svg = d3.select('#d3-arch')
+    .attr('width', 1184)
+    .attr('height', 530)
+    .attr('viewBox', '0 0 1184 530');
+
+  const defs = svg.append('defs');
+
+  // Arrow markers
+  ['#00875A','#1565C0','#6A1B9A','#E65100','#78909C','#D32F2F'].forEach(color => {
+    defs.append('marker')
+      .attr('id', `arrow-${color.replace('#','')}`)
+      .attr('viewBox', '0 0 10 10')
+      .attr('refX', 9).attr('refY', 5)
+      .attr('markerWidth', 7).attr('markerHeight', 7)
+      .attr('orient', 'auto-start-reverse')
+      .append('path')
+      .attr('d', 'M 1 2 L 9 5 L 1 8 Z')
+      .attr('fill', color);
+  });
+
+  // Drop shadow filter
+  const shadow = defs.append('filter').attr('id', 'shadow').attr('x', '-10%').attr('y', '-10%').attr('width', '130%').attr('height', '140%');
+  shadow.append('feDropShadow').attr('dx', 0).attr('dy', 2).attr('stdDeviation', 3).attr('flood-opacity', 0.1);
+
+  // ── Node definitions ──
+  const groups = {
+    external: {
+      label: 'EXTERNAL SYSTEMS', color: '#546E7A', bg: '#ECEFF1',
+      x: 10, y: 8, w: 190, h: 510,
+      nodes: [
+        { id: 'his',     label: 'HIS / Data Center',    icon: '🏥', y: 55 },
+        { id: 'cdp',     label: 'CDP Hospital',         icon: '📊', y: 120 },
+        { id: 'pay',     label: 'Payment Gateway',      icon: '💳', y: 185 },
+        { id: 'ecom',    label: 'Hospital E-Commerce',  icon: '🌐', y: 250 },
+        { id: 'shopee',  label: 'Shopee',               icon: '🛒', y: 315 },
+        { id: 'partner', label: 'Partners (Marriott)',   icon: '🤝', y: 380 },
+        { id: 'line',    label: 'LINE',                  icon: '💬', y: 445 },
+        { id: 'well',    label: 'Well App',              icon: '📱', y: 475, hidden: true },
+      ]
+    },
+    gateway: {
+      label: 'API GATEWAY', color: '#00897B', bg: '#E0F2F1',
+      x: 390, y: 160, w: 170, h: 210,
+      nodes: [
+        { id: 'lb',  label: 'Load Balancer',   y: 200 },
+        { id: 'waf', label: 'WAF + Rate Limit', y: 250 },
+        { id: 'tls', label: 'TLS 1.3 + OAuth',  y: 300 },
+      ]
+    },
+    core: {
+      label: 'CORE SERVICES', color: '#00875A', bg: '#E8F5E9',
+      x: 620, y: 40, w: 170, h: 360,
+      nodes: [
+        { id: 'ma',     label: 'Marketing Automation', y: 80 },
+        { id: 'auth',   label: 'Auth Service (SSO)',   y: 140 },
+        { id: 'elig',   label: 'Eligibility API',      y: 200 },
+        { id: 'priv',   label: 'Privilege Service',    y: 260 },
+        { id: 'wallet', label: 'Wallet Service',       y: 320 },
+        { id: 'tier',   label: 'Tier Engine',          y: 380 },
+      ]
+    },
+    data: {
+      label: 'DATA LAYER', color: '#1565C0', bg: '#E3F2FD',
+      x: 850, y: 80, w: 150, h: 260,
+      nodes: [
+        { id: 'pg',    label: 'PostgreSQL\n(RLS + Sharding)', y: 130 },
+        { id: 'redis', label: 'Redis Cache\n(< 50ms reads)',  y: 220 },
+        { id: 's3',    label: 'Object Storage',               y: 300 },
+      ]
+    },
+    analytics: {
+      label: 'ANALYTICS', color: '#6A1B9A', bg: '#F3E5F5',
+      x: 1040, y: 100, w: 134, h: 200,
+      nodes: [
+        { id: 'dw',    label: 'Analytics DB',       y: 155 },
+        { id: 'dash',  label: 'Dashboard Engine\n(10+20 Custom)', y: 235 },
+      ]
+    },
+    events: {
+      label: 'EVENT PROCESSING', color: '#E65100', bg: '#FFF3E0',
+      x: 620, y: 420, w: 380, h: 100,
+      nodes: [
+        { id: 'kafka', label: 'Apache Kafka\n(Real-time)', x: 660, y: 460 },
+        { id: 'cdc',   label: 'CDC / Debezium',            x: 820, y: 460 },
+        { id: 'temp',  label: 'Temporal\n(Durable)',        x: 970, y: 460 },
+      ]
+    }
+  };
+
+  // Draw group backgrounds
+  Object.values(groups).forEach(g => {
+    const grp = svg.append('g');
+    grp.append('rect')
+      .attr('x', g.x).attr('y', g.y)
+      .attr('width', g.w).attr('height', g.h)
+      .attr('rx', 12)
+      .attr('fill', g.bg)
+      .attr('stroke', g.color)
+      .attr('stroke-width', 1.5)
+      .attr('stroke-opacity', 0.3);
+    grp.append('text')
+      .attr('x', g.x + 12).attr('y', g.y + 20)
+      .attr('font-size', 10).attr('font-weight', 700)
+      .attr('fill', g.color).attr('letter-spacing', '0.5px')
+      .text(g.label);
+  });
+
+  // Draw nodes
+  const nodePositions = {};
+  Object.entries(groups).forEach(([gk, g]) => {
+    g.nodes.forEach(n => {
+      if (n.hidden) { nodePositions[n.id] = { x: g.x + g.w/2, y: n.y, gx: g.x, gw: g.w }; return; }
+      const nx = n.x || (g.x + g.w / 2);
+      const ny = n.y;
+      nodePositions[n.id] = { x: nx, y: ny, gx: g.x, gw: g.w };
+
+      const node = svg.append('g').attr('class', 'node-box');
+      node.append('rect')
+        .attr('x', nx - 70).attr('y', ny - 18)
+        .attr('width', 140).attr('height', 36)
+        .attr('rx', 8)
+        .attr('fill', 'white')
+        .attr('stroke', g.color)
+        .attr('stroke-width', 1.5)
+        .attr('filter', 'url(#shadow)');
+
+      const lines = n.label.split('\n');
+      if (lines.length === 1) {
+        node.append('text')
+          .attr('x', nx).attr('y', ny + 1)
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'middle')
+          .attr('font-size', 11).attr('font-weight', 500)
+          .attr('fill', '#333')
+          .text(n.icon ? `${n.icon} ${n.label}` : n.label);
+      } else {
+        node.append('text')
+          .attr('x', nx).attr('y', ny - 6)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', 11).attr('font-weight', 600)
+          .attr('fill', '#333')
+          .text(n.icon ? `${n.icon} ${lines[0]}` : lines[0]);
+        node.append('text')
+          .attr('x', nx).attr('y', ny + 9)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', 9.5).attr('font-weight', 400)
+          .attr('fill', '#777')
+          .text(lines[1]);
+      }
+    });
+  });
+
+  // ── Connections ──
+  function connect(fromId, toId, color, label, opts = {}) {
+    const from = nodePositions[fromId];
+    const to = nodePositions[toId];
+    if (!from || !to) return;
+
+    const fromX = opts.fromRight !== false ? (from.gx + from.gw) : from.x;
+    const toX = opts.toLeft !== false ? to.gx : to.x;
+    const fy = opts.fy || from.y;
+    const ty = opts.ty || to.y;
+
+    const dx = (toX - fromX);
+    const cp = Math.max(40, Math.abs(dx) * 0.35);
+
+    const path = svg.append('path')
+      .attr('d', `M ${fromX} ${fy} C ${fromX + cp} ${fy}, ${toX - cp} ${ty}, ${toX} ${ty}`)
+      .attr('fill', 'none')
+      .attr('stroke', color)
+      .attr('stroke-width', 1.5)
+      .attr('stroke-opacity', 0.55)
+      .attr('marker-end', `url(#arrow-${color.replace('#','')})`);
+
+    if (opts.dashed) path.attr('stroke-dasharray', '5,4');
+    if (opts.bidir) {
+      svg.append('path')
+        .attr('d', `M ${toX} ${ty + 6} C ${toX - cp} ${ty + 6}, ${fromX + cp} ${fy + 6}, ${fromX} ${fy + 6}`)
+        .attr('fill', 'none')
+        .attr('stroke', color)
+        .attr('stroke-width', 1.2)
+        .attr('stroke-opacity', 0.35)
+        .attr('stroke-dasharray', '4,3')
+        .attr('marker-end', `url(#arrow-${color.replace('#','')})`);
+    }
+
+    if (label) {
+      const mx = (fromX + toX) / 2;
+      const my = (fy + ty) / 2 - 8;
+      svg.append('text')
+        .attr('x', mx).attr('y', my)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 8.5).attr('font-weight', 500)
+        .attr('fill', color).attr('opacity', 0.8)
+        .text(label);
+    }
+  }
+
+  // External → Gateway
+  connect('his', 'lb', '#546E7A', 'Purchases, Visits, Services', { fy: 55, ty: 200 });
+  connect('cdp', 'lb', '#546E7A', 'Service Catalog', { fy: 120, ty: 220 });
+  connect('pay', 'lb', '#546E7A', 'Payment Callbacks', { fy: 185, ty: 250 });
+  connect('ecom', 'lb', '#546E7A', 'Purchase Events', { fy: 250, ty: 270 });
+  connect('shopee', 'lb', '#546E7A', 'Order Data (Webhook)', { fy: 315, ty: 290 });
+  connect('partner', 'lb', '#546E7A', 'Activity Events', { fy: 380, ty: 300 });
+  connect('line', 'lb', '#546E7A', 'OAuth, LIFF Events', { fy: 445, ty: 320 });
+
+  // Gateway → Core
+  connect('lb', 'elig', '#00897B', '', { fy: 200, ty: 200 });
+  connect('waf', 'wallet', '#00897B', '', { fy: 250, ty: 320 });
+  connect('tls', 'auth', '#00897B', '', { fy: 300, ty: 140 });
+
+  // Core → Data
+  connect('wallet', 'pg', '#00875A', '', { fy: 320, ty: 130 });
+  connect('wallet', 'redis', '#00875A', '', { fy: 330, ty: 220 });
+  connect('elig', 'redis', '#00875A', 'Cache Lookup', { fy: 200, ty: 210 });
+  connect('priv', 'pg', '#00875A', '', { fy: 260, ty: 140 });
+
+  // Data → Analytics
+  connect('pg', 'dw', '#1565C0', '', { fy: 130, ty: 155 });
+  connect('dw', 'dash', '#6A1B9A', '', { fy: 175, ty: 235, fromRight: true, toLeft: true });
+
+  // Core → Events
+  connect('wallet', 'kafka', '#E65100', '', { fy: 340, ty: 460, toLeft: false });
+  connect('tier', 'kafka', '#E65100', '', { fy: 390, ty: 450, toLeft: false });
+
+  // Events internal
+  const evtY = 475;
+  svg.append('path')
+    .attr('d', `M 730 ${460} L 790 ${460}`)
+    .attr('stroke', '#E65100').attr('stroke-width', 1.5).attr('stroke-opacity', 0.5)
+    .attr('marker-end', 'url(#arrow-E65100)');
+  svg.append('path')
+    .attr('d', `M 890 ${460} L 940 ${460}`)
+    .attr('stroke', '#E65100').attr('stroke-width', 1.5).attr('stroke-opacity', 0.5)
+    .attr('marker-end', 'url(#arrow-E65100)');
+
+  // HIS ← Eligibility (return path)
+  svg.append('path')
+    .attr('d', 'M 620 210 C 500 210, 350 65, 200 65')
+    .attr('fill', 'none').attr('stroke', '#D32F2F')
+    .attr('stroke-width', 1.5).attr('stroke-opacity', 0.45)
+    .attr('stroke-dasharray', '5,4')
+    .attr('marker-end', 'url(#arrow-D32F2F)');
+  svg.append('text')
+    .attr('x', 390).attr('y', 110)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 8.5).attr('font-weight', 600)
+    .attr('fill', '#D32F2F').attr('opacity', 0.7)
+    .text('← Eligibility, Entitlements, Status');
+
+  // Events → Core (feedback loop)
+  svg.append('path')
+    .attr('d', 'M 970 445 C 1020 420, 780 400, 750 390')
+    .attr('fill', 'none').attr('stroke', '#E65100')
+    .attr('stroke-width', 1.2).attr('stroke-opacity', 0.4)
+    .attr('stroke-dasharray', '4,3')
+    .attr('marker-end', 'url(#arrow-E65100)');
+
+})();
+</script>
+
+</body>
+</html>

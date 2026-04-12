@@ -1,0 +1,72 @@
+---
+description: "Update product-marketing docs after major feature changes (new feature, renamed feature, new module, new market-facing term). Not for bugfixes, refactors, or internal changes."
+alwaysApply: false
+---
+
+# Product Marketing Docs
+
+The `product-marketing/` folder (symlinked from an external repo) contains marketing-level documentation used by the FE illustration project for translation and content work. These are NOT technical docs — no DB schemas, function names, or API endpoints.
+
+## Folder Structure
+
+```
+product-marketing/
+├── Product/
+│   ├── PRODUCT_OVERVIEW.md          — Module relationships, platform positioning
+│   ├── LOYALTY_FEATURES.md          — Loyalty feature descriptions
+│   ├── MARKETING_AUTOMATION_FEATURES.md — AMP / automation feature descriptions
+│   └── CUSTOMER_SERVICE_FEATURES.md — CS feature descriptions
+└── Translation/
+    ├── TRANSLATION_PHILOSOPHY.md    — Universal translation rules
+    ├── ENGLISH_CONTEXT.md           — English vocabulary + writing conventions
+    ├── JAPAN_CONTEXT.md             — Japanese market context
+    ├── TAIWAN_CONTEXT.md            — Taiwanese market context
+    └── THAILAND_CONTEXT.md          — Thai market context
+```
+
+## When to Update
+
+Only after **major** changes visible to customers:
+
+| Trigger | Example | Update? |
+|---|---|---|
+| Brand-new feature or sub-feature | New mission type, new channel, new CS action | Yes |
+| Feature renamed or core behavior fundamentally changed | "Workflows" → "Automation Rules" | Yes |
+| New module or product line added | A fourth module | Yes |
+| New market-facing term introduced | Term that would appear in UI copy | Yes |
+| Bugfix | Fix wallet balance calculation | No |
+| Performance improvement | Speed up tier evaluation | No |
+| Internal refactor | Rename DB function, restructure code | No |
+| API change with no customer-visible effect | Change BFF response shape | No |
+| Incremental enhancement to existing feature | Add a filter option to an existing list | No |
+
+## Domain → Doc Mapping
+
+| Domain | Product-Marketing Doc |
+|---|---|
+| Missions, Rewards, Currency, Tier, Tag/Persona, Referral, Forms, Checkin, Stored Value Card, Store, Activity/Earning, Purchase | `Product/LOYALTY_FEATURES.md` |
+| AMP Workflows, AMP AI Agent | `Product/MARKETING_AUTOMATION_FEATURES.md` |
+| CS Conversations, Knowledge Base, Procedures, Channels, Customers | `Product/CUSTOMER_SERVICE_FEATURES.md` |
+| New module or cross-module relationship change | `Product/PRODUCT_OVERVIEW.md` |
+
+## How to Write
+
+1. **Marketing level only.** What does this do for the brand or their customers? Not how it's implemented.
+2. **No technical details.** No function names, table names, API endpoints, DB schemas.
+3. **Outcome-first.** "Automatically reward customers when they reach a spending milestone" — not "trigger_milestone_reward fires when purchase_total exceeds tier threshold."
+4. **Match the existing tone.** Read the doc you're updating before writing. Follow its structure and voice.
+
+## Translation Handling
+
+If a new domain term is introduced in English:
+1. Add it to the vocabulary table in `Translation/ENGLISH_CONTEXT.md`
+2. Flag JP/TW/TH docs as needing a translation entry — add a comment or note at the top of each affected file
+3. Do NOT guess translations — only add the English source term
+
+## If the Symlink Is Missing
+
+Run from project root:
+
+```bash
+ln -s "/Users/rangwan/Documents/Rocket CRM - marketing content/product marketing" "./product-marketing"
+```

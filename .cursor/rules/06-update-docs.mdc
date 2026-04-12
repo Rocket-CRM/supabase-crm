@@ -1,0 +1,71 @@
+---
+description: Keep documentation in sync when creating or modifying functions, tables, APIs, services, or frontend integrations.
+alwaysApply: true
+---
+
+## Update Documentation After Changes
+
+This rule applies to ALL backend and integration changes, regardless of where the code lives (Supabase, Render, Inngest, frontend). After creating or modifying any of the items below, update the corresponding docs IN THE SAME SESSION — never defer.
+
+### What changed → What to update
+
+| Change | Where code lives | What to update |
+|---|---|---|
+| New DB function | `supabase/migrations/` | Add to `requirements/INDEX_FUNCTION.md` (name, type, purpose). Add to domain requirement doc. |
+| Changed function signature | `supabase/migrations/` | Update in `requirements/INDEX_FUNCTION.md`. If FE calls it, flag as breaking. |
+| Deprecated function | `supabase/migrations/` | Move to Legacy section in `requirements/INDEX_FUNCTION.md` |
+| New table | `supabase/migrations/` | Add to `requirements/INDEX_DOMAIN.md` + domain requirement doc |
+| Schema change | `supabase/migrations/` | Update table definition in domain requirement doc |
+| New edge function | `supabase/functions/` | Add to `requirements/INDEX_FUNCTION.md` under Edge Function section |
+| New Inngest function | `supabase/functions/` or `services/*/src/` | Add to `requirements/INDEX_FUNCTION.md` under Inngest section |
+| New Render service endpoint | `services/*/src/` | Add to `requirements/INDEX_FUNCTION.md` under Integration section |
+| New MCP tool | `services/cs-ai-service/src/` | Add to `requirements/INDEX_FUNCTION.md` under MCP Tools section |
+| FE starts calling a new BFF | `app/src/` | Verify function exists in `requirements/INDEX_FUNCTION.md` — if missing, add it |
+| New domain | anywhere | Create `requirements/<Domain>.md`, add sections to both INDEX files |
+| New CS table or function | anywhere | CS entries use `cs_` prefix, live in `CS_*.md` requirement docs |
+| Major new feature / renamed feature / new module | anywhere | Review `product-marketing/` docs per `12-product-marketing.mdc` (major changes only — not bugfixes or refactors) |
+| Feature behavior change with a Complete guide | anywhere | Update `requirements/feature-docs/<feature>.md` per `13-feature-guide-writing.mdc` (see Feature Guide Update below) |
+
+### How to update INDEX files
+
+**INDEX_FUNCTION.md** — add to the correct domain group: `| function_name | Type (BFF/Backend/Edge/Inngest) | One-line purpose |`
+
+**INDEX_DOMAIN.md** — add or update: Keywords, Source doc path, Tables, Functions.
+
+Read the file's domain headers first (offset/limit) to find the right section.
+
+### Rules
+
+- Do NOT defer doc updates — they are part of the same task as the code change
+- Doc updates triggered by an approved code change do not require separate approval — they are covered by the original approval
+- For CS domains, prefix requirement doc filenames with `CS_`
+- Keep entries factual — function name, type, one-line purpose. No aspirational descriptions.
+
+### Feature Guide Update
+
+Feature Guides (`requirements/feature-docs/`) describe user-visible behavior for non-technical audiences. They must stay in sync when behavior changes — but not on every code touch.
+
+**Creating or editing a feature guide?** Read `.cursor/rules/13-feature-guide-writing.mdc` FIRST — before gathering information or writing. It contains the template, 3-source gathering process, writing principles, and quality checklist.
+
+**When to update:** After implementing a change that alters anything a tester, CS agent, or marketer would notice:
+
+| Triggers update | Does NOT trigger update |
+|---|---|
+| New config option / field added to admin form | Internal refactor with no behavior change |
+| Status value added or renamed | Performance optimization |
+| New step in admin or member journey | Bugfix that restores intended behavior already described |
+| Business rule changed (eligibility, pricing, limits) | Migration that restructures without changing output |
+| New fulfillment method, visibility type, or enum value | Dependency upgrade |
+| BFF response shape change that affects what FE displays | Code cleanup |
+
+**How to check:** Read `requirements/feature-docs/INDEX.md`. If the affected domain has a guide marked "Complete," update it. If the guide is "Planned" or doesn't exist, skip — the guide will be written from current state later.
+
+**What to update:** Only the sections affected by the change. Don't rewrite the whole guide. Common patterns:
+- New config field → update Section 3 (Configuration Reference)
+- New journey step → update Section 4 or 5 + route map if route changed
+- New status value → update Section 2 (Key Concepts) + Section 6c (Testers)
+- Business rule change → update Section 7 (Business Rules)
+
+**Writing rules apply.** The glob trigger on `requirements/feature-docs/*.md` auto-loads `13-feature-guide-writing.mdc`. Follow it — especially context efficiency rules (define once, don't duplicate across sections).
+
+**Applies in both plan mode and agent mode.** When planning, include doc updates in the plan. When executing, update docs before marking the task complete.

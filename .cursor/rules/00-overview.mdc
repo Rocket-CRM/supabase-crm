@@ -1,0 +1,128 @@
+---
+alwaysApply: true
+---
+
+# CX Platform — Supabase Backend
+
+This is the Supabase backend for a **CX Platform** with two modules:
+- **Loyalty** — points, tiers, rewards, missions, marketing automation
+- **CS (Customer Service)** — conversations, knowledge base, AI procedures, omnichannel support
+
+Both modules share this Supabase project. Requirement docs are in `/requirements/`. CS docs are prefixed with `CS_`.
+
+## Supabase Project
+
+- **Project ID:** `wkevmsedchftztoolkmi`
+- NEVER call `list_projects` — use this ID directly.
+- All DB work via MCP: `execute_sql`, `apply_migration`, `deploy_edge_function`
+- Do NOT write Edge Function or migration code to local files — deploy directly via MCP. Documentation files (`requirements/*.md`) are maintained locally and must be updated per `06-update-docs.mdc`.
+
+## Context Lookup Procedure
+
+**MANDATORY on every user task** — including "build", "fix", "add", "create", "update", and "analyze". No tool calls, no proposals, no code until Steps 1–3 are complete.
+
+**FIRST TOOL CALLS must be:** reading the relevant section of `requirements/INDEX_DOMAIN.md` + querying Supabase MCP for existing schema/functions. Do NOT read plan docs, spec files, or open editor files first.
+
+### Step 3 (MCP check) is ALWAYS required
+
+Any task that touches a domain — whether building, planning, analyzing, or reviewing — requires checking the live database. Plans built on assumptions are wrong plans.
+
+| Request type | Steps required |
+|---|---|
+| **Build/fix/create/modify** | Steps 1–5 (full procedure) |
+| **Plan/design/propose** | Steps 1–3, then present proposal. Step 5: wait for approval. |
+| **Explain/analyze** | Steps 1–3, then present. No approval wait needed. |
+| **"Read this file and extract X"** — user points to a source | Read the file as asked + run Step 3 alongside for existing-vs-planned context |
+| **Meta tasks** (create/edit `.cursor/rules/` files, update `README.md`) | Use judgment — procedure is for domain/DB tasks, not project config. Any task that reads or modifies domain tables, functions, or requirement docs is NOT a meta task — it requires Steps 1–3. |
+
+Even when abbreviating, **always state which steps you're running or skipping and why.**
+
+### Step 1 — Identify the domain
+
+Match keywords from the user's message to a domain:
+
+**Loyalty Domains:**
+
+| Feature | Requirement Docs | DB Patterns |
+|---------|-----------------|-------------|
+| Missions | `Mission.md` | `mission_*`, `fn_*mission*` |
+| Rewards | `Reward.md` | `reward_*`, `redemption_*`, `promo_code_*` |
+| Currency | `Currency.md` | `wallet_*`, `points_*`, `tickets_*` |
+| Tier | `Tier.md` | `tier_*`, `user_tier_*` |
+| Tag/Persona | `Tag_and_Persona.md` | `persona_*`, `tag_*`, `user_personas`, `user_tags` |
+| Referral | `Referral.md` | `referral_*` |
+| Forms | `Forms.md` | `form_*`, `form_submissions` |
+| Checkin | `Checkin.md` | `checkin_*` |
+| Stored Value Card | `Stored_Value_Card.md` | `svc_*`, `stored_value_*` |
+| Store Classification | `Store_Attribute_Classification.md` | `store_*`, `location_*`, `partner_*` |
+| Activity/Earning | `Activity_Based_Earning.md` | `activity_*`, `earn_*` |
+| Purchase | `Purchase_Transaction.md` | `purchase_*`, `transaction_*` |
+| AMP Workflows | `AMP - Rule Based.md` | `workflow_master`, `workflow_node` |
+| AMP AI Agent | `AMP - AI Decisioning.md` | `amp_agent`, `amp_agent_action` |
+
+**CS Domains:**
+
+| Feature | Requirement Docs | DB Patterns |
+|---------|-----------------|-------------|
+| CS Overview | `CS_Feature_Spec.md` | `cs_*` |
+| Conversations | `CS_Conversations.md` | `cs_conversations`, `cs_messages`, `cs_conversation_events` |
+| Knowledge Base | `CS_Knowledge_Base.md` | `cs_knowledge_articles`, `cs_knowledge_embeddings` |
+| Procedures/AOPs | `CS_Procedures.md` | `cs_procedures` |
+| CS Channels | `CS_Channels.md` | `cs_channels`, `cs_platform_identities` |
+| CS Customers | `CS_Customers.md` | `cs_customers`, `cs_customer_memory` |
+
+If you can't match keywords, read the keyword cross-reference section in `requirements/INDEX_DOMAIN.md`.
+
+### Step 2 — Read the domain index entry
+
+Read ONLY the relevant domain section from `requirements/INDEX_DOMAIN.md` using offset + limit. NEVER read the full file.
+
+Extract: key business rules, function names + types, table names.
+
+### Step 3 — Verify schema via Supabase MCP
+
+Use `execute_sql` with project_id `wkevmsedchftztoolkmi`. Run at minimum:
+- **Table columns**: `SELECT column_name, data_type, is_nullable, column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='<table>' ORDER BY ordinal_position`
+- **Existing functions**: `SELECT proname, pg_get_function_arguments(oid) FROM pg_proc p JOIN pg_namespace n ON p.pronamespace=n.oid WHERE n.nspname='public' AND p.proname LIKE '%<keyword>%'`
+- **Function body** (when needed): `SELECT pg_get_functiondef(p.oid) FROM pg_proc p JOIN pg_namespace n ON p.pronamespace=n.oid WHERE n.nspname='public' AND p.proname='<name>'`
+
+**NEVER** guess column names from memory, docs, or similar tables. **NEVER** assume a column exists because a requirement doc mentions it — docs can be stale. **ALWAYS** run at least the table columns check before writing any function.
+
+### Step 4 — Read requirement doc sections (only if needed)
+
+Only when Steps 1-3 don't give enough context (complex business rules, state machines, edge cases). Use offset + limit, never the full doc.
+
+### Step 5 — Present findings, then wait
+
+Present: relevant tables, functions, business rules, proposed approach. WAIT for approval before making any changes.
+
+**Show your work.** Before each tool call, state which step you're on:
+- "**Step 1 — Domain:** CS Procedures (AOP)"
+- "**Step 2 — INDEX_DOMAIN.md:** Reading CS Procedures section..."
+- "**Step 3 — MCP:** Checking cs_procedures table and existing functions..."
+
+This is not optional formatting — it prevents silently skipping steps.
+
+### Multi-domain tasks
+
+When a task spans multiple domains (e.g., "audit all CS functions", "review the entire rewards + missions flow"):
+
+- **Step 1:** List all domains in scope explicitly.
+- **Step 2:** Batch-read relevant INDEX_DOMAIN.md sections (one read per section, parallel is fine).
+- **Step 3:** Run MCP discovery queries across the scope (e.g., `proname LIKE 'cs_%'` for all CS functions, `table_name LIKE 'cs_%'` for all CS tables). Per-table column checks come when you drill into specific items — not at discovery stage.
+- **Steps 4–5:** Continue as normal.
+
+### DO NOT shortcut the procedure by:
+- Reading plan docs (`.cursor/plans/`), spec files, or open editor files before completing Steps 1–3. Plan docs may only be consulted after Steps 1–3 confirm the live state.
+- Using the user's open/recent editor files as your starting context
+- Skipping MCP schema verification because a doc "probably has" the info
+- Treating "build" or "create" as implicit approval to skip Steps 1–5
+- Reading full requirement docs when INDEX_DOMAIN.md + MCP would suffice
+
+## Workflow
+
+1. Follow the Context Lookup Procedure (Steps 1-5) — MANDATORY, no exceptions
+2. Present findings and proposal
+3. Creation work follows only after explicit human approval
+
+**Applies in both plan mode and agent mode.** The lookup procedure is required whether you're planning an approach or executing it.

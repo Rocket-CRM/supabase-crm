@@ -1,0 +1,54 @@
+---
+alwaysApply: false
+description: "Abstraction and layering principles for architecture and design. Check when proposing new tables, functions, services, or any cross-module structure."
+---
+
+# Abstraction Principles
+
+## 1. Shared Abstraction Over Parallel Implementation
+
+When two systems need similar capabilities, extract the common concept into one shared abstraction. Never build two versions side by side.
+
+**Test:** If you're about to create `cs_<thing>` and `amp_<thing>` (or any module-prefixed pair) with similar schemas or logic — stop. That's one shared `<thing>` with per-consumer configuration.
+
+## 2. Depend on Abstractions, Not Siblings
+
+Module A should never import from or depend on Module B. If both need the same capability, it lives in a shared layer they both depend on. Dependencies point inward/downward, never sideways.
+
+## 3. Right Level of Ownership
+
+Ask: **"Who needs this?"**
+
+- One module → it belongs in that module
+- Multiple modules → it belongs in a shared layer
+- Anyone who plugs in → it's an interface or registry
+
+Don't put module-specific logic in shared layers. Don't put shared logic inside a single module.
+
+## 4. Don't Leak Specifics Upward
+
+A shared layer must never contain module-specific logic. The shared dispatcher shouldn't have CS-specific branches or AMP-specific conditions. Module details stay in the module; the shared layer works through configuration and contracts.
+
+## 5. Composition Over Duplication
+
+If you're copying a pattern from one module to create a similar one in another — stop. That pattern needs to be extracted and shared, not cloned.
+
+## Build-on-Violation Rule
+
+If you're about to build on top of an existing structure that violates these principles:
+
+1. **Stop.** Don't compound the violation.
+2. **Flag it.** Present what's wrong: what's duplicated, what should be shared, what proper layering looks like.
+3. **Propose consolidation first.** Refactor the foundation, then build the new thing on the clean abstraction.
+4. **Get approval.** The user may accept the tech debt — but the violation must be visible, not silently inherited.
+
+## Project Examples
+
+These illustrate the principles using existing patterns in this codebase:
+
+- `action_registry` = shared abstraction. `action_caller_config` = per-consumer config. The dispatcher doesn't know who's calling. *(Principles 1, 4)*
+- `cs_action_config` + `amp_agent_action` as separate tables = violation. Should be one `action_caller_config`. *(Principle 1)*
+- `workflow_master` uses a `domain` column — shared structure, module-filtered. Correct pattern. *(Principle 3)*
+- If CS needs to award points, it calls the shared loyalty function — it doesn't create `cs_award_points`. *(Principle 2)*
+
+**Applies in both plan mode and agent mode.** Challenge designs that introduce parallel structures before they reach implementation.

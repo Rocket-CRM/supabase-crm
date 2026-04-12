@@ -1,0 +1,160 @@
+---
+alwaysApply: false
+description: "Auth conventions for admin, user, and API authentication. Covers: get_current_merchant_id() resolution chain, admin JWT flow, user sessions, API key validation, role/permission checks, superadmin. Read when writing any function that needs auth context or merchant resolution."
+---
+
+# Auth Conventions
+
+Three distinct auth contexts exist. Every function must use the correct one.
+
+**Applies in both plan mode and agent mode.** Auth design must be correct in proposals and in implementation.
+
+## 1. Admin Auth (BFF functions)
+
+**Who:** Admin panel users (merchants, operators, CS agents).
+**How:** Supabase Auth JWT. Merchant resolved automatically.
+
+### Merchant Resolution — `get_current_merchant_id()`
+
+Every `bff_*` and `bff_admin_*` function calls this as the first line. Resolution priority:
+
+| Priority | Source | How it gets set |
+|---|---|---|
+| 1 | `x-merchant-id` header | FE passes merchant UUID directly |
+| 2 | `x-merchant-code` header | FE passes merchant code → looked up in `merchant_master` |
+| 3 | JWT claim `merchant_id` | Set by `custom_access_token_hook` |
+| 4 | JWT `user_metadata.merchant_id` | Set during signup/login |
+| 5 | JWT `app_metadata.active_merchant_id` | Set by `admin_set_active_merchant` (multi-merchant admins) |
+| 6 | `admin_users` lookup by `auth.uid()` | Fallback — looks up the admin's merchant |
+| 7 | `user_accounts` lookup by `auth.uid()` | Final fallback — looks up the user's merchant |
+
+**Never** accept `p_merchant_id` as a parameter in BFF functions. Always derive from auth context.
+
+### Admin Identity
+
+- `auth.uid()` → Supabase auth user UUID
+- `admin_users` table links `auth_user_id` → `merchant_id`, role, permissions
+- `check_admin_permission(p_permission)` — verifies the current admin has a specific permission
+- `is_current_user_admin()` — checks if the current user is in `admin_users`
+
+### Role & Permission System
+
+```
+admin_roles           → defines roles per merchant (Admin, Manager, Viewer, etc.)
+admin_role_permissions → maps role_id → permission strings
+admin_users           → maps auth_user_id → merchant_id + role_id
+```
+
+Permission check in functions:
+```sql
+IF NOT check_admin_permission('manage_rewards') THEN
+    RETURN fn_response_error('Forbidden', 'Insufficient permissions', 'FORBIDDEN');
+END IF;
+```
+
+### Admin Session Flow
+
+1. Admin signs in via Supabase Auth (email/password or SSO)
+2. `custom_access_token_hook` enriches JWT with `merchant_id`, role, permissions
+3. FE sends JWT in Authorization header + `x-merchant-id` in custom header
+4. BFF function calls `get_current_merchant_id()` → resolves merchant
+5. All queries filter by this merchant_id
+
+## 2. End-User Auth (user-facing functions)
+
+**Who:** End-users (loyalty members, customers).
+**How:** Supabase Auth JWT or custom session tokens.
+
+### User Identity
+
+- `auth.uid()` → Supabase auth user UUID
+- `get_current_user_id()` / `current_user_id()` → user UUID from auth context
+- `get_header_user_id()` → user UUID from custom header (for service-to-service calls)
+- `user_accounts` table is the primary user record (links `auth_user_id` → `merchant_id`)
+
+### User Session Management
+
+```
+user_sessions        → extended sessions (LINE login, custom auth)
+refresh_tokens       → token refresh tracking
+```
+
+- `create_extended_session()` — creates long-lived session
+- `validate_session()` / `check_user_session_valid()` — validates session token
+- `refresh_session()` — refreshes expired session
+
+### User Auth Methods
+
+Configured per merchant in `merchant_master.auth_methods` (text[]):
+- `line` — LINE Login (most common in Thailand)
+- `email` — Email/password
+- `tel` — Phone/OTP
+- `shopify` — Shopify customer auth
+
+OTP flow: `otp_requests` table, validated by `fn_validate_otp()`
+
+## 3. API Auth (external integrations)
+
+**Who:** External systems, webhooks, server-to-server calls.
+**How:** API key in header, merchant_id passed explicitly.
+
+### API Key System
+
+```
+merchant_api_keys    → stores hashed API keys per merchant
+```
+
+- `validate_api_key(p_api_key)` — validates and returns merchant_id
+- `bff_create_merchant_api_key()` — admin creates new key
+- `bff_revoke_merchant_api_key()` — admin revokes key
+- `admin_generate_api_key()` — generates the key
+
+### API Function Pattern
+
+API functions (`api_*`) receive `p_merchant_id` explicitly — the API gateway validates the key and passes the merchant:
+
+```sql
+CREATE OR REPLACE FUNCTION public.api_get_user(
+    p_merchant_id uuid,
+    p_user_id uuid DEFAULT NULL,
+    p_email text DEFAULT NULL,
+    p_tel text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $function$
+...
+```
+
+**Key difference from BFF:** `api_*` takes `p_merchant_id` as a parameter. `bff_*` derives it from `get_current_merchant_id()`.
+
+## 4. Superadmin Auth
+
+**Who:** Platform operators managing multiple merchants.
+**How:** Hardcoded check or special role.
+
+`superadmin_*` functions — operate across merchants. Used for:
+- Creating new merchants (`superadmin_create_merchant`)
+- Managing admin users across merchants
+- Platform-level configuration
+
+## Auth Decision Matrix
+
+| Building a... | Use this auth pattern |
+|---|---|
+| Admin panel feature | `bff_*` → `get_current_merchant_id()` |
+| End-user feature (LINE app, web) | User JWT → `auth.uid()` → `user_accounts` |
+| External API endpoint | `api_*` → explicit `p_merchant_id` (key validated upstream) |
+| Internal function called by others | `fn_*` → inherits caller's context or receives merchant_id as param |
+| Trigger function | `trigger_*` → uses `NEW.merchant_id` from the row |
+| Cross-merchant operation | `superadmin_*` → platform-level auth |
+
+## Security Rules
+
+- **BFF functions**: NEVER accept `p_merchant_id` — always `get_current_merchant_id()`
+- **API functions**: ALWAYS accept `p_merchant_id` explicitly
+- **fn_* helpers**: Can accept `p_merchant_id` when called by service role
+- **All queries**: MUST filter by merchant_id (enforced by RLS as safety net)
+- **Sensitive operations**: Add `check_admin_permission()` check
+- **User data access**: Always verify user belongs to the merchant

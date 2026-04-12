@@ -1,0 +1,388 @@
+Phase,Sub-Item,Type,Module Mapping,Specified in TOR,Custom Dev (One-time),Custom Dev MA & Hosting (On-going/year),License (On-going/year),Service (On-going/year),Per Consumption Cost,Setup (One-time),TOR Items Mapping,Additional CRM Features Beyond TOR
+"Phase 1 : การพัฒนาที่เกี่ยวกับ e-coupon management",,,,,,,,,,,, 
+Phase 1,ระบบสมัครสมาชิก/เข้าสู่ระบบ (Register/Login/SSO/OTP),License + Custom Development,"CRM Core, Open API",Yes,60000,10000,100000,,,,"- B1.1: สมัครสมาชิก/เข้าสู่ระบบ (Register/Login/OTP/SSO)
+- E1.1: Register/Login (SSO)
+- E2.1: Member
+- E2.2: Register / Login
+- E3.1: Register / Login (ผ่าน LIFF / Webview)","- ตั้งค่า auth method ได้ตาม merchant (LINE only / Phone only / ทั้งคู่)
+- ระบบตรวจสอบ profile completion หลัง login อัตโนมัติ
+- ตั้งค่า field ที่ต้องกรอกได้ 15+ fields พร้อม validation เช่น ชื่อ-สกุล, เบอร์โทร, อีเมล, เลขบัตรประชาชน, ที่อยู่
+- แสดง field ตามประเภทสมาชิกได้ เช่น สมาชิกประเภท Corporate เห็น field บริษัท"
+Phase 1,ระบบ Coin Wallet & ยอดคะแนนสะสม,License,CRM Core,Yes,,,150000,,,,"- A1.2: Coins คือ คะแนนสะสมท่ี่ได้จากพฤติกรรม/การซื้อ/การใช้บริการ และอื่น ๆ ใช้แลกสิทธิ์ต่าง ๆ ได้
+- B1.2a: ยอด coins ปัจจุบัน
+- B1.2b: ประวัติ earn/burn/expire (history)
+- A2.3: Omni-channel: Wallet ของ Coins, Wallet ของ eCoupons, Tier และอ่ื่น ๆ ต้องสะท้อนทุกช่องทาง โดยจัดลําดับของการทําธุรกรรมต่างกันแต่ละช่องทาง เช่น LINE เป็นช่องทางหลัก: Register/Check Coins/Burn Coins และ redirect ไป webview (เช่น LIFF) หรือ Well by Samitivej ที่เป็น super app: ต้อง display และทําธุรกรรมได้มากท่ีสุด (Full loop)
+- E1.3: Wallet: Coins + eCoupons + Tier
+- E2.4: Check Coins
+- E3.2: Check Coins / Check Tier / Check eCoupons","- รองรับหลายสกุลเงิน: Coins (ใช้แทนกันได้) + Tickets (แยกประเภท เช่น ticket สำหรับเข้าร่วม campaign พิเศษ หรือกิจกรรมเฉพาะสมาชิก)
+- บันทึกทุกรายการพร้อม audit trail ครบ
+- ระบบหมดอายุ coin ที่ยืดหยุ่น: ตั้งค่าได้หลายรูปแบบ เช่น จำนวนวันหลังได้รับ, วันที่กำหนดตายตัว, สิ้นเดือน, สิ้นปี, หรือกำหนดเองตามเงื่อนไขธุรกิจ — ระบบประมวลผลหมดอายุอัตโนมัติ
+- ระบบ reversal/ยกเลิกรายการ กรณี refund หรือยกเลิกบริการ
+- ตั้งค่า delayed award ได้ เช่น หน่วง 24 ชม. หลังเข้ารับบริการก่อนเข้า wallet"
+Phase 1,ระบบ Earn Coins จากพฤติกรรม (Content/Social),License + Custom Development,"CRM Core, CRM Campaigns",Yes,80000,15000,120000,,,,"- B1.3a: อ่านบทความ, กด Like, Share
+- B1.3: ได้ Coins จากพฤติกรรมที่ดี
+- A2.4: รองรับการให้ Coins จากพฤติกรรม (Behavioral Data) บนจากทุกช่องทางเครือโรงพยาบาลสมิติเวช ทั้ง Online และ Offline พร้อมรองรับเช่ือม Omni
+- E2.7: Track Activities Contents Read / Like / Share / Hospital Ecommerce
+- E2.8: ส่ง event เข้า CRM เพ่ือให้ coins ตามกติกา","- รองรับ 15+ ประเภทช่องทางการ earn coin
+- ตั้งค่าช่องทาง earn ได้หลายรูปแบบ (purchase, campaign, lifecycle, custom)
+- กำหนดอัตราแลก (ใช้บริการ X บาท ได้ Y coin) + ตัวคูณ coin (เช่น 2x ช่วงเปิดตัวสาขาใหม่)
+- ตั้ง earn rule ระดับบริการ (แพ็กเกจตรวจสุขภาพ/แผนก/ประเภทบริการ)
+- ตั้ง Threshold & Cap (จำกัดต่ำสุด/สูงสุดที่ earn coin ได้ต่อรายการ)"
+Phase 1,ระบบ Mission & Gamification,License,CRM Campaigns,Yes,,,150000,,,,"- B1.3b: Mission เช่น Online gamification, On-site gamification (ไปทําภารกิจรายแผนก)","- Standard Mission: ภารกิจเป้าหมายเดียว ทำซ้ำได้ตามตั้งค่า เงื่อนไขแบบ AND
+- Milestone Mission: ภารกิจหลายระดับ (เช่น ตรวจสุขภาพ 3 ครั้ง → 5 ครั้ง → 10 ครั้ง) พร้อม overflow waterfall
+- ติดตามความคืบหน้าแต่ละเงื่อนไขแยกกัน
+- ประเมินผลอัตโนมัติเมื่อมี event เกิดขึ้น
+- รองรับหลาย condition source: purchase, wallet, form, referral
+- แจกรางวัลอัตโนมัติเมื่อทำสำเร็จ
+- ระบบ Check-in ตามสถานที่ (เช่น check-in ที่ รพ.)
+- ระบบ Referral: ชวนเพื่อนสมัครสมาชิก/ใช้บริการ พร้อมรางวัลทั้งผู้ชวนและผู้ถูกชวน"
+Phase 1,ระบบแลก Coins เป็น eCoupon / Privilege / Reward Catalog,License,CRM Core,Yes,,,150000,,,,"- B1.4: แลก Coins เป็น eCoupon / Privilege / E Cash Voucher
+- B1.4a: เลือกสิทธิ์จาก catalog
+- B1.4b: เห็นเงื่อนไข/วันหมดอายุ/จํานวนคงเหลือ
+- B1.4c: ได้โค้ดสําหรับใช้ (QR/Barcode/Serial/Copy code)
+- A1.4: Privilege คือ สิทธิพิเศษจากโรงพยาบาลหรือ partner (คูปองส่วนลด/ดีลพิเศษ/ของรางวัล)
+- E1.4: Earn coins / eCoupon จากกิจกรรม, Redeem coins / eCoupon
+- E3.3: Burn Coins / Redeem Coupons redirect ไปหน้า CRM webview","- สถาปัตยกรรม 2 ชั้น: Eligibility Layer (ใครแลกได้) + Points Pricing Layer (ใช้กี่แต้ม)
+- Multi-dimensional matching: tier × user type × persona × tags พร้อมกัน
+- คำนวณราคา coin แบบ dynamic ตามมิติลูกค้า เช่น สมาชิก Platinum ใช้ coin น้อยกว่า Silver
+- 4 วิธี fulfillment: digital, shipping, pickup, printed
+- 3 ประเภท visibility: user (สาธารณะ), admin (หลังบ้าน), campaign (เฉพาะกลุ่ม)
+- จัดการ promo code แบบ bulk import พร้อม partner attribution"
+Phase 1,ระบบ Transfer Coin/Point (E-commerce & Partners),Custom Development,Open API,Yes,150000,30000,,,,,"- B1.5: แลก Transfer Coin / Point
+- B1.5a: Transfer จาก Ecommerce ต่าง ๆ ที่ Samitivej ขึ้นบริการ เช่น Shopee, Lazada, Line Myshop มาที่ Samitivej
+- B1.5b: Transfer จาก Partners เจ้าท่ีมี Coin / Point เช่น The One / M Card / K Point ฯลฯ มาที่ Samitivej
+- หมายเหตุ: Transfer coin เฉพาะกับแพลตฟอร์ม shopee, lazada เท่านั้น เป็นการ transfer จากเจ้าอื่นมาที่ Samitivej เท่านั้น ไม่สามารถแลก coin ออกได้","- รองรับระบบเครดิตสำหรับเชื่อมต่อ platform ภายนอก
+- ตั้ง conversion rate ต่อ partner ได้
+- API-based transfer พร้อม audit trail ครบ
+- Marketplace earn channel รองรับหลาย platform (Shopee/Lazada/TikTok)"
+Phase 1,"ระบบ eCoupon สำหรับโรงพยาบาล (เดี่ยว/ชุด/Seasonal)",License + Custom Development,CRM Core,Yes,120000,25000,180000,,,,"- A1.3: eCoupon คือ สิทธิ์แบบ ""คูปอง"" อาจเป็นส่วนลด, สิทธิ์บริการ, หรือ ""แพ็กเกจหลายครั้ง"" เป็นต้น
+- B1.6: eCoupon สําหรับโรงพยาบาล
+- B1.6a: คูปองร้านค้าในโรงพยาบาล เช่น คูปองส่วนลดร้านอาหาร 100 บาท จากแพ็คเกจตรวจสุขภาพ
+- B1.6b: คูปองส่วนลด/แลกสิทธิ์ใช้บริการ
+- B1.6d: คูปองจากการแลก coins
+- B1.6e: คูปองสมาชิกแพ็กเกจสุขภาพ 1/3/5 ปี [คูปองบังคับ กําหนดจํานวน, ช่วงเวลาใช้ | คูปองเลือกตามสิทธิ์แพ็คเกจ | คูปองส่วนลด แบบใช้ไม่จำกัด], Seasonal Coupon เช่น วันเกิด, เดือนเกิด, ครบรอบสมิติเวช 48, 49, 50, 55, 60 ปี เป็นต้น
+- E1.5: ซื้อ/รับ eCoupon จาก e-commerce (เช่น คูปองอาหาร)
+- E2.6: View eCoupons","- คูปอง admin-only สำหรับแจกจากหลังบ้านเท่านั้น เช่น คูปอง VIP จากแผนกลูกค้าสัมพันธ์
+- คูปอง campaign-specific สำหรับแจกเฉพาะกลุ่มเป้าหมาย เช่น เฉพาะสมาชิก Platinum
+- Flash reward หมดอายุเป็นนาที สำหรับ real-time promotion เช่น ส่วนลดคลินิกเฉพาะทางช่วง off-peak
+- Relative days expiry เช่น หมดอายุ 30 วันหลังรับคูปอง
+- Absolute date expiry เช่น คูปองวันเกิดหมดอายุสิ้นเดือนเกิด
+- สร้างชุดคูปองจาก template ได้"
+Phase 1,ระบบแพ็กเกจหลายครั้ง (Package Entitlement — ตัดใช้ทีละครั้ง),License + Custom Development,CRM Core,Yes,150000,30000,100000,,,,"- B1.6c: คูปองแพ็กเกจการใช้สิทธิ์ Package/Entitlement แบบหลายครั้ง เช่น treatment 5 ครั้ง (**สําคัญมาก)
+- B1.6c.i: ตัดใช้ทีละครั้ง (ป้องกันการใช้ซํ้า/ใช้เกิน)
+- B1.6c.ii: เห็นสถานะคงเหลือ + วันหมดอายุ
+- B1.6c.iii: รองรับ Edge cases เช่น ย้ายสาขา, ใช้พร้อมกัน 2 จุด, เปล่ี่ยนแพ็กเกจ","- จัดการ stock แบบ real-time ต่อ reward
+- รางวัล physical: ระบบติดตามสถานะ fulfillment ครบ (รอดำเนินการ → จัดส่ง → ส่งถึง → เสร็จสิ้น → ยกเลิก)
+- รางวัล digital: ออกสิทธิ์ผ่าน API หรือ code validation อัตโนมัติ
+- ติดตามสถานะ (claim แล้ว vs ใช้งานจริงที่ รพ.)
+- บันทึก audit trail ครบทุกการใช้สิทธิ์"
+Phase 1,"Back Office: จัดการคูปอง (อัตโนมัติ/Manual/สิทธิ์กลาง-แผนก)",License + Custom Development,CRM Core,Yes,80000,20000,100000,,,,"- B2.1: สร้างคูปองอัตโนมัติหลังคนไข้เข้ารับบริการ (แบบเด่ียว/แบบชุดคูปอง) + sync Data Center-HIS (API)
+- B2.2: สร้างคูปองแบบ manual (เด่ียว/ชุด) + แก้ไขรูปแบบ เงื่อนไขคูปองต่างๆได้
+- B2.3: สร้างสิทธิ์กลาง ให้สิทธิ์ย่อยตามแผนกเข้าถึงได้ (50 + แผนก)
+- B2.3a: ผู้ดูแลส่วนกลาง สามารถ สร้าง กําหนดเงื่อนไข วิธีการ / แพ็กเกจ / คูปองเด่ียว, ชุด / แยกแผนก
+- B2.3b: ผู้ดูแลแผนกสามารถกําหนดสิทธิ์ สร้าง/เลือกคูปองรูปแบบต่าง ๆ ส่งให้คนไข้ทางตรงเพ่ือนําไปใช้ได้
+- B2.3c: สามารถกําหนดมาตรฐาน / เงื่อนไข เดียวกันจากส่วนกลางเพื่อ สร้าง / ใช้ หรือส่งบันทึกใหม่ เข้าระบบจัดการสินค้า ใน CDP Platform ของโรงพยาบาล","- ตั้งค่า visibility ได้: สาธารณะ, admin-only, campaign-specific
+- กำหนดกลุ่มเป้าหมายตามประเภทสมาชิก เช่น เฉพาะสมาชิก Corporate
+- สร้างคูปองจาก template
+- จัดการคูปองจำนวนมากพร้อมกันได้"
+Phase 1,Coins Rule Engine,License,CRM Core,Yes,,,200000,,,,"- B2.4: Coins rule engine
+- B2.4a: กําหนด earn rate / bonus / expiry / จํากัดจํานวน / จํากัดความถี่ / แยกตามประเภทได้ เช่น OPD, IPD สัดส่วนได้ต่างกัน เป็นต้น
+- B2.4b: กําหนด earn rate แบบ Special ตามช่วงเวลาท่ี่กําหนด / กลุ่มท่ี่กําหนด / เฉพาะบุคคล
+- B2.4c: มีความสามารถควบคุม/อนุมัติการปรับแต้ม (maker-checker)","- กลุ่มกฎการ earn พร้อมควบคุม stacking (ซ้อนตัวคูณได้/ไม่ได้)
+- ตั้ง earn rule ระดับบริการ: แพ็กเกจ/แผนก/ประเภทบริการ พร้อมกำหนดข้อยกเว้นได้
+- ตั้ง rule ตามสาขา/แผนก รพ. ได้
+- ตั้ง delayed award ได้ เช่น หน่วง 7 วัน หลังเข้ารับบริการก่อนเข้า wallet
+- กำหนดข้อยกเว้นได้ เช่น ไม่นับบริการ X
+- ตัวคูณ coin อัตโนมัติตาม tier เช่น Platinum ได้ 2x
+- รองรับเงื่อนไขเฉพาะทางที่ซับซ้อน"
+Phase 1,Back Office: รายงาน & Analytics,License,CRM Core,Yes,,,150000,,,,"- B2.5: รายงานการใช้คูปอง แยกตามแผนก/ร้านค้า/แพ็กเกจ/รายบุคคล รายวัน/เดือน/ปี / ตามกําหนดและสามารถตั้ง monthly auto gen
+- F1.5: รายงาน: earn/burn, redemption, active users, campaign performance, funnel metrics
+- F1.6: export รายงาน (Excel/CSV) / Dashboard","- ระบบรายงานครอบคลุม 5 กลุ่มหลัก: (1) Member & Engagement — ภาพรวมสมาชิก, active users, retention (2) Coin Economy — earn/burn/expire, ยอดหมุนเวียน, ต้นทุนต่อ coin (3) Campaign & Redemption — ผลลัพธ์แต่ละ campaign, redemption rate, conversion (4) Action-to-Value Attribution — วัดผล ROI ของแต่ละ action ตั้งแต่ earn → engagement → redemption → revenue (5) Operations — coupon usage ตามแผนก, tier movement, anomaly detection
+- Drill-down จากภาพรวมลงถึงรายบุคคลได้
+- เปรียบเทียบ campaign หลายตัวพร้อมกัน
+- แชร์ dashboard ให้ทีมต่าง ๆ ดูได้ตามสิทธิ์"
+Phase 1,Back Office: Reward Catalog Management,License,CRM Core,Yes,,,80000,,,,"- B2.6: บริหาร reward catalog (ของรางวัล/สิทธิ์ที่แลกได้ด้วย coins) / personal reward (nice to have)","- ตั้ง eligibility หลายมิติ (tier + ประเภทสมาชิก + tags)
+- คำนวณราคา coin แบบ dynamic ตามมิติลูกค้า
+- นำเข้า promo code จำนวนมากพร้อมระบุ partner ต้นทาง
+- จัดการ stock แบบ real-time
+- ตั้ง scheduling ของ reward (start/end date)"
+Phase 1,Back Office: สิทธิ์ผู้ใช้งาน (Role/Permission/MFA),License,CRM Core,Yes,,,60000,,,,"- B2.7: สิทธิ์ผู้ใช้งานหลังบ้าน (role/permission/MFA) user access control
+- A2.8: Governance สรุปกติกา + audit log + ผู้อนุมัติ (maker-checker) และอื่น ๆ
+- F1.7: Permission management / audit log","- แยกข้อมูลระดับ merchant อย่างปลอดภัย
+- แบ่ง admin function ได้ละเอียด: ดู / สร้าง / แก้ไข / อนุมัติ
+- Superadmin สำหรับจัดการระดับ platform
+- ตั้งค่า approval workflow สำหรับ action ที่มีผลกระทบสูง เช่น ปรับแต้มจำนวนมาก"
+Phase 1,เชื่อมต่อ Well by Samitivej (SuperApp — Full Loop),Custom Development,Open API,Yes,300000,60000,,,,,"- B3.1: Well by Samitivej (แสดง wallet + collect / redeem)
+- E1: WellbySamitivej (SuperApp)—""FullLoop มากที่สุด""
+- E1 ภาพที่อยากได้: Well เป็น ""หน้าบ้านหลัก"" ท่ี่ลูกค้าเห็นและทําธุรกรรมได้ครบที่สุด Vendor ต้องรองรับผ่าน API/SDK/Deep link ตามความเหมาะสม
+- E1.1: Register/Login (SSO)
+- E1.2: Member Benefit / Status
+- E1.3: Wallet: Coins + eCoupons + Tier
+- E1.4: Earn coins / eCoupon จากกิจกรรม, Redeem coins / eCoupon
+- E1.5: ซื้อ/รับ eCoupon จาก e-commerce (เช่น คูปองอาหาร)
+- E1.6: แสดงสิทธิ์ package entitlement (เหลือกี่ครั้ง) และกดใช้/ยืนยันได้
+- E1.7: รับ Push/ข้อความแจ้งสิทธิ์จาก Journeys เชื่อม Tier ได้ข้อเสนอที่แตกต่างกันได้ ซื้อได้ทันที
+- E1.8: Consent & preference / Omni","- แสดง content และข้อเสนอเฉพาะบุคคลตาม tier/ประเภทสมาชิก/segment
+- รองรับหลายภาษา (ไทย/อังกฤษ/จีน/ญี่ปุ่น) สำหรับผู้ป่วยต่างชาติ
+- ระบบ cache สำหรับโหลดข้อมูล wallet/สิทธิ์ได้เร็ว
+- รับข้อมูลจากหลายระบบพร้อมกันได้ (HIS, e-commerce, LINE) เพื่ออัปเดต member profile"
+Phase 1,เชื่อมต่อ Data Center-HIS (API),Custom Development,Open API,Yes,250000,50000,,,,,"- B3.4: Data Center-HIS (API) ข้อมูลต่างๆ อาทิ patient history, tier พร้อมการทํา analytics และ event การเข้ารับบริการ เพื่อออกคูปอง/ตัดสิทธิ์
+- A2.2: เช่ื่อม Data Center-HIS ได้ โดยเฉพาะการซื้อแพ็กเกจหน้างาน การเข้าใช้บริการ ""แพ็กเกจหลายครั้ง/คูปองชุด"" และการสร้าง/ตัดอัตโนมัติ หลัง ซ้ือ/เข้ารับบริการ การมาโรงพยาบาล แยกย่อยแผนกต่างๆ","- ระบบรับ event จาก HIS แบบ real-time
+- ระบบส่งข้อมูลที่เชื่อถือได้ ไม่มีข้อมูลหาย
+- ระบบประมวลผลที่มีความเสถียร พร้อม retry อัตโนมัติ
+- ตั้งค่า event-to-action mapping ได้ (HIS event → คูปอง/สิทธิ์/tier update)
+- Bi-directional API (อ่านข้อมูลผู้ป่วย + เขียนสถานะสิทธิ์กลับ)"
+Phase 1,"เชื่อมต่อ E-commerce (Shopee/Lazada/LINE MyShop/Hospital)",Custom Development,Open API,Yes,150000,35000,,,,,"- B3.5: E-commerce (Hospital e-commerce, Shopee, Lazada, Line Myshop)
+- E4: E-commerce ทุกช่องทาง — ต้องเชื่อมและ TransferCoin/Point มาที่ Samitivej
+- E4.1: Shopee / Lazada / LINE My Shop
+- E4.2: Hospital e-commerce platform
+- E4 สิ่งที่ต้องทําให้เกิด 1: ซื้อแล้วให้ coins หรือให้ eCoupon ตามกติกา
+- E4 สิ่งที่ต้องทําให้เกิด 2: Redeem eCoupon ในการซื้อครั้งถัดไป (ถ้าใช้เป็น discount)
+- E4 สิ่งที่ต้องทําให้เกิด 3: Tier benefit ต้องมีผลกับ e-commerce (เช่น ส่วนลด/สิทธิพิเศษตาม tier)
+- A2.1: เชื่อมการนับเงื่อนไขต่าง ๆ เช่น Spending หรือการส่ั่งซื้อสินค้าสําเร็จ จาก E-commerce Shopee / Lazada / LINE My Shop / Hospital e-commerce และ Tier ต้องบริหารจากศูนย์กลาง","- ตั้งค่า earn channel ครั้งเดียวครอบทุก marketplace (Shopee/Lazada/TikTok)
+- ระบบตรวจสอบใบเสร็จ
+- ระบบตรวจสอบ order code จาก marketplace
+- ตั้ง rule แยกตามช่องทางการขายได้
+- ตั้ง earn rule แยกต่อ marketplace ได้"
+Phase 1,Single Customer View & Dynamic Segmentation,License + Custom Development,Mini-CDP,Yes,100000,20000,150000,,,,"- D1.1: Single Customer View (SCV) + Dynamic Segmentation
+- D1.1a: รวมข้อมูลพฤติกรรมจาก: Well/เว็บ/LINE/ecom/Data Center-HIS (เท่าที่อนุญาต)
+- D1.1b: ทํา segment
+- D1.1b.i: Segement แบบ Input
+- D1.1b.ii: Segement แบบ dynamic สร้างเงื่อนไขทางการตลาดได้
+- A1.6: Single Customer View (SCV) คือ มุมมองลูกค้าคนเดียวท่ี่รวมพฤติกรรมทุกช่องทาง ประวัติการใช้งาน
+- A2.6: ทํางานร่วมกับ CDP Hospital ได้: อย่างน้อยต้อง consume master product/price และใช้กับ offering/discount/journey/privilege
+- D เป้าหมาย: จาก ""มีข้อมูล"" ไปสู่ ""ใช้ข้อมูลทํา automation ถูกลูกค้าในแต่ละ Segment/Stage"" และวัดผลได้","- สร้าง segment จากพฤติกรรมไม่จำกัดมิติ เช่น VIP, ผู้ป่วยเรื้อรัง, กลุ่มตรวจสุขภาพประจำปี, กลุ่มสะสม coin สูง
+- จัดกลุ่มลูกค้าตามประเภทสมาชิก เช่น Corporate, Insurance, Individual
+- กำหนด customer attributes หลายมิติ (tier + ประเภทสมาชิก + tags)
+- Segment อัปเดตอัตโนมัติเมื่อ attribute ลูกค้าเปลี่ยน
+- Export segment ไปใช้กับระบบภายนอกได้"
+Phase 1,Journey Automation & Multi-channel Messaging,License,Marketing Automation,Yes,,,250000,,,,"- A1.5: Marketing Automation คือ การแคมเปญส่ื่อสารอัตโนมัติแบบมีเง่ื่อนไข (trigger/lifecycle/segment)
+- D1.2: Journey Automation
+- D1.2a: Trigger-based & Lifecycle เช่น Welcome / Upsell / Winback / Remind / etc.
+- D1.2b: ส่งได้หลายช่องทาง: SMS / LINE / Email / App Push / Web Push พร้อม personalization
+- D1.2c: Track performance ราย funnel และ Campaign report / Dashboard
+- E1.7: รับ Push/ข้อความแจ้งสิทธิ์จาก Journeys เชื่อม Tier ได้ข้อเสนอที่แตกต่างกันได้ ซื้อได้ทันที
+- E3.4: (Optional) Trigger message/notification จาก journey","- Frequency capping จำกัดข้อความต่อคนต่อช่วงเวลา เช่น ไม่เกิน 3 ครั้ง/สัปดาห์
+- Suppression list management
+- A/B testing สำหรับเปรียบเทียบ message เช่น ทดสอบข้อความ LINE 2 แบบ
+- Journey branching logic (if/else paths)
+- Delay nodes และ wait conditions เช่น รอ 3 วันหลังเข้ารับบริการ
+- Dynamic content personalization ตาม customer attributes เช่น แสดงชื่อแผนกที่ใช้บริการล่าสุด"
+Phase 1,SMS (ส่งข้อความ SMS),Service,Marketing Automation,Yes,,,,,,0.30 บาท/ข้อความ,,"- D1.2b: ส่งได้หลายช่องทาง: SMS / LINE / Email / App Push / Web Push พร้อม personalization","- ใช้ SMS สำหรับ OTP, แจ้งเตือนสิทธิ์, campaign และ journey automation
+- คิดค่าบริการตามจำนวนข้อความที่ส่งจริง
+- รองรับการส่งทั้งในประเทศและต่างประเทศ
+- ระบบ delivery tracking และ reporting"
+Phase 1,Lifestage / Hyperpersonalization (Optional),Custom Development,Marketing Automation,Yes,80000,15000,,,,,"- D2: (Challenge / Optional) รองรับ Lifestage / Life Context เชื่อม Data Center-HIS เพื่อทํา Hyperpersonalization
+- D2.1: สร้าง Lifestage Rule เชื่อม Dynamic Segment เช่น ก่อนถึงนัด สามารถเลือกซื้อเพิ่มได้, หลังจากออกจากโรงพยาบาล แจ้ง Campaign ฟื้นฟูอาการ
+- D2.2: ส่ง Campaign ย่อยตาม Lifestage Rule","- ระบบ Lifestage rule เชื่อม HIS เช่น upsell ก่อนนัด, follow-up หลังออก รพ.
+- สร้าง segment อัตโนมัติตาม patient journey stage
+- ส่ง campaign อัตโนมัติตาม lifecycle event"
+Phase 1,AI Decisioning (ระบบ AI สำหรับตัดสินใจอัตโนมัติ),License,AI Decisioning (Optional),No,,,150000,,,,,,"- แนวคิดหลัก: ทุกครั้งที่ข้อมูลลูกค้าเปลี่ยนแปลง (เข้ารับบริการ, ซื้อแพ็กเกจ, earn/burn coin, tier เปลี่ยน) → AI จะ review ประวัติ, profile, และ context ของลูกค้าคนนั้น → ตัดสินใจว่าควร: ส่งข้อเสนอทันที / รอจังหวะที่เหมาะสม / ไม่ต้องทำอะไร — เสมือนมีผู้เชี่ยวชาญการตลาดดูแลลูกค้าทุกคน แบบ 1:1 ในระดับ scale
+- ตั้ง guardrails ได้: กำหนด assets ที่ใช้ได้ (คูปอง/eCoupon/ข้อเสนอ), งบประมาณ, ความถี่สูงสุด, ช่องทางที่อนุญาต, และข้อจำกัดอื่น ๆ
+- Next-best-offer: แนะนำแพ็กเกจ/บริการที่เหมาะกับประวัติผู้ป่วยแต่ละคน
+- Predictive churn scoring: คาดการณ์สมาชิกที่จะหายไป เพื่อส่ง retention campaign ก่อน
+- Behavioral pattern recognition: วิเคราะห์รูปแบบพฤติกรรม เช่น ตรวจสุขภาพประจำปี vs ใช้บริการเฉพาะกิจ
+- Smart send-time optimization: ส่งข้อความในเวลาที่แต่ละคนมีโอกาสเปิดอ่านสูงสุด"
+Phase 1,Campaign & Privilege Management Console,License,"CRM Core, CRM Campaigns",Yes,,,150000,,,,"- F1.1: สร้าง/แก้ไข campaign, privilege, eCoupon
+- F1.2: ตั้ง rule ของ coins, privilege, eCoupon
+- F1.3: ตั้งเงื่อนไขการมองเห็น/แลกได้ตาม tier/segment/time/campaign
+- F1.4: ตัวอย่างระบบหลังบ้านที่มี privilege/campaign management + condition + rule engine + analytics
+- A2.7: มี Back office สําหรับทีมการตลาด/operation ตั้ง segment, rule, campaign, privilege, report","- Mission template library สำหรับสร้าง mission เร็ว เช่น ภารกิจตรวจสุขภาพ
+- Form builder สำหรับ survey และเก็บข้อมูลผู้ป่วย
+- Display settings พร้อมระบบแปลหลายภาษา (ไทย/อังกฤษ/จีน/ญี่ปุ่น)
+- จัดการ content block style เพื่อ branding สม่ำเสมอ
+- แสดง content ตามประเภทสมาชิก"
+Phase 1,รองรับหลายภาษา (Multi-language),License,CRM Core,No,,,50000,,,,,"- รองรับภาษาไทย อังกฤษ จีน ญี่ปุ่น อาหรับ ใน license — ไม่มีค่าพัฒนาเพิ่มเติม
+- ภาษาอื่น ๆ เพิ่มเติมตามคำขอได้
+- ระบบแปลภาษาครอบคลุมทุกส่วน: หน้า consumer, eCoupon, reward, campaign, notification
+- ทีมการตลาดตั้งค่าเนื้อหาแต่ละภาษาได้เองจากหลังบ้าน
+- เหมาะสำหรับ รพ. ที่มีผู้ป่วยต่างชาติหลากหลายสัญชาติ"
+Phase 1,ซื้อ Health Package ผ่าน Well by Samitivej,Custom Development,"CRM Core, Open API",Yes,120000,25000,,,,,"- F3: ซื้อ Health Package ของ Samitivej เองได้ทันที ผ่าน Well by Samitivej (ระบบหลังบ้านใช้ของ Vendor)
+- F3.1 Customer: ผู้ใช้สามารถ ค้นหา/เลือกซื้อ Health Package ได้ภายในแอป (Catalog/Browse/Search/Filter) / ดูรายละเอียดแพ็กเกจได้ครบ เช่น รายละเอียดบริการ/เง่ื่อนไข/ระยะเวลาใช้งาน/ข้อจํากัด/สถานท่ี่ให้บริการ/ช่องทางนัดหมาย / ชําระเงิน + Coin แทนส่วนลด ""จบใน flow"" / หลักฐานการซื้อ/Order confirmation + สถานะรายการ / ระบบออกสิทธิ์หลังซื้อ (eCoupon/Voucher, Entitlement แบบนับจํานวน เช่น 5 ครั้ง, สิทธิ์การเข้าถึงบริการ/นัดหมาย) / ประวัติการซื้อ (Order History) + สถานะการใช้สิทธิ (ใช้ไปกี่ครั้ง/เหลือเท่าไร/หมดอายุเมื่อไร) / การแจ้งเตือนหลังซื้อ (push/LINE/Email) ตามช่องทางที่ได้รับ consent
+- F3.2 Vendor BO: สร้าง/แก้ไข/เผยแพร่ Health Package (Catalog management) / ตั้งราคา/เงื่อนไข/ช่วงเวลา (effective–expiry), quota, ซ่อน/แสดงแพ็กเกจตามเง่ื่อนไข / แคมเปญราคา/ส่วนลดตาม Journey/Segment/Tier/Eligibility หรือ Trigger จาก API / Order management (สถานะคําสั่งซื้อ, ยืนยันชําระเงิน, ยกเลิก/คืนเงิน ตาม policy) / ออกสิทธิ์อัตโนมัติหลังซื้อ (issue eCoupon/Entitlement) + audit log / รายงาน export (ยอดขาย, conversion funnel, package uptake, redemption/usage ตามสาขา/แผนก/ช่วงเวลา/แคมเปญ)","- รองรับหลายวิธี fulfillment (digital + physical + pickup)
+- รองรับ promo code สำหรับส่วนลดแพ็กเกจ
+- ระบบออกสิทธิ์อัตโนมัติ (ซื้อ → สิทธิ์)
+- จ่ายบางส่วนด้วย Coin ได้
+- จัดการ stock/quota แบบ real-time"
+Phase 1,Reward Pool / Pay-per-use,License + Custom Development,CRM Core,Yes,50000,10000,60000,,,,"- F4: Reward Pool แบบ Pay-per-use (อยากให้มีทางเลือก)
+- F4.1: ต้องการระบบ ""Privilege pool"" ดีลกลางของรางวัลหลากหลายให้ลูกค้าเลือกเอง หรือมี Tier ของรางวัล (คูปอง/ของ physical/อื่น ๆ)
+- F4.2: ใช้รูปแบบ pay-per-use โดยสมิติเวชจะจ่ายเมื่อมีลูกค้ากด Redeem
+- F4.3: กรณีเป็นส่วนของรางวัลรวม fulfillment/shipping","- ติดตาม partner ต้นทางของ promo code ได้
+- นำเข้า code จำนวนมากพร้อมจัดการวันหมดอายุ
+- รางวัล physical: ติดตามสถานะจัดส่ง (รอ → จัดส่ง → ส่งถึง → เสร็จสิ้น) / รางวัล digital: ออกสิทธิ์ผ่าน API หรือ code validation
+- วิเคราะห์ต้นทุนต่อ redemption ได้"
+Phase 1,"Reward Sourcing (จัดหาของรางวัล / Pay-per-use)",Service,CRM Core,Yes,,,,,"8-10% ของมูลค่ารางวัล (ขึ้นกับประเภท)",,"- F4.1: ต้องการระบบ ""Privilege pool"" ดีลกลางของรางวัลหลากหลายให้ลูกค้าเลือกเอง หรือมี Tier ของรางวัล (คูปอง/ของ physical/อื่น ๆ)
+- F4.2: ใช้รูปแบบ pay-per-use โดยสมิติเวชจะจ่ายเมื่อมีลูกค้ากด Redeem
+- F4.3: กรณีเป็นส่วนของรางวัลรวม fulfillment/shipping","- รางวัลกว่า 2,000+ SKU ครอบคลุมหลายหมวดหมู่: eCoupon ร้านอาหาร/คาเฟ่, บัตรของขวัญ (Starbucks, Central, Grab ฯลฯ), สินค้า lifestyle & wellness, ของรางวัล physical (ของใช้, gadget), สิทธิพิเศษจาก partner (โรงแรม, สปา, สายการบิน)
+- คิดค่าบริการเฉพาะเมื่อสมาชิกกด redeem จริง (pay-per-use)
+- ไม่มีค่าใช้จ่ายล่วงหน้าสำหรับ reward sourcing
+- จัดส่ง/fulfillment รวมอยู่ในบริการ"
+Phase 1,Data Strategy & Infrastructure,Service + Custom Development,"Mini-CDP, Open API",Yes,60000,15000,,,,,"- G.1: แนวทางการทําโครงสร้าง Data Strategy / Data Preparation / Data Enrichment / System / Infra","- ระบบประมวลผลแบบ event-driven ที่เสถียรและ real-time
+- ระบบ caching สำหรับความเร็วสูง
+- ฐานข้อมูลพร้อม real-time capabilities
+- ระบบเสริมข้อมูลลูกค้าอัตโนมัติ (ซื้อ → คะแนน → tier → segment)
+- โครงสร้างข้อมูลยืดหยุ่น ขยายได้ในอนาคตโดยไม่กระทบระบบเดิม"
+Phase 1,Security / PDPA / Audit / Anti-fraud,Service + License,CRM Core,Yes,,,40000,,,,"- G.2: แนวทางความปลอดภัย Security / PDPA / Audit / Anti-fraud
+- A2.9: Security + PDPA + Audit ป้องกันการ Fraudulent","- ระบบแยกข้อมูลระหว่าง tenant อย่างปลอดภัย
+- ระบบยืนยันตัวตนที่ปลอดภัยพร้อมแยกสิทธิ์ตาม merchant
+- PDPA consent management แยกช่องทาง แยกวัตถุประสงค์
+- Audit logging ครบทุก data mutation
+- ป้องกัน double-spend สำหรับ coin/coupon
+- Rate limiting และ abuse detection
+- เข้ารหัสข้อมูลทั้ง at rest และ in transit"
+Phase 1,Support / SLA / Operations,Service,N/A (Service),Yes,,,,504000,,,"- G.3: แนวทางการสนับสนุน Support / SLA / Operation","- ทีม Customer Success เฉพาะโปรเจกต์ 3 คน: 1 หลัก + 1 สำรอง + 1 coordinator
+- ทีม Support ให้บริการ 7 วัน 9:00-21:00 น. (ปรับเวลาได้ตามความต้องการ)
+- ระบบ monitoring & alerting ตลอด 24 ชม.
+- Performance optimization & tuning ต่อเนื่อง
+- Training & knowledge transfer workshops สำหรับทีม รพ.
+- จัดทำเอกสาร คู่มือการใช้งาน และ runbooks
+- ขั้นตอนรับมือเหตุการณ์เร่งด่วน (incident response & escalation)"
+"Phase 2 : การพัฒนา membership management (การซื้อสมาชิก paid member, คูปองที่ fix on type paid member, payment gateway, แพ็คเกจคูปอง, ระบบตัดใช้ทีละใบ)",,,,,,,,,,,, 
+Phase 2,โครงสร้าง Member 6 ประเภท & Multi-membership,License,CRM Core,Yes,,,200000,,,,"- A1.1: Member ปัจจุบัน Samitivej CRM แบ่ง เป็น 6 ประเภท
+- A1.1a: (ประเภทให้ดาว VIP) Star with Entitlement คือ กลุ่มผู้ถือครองสิทธิประโยชน์ต่าง ๆ ท่ี่ได้ตกลงกับสมิติเวชไว้ ท่ี่ต้องได้รับสิทธิประโยชน์ต่าง ๆ ตามข้อตกลง
+- A1.1b: (ประเภทจ่ายเงิน) Paid คือ คนท่ีีซื้อ Membership หรือ Subsciption Plan เช่น Divine Elite, อื่นๆ
+- A1.1c: (ประเภทไมจ่ายเงิน) Engagement / Tier (Membership Tier) คือ การท่ีมีส่วนร่วมหรือกิจกรรมท่ี่ตรงเง่ื่อนไข แล้วจะได้สิทธิประโยชน์ เช่น การทํากิจกรรม เช่น ล็อคอิน, Spending Tier Silver/Gold/Platinum จะได้รับสิทธิ์ แตกต่างกัน, อ่ื่นๆ
+- A1.1d: (ประเภท Corporate) กลุ่มสมาชิกบริษัทตามคู่สัญญา ผู้มีสิทธิ์ตามเงื่อนไขท่ี่ตกลงกันทางธุรกิจและบริการ เช่น ลูกค้าบริษัทระดับผู้บริหาร, ลูกค้าบริษัทท่ั่วไป อื่น ๆ ได้รับสิทธิ์ต่างกัน
+- A1.1e: (ประเภท Insurance) กลุ่มสมาชิกคู่สัญญาบริษัทประกันในแต่ละระดับ ผู้มีสิทธิ์ตามเงื่อนไขที่ตกลงกันทางธุรกิจและบริการ เช่น ลูกค้าประกันระดับสูง, ลูกค้าประกันทั่วไป, อื่น ๆ ได้รับสิทธิ์ต่างกัน
+- A1.1f: (ประเภท Exclusive Partner) กลุ่มสมาชิกพันธมิตร ผู้มีสิทธิ์ตามเง่ื่อนไขท่ี่ตกลงกันทางธุรกิจและบริการ เช่น ลูกค้าระดับสูง, ลูกค้าท่ั่วไป, อ่ื่น ๆ ได้รับสิทธิ์ต่างกัน
+- หมายเหตุ: 1 คน สามารถ Member ได้หลายประเภท แต่ในมุมมอง Single Customer View ต้องรู้ว่าคนน้ีเก่ียวข้องกับประเภทไหนบ้าง
+- A2.5: รองรับการแสดง/จัดการ Member จากทุกประเภท
+- C เป้าหมาย: ทํา Member 6 ประเภท เชื่อม ""Benefits+Cross-channel"" ให้เป็นระบบเดียวกัน โดยต้องเชื่อม Omni การเห็น และเข้าถึงได้","- ระบบ Tag สำหรับ segmentation เพิ่มเติม เช่น กลุ่มตรวจสุขภาพประจำ, กลุ่มศัลยกรรม, กลุ่มทันตกรรม
+- จัดกลุ่มสมาชิกแบบลำดับขั้น (group → ประเภทสมาชิก → user)
+- ติด tag พฤติกรรมไม่จำกัดจำนวน เช่น VIP, ผู้ป่วยเรื้อรัง, ตรวจสุขภาพประจำปี
+- โครงสร้างยืดหยุ่น ขยาย rule ได้ในอนาคตโดยไม่กระทบระบบเดิม"
+Phase 2,"VIP Membership (Star with Entitlement)",License + Custom Development,CRM Core,Yes,100000,20000,100000,,,,"- C1: VIP Membership กลุ่มผู้ถือครองสิทธิ์ประโยชน์ต่าง ๆ ที่ได้ตกลงกับสมิติเวชไว้ เช่น Connex, Cheva (BDMS), VIP Insurance, etc. โดย สร้าง Star แต่ละ Segment พร้อมกับ Entitlement
+- C1.1: สร้าง/รับค่า/API มี Star ได้หลายระดับ
+- C1.2: สร้าง/เช่ือม Entitlement สิทธิประโยชน์ท่ีได้
+- C1.3: รองรับการใช้งานแยกตามสิทธิ เช่น eCoupon, สิทธิ์ส่วนลด ทั้งนี้ ล้อโครงสร้างสําคัญตามเดิม
+- หมายเหตุ (A1): สิทธิ์ที่ได้รับมีทั้ง 2 แบบ: 1. สิทธิ์ที่ใช้ได้แค่ครั้งเดียว 2. สิทธิ์ที่ได้รับโดยมีระยะเวลา start date - end date โดยไม่ได้จำกัดว่าสมาชิก star VIP จะใช้กี่ครั้ง
+- หมายเหตุ (precedence): สมาชิก 2 ประเภท ได้สิทธิ์เดียวกัน ให้ระบบหยิบมูลค่าสูงสุดแสดง (เช่น Star VIP 30% vs Insurance 20% → แสดง 30%)","- แบ่งกลุ่มย่อย VIP ตามประเภทสมาชิก เช่น Connex vs Cheva
+- กำหนด benefit แยกต่อระดับ Star ได้
+- แจก entitlement อัตโนมัติเมื่อ assign tier
+- ตั้งระยะเวลา entitlement ได้"
+Phase 2,Paid Membership + Payment Gateway + คูปองแพ็คเกจ,License + Custom Development,"CRM Core, Open API",Yes,150000,30000,150000,,,,"- C2: Paid Membership สมาชิกประเภทจ่ายเงิน — ซื้อ Membership หรือ Subsciption Plan เช่น Divine Elite
+- C2.1: ตั้งกําหนด benefit อัตโนมัติ มี คูปองบังคับ (mandatory) vs คูปองเลือก (เลือกจากสิทธิ์) vs ส่วนลดใช้ได้จํากัด และ ใช้ได้ไม่จำกัด
+- C2.2: เห็นสิทธิ์/เงื่อนไข/การหมดอายุ
+- C2.3: การใช้งาน Benefit ล้อตาม eCoupon
+- หมายเหตุ (A1): Paid member — มี Tier โดยนับจากยอด paid package ที่ลูกค้าซื้อ เพื่อขยับ tier / ใช้ payment gateway ฝั่ง Rocket ทั้งหมด end to end
+- หมายเหตุ (A1): สมาชิกประเภท paid member ต้องได้รับสิทธิ์คูปองตามจำนวน package ที่ซื้อ ถึงแม้ว่าคูปองนั้น ๆ จะซ้ำกัน เนื่องจากเป็นสิทธิฺ์ตามแพ็คเกจที่ซื้อ","- Tier เลื่อนขั้นอัตโนมัติตามยอดสะสม
+- เชื่อมต่อ payment gateway ได้
+- อัปเกรด tier อัตโนมัติตามเงื่อนไขการใช้จ่าย
+- รวมสิทธิประโยชน์เป็นแพ็กเกจได้
+- ระบบจัดการต่ออายุ (renewal) และแจ้งเตือนหมดอายุ"
+Phase 2,Engagement / Tier-based Membership,License,CRM Core,Yes,,,200000,,,,"- C3: Engagement Membership / Tier-based membership structure สมาชิกประเภทไม่จ่ายเงิน
+- C3.1: Engagement / Tier-based membership structure
+- C3.1a: นิยาม tier ได้หลายระดับ
+- C3.1b: กําหนด benefit ต่อ tier
+- C3.1c: ตั้งเกณฑ์ upgrade/downgrade/expiry
+- C3.1d: เชื่อม Trigger จากการคํานวน Tier
+- C3.2: การคํานวณ Tier เชื่อมโยงกับ Trigger ข้อมูลจาก Data Source ต่างๆ
+- C3.2a: จากยอดใช้จ่าย เช่น Spending Tier Silver/Gold/Platinum จะได้รับสิทธิ์แตกต่างกัน เช่น First (Offer, Top Spend)
+- C3.2b: จากจํานวนคร้ั้งที่ใช้บริการ
+- C3.2c: จากกิจกรรมพฤติกรรมต่างๆ (Behavior Data)
+- C3.2d: รองรับหลายโรงพยาบาล/หลายสาขา (multi-site) โดยเบื้องต้น 2 สาขา
+- C3.2e: อ่ืนๆ เช่น จํานวนปี ที่เป็นลูกค้า
+- C3.3: การเชื่อม Tier สําหรับ E-commerce
+- C3.3a: ร้านใน Shopee/Lazada/Line My Shop และ e-commerce โรงพยาบาล ต้องสามารถผูก tier benefit ได้
+- C3.3b: การซื้อขายใน Shopee/Lazada/Line My Shop และ e-commerce โรงพยาบาลต้องกระทบส่งอัปเดตนับเงื่อนไขการซื้อ เช่น ราคา, จํานวนความถ่ี่ท่ี่ซ้ือ เพ่ื่อกระทบรวม Tier กลางของ Samitivej (API ได้หรืออย่างน้อยมีวิธี reconcile)","- รองรับ 5 window types: rolling, fixed_period, anniversary, calendar_month, calendar_quarter
+- Non-adjacent progression ข้าม tier ได้ถ้า qualify เช่น Silver ข้ามไป Platinum
+- Multi-path qualification (points หรือ sales หรือ orders → tier เดียวกัน)
+- Burn Rate ต่อ tier แปลง coin เป็นส่วนลด เช่น Platinum: 1 coin = 0.50 บาท
+- อัปเกรด tier ได้ทันที + ตรวจสอบ maintenance อัตโนมัติตามกำหนด
+- ตั้ง upgrade timing: ทันที, สิ้นเดือน, วันที่กำหนด, rolling days
+- แบ่งกลุ่มย่อยตามประเภทสมาชิกเป็นมิติเสริมอิสระ"
+Phase 2,Corporate Membership,License + Custom Development,CRM Core,Yes,100000,20000,100000,,,,"- C4: Corporate Membership กลุ่มสมาชิกบริษัทตามคู่สัญญา — ผู้มีสิทธิ์ตามเงื่อนไขที่ตกลงกันทางธุรกิจและบริการ เช่น ลูกค้าบริษัทระดับผู้บริหาร, ลูกค้าบริษัททั่วไป อื่น ๆ ได้รับสิทธิ์ต่างกัน
+- C4.1: สร้าง ""โปรแกรม/สัญญาองค์กร"" (Corporate Contract/Plan) ใน back office
+- C4.2: รองรับ ""ระดับสิทธิ์"" ภายใต้สัญญาเดียวกัน (เช่น Executive / General / Other)
+- C4.3: การนําเข้ารายช่ือผู้มีสิทธิ์ (Eligibility/Roster Import) แบบไฟล์ (batch) และ/หรือ API (ถ้ามี)
+- C4.4: การผูก ""สมาชิก"" กับ ""บริษัทคู่สัญญา + ระดับสิทธิ์ + ช่วงเวลามีผล"" (effective/expiry/status)
+- C4.5: แสดง ""สถานะสมาชิกองค์กร + ระดับสิทธิ์ + สิทธิ์ที่ได้รับ"" ในช่องทางหลัก (Well app / Web / LINE webview) ตามสิทธิ์ที่อนุญาต
+- C4.6: กําหนดสิทธิประโยชน์ตามระดับสิทธิ์ (benefit mapping) เช่น สิทธิ์การเข้าถึง, eCoupon, Privilege, ส่วนลด/ข้อเสนอ (ตามข้อตกลง)
+- C4.7: ออกรายงานสําหรับกลุ่ม Corporate แยกตามบริษัท/สัญญา/ระดับสิทธิ์ และการใช้งานสิทธิ์ (usage) เพื่อการบริหารสัญญา","- โครงสร้างลำดับขั้นองค์กร เช่น C-Level → Executive → General
+- นำเข้ารายชื่อผู้ใช้จำนวนมากพร้อม validation
+- ติด tag เพิ่มเติมภายในกลุ่ม corporate ได้
+- จัดการรายชื่อผู้มีสิทธิ์ผ่าน API แบบ real-time"
+Phase 2,Insurance Membership,License + Custom Development,"CRM Core, Open API",Yes,100000,20000,100000,,,,"- C5: Insurance Membership กลุ่มสมาชิกคู่สัญญาบริษัทประกันในแต่ละระดับ — ผู้มีสิทธิ์ตามเงื่อนไขที่ตกลงกันทางธุรกิจและบริการ เช่น ลูกค้าประกันระดับสูง, ลูกค้าประกันท่ั่วไป, อื่น ๆ ได้รับสิทธิ์ต่างกัน
+- C5.1: การสร้าง ""Partner Contract/Plan"" สําหรับคู่สัญญาบริษัทประกันใน back office เช่น Cheva (BDMS), AIA, Allianz Ayudhya และอื่น ๆ
+- C5.2: รองรับหลายระดับสิทธิ์ภายใต้คู่สัญญาเดียวกัน (เช่น Premium / Standard / Other หรือ A/B/C)
+- C5.3: การตรวจสอบสิทธิ์ (Eligibility Verification) ได้ทั้งแบบ batch และ/หรือ API ตามความพร้อมของคู่สัญญา และ/หรือการเช่ื่อมต่อ Data Center-HIS เพื่อเข้าถึง Eligible Data
+- C5.4: การผูกสมาชิกกับ ""คู่สัญญา + ระดับสิทธิ์ + ช่วงเวลามีผล + สถานะ"" (active/suspended/expired)
+- C5.5: แสดง ""สถานะสิทธิ์ + ระดับสิทธิ์ + benefit ท่ี่ได้รับ"" ในช่องทางหลัก (Well app / Web / LINE webview)
+- C5.6: รองรับกติกา ""การใช้สิทธิ์ร่วม/ไม่ร่วม"" กับ Coins/eCoupon/ส่วนลดอื่น (stackability / precedence) ตามเงื่อนไขธุรกิจ
+- C5.7: รายงานการใช้งานสิทธิ (usage) และสรุปตามคู่สัญญา/ระดับสิทธิ์/ช่วงเวลา เพื่อการบริหารสัญญา
+- หมายเหตุ: ทางสมิติเวชมีขาย แพ็คเกจตรวจสุขภาพ ซึ่งมีหลายแพ็คเกจ และมีเงื่อนไข apply discount ต่าง ๆ กัน ระบบจะต้องรองรับหลายเงื่อนไขได้ (เช่น แพ็คเกจ A ใช้ร่วมกับ Coins/eCoupon/ส่วนลดอื่นๆ ได้ / แพ็คเกจ B ใช้ร่วมกับ coupon เท่านั้น)","- กำหนดลำดับความสำคัญสิทธิ์ได้
+- ตั้งค่าได้ว่าสิทธิ์ไหนใช้ร่วมกันได้ / ไม่ได้
+- ใช้ส่วนลดตามเงื่อนไขแพ็กเกจได้แบบ dynamic
+- ตรวจสอบสิทธิ์เฉพาะ partner ผ่าน API
+- จัดการสถานะอัตโนมัติ (active → suspended → expired)"
+Phase 2,Exclusive Partner Membership,License + Custom Development,"CRM Core, Open API",Yes,100000,20000,100000,,,,"- C6: Exclusive Partner Membership กลุ่มสมาชิกพันธมิตร ผู้มีสิทธิ์ตามเงื่อนไขที่ตกลงกันทางธุรกิจและบริการ เช่น ลูกค้าระดับสูง, ลูกค้าทั่วไป, อื่น ๆ ได้รับสิทธิ์ต่างกัน
+- C6.1: การสร้าง ""Exclusive Partner Contract/Plan"" ใน back office
+- C6.2: รองรับหลายระดับสิทธิ์ภายใต้พันธมิตรเดียวกัน (High / General / Other หรือ A/B/C)
+- C6.3: การนําเข้ารายช่ือผู้มีสิทธิ์แบบ batch และ/หรือ API (ตาม partner) และ/หรือการเช่ื่อมต่อ Data Center-HIS เพ่ือเข้าถึง Eligible Data
+- C6.4: การกําหนดสิทธิประโยชน์ตามระดับสิทธิ์ (benefit mapping) และกําหนดการมองเห็น/การแลกสิทธิได้ (visibility/redeemable)
+- C6.5: แสดงสถานะและสิทธิของสมาชิกพันธมิตรในช่องทางหลัก (Well app / Web / LINE webview)
+- C6.6: การเชื่อม ""Exclusive Landing Page/Deal"" โดยใช้ข้อมูล partner membership level เป็นหนึ่งในเงื่อนไขการแสดงสิทธิ์ (dynamic condition) / โดยการเพิ่ม และบริหารสิทธิ์ ที่ขึ้นใน LandingPage ปรับเปลี่ยนได้ โดย Samitivej โดยไม่ขึ้นตรงระบบพันธมิตร
+- C6.7: ระบบต้องมีรายงานแยกตามพันธมิตร/สัญญา/ระดับสิทธิ์ และการใช้งานสิทธิสําหรับการบริหารความสัมพันธ์กับพันธมิตร","- จัดการ Landing page content ภายใน CRM
+- แสดงดีลเฉพาะบุคคลตามเงื่อนไข
+- Reward pool แยกต่อ partner ได้
+- รับ activity context จาก partner ผ่าน API
+- ตั้ง rule เฉพาะ partner ได้"
+Phase 2,"กติกาข้ามประเภทสมาชิก (Precedence/Stackability/Audit)",License,"CRM Core, Mini-CDP",Yes,,,80000,,,,"หมายเหตุ Scope ร่วม:
+● มี Audit Trail ครบ: ใครเพิ่ม/แก้/ลบสิทธิ์ เมื่อไร, ด้วยเหตุผลอะไร (รวม manual override)
+● มี Role & Permission สําหรับ back office และมีขั้นตอนอนุมัติ (maker-checker) สําหรับการปรับสิทธิ์สำคัญ
+● ต้องรองรับ สมาชิก 1 คนมีหลายสิทธิ์ / หลายโปรแกรมพร้อมกัน และมีกติกา การจัดลําดับความสําคัญ (Precedence) และความสามารถในการเรียงสิทธิ์ที่ใช้ต่อกันได้ (Stackability) ตั้งค่าได้
+● ต้องมี Single Source of Truth สําหรับสถานะ membership/benefits เพื่อให้ข้อมูลตรงกันทุกช่องทาง
+● ต้องรองรับการ export รายงาน และ API สําหรับดึงสถานะสิทธิ์ (Eligibility Status) ไปใช้กับช่องทางอื่น (เช่น e-commerce)","- ข้อมูลอัปเดตแบบ real-time ข้ามทุกช่องทาง
+- โครงสร้างยืดหยุ่น ขยาย rule ได้โดยไม่กระทบระบบเดิม
+- บันทึก audit trail ครบทุกรายการพร้อมที่มาของแต่ละรายการ
+- จัดลำดับความสำคัญสิทธิ์ต่อประเภทได้
+- กำหนดได้ว่าสิทธิ์ไหนใช้ร่วมกับสิทธิ์ไหนได้"
+Phase 2,Exclusive Partner Landing Page,Custom Development,CRM Campaigns,Yes,150000,30000,,,,,"- F2: Exclusive Landing Page for Partner Privilege (Requirement เฉพาะ) — ""หน้าดีลเฉพาะ"" ไม่ปน mass campaign กับพันธมิตรท่ี่อยูในเครือข่ายของ Vendor หรือที่เราดีลเอง
+- F2 Front 1: ดีล Exclusive Health Privilege เช่ื่อมลูกค้าและมีหน้าแสดงผลเฉพาะของสมิติเวช
+- F2 Front 2: เม่ื่อผู้ใช้ทํากิจกรรมกับ Partner A สําเร็จ → มี CTA ไปหน้า landing เฉพาะท่ี่กําหนดให้ Partner A เท่านั้น
+- F2 Front 3: สิทธิ์เปล่ี่ยนตามบริบท (dynamic condition) โดยฝั่งสมิติเวชเป็นคนกําหนด
+- F2 Back 1: ทีมการตลาดตั้ง rule เอง เลือก privilege จาก pool กลาง ตามแต่ละดีล
+- F2 Back 2: รองรับ API-based จาก partner ส่ง activity context เข้ามา
+- F2 Back 3: Match: User <-> Partner <-> Activity Status เพ่ื่อให้ partner เอาไปแสดงหน้าใช้สิทธิ์","- แสดง content ตามประเภทสมาชิก
+- กำหนดสิทธิ์แลกรางวัลตาม customer attributes แบบ real-time
+- กำหนดดีลตามสาขา/แผนกได้
+- สร้าง deep link สำหรับ partner distribution"
+"Phase 3 : การพัฒนาในส่วน Website ของ รพ. & LINE OA แต่ละสาขา",,,,,,,,,,,, 
+Phase 3,"เว็บไซต์สมิติเวช (เริ่มต้น 2 สาขา: ศรีนครินทร์ & สุขุมวิท)",Custom Development,Open API,Yes,1000000,180000,,,,,"- E2: เว็บไซต์สมิติเวช และสมิติเวชเด็ก — ""Earn + Identify + Activate""
+- E2 เว็บต้องรองรับอย่างน้อย:
+- E2.1: Member
+- E2.2: Register / Login
+- E2.3: Patient History (การแสดงผลจาก Internal)
+- E2.4: Check Coins
+- E2.5: Redeem Coins
+- E2.6: View eCoupons
+- E2.7: Track Activities Contents Read / Like / Share / Hospital Ecommerce
+- E2.8: ส่ง event เข้า CRM เพ่ือให้ coins ตามกติกา
+- E2.9: Consent & preference / Omni
+- B3.2: เว็บไซต์สมิติเวช / เว็บไซต์สมิติเวชเด็ก (register/login + activity tracking + wallet view + redeem)","- รองรับ web event tracking
+- เชื่อมต่อ earn channel สำหรับ content engagement
+- ตั้งค่า activity-to-coin mapping ได้ เช่น อ่านบทความ = X coins
+- รองรับ embedded widget (wallet, tier status)
+- ราคาต่อ website ต่อ รพ."
+Phase 3,"เว็บไซต์สมิติเวช (Optional: เพิ่มสาขา — ราคาต่อสาขา)",Custom Development,Open API,Yes,100000,60000,,,,,"- E2: เว็บไซต์สมิติเวช — เนื้อหาเดียวกับ 2 สาขาแรก แต่ขยายเพิ่มอีก 5 สาขา
+- หมายเหตุ Phase 3: กรณีในอนาคตจะให้พัฒนาเพิ่มสาขาอื่นๆ อีกประมาณ 5 สาขา จะคิดค่าพัฒนาต่อสาขาเท่าไหร่ **ให้ท่ามาเป็น Optional","- Architecture เดียวกับ 2 สาขาแรก ขยายได้ทันที
+- แชร์ CRM backend เดียวกัน (multi-site)
+- ตั้งค่า earn rule / campaign แยกต่อสาขาได้
+- ตั้งค่าแยกตามสาขาได้"
+Phase 3,"LINE OA แต่ละสาขา (เริ่มต้น 2 สาขา: ศรีนครินทร์ & สุขุมวิท)",License,Open API,Yes,,,120000,,,100000,,,"- E3: LINE — ควรเป็นช่องทาง:
+- E3 LINE ควรเป็นช่องทาง:
+- E3.1: Register / Login (ผ่าน LIFF / Webview)
+- E3.2: Check Coins / Check Tier / Check eCoupons
+- E3.3: Burn Coins / Redeem Coupons redirect ไปหน้า CRM webview
+- E3.4: (Optional) Trigger message/notification จาก journey
+- B3.3: LINE (register / login / activities / collect / redeem)
+- หมายเหตุ Phase 3: การพัฒนาระบบ Line OA แต่ละสาขา ซึ่ง ร.พ.สมิติเวช แต่ละสาขาจะมี line oa ของตัวเอง ต้องใส่ราคาแยกมาแต่ละโรงพยาบาล ราคา per website/per line oa เท่าไหร่","- LINE OAuth built-in authentication
+- LIFF web app framework support
+- Rich menu webhook integration
+- LINE Messaging API สำหรับ journey notifications
+- Flex message templates สำหรับ rich content display
+- ราคาต่อ LINE OA ต่อ รพ."
+Phase 3,"LINE OA (Optional: เพิ่มสาขา — ราคาต่อสาขา)",License,Open API,Yes,,,120000,,,80000,,,"- E3: LINE — เนื้อหาเดียวกับ 2 สาขาแรก แต่ขยายเพิ่มอีก 5 สาขา
+- หมายเหตุ Phase 3: กรณีในอนาคตจะให้พัฒนาเพิ่มสาขาอื่นๆ อีกประมาณ 5 สาขา จะคิดค่าพัฒนาต่อสาขาเท่าไหร่ **ให้ท่ามาเป็น Optional","- Architecture เดียวกับ 2 สาขาแรก ขยายได้ทันที
+- แชร์ CRM backend เดียวกัน (multi-site)
+- ตั้งค่า rich menu / campaign แยกต่อสาขาได้"
