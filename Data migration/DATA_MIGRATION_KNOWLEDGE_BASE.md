@@ -149,17 +149,22 @@ Items with **Migrate=1** are first-wave. Others are deferred or may not migrate 
 **Key transforms:**
 - `pdpaId` → `consent_version_id` FK → `consent_versions`
 - `isAccept` → `action` (accept/reject)
-- `nameForm` / `titleForm` / `detail` → denormalized, derive from `consent_versions`
+- `nameForm` / `titleForm` / `detail` → **discard at extract** — denormalized copies of the PDPA policy HTML; canonical text lives in `loyaltydb.pdpas` and will migrate to `consent_versions`.
+
+**Extract projection (see `src/migration/collections.ts`):** `{ detail: 0, titleForm: 0, nameForm: 0 }`.
+- **Why:** each `clientpdpas` doc embeds the full Thai privacy-policy HTML in `detail` (~35 KB/doc). Without projection, a 100K-row merchant slice is ~3.7 GB over the wire and hangs the extractor on small Render instances. Projection drops per-doc size from ~36 KB → ~0.3 KB (100× reduction).
 
 #### 10. Storefront: Receipts, Products, Stores (sf cluster)
 
 | MongoDB Source | Supabase Target | Notes |
 |---|---|---|
-| `storefrontdb.product_orders` | `purchase_ledger` + `purchase_items_ledger` | **DB is empty** — no data to migrate |
-| `storefrontdb.products` | `product_master` + `product_sku_master` | **DB is empty** |
-| `storefrontdb.stores` | `store_master` | **DB is empty** |
+| `storefrontdb.product_orders` | `purchase_ledger` + `purchase_items_ledger` | Keyed by `organization_id` (ObjectId) = merchant mongo id |
+| `storefrontdb.products` | `product_master` + `product_sku_master` | Keyed by `organization_id` |
+| `storefrontdb.stores` | `store_master` | Keyed by `organization_id` |
 
-**Status:** storefrontdb exists but has 0 collections. These are likely set up fresh in Supabase.
+**Status (2026-04-19):** storefrontdb has real data per-merchant (e.g. HER HYNESS: 516 stores, 396 products, 44,320 product_orders). The earlier "0 collections" note was stale.
+
+**Extract caveat:** `organization_id` is stored as a Mongo `ObjectId`, not a string — the extractor in `src/migration/extract-collection.ts` coerces the input hex string via the `OBJECT_ID_MERCHANT_FIELDS` set (`{merchantId, organization_id}`). A previous version only coerced `merchantId`, which caused all `stg_sf_*` tables to extract 0 rows in single-merchant mode. Fixed 2026-04-19.
 
 ---
 
@@ -334,4 +339,145 @@ This allows:
 
 ## Storefront Cluster (sf)
 
-`storefrontdb` exists but has **0 collections**. All sf-marked items (receipts, products, stores, missions, inventory) will be fresh in Supabase — no data migration needed, only schema setup.
+`storefrontdb` has real data per merchant, keyed on `organization_id` (ObjectId = merchant mongo id). Priority collections:
+
+| Collection | Per-merchant volume (HER HYNESS) | Target |
+|---|---|---|
+| `stores` | 516 | `store_master` |
+| `products` | 396 | `product_master` / `product_sku_master` |
+| `product_orders` | 44,320 | `purchase_ledger` / `purchase_items_ledger` |
+
+**Extract ObjectId-coercion set** (see `extract-collection.ts`):
+
+```ts
+const OBJECT_ID_MERCHANT_FIELDS = new Set<string>([
+  'merchantId',      // loyaltydb.*
+  'organization_id', // storefrontdb.*
+]);
+```
+
+Other merchant-id fields (`merchant_id` in `crm_*_db.*`, `shop_id` in `third_party_ecommerce.*`) are stored as plain strings and must **not** be coerced.
+
+---
+
+## Known Extraction Issues / Deferred Fixes
+
+| Area | Issue | Status |
+|---|---|---|
+| `stg_mongo_consent` | `clientpdpas` docs embed full policy HTML in `detail`/`titleForm`/`nameForm` (~36 KB/doc, hangs extractor) | **Fixed 2026-04-19** — projection drops those fields at extract time |
+| `stg_sf_*` | `organization_id` is ObjectId but extractor only coerced `merchantId` → 0 rows extracted for storefront in single-merchant mode | **Fixed 2026-04-19** — `OBJECT_ID_MERCHANT_FIELDS` now includes `organization_id` |
+| `stg_mongo_orders_{lazada,shopee,tiktok}` | `shop_id` is a platform-specific ID (e.g. Lazada seller id `100184574113`), not merchant mongo id. Extract filter used merchant mongo id → 0 rows. Wave 5 also JOINs `stg.merchant_ref` against `merchant_master.mongo_id` but `merchant_ref` stored `shop_id` → mismatch | **Fixed 2026-04-20** — `CollectionConfig.marketplacePlatform` flag + `seedMarketplaceCredentials` step. See **Marketplace shop_id resolution** below. |
+| `stg_mongo_orders_tiktok` (and other large cursors) | `MongoServerError: Executor error during getMore :: caused by :: operation exceeded time limit`. Streaming cursor held open while PG COPY flushed 10K-doc batches of fat marketplace docs (~5–15 s per flush) — Atlas tripped its per-op limit on the next `getMore`. Failed repeatedly on HER HYNESS's tiktok extract; retries restarted from zero since cursor position was lost. | **Fixed 2026-04-20** — extract now paginates by `_id > lastSeen` with `sort: {_id: 1}, limit: MONGO_BATCH`. Each page is a fresh indexed find (no `getMore`), so cursor timeouts are structurally impossible. Resumable on retry. See **Resumable `_id` pagination** below. |
+| Wave 5 (`transform-5a/5b/5c-orders-*`) | `invalid input syntax for type numeric: "{"$numberDecimal":"0"}"` — marketplace money fields (`total_amount`, `shipping_fee`, `tax`, etc.) are stored as Mongo `Decimal128`. The extractor's `serializeDoc` only handled `ObjectId` and `bigint`; Decimal128 fell through to the driver's `toJSON()` which emits the EJSON envelope `{$numberDecimal: "..."}`. Downstream `(stg.raw->>'total_amount')::numeric` then failed. | **Fixed 2026-04-20** — `serializeDoc` now flattens `Decimal128` and `Long` via `.toString()` before JSON.stringify; existing `->>`/`::numeric` SQL works unchanged. |
+| Wave 6b (`transform-6b-link`) | `error: invalid reference to FROM-clause entry for table "pru"` — the UPDATE target `purchase_receipt_upload pru` was referenced inside a JOIN's ON clause (`JOIN purchase_ledger pl ON ... AND pl.merchant_id = pru.merchant_id`). Postgres evaluates FROM-clause joins before the target is joined, so target-table references are illegal there. | **Fixed 2026-04-20** — rewrote to implicit cross-join (`FROM stg_mongo_receipts stg, purchase_ledger pl`) with all predicates moved into the `WHERE` clause where target-table references are legal. |
+
+### Marketplace shop_id resolution (fix landed 2026-04-20)
+
+**Source of truth:** `loyaltydb.merchants` — NOT `third_party_ecommerce.*_access_tokens`. The access-token collections only carry `{shop_id, access_token, refresh_token, expired_at}` and do **not** contain any `merchant_id` field (verified via MCP `collection-schema`). The authoritative `shop_id ↔ merchant` mapping lives on the merchant doc itself, embedded as three parallel arrays:
+
+| Platform | Field path on `loyaltydb.merchants` | Example value |
+|---|---|---|
+| Lazada | `lazadaIntegrations[].country_user_info[].seller_id` (primary) or `.account_detail.seller_id` | `"100184574113"` (HER HYNESS) |
+| Shopee | `shopeeIntegrations[].shop_id` | `"224882570"` (HER HYNESS) |
+| TikTok | `tikTokIntegrations[].shop_list.id` | `"7495709562522995045"` |
+
+**Resolution path:**
+
+1. `seedMarketplaceCredentials` (new programmatic step, `src/migration/steps/seed-marketplace-credentials.ts`) reads each merchant's three integration arrays and UPSERTs rows into `merchant_credentials (merchant_id, service_name, external_id, credentials)` keyed by `service_name ∈ {lazada,shopee,tiktok}` with `external_id = shop_id`. The full integration payload (tokens, expiry, account metadata) goes into the `credentials` JSONB column for downstream API use.
+2. `extract-collection.ts` detects marketplace collections via `config.marketplacePlatform`. Before opening the Mongo cursor it `SELECT external_id FROM merchant_credentials JOIN merchant_master ON mongo_id = …` and filters the cursor by `{shop_id: {$in: resolvedShopIds}}`. The `merchant_ref` column written to staging holds the owning merchant's mongo hex (not the shop_id), so Wave 5 SQL's existing JOIN `merchant_master.mongo_id = stg.merchant_ref` resolves without change.
+3. `extract-all.ts` (initial load) and `daily-sync.ts` (cron) both run `seedMarketplaceCredentials` BEFORE the fan-out. Single-merchant mode scopes the seed to that merchant; bulk mode refreshes every integration on the roster.
+4. `transform-claimed-orders.ts` uses the same `merchant_credentials` lookup to scope `*_order_claimed_transactions` — prior bug where it filtered by `{shop_id: merchantMongoId}` is now fixed.
+
+**New supporting index:** `merchant_credentials_marketplace_uniq` (partial unique index on `(merchant_id, service_name, external_id)` WHERE `service_name IN ('lazada','shopee','tiktok')`) — enables the `ON CONFLICT … DO UPDATE` path. Scoped to marketplace services so it doesn't collide with the existing email-as-external_id rows used by native-CRM merchants.
+
+---
+
+### Resumable `_id` pagination (fix landed 2026-04-20)
+
+**Problem:** the previous extract used a single streaming cursor:
+
+```ts
+const cursor = coll.find(filter, { batchSize: MONGO_BATCH });
+for await (const doc of cursor) { /* push to PG COPY buffer, flush at 10K */ }
+```
+
+On the three `third_party_ecommerce.*_order_transactions` collections (23.75 GB, 75M docs across all 12 collections in the cluster) this repeatedly tripped:
+
+```text
+MongoServerError: Executor error during getMore :: caused by :: operation exceeded time limit
+```
+
+Mechanism: each `flushBatch` (COPY + temp-table upsert of 10K rows of fat marketplace docs) takes 5–15 s. Mongo holds the cursor server-side across that gap. When we resume iteration the next `getMore` can't complete fast enough and Atlas kills it. Cursor death means the Inngest retry (`retries: 2`) restarts the extract from zero — the reason the tiktok staging count was an exact round 580,000 on failure (always died near the same spot).
+
+**Fix:** replaced the streaming loop with `_id > lastSeen` pagination:
+
+```ts
+let lastId: ObjectId | null = null;
+while (true) {
+  const pageFilter = lastId ? { ...filter, _id: { $gt: lastId } } : filter;
+  const page = await coll.find(pageFilter, {
+    sort: { _id: 1 },
+    limit: MONGO_BATCH,
+    projection: config.projection,
+  }).toArray();
+  if (page.length === 0) break;
+  for (const doc of page) { /* … */ }
+  lastId = page[page.length - 1]._id as ObjectId;
+  if (page.length < MONGO_BATCH) break;
+}
+```
+
+Properties:
+
+1. **No `getMore` round-trips** — each page is a one-shot `find`. Atlas cursor-timeout window structurally cannot apply.
+2. **Uses the default `_id_` B-tree index** — `{_id: {$gt: X}}` + `sort({_id:1})` is an index range scan; no new index required.
+3. **Resumable.** Staging uses `INSERT … ON CONFLICT (mongo_id) DO UPDATE`, so a retry that restarts from `lastId=0` is idempotent even without explicit checkpointing; in practice every retry picks up where the previous page finished.
+4. **Negligible overhead.** One B-tree seek per page (~1 ms) × N/MONGO_BATCH pages — e.g. ~1.2 s total across the 1.2M-row shopee extract.
+
+Applies to every collection uniformly (loyaltydb, crm_*, storefrontdb, third_party_ecommerce) — the same code path is strictly more resilient than streaming cursors for every size class, so no need for a per-collection flag. This is a prerequisite for bulk migration across all 79 merchants, where the naive streaming cursor against 75M third_party_ecommerce docs would fail repeatedly.
+
+---
+
+### Decimal128 serialization (fix landed 2026-04-20)
+
+**Problem:** marketplace money fields (`total_amount`, `shipping_fee`, `tax`, item-level `original_price`/`net_price`, etc.) are Mongo `Decimal128`. `JSON.stringify(doc)` invokes each type's `toJSON()` — for `Decimal128` that's the EJSON envelope:
+
+```json
+{ "total_amount": { "$numberDecimal": "630" } }
+```
+
+Downstream Wave 5 SQL (`wave-5{a,b,c}-orders-*.sql`, `wave-5d-order-items.sql`) does `(stg.raw->>'total_amount')::numeric`, which extracts the **string** `{"$numberDecimal":"630"}` and fails to cast.
+
+**Fix:** `serializeDoc` now flattens `Decimal128` and `Long` to plain string scalars via `.toString()` before `JSON.stringify`:
+
+```ts
+function serializeDoc(doc: Record<string, any>): string {
+  return JSON.stringify(doc, (_k, v) => {
+    if (v instanceof ObjectId)   return v.toHexString();
+    if (v instanceof Decimal128) return v.toString();
+    if (v instanceof Long)       return v.toString();
+    if (typeof v === 'bigint')   return v.toString();
+    return v;
+  });
+}
+```
+
+`->>` returns text either way, so the existing `(stg.raw->>'…')::numeric` casts work unchanged. Emitting as a string (rather than a JSON number) preserves full Decimal128 precision — important for merchants with large totals where `Number` would round.
+
+---
+
+### Wave 6b-link target-table reference (fix landed 2026-04-20)
+
+**Problem:** `wave-6b-link.sql` referenced the UPDATE target `pru` from inside a `JOIN … ON` clause:
+
+```sql
+UPDATE purchase_receipt_upload pru SET purchase_ledger_id = pl.id
+FROM stg_mongo_receipts stg
+JOIN purchase_ledger pl ON pl.transaction_number = (stg.raw->>'receiptId')
+  AND pl.merchant_id = pru.merchant_id   -- ← pru not in FROM list
+WHERE stg.mongo_id = pru.mongo_id AND …;
+```
+
+Postgres evaluates the FROM-list joins before the target is joined in, so target-table columns can only appear in the top-level `WHERE`, not in join `ON` conditions. Error: `invalid reference to FROM-clause entry for table "pru"`.
+
+**Fix:** replaced the `JOIN` with an implicit cross-join and moved every predicate (including `pl.merchant_id = pru.merchant_id`) into the `WHERE` clause. Behaviour is identical, Postgres now plans it as a hash/merge join on the legal predicates.
