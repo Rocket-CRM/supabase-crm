@@ -481,3 +481,63 @@ WHERE stg.mongo_id = pru.mongo_id AND …;
 Postgres evaluates the FROM-list joins before the target is joined in, so target-table columns can only appear in the top-level `WHERE`, not in join `ON` conditions. Error: `invalid reference to FROM-clause entry for table "pru"`.
 
 **Fix:** replaced the `JOIN` with an implicit cross-join and moved every predicate (including `pl.merchant_id = pru.merchant_id`) into the `WHERE` clause. Behaviour is identical, Postgres now plans it as a hash/merge join on the legal predicates.
+
+---
+
+### Per-merchant rollback hardening (fixes landed 2026-04-20)
+
+Two orthogonal bugs blocked `POST /migration/rollback/:merchantMongoId` on HER HYNESS; both now fixed.
+
+#### 1. `column "mongo_id" does not exist` (code bug in `rollbackMerchant`)
+
+`rollback-merchant.ts` applied `mongo_id IS NOT NULL` as a delete predicate against every target table, but 9 of the 32 target tables don't carry a `mongo_id` column (they're normalised children scoped through a parent FK). The endpoint 500'd on dry-run at the first such table.
+
+Tables without `mongo_id` (scoping is via parent subquery in `extra`, which itself filters parent's `mongo_id IS NOT NULL`):
+
+```text
+tier_progress          form_responses            form_submissions
+user_address           reward_promo_code         reward_points_conditions
+store_attribute_assignments   store_attributes   store_attribute_categories
+```
+
+**Fix:** added `noMongoId?: boolean` flag to `TARGET_TABLES` entries, marked those 9, and made the `mongo_id IS NOT NULL` predicate conditional:
+
+```ts
+const predicates: string[] = [];
+if (!t.noMongoId) predicates.push('mongo_id IS NOT NULL');
+if (t.extra) predicates.push(t.extra);
+else predicates.push('merchant_id = $1::uuid');
+if (t.requireSkipCdc) predicates.push('skip_cdc = true');
+```
+
+For the 8 child tables with `extra`, the parent subquery already filters to migrated rows, so dropping the child-side predicate is safe. `store_attribute_categories` is the one exception — no mongo_id *and* no `extra`, so its rollback scope is every row for the merchant. Acceptable because rollback is explicitly a clean-slate operation; documented in code.
+
+When adding a new target table: run the `information_schema.columns` check in the code comment and set the flag accordingly.
+
+#### 2. `Column used in the publication WHERE expression is not part of the replica identity` (schema bug)
+
+The `crm_cdc_publication` has a row filter `(skip_cdc IS NOT TRUE)` on three tables:
+
+| Table | Replica identity before | After |
+|---|---|---|
+| `wallet_ledger` | `full` | `full` (was already correct) |
+| `purchase_ledger` | `default (pkey)` | **`full`** |
+| `tier_change_ledger` | `default (pkey)` | **`full`** |
+
+A DELETE against a CDC-filtered table fails if Postgres can't evaluate the publication's row filter on the tombstone, and it can't unless the filter-referenced columns are present in the replica identity. `default` replica identity only covers the primary key, so `skip_cdc` isn't publishable → DELETE blocked.
+
+**Fix:** `ALTER TABLE purchase_ledger REPLICA IDENTITY FULL; ALTER TABLE tier_change_ledger REPLICA IDENTITY FULL;` — matches the existing pattern on `wallet_ledger`. Applied directly against Supabase (no migrations folder in this repo).
+
+Trade-off: `REPLICA IDENTITY FULL` slightly increases WAL volume for UPDATE/DELETE (publishes all old-row columns instead of just PK). Negligible for these three low-QPS ledger tables and already accepted for `wallet_ledger`.
+
+**Audit query** for adding future CDC-filtered tables:
+
+```sql
+SELECT pt.tablename, pt.rowfilter,
+       CASE c.relreplident WHEN 'f' THEN 'full' ELSE 'default (pkey)' END AS replica_identity
+  FROM pg_publication_tables pt
+  JOIN pg_class c ON c.relname=pt.tablename
+ WHERE pt.pubname='crm_cdc_publication' AND pt.rowfilter IS NOT NULL;
+```
+
+Any table with a non-null `rowfilter` must have `replica_identity = full` or the rollback path (and any other DELETE/UPDATE touching the filtered rows) will trip.
