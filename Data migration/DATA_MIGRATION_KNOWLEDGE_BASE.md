@@ -370,6 +370,10 @@ Other merchant-id fields (`merchant_id` in `crm_*_db.*`, `shop_id` in `third_par
 | `stg_mongo_orders_tiktok` (and other large cursors) | `MongoServerError: Executor error during getMore :: caused by :: operation exceeded time limit`. Streaming cursor held open while PG COPY flushed 10K-doc batches of fat marketplace docs (~5–15 s per flush) — Atlas tripped its per-op limit on the next `getMore`. Failed repeatedly on HER HYNESS's tiktok extract; retries restarted from zero since cursor position was lost. | **Fixed 2026-04-20** — extract now paginates by `_id > lastSeen` with `sort: {_id: 1}, limit: MONGO_BATCH`. Each page is a fresh indexed find (no `getMore`), so cursor timeouts are structurally impossible. Resumable on retry. See **Resumable `_id` pagination** below. |
 | Wave 5 (`transform-5a/5b/5c-orders-*`) | `invalid input syntax for type numeric: "{"$numberDecimal":"0"}"` — marketplace money fields (`total_amount`, `shipping_fee`, `tax`, etc.) are stored as Mongo `Decimal128`. The extractor's `serializeDoc` only handled `ObjectId` and `bigint`; Decimal128 fell through to the driver's `toJSON()` which emits the EJSON envelope `{$numberDecimal: "..."}`. Downstream `(stg.raw->>'total_amount')::numeric` then failed. | **Fixed 2026-04-20** — `serializeDoc` now flattens `Decimal128` and `Long` via `.toString()` before JSON.stringify; existing `->>`/`::numeric` SQL works unchanged. |
 | Wave 6b (`transform-6b-link`) | `error: invalid reference to FROM-clause entry for table "pru"` — the UPDATE target `purchase_receipt_upload pru` was referenced inside a JOIN's ON clause (`JOIN purchase_ledger pl ON ... AND pl.merchant_id = pru.merchant_id`). Postgres evaluates FROM-clause joins before the target is joined, so target-table references are illegal there. | **Fixed 2026-04-20** — rewrote to implicit cross-join (`FROM stg_mongo_receipts stg, purchase_ledger pl`) with all predicates moved into the `WHERE` clause where target-table references are legal. |
+| Extract pipeline serialisation | Each extract-one did `fetchPage → process → flushBatch → fetchPage …` with Mongo and PG never busy at the same time. On flush-bound extracts (marketplace, `sf_bills`) that roughly doubled wall time vs the overlap-ideal: a 5–15 s PG flush per 10K docs was paired with a 0.5–2 s Atlas page fetch, both serial. Observed HER HYNESS run: ~9 min each for `orders_{lazada,shopee,tiktok}` and `sf_bills`. | **Fixed 2026-04-20** — `MONGO_BATCH` raised from 1K → 10K (matches `COPY_BATCH`), and the loop now kicks off the NEXT page's `find()` before processing+flushing the current page. Overlap is a simple one-deep prefetch on the shared PG client — memory bounded at one in-flight page + one in-flight flush buffer. See **Pipelined page fetch** below. |
+| Single-slot flush on flush-bound extracts | With pipelining in place, `max(fetch, flush)` per iteration meant marketplace + sf_bills extracts were still flush-bound: ~8 s per 10K-row PG COPY+INSERT dominated the 1.5 s Atlas fetch. Extract wall time scaled linearly with flush time. | **Fixed 2026-04-20** — added `FLUSH_PARALLELISM = 2` and reshaped the loop to a 2-slot round-robin on fresh pooled connections. Two concurrent COPY+INSERTs commit independently against the same staging table; `ON CONFLICT (mongo_id) DO UPDATE` is commutative (a single Mongo page has no duplicate `_id`s, so no in-flight row conflict is possible). Expected ~2× on flush-bound extracts. See **Parallel flush** below. |
+| Late-start on `concurrency: 5` fan-out | HER HYNESS run (2026-04-19 23:26 UTC): `lazada`/`tiktok` started at `t+3 s`, `sf_bills` at `t+6 min`, `shopee` at `t+10 min`. The Inngest concurrency cap left the two largest extracts queued for ~10 min behind smaller fast-finishing collections — pure wall-time tax with no database pressure. | **Fixed 2026-04-20** — raised `concurrency: { limit: 5 }` → `8` in `migration-extract-one` and bumped `getPgPool().max` from 10 → 20 (required for 8 × 2 peak connections with `FLUSH_PARALLELISM=2`). Memory envelope on Render Pro 4 GB verified below 50 %. |
+| Storefront extract missing compound index `{organization_id, _id}` | `storefrontdb.{product_orders,products,stores}` have only a single-field `organization_id_1` index. The `_id`-paginated extract query `find({organization_id:X, _id:{$gt:last}}).sort({_id:1}).limit(10000)` falls back to an in-memory SORT of every merchant doc per page (verified via `.explain(executionStats)`: 44,331 keysExamined, 44,331 docsExamined, SORT stage with 54 MB in memory, 699 ms per page on HER HYNESS). For HER HYNESS this is ~3.5 s total (0.35 % of extract wall time — PG TOAST writes dominate). For 500K-order merchants ≈ 6 min Mongo time per extract; 2M+ merchants ≈ 45+ min. | **TODO before bulk backfill of large-storefront merchants** — not needed for HER HYNESS validation run (Mongo cost negligible relative to PG). Create via `mongosh` against storefront cluster: `use storefrontdb; db.product_orders.createIndex({organization_id:1, _id:1}, {name:'organization_id_1__id_1', background:true})` — repeat for `products` and `stores`. Build takes ~2-5 min on 5.2M-row `product_orders`; do between runs so it doesn't compete for Mongo I/O. Atlas UI cannot create this — the Create Index dropdown filters `_id` out; use mongosh or Compass. |
 
 ### Marketplace shop_id resolution (fix landed 2026-04-20)
 
@@ -435,6 +439,130 @@ Properties:
 4. **Negligible overhead.** One B-tree seek per page (~1 ms) × N/MONGO_BATCH pages — e.g. ~1.2 s total across the 1.2M-row shopee extract.
 
 Applies to every collection uniformly (loyaltydb, crm_*, storefrontdb, third_party_ecommerce) — the same code path is strictly more resilient than streaming cursors for every size class, so no need for a per-collection flag. This is a prerequisite for bulk migration across all 79 merchants, where the naive streaming cursor against 75M third_party_ecommerce docs would fail repeatedly.
+
+---
+
+### Pipelined page fetch (fix landed 2026-04-20)
+
+**Problem:** the `_id` pagination loop was structurally serial. Each iteration looked like:
+
+```text
+await fetchPage(lastId)   ←  0.5 – 2 s (Atlas RTT + serve)
+process page
+await flushBatch(buffer)  ←  5 – 15 s (CREATE TEMP + COPY + INSERT…ON CONFLICT + COMMIT)
+```
+
+Mongo was idle during the flush; PG was idle during the fetch. On the four flush-bound extracts (`stg_sf_bills`, `stg_mongo_orders_{lazada,shopee,tiktok}`) wall time was approximately `(fetch + flush) × pages` — HER HYNESS observed ~9 min per collection in parallel.
+
+**Fix:** two small changes in `src/migration/extract-collection.ts`:
+
+1. `MONGO_BATCH` raised from 1 000 → 10 000, matching `COPY_BATCH`. Every page now triggers exactly one flush, cutting Atlas round-trips by 10×.
+2. The loop kicks off the next page's `find()` *before* processing and flushing the current one:
+
+```ts
+let pagePromise: Promise<any[]> = fetchPage(null);
+while (true) {
+  const page = await pagePromise;
+  if (page.length === 0) break;
+  const nextLastId = page[page.length - 1]._id as ObjectId;
+  const shortPage = page.length < MONGO_BATCH;
+  pagePromise = shortPage ? Promise.resolve([]) : fetchPage(nextLastId);
+
+  for (const doc of page) { /* format → buffer → flush at COPY_BATCH */ }
+
+  if (shortPage) break;
+}
+```
+
+Effective wall time becomes `max(fetch, flush) × pages` — when flush dominates (always true on marketplace / sf_bills), Atlas latency disappears from the critical path.
+
+**Invariants preserved:**
+
+- Filter, page ordering (`sort: {_id:1}`), and upsert key (`ON CONFLICT (mongo_id)`) are unchanged — no migration or schema impact.
+- At most one flush in flight: the same pooled PG client serialises writes, so memory stays bounded at roughly two pages + one buffer (~100 MB worst case on fat marketplace docs).
+- Resumable-on-crash: if the process dies mid-flush, Inngest's retry restarts this collection from `lastId = null` and `ON CONFLICT DO UPDATE` rewrites any previously-committed rows. A prefetched-but-unused next page is discarded without side effect.
+
+Not worth chasing further without measurement: parallel flushes on two PG connections would roughly halve time on marketplace extracts specifically (since flush is ≥10× longer than fetch), but adds a second transaction to reason about. Defer until we've measured the simple overlap win.
+
+**Follow-up (2026-04-20):** live stats from the HER HYNESS run validated that marketplace and sf_bills extracts were still flush-bound even with pipelining (~8 s flush per 10K vs ~1.5 s fetch). Parallel flush landed — see **Parallel flush** below.
+
+---
+
+### Parallel flush (fix landed 2026-04-20)
+
+**Stats that justified the change** (HER HYNESS run, merchant `66e2aa1173943473744230b8`, measured from `MIN(loaded_at)` → `MAX(loaded_at)` on each staging table):
+
+| Collection | Rows | Span (s) | Rows/sec | Mongo cluster |
+|---|---|---|---|---|
+| `stg_sf_bills` | 44,331 | 1002 | 44 | sf M50 |
+| `stg_mongo_orders_lazada` | 683,276 | 547 | 1,249 | crm M60 |
+| `stg_mongo_orders_tiktok` | 771,229 | 655 | 1,177 | crm M60 |
+| `stg_mongo_orders_shopee` (still running) | 1,230,000 / 2,877,520 | 903 so far | 1,361 | crm M60 |
+
+`stg_sf_bills`'s 30× slower per-row rate traces to a 96 % TOAST ratio (`pg_total_relation_size`: 5 MB table / 140 MB TOAST+idx) — the docs exceed PG's ~2 KB TOAST threshold and every row pays the out-of-line storage cost. Marketplace docs inline (7 % TOAST on shopee). Parallel flush halves the commit cycle for both classes; the TOAST cost itself is not eliminated, but now runs on two connections at once.
+
+**Design:**
+
+```ts
+const FLUSH_PARALLELISM = 2;
+const flushSlots: Promise<void>[] = Array.from(
+  { length: FLUSH_PARALLELISM },
+  () => Promise.resolve()
+);
+let flushSlotIdx = 0;
+
+const flushBatchOnPool = async (rows: string[]) => {
+  const client = await getPgPool().connect();
+  try { await flushBatch(client, stagingTable, rows); }
+  finally { client.release(); }
+};
+
+// inside the page loop, when buffer is full:
+const toFlush = buffer; buffer = [];
+await flushSlots[flushSlotIdx];                           // wait only for THIS slot
+flushSlots[flushSlotIdx] = flushBatchOnPool(toFlush);     // new fresh-connection flush
+flushSlotIdx = (flushSlotIdx + 1) % FLUSH_PARALLELISM;
+
+// at end:
+await Promise.all(flushSlots);                            // drain remaining in-flight
+if (buffer.length > 0) await flushBatchOnPool(buffer);    // remainder
+```
+
+**Correctness invariants:**
+
+- Two simultaneous COPY+INSERT flushes target the same staging table but disjoint sets of `mongo_id`s (a Mongo page sorted by `_id` has no duplicates and we clear `buffer` before handing it off), so `ON CONFLICT (mongo_id) DO UPDATE` has no two-row contention between slots.
+- `INSERT … ON CONFLICT` takes per-row locks, not table locks, so the two transactions commit in any order without blocking each other.
+- On error in any slot, `Promise.allSettled(flushSlots)` in the outer catch lets other in-flight flushes drain before the function throws. Any partially-committed rows are idempotent on retry (same `mongo_id` conflict path).
+
+**Connection-pool sizing:** raised `getPgPool().max` from 10 → 20 in `src/lib/pg.ts`. Peak usage: `concurrency(extract-one) × FLUSH_PARALLELISM = 8 × 2 = 16` for flushes, plus ~2 for API routes and status endpoints ≈ 18. Supabase allows ~200 direct connections so we're well under the server ceiling.
+
+**Not tried:** `FLUSH_PARALLELISM > 2`. Once `flush/N < fetch` the pipeline becomes fetch-bound and further slots just waste memory. For the observed HER HYNESS shape, N=2 hits `max(1.5 s fetch, 4 s flush) ≈ 4 s` per iteration — already close enough to fetch-bound that N=3 would buy single-digit percent. Revisit if marketplace doc sizes grow or if we move the worker to a plan with faster CPU.
+
+---
+
+### Inngest concurrency bump to 8 (landed 2026-04-20)
+
+**Why:** HER HYNESS timeline showed the 5-slot cap costing ~10 min of pure wall-time. Fan-out kicked at `23:26:06`, but:
+
+- `stg_sf_bills`  first write at `23:32:02`  (t + 6 min)
+- `stg_mongo_orders_shopee` first write at `23:36:47`  (t + 10 min)
+
+Both large collections had to wait for smaller collections to release a slot — there was no database pressure preventing them from running. The cap was sized for safety during the initial rollout.
+
+**New setting:** `concurrency: { limit: 8 }` in `extractOneFn` (`src/migration/inngest/extract-one.ts`).
+
+**Memory envelope on Render Pro (4 GB)** with parallel flush active:
+
+```text
+8 concurrent extracts × max(50 MB fat, 5 MB small) × (page + prefetch + 2 flush buffers)
+  worst-case (all 8 are fat, which never happens — only 4 fat collections exist):
+  8 × 4 × 50 MB = 1.6 GB peak
+  typical: 4 fat + 4 small = 4×200 + 4×20 ≈ 880 MB peak
++ Node + driver baseline ≈ 400 MB
+= <2 GB of 4 GB total, comfortable
+```
+
+**Do NOT raise further without re-measuring.** The next bump (→ 16) would push worst-case toward the 4 GB Render Pro ceiling and would need either Pro Plus (8 GB) or a measurement-driven reduction in `FLUSH_PARALLELISM`. Bulk-merchant backfill across all 79 merchants will need this decision re-examined against the per-merchant memory cost multiplied by the cross-merchant Inngest concurrency.
 
 ---
 
