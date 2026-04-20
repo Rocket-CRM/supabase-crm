@@ -379,6 +379,7 @@ Other merchant-id fields (`merchant_id` in `crm_*_db.*`, `shop_id` in `third_par
 | No bulk orchestrator for 79-merchant rollout | Fleet-wide migration required N individual `curl POST /migration/start` calls with no built-in way to cap concurrent merchants. Single-merchant endpoints existed and are isolated (per-merchant staging / target scoping, ON CONFLICT idempotency throughout) but there was no batched entry point. | **Fixed 2026-04-20** — `migration-run-full` now has `concurrency: { limit: BULK_MERCHANT_CONCURRENCY }` (env-configurable, default 3 for Render Pro 4 GB). New endpoint `POST /migration/bulk-start` enqueues one `migration/start` per target merchant; Inngest dispatches them N at a time, rest queue. Skips `SKIP_MERCHANT_IDS`, skips completed/live merchants by default. See **Bulk migration orchestration** below. |
 | `getMore` cursor timeouts under concurrent-extract GC pressure | With HER HYNESS (2.88M shopee) + Future Park (1.8M points, 430K bills, 414K users — ~10× HER HYNESS's scale) running concurrently, 8 parallel extract-ones on Render Pro 4 GB hit GC-pause storms. Node event loop stalls for 5–30 s during major GCs, Mongo driver can't drain getMore response buffers fast enough, Atlas trips its per-op timeout (`MongoServerError: Executor error during getMore :: operation exceeded time limit`). Inngest's function-level `retries: 2` did eventually recover (data progressed), but each retry restarted from `lastId=null` — wasteful. Simultaneously observed: intermittent `Error performing request to SDK URL: Your server reset the connection` — Node event loop too busy to answer Inngest's step-request webhook → TCP RST. Root cause is client-side resource pressure, NOT an Atlas capacity issue (M60 is nowhere near saturation). | **Fixed 2026-04-20** — two defences: (a) per-page retry with exponential backoff inside `extractCollection` for transient patterns (`getMore`, `exceeded time limit`, network/socket errors) — 3 attempts with 500/1500/4000 ms backoff, keeps progress (no restart from `lastId=null`); (b) per-collection `mongoBatchSize` override on `CollectionConfig` — marketplace and `stg_sf_bills` reduced from 10K → 5K to halve in-flight page memory (fat docs), small-doc collections stay at 10K. Throughput-neutral (flush-bound extracts scale linearly either way) but roughly halves GC pressure per extract. Render Pro Plus (8 GB / 4 CPU) would further reduce recurrence risk if bulk concurrency grows beyond 3–5 merchants. See **Page-fetch retry + per-collection batch size** below. |
 | Stuck orchestrator on lost fan-in events | Extract-all used 21 parallel `step.waitForEvent('migration/extract-one-done')` calls for fan-in. When Inngest's SDK connection to Render dropped mid-run (observed during the GC-pressure incident above), one or more `extract-one-done` events went undelivered even though the extract-one function itself reported "Completed" in the Inngest dashboard (its own step.run calls succeeded). Extract-all's corresponding `waitForEvent` never fired. Orchestrator hung for 44+ min on HER HYNESS, 26+ min on Future Park, with staging data fully populated but `migration_merchant_status.status` still stuck at `'extracting'` and zero transform waves triggered. Design is fundamentally fragile: single lost event = whole run wedged until 6h timeout. | **Fixed 2026-04-20** — replaced event-based fan-in with DB polling against a new `wave=0` sentinel in `migration_wave_status`. Extract-one now writes `status='running'` at start, `'completed'`/`'failed'` at end via durable `step.run` calls. Extract-all polls `SELECT ... WHERE run_id=$1 AND wave=0` every 15s (step.sleep + step.run) until all collections are no longer `'running'`. Source of truth is PG rows, not Inngest event delivery — resilient to any number of dropped events. The `step.sendEvent('extract-done')` signal is kept for observability but extract-all no longer depends on it. See **Extract fan-in via DB polling** below. |
+| Stuck orchestrator on lost wave-done events (run-full layer) | The extract-all fan-in fix only covered the child-level hand-off (21× `extract-one-done` → extract-all). The parent `migration-run-full` still used 6 × `step.waitForEvent('migration/extract-done' \| 'migration/wave-done')` for its own child coordination (extract-all → run-full, transform-wave → run-full for each of waves 1,2,3,5,6,4). Same class of failure hit a second time on the 2026-04-20 merchant `66e2aa...4230b8` run: extract-all completed cleanly (all 21 staging tables populated, fan-in poll exited green, Inngest showed `migration-extract-all` as Completed at 28m 57s), but run-full's `wait-extract` waiter never fired. The `migration/extract-done` event was dropped in the same SDK-webhook window as the original incident. Run-full sat on `wait-extract` for 31m+ until cancelled. `migration_merchant_status.status` stuck at `'extracting'`, no transform waves triggered despite the 21 extract sub-steps all being `'completed'` in the DB. Identical failure mode, one layer up, still fragile for the same reason. | **Fixed 2026-04-20** — applied the DB-polling pattern at the run-full layer too. `transform-wave.ts` and `extract-all.ts` now each write a per-wave sentinel row (`sub_step='__wave__'`, `status='running'` at start → `'completed'`/`'failed'` at end, `error_detail` populated on failure). `run-migration.ts` replaces every `step.waitForEvent` with a `waitForWaveCompletion` helper that polls `migration_wave_status WHERE run_id=$1 AND wave=$2 AND sub_step='__wave__'` on the same 15s interval. Source of truth is the sentinel row, not event delivery — same resilience guarantee the extract-level fix gave, now uniform across all 7 phases (wave 0 extract + waves 1–6 transforms). `sendEvent('extract-done')` and `sendEvent('wave-done')` are retained purely for observability / external listeners. Also adds a `mark-merchant-failed` cleanup step so a crashed run-full flips `migration_merchant_status.status='failed'` instead of leaving it stuck at `'extracting'` or `'transforming'`. See **Run-full fan-in via DB polling** below. |
 
 ### Marketplace shop_id resolution (fix landed 2026-04-20)
 
@@ -842,6 +843,83 @@ for (let i = 0; i < POLL_MAX_ITERATIONS; i++) {
 **Step budget:** typical single-merchant extract finishes in 15–40 min = 60–160 poll iterations = 120–320 Inngest steps for the fan-in. 4h worst-case cap = 960 iterations = 1920 steps; exceeds Inngest's ~1000 soft limit but only triggers for genuinely broken extracts. If we see this in practice, bump the step plan or reduce the cap.
 
 **Unblocks stuck orchestrators going forward.** For runs that hung on the old fan-in (like the HER HYNESS/Future Park incident), the only recovery is to cancel + re-trigger — no backwards compatibility for in-flight runs. Post-deploy, any new run uses the polling path.
+
+---
+
+### Run-full fan-in via DB polling (fix landed 2026-04-20)
+
+**Problem observed on 2026-04-20 single-merchant run (`66e2aa...4230b8`):**
+
+`migration-extract-all` ran for 28m 57s and completed **green** in the Inngest dashboard — internal 21-collection fan-in polled `migration_wave_status wave=0` to completion exactly as designed. All 21 `extract-*` sub_steps showed `status='completed'`, all 4.8M staging rows landed, `summary.percentComplete=100`. But the parent `migration-run-full` sat stuck on its `wait-extract` step for 31m+ before being cancelled. `migration_merchant_status.status` remained `'extracting'`, no transform waves triggered.
+
+**Root cause:** the extract-level fix closed the child-fan-in hole but left the parent-level hand-off using the same lost-event pattern. `run-migration.ts` had six `step.waitForEvent` calls:
+
+| Step | Waits on event | Sent by |
+|---|---|---|
+| `wait-extract` | `migration/extract-done` | `extract-all.ts` |
+| `wait-wave-{1,2,3,4,5,6}` | `migration/wave-done` (match `wave == N`) | `transform-wave.ts` |
+
+Every one of these is one-shot. A single dropped event wedges the whole run for the full 60m / 120m / 180m / 6h `timeout`. That's what happened here: extract-all's final `sendEvent('migration/extract-done')` never reached run-full's waiter, the same way the 21× `extract-one-done` events used to drop under load.
+
+**Fix:** same DB-polling pattern, extended to the run-full layer. Uses a single sentinel row per wave (not per sub_step — transform-wave has fn-based sub_steps like `seedPersonas`, `transformClaimedOrders` that don't write `migration_wave_status`, so we can't infer wave completion from per-sub_step rows).
+
+**Sentinel convention:** `sub_step = '__wave__'`, one row per `(run_id, wave)` where `wave ∈ {0..6}` (0 = extract phase, 1–6 = transform waves). Double-underscore prefix distinguishes it from real sub_steps in progress endpoints.
+
+**`transform-wave.ts`** writes the sentinel at start, flips to completed/failed at end:
+
+```ts
+await step.run(`mark-wave-${wave}-running`, () =>
+  pgQuery(`INSERT INTO migration_wave_status (run_id, wave, sub_step, status, started_at)
+           VALUES ($1,$2,'__wave__','running',now())
+           ON CONFLICT (run_id, wave, sub_step) DO UPDATE SET
+             status='running', started_at=now(), completed_at=NULL, error_detail=NULL`,
+          [runId, wave]));
+
+try {
+  // ... run all sub-steps (parallelGroup-aware loop unchanged) ...
+} catch (err) {
+  await step.run(`mark-wave-${wave}-failed`, () => pgQuery(
+    `UPDATE migration_wave_status SET status='failed', completed_at=now(), error_detail=$4
+       WHERE run_id=$1 AND wave=$2 AND sub_step=$3`,
+    [runId, wave, '__wave__', (err as Error).message.slice(0, 2000)]));
+  throw err;
+}
+
+await step.run(`mark-wave-${wave}-complete`, () => pgQuery(
+  `UPDATE migration_wave_status SET status='completed', completed_at=now()
+     WHERE run_id=$1 AND wave=$2 AND sub_step='__wave__'`, [runId, wave]));
+```
+
+**`extract-all.ts`** does the same for `wave=0`, bracketing the existing per-collection fan-in. On timeout or `failed > 0` it writes the sentinel `'failed'` before throwing, so run-full's poll breaks fast instead of waiting out the 4h fan-in cap.
+
+**`run-migration.ts`** replaces all 6 `waitForEvent` calls with a shared helper:
+
+```ts
+async function waitForWaveCompletion(step, { label, runId, wave, timeoutMinutes }) {
+  const maxIterations = Math.ceil((timeoutMinutes * 60) / 15);
+  for (let i = 0; i < maxIterations; i++) {
+    const sentinel = await step.run(`${label}-check-${i}`, () => pgQuery(
+      `SELECT status, error_detail FROM migration_wave_status
+        WHERE run_id=$1 AND wave=$2 AND sub_step='__wave__'`, [runId, wave]));
+    if (sentinel?.status === 'failed') throw new Error(`Wave ${wave} failed: ${sentinel.error_detail}`);
+    if (sentinel?.status === 'completed') return;
+    await step.sleep(`${label}-wait-${i}`, '15s');
+  }
+  throw new Error(`Wave ${wave} did not complete within ${timeoutMinutes}m`);
+}
+```
+
+**Failure-path cleanup:** run-full now wraps its main body in try/catch and flips `migration_merchant_status.status='failed'` on any thrown error, so a crashed run is visible on `/progress/detailed` without digging through Inngest. Scoped to `current_run_id=$runId` so a concurrent re-trigger (new runId) isn't clobbered.
+
+**Invariants preserved:**
+
+- `step.sendEvent('extract-done')` and `step.sendEvent('wave-done')` still fire — kept for observability and any external listener. Run-full just doesn't depend on them.
+- Per-sub_step rows for transforms (`1a-tiers`, `5b-orders-shopee`, etc.) keep their existing semantics from `runSql` / `runSqlPerMerchant`. Adding the `__wave__` sentinel adds exactly 1 row per wave, increasing `subStepsTotal` in `/progress` responses by a small constant (good — the sentinel reflects real aggregate progress).
+- Extract phase retains its 21-row per-collection tracker. The `wave=0 __wave__` sentinel is layered on top; extract-all's internal fan-in still polls per-collection rows as the source of truth for "have all 21 finished", then updates the sentinel to `completed` for the parent.
+
+**Cost:** 1 SELECT per poll × 7 polls (extract + 6 waves). Single-condition index scan on `(run_id, wave, sub_step)` — sub-millisecond. A full merchant run (typical ~90 min total across all phases) = ~90 × 60 / 15 = 360 polls = 720 steps; well inside Inngest's soft limit.
+
+**Unblocks stuck runs going forward.** For the `66e2aa...4230b8` run that hung on the old hand-off: cancel in Inngest, reset `migration_merchant_status.status='pending'` + `current_run_id=null` (staging is already populated and idempotent — no need to re-extract), retrigger `POST /migration/start`. Post-deploy, run-full uses DB polling for all 7 phases.
 
 ---
 
