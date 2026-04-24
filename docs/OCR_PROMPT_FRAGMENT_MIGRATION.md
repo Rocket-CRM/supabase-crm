@@ -747,3 +747,51 @@ __compose.is_futurepark__            len=382   (CS6 version, without examples fr
 - `receipt_number`: CS6 rewrote `frag.extract.receipt_number` from 8,836 → 2,239 chars removing exception rules. Pre-CS6 version exists in versions table. Requires targeted eval before restoring (hint-first benefit of CS6 must be preserved).
 - `prediction_class` nulls: Roboflow model, not addressable via prompts.
 - net_amount wrong values (MK coupon, ComSeven): prompt-level, lower priority vs null fixes.
+
+---
+
+## Change set 11 — Net amount null barrier + hint-not-found fallback — 2026-04-25
+
+### Context
+New 100-sample eval (run `a0dc00a3`) after CS10: 80/100 processed, overall 62.5% (up from 57%).
+- `receipt_datetime`: 96.25% (+6.25%) ✅ CS10 FORMAT LOCK working
+- `receipt_number`: 92.5% (+5.5%) ✅
+- `net_amount_after_discount`: 72.5% (-5.5%) ❌ still degraded
+
+### Root causes (net_amount failures)
+
+| Pattern | Failures | Root cause |
+|---|---|---|
+| Clear-image returns null (~13 cases) | Mo-Mo Paradise, Sushiro, OISHI RAMEN, Watsons, UNIQLO, Shinkanzen, Bakery Treasury, S&P, KUB KAO KUB PLA, Oriental Princess | Roboflow sale_section_ocr crop misses the Total row. HINT FIRST finds no match → exits without falling through to FALLBACK PRINCIPLES (P1–P8 only apply "when no hint exists"). Model returns null. |
+| Before-VAT extracted (4 cases) | ComSeven/Studio 7 (store 108907) | Hint label `รวมทั้งสิ้น` correctly found, but equals before-VAT base (17663.55) on their tax invoice format. The actual payment (18900 = base × 1.07) is outside the Roboflow OCR crop. P2 ("prefer ~7% larger") only checked OCR text, not image → model kept 17663.55. |
+
+### Changes applied
+
+**`frag.reasoning.net_amount.principles`** (2,052 → 2,672 chars)
+
+HINT FIRST section rewritten to:
+- Change P2 scope from "on the same receipt" → "anywhere on the receipt **(OCR or image)**"
+- Add explicit hint-not-found fallback: if hint label absent from OCR, look in image; if still absent, fall through to P1–P8. Never return null solely because the hint label is missing from OCR.
+
+**`frag.extract.net_amount.core`** (1,202 → 1,201 chars)
+
+Step 5 changed from `"Null only if no amount anywhere on the receipt"` to:
+> **NULL BARRIER** — Before returning null: look at the bottom of the receipt image. Thai receipts always display a final total amount (usually bold, larger font, or boxed). If any payment total is visible — even partially — return that value. Return null ONLY if the receipt image itself is physically unreadable.
+
+### Post-change fragment sizes
+```
+frag.reasoning.net_amount.principles  2,672 chars
+frag.extract.net_amount.core          1,201 chars
+```
+
+### Pre-change hashes (to roll back to)
+```
+frag.reasoning.net_amount.principles  len=2,052  (CS8 version)
+frag.extract.net_amount.core          len=1,202  (CS10 version)
+```
+
+### Known residual failures (not addressed)
+- ComSeven receipt_number confusions (BR vs 0B OCR character, partial quality images)
+- Bonchon +500 wrong amount (likely a 500-baht voucher/coupon deducted on receipt but not subtracted)
+- `prediction_class` nulls: Roboflow model, not addressable via prompts.
+- `receipt_number`: pre-CS6 restore still deferred pending targeted eval.
