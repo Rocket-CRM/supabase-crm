@@ -1,71 +1,77 @@
 ---
-description: Keep documentation in sync when creating or modifying functions, tables, APIs, services, or frontend integrations.
-alwaysApply: true
+description: "After making approved changes (new/modified DB functions, tables, edge functions, queues, crons, Render services, APIs, or behavior-affecting bug fixes), update the corresponding docs AND registries AND append a one-line entry to requirements/CHANGELOG.md in the same session. Read this rule before closing any task that made changes."
+alwaysApply: false
 ---
 
 ## Update Documentation After Changes
 
-This rule applies to ALL backend and integration changes, regardless of where the code lives (Supabase, Render, Inngest, frontend). After creating or modifying any of the items below, update the corresponding docs IN THE SAME SESSION — never defer.
+After creating or modifying any of the items below, update the corresponding docs IN THE SAME SESSION — never defer.
 
-### What changed → What to update
+| Change | What to update |
+|---|---|
+| New / changed DB function | Domain doc only (e.g. `requirements/Reward.md`, `CS_Conversations.md`). Do NOT touch `INDEX_FUNCTION.md`. Regenerate `REGISTRY_SUPABASE.md` via the `registry-regenerate` skill so future greps see the new name. |
+| New table or schema change | Domain doc (e.g. `Reward.md`) AND `requirements/domains/<domain>.md` (until that file is merged in Phase 6 of `agent-context-architecture.md`). Regenerate `REGISTRY_SUPABASE.md` via the `registry-regenerate` skill. |
+| New / changed Supabase edge function | Domain doc + `requirements/REGISTRY_RENDER.md` (add/move/delete the `E:` line). |
+| New / changed pg_cron job | Domain doc + `requirements/REGISTRY_RENDER.md` (`C:` line). |
+| New / changed PGMQ queue | Domain doc + `requirements/REGISTRY_RENDER.md` (`Q:` line). |
+| New / changed Render service | Domain doc + `requirements/REGISTRY_RENDER.md` (`R:` line). |
+| New / changed Inngest function or MCP tool | Domain doc + `REGISTRY_RENDER.md` if it has a public surface. |
+| New domain or undocumented tables | Create `requirements/<Domain>.md`, add entry to `requirements/domains/_index.md`. |
+| CS tables/functions | Use `cs_` prefix, `CS_*.md` docs. |
+| Feature behavior change with an active Feature Guide | Update `requirements/feature-docs/<feature>.md` (only `rewards.md` is currently Active — see `requirements/feature-docs/INDEX.md`). |
+| **Any of the above (final step)** | **Append a one-line entry to `requirements/CHANGELOG.md` under today's date, linking the domain MD where full detail lives.** |
 
-| Change | Where code lives | What to update |
-|---|---|---|
-| New DB function | `supabase/migrations/` | Add to `requirements/INDEX_FUNCTION.md` (name, type, purpose). Add to domain requirement doc. |
-| Changed function signature | `supabase/migrations/` | Update in `requirements/INDEX_FUNCTION.md`. If FE calls it, flag as breaking. |
-| Deprecated function | `supabase/migrations/` | Move to Legacy section in `requirements/INDEX_FUNCTION.md` |
-| New table | `supabase/migrations/` | Add to `requirements/INDEX_DOMAIN.md` + domain requirement doc |
-| Schema change | `supabase/migrations/` | Update table definition in domain requirement doc |
-| New edge function | `supabase/functions/` | Add to `requirements/INDEX_FUNCTION.md` under Edge Function section |
-| New Inngest function | `supabase/functions/` or `services/*/src/` | Add to `requirements/INDEX_FUNCTION.md` under Inngest section |
-| New Render service endpoint | `services/*/src/` | Add to `requirements/INDEX_FUNCTION.md` under Integration section |
-| New MCP tool | `services/cs-ai-service/src/` | Add to `requirements/INDEX_FUNCTION.md` under MCP Tools section |
-| FE starts calling a new BFF | `app/src/` | Verify function exists in `requirements/INDEX_FUNCTION.md` — if missing, add it |
-| New domain | anywhere | Create `requirements/<Domain>.md`, add sections to both INDEX files |
-| New CS table or function | anywhere | CS entries use `cs_` prefix, live in `CS_*.md` requirement docs |
-| Major new feature / renamed feature / new module | anywhere | Review `product-marketing/` docs per `12-product-marketing.mdc` (major changes only — not bugfixes or refactors) |
-| Feature behavior change with a Complete guide | anywhere | Update `requirements/feature-docs/<feature>.md` per `13-feature-guide-writing.mdc` (see Feature Guide Update below) |
+### Why both the domain doc AND `REGISTRY_RENDER.md`
 
-### How to update INDEX files
+`REGISTRY_RENDER.md` is hand-maintained and serves as the single grep target for "what edge functions / queues / crons / Render services exist." If you add a function but don't update the registry, it becomes invisible to future agents that grep first. The registry's value collapses without this discipline.
 
-**INDEX_FUNCTION.md** — add to the correct domain group: `| function_name | Type (BFF/Backend/Edge/Inngest) | One-line purpose |`
+`REGISTRY_SUPABASE.md` is **not** hand-edited — it is regenerated from the live DB by the `registry-regenerate` skill. Run that skill at the close of any task that added, renamed, or dropped a function or table so future greps find the right name.
 
-**INDEX_DOMAIN.md** — add or update: Keywords, Source doc path, Tables, Functions.
+### Changelog Entry (final step, every task that changed docs)
 
-Read the file's domain headers first (offset/limit) to find the right section.
+After updating the domain doc(s) and any registries, append one bullet to `requirements/CHANGELOG.md` summarizing the change. This is part of the same task — no separate approval needed.
+
+- Newest date at top. Add a new `## YYYY-MM-DD` section if today's date isn't there yet.
+- Format: `**<Domain>** — <one-sentence summary>. See \`requirements/<Doc>.md\` §<Section>.`
+- One bullet per change. Bug fixes that change behavior are in scope; pure refactors and doc-only edits are not.
+- Never duplicate detail in the changelog — the linked MD is the source of truth.
+
+### About `INDEX_FUNCTION.md` (DEPRECATED — do not read or write)
+
+This 100KB index is **deprecated and unmaintained**. Its role is replaced by `requirements/REGISTRY_SUPABASE.md`, which is:
+- Generated on demand from `pg_proc` / `information_schema` by `scripts/regen_registry_supabase.sql` via the `registry-regenerate` skill
+- Smaller, grep-friendly, domain-grouped
+- Refreshed at the close of any task that changed the schema or a function signature
+
+Hard rules:
+- Never full-read `INDEX_FUNCTION.md`.
+- Never edit `INDEX_FUNCTION.md` by hand.
+- To look up a function: grep `REGISTRY_SUPABASE.md`, then verify the signature via Supabase MCP (`pg_proc`).
+- To regenerate the registry on demand: use the `registry-regenerate` skill.
+
+### The "No Domain Doc" Rule
+
+If no domain doc exists for the tables you're touching: create `requirements/<Domain>.md` and add a one-line entry to `requirements/domains/_index.md` as part of the current task. Applies even for pre-existing undocumented tables.
+
+### How to update the domain index
+
+`requirements/domains/_index.md` is a **pointer index** — one row per domain pointing at the per-domain file (and, post-Phase-6, at the authoritative `<Domain>.md`). Keep each row to: domain name · keywords · file path. Do not embed schemas or function signatures here; those live in the per-domain file (or the authoritative doc) and in `REGISTRY_SUPABASE.md`.
+
+### Writing Conciseness (token-aware)
+
+Index files, requirement docs, and registries become input tokens in future threads. Write the minimum that carries full meaning:
+- Per-domain index row: keywords + file path. Nothing else.
+- Domain docs: schema + business rules + function signatures. No narrative filler.
+- Registry entries: one line per item. No prose.
+- Never add "comprehensive," "robust," or any modifier that doesn't add information.
+
+### Feature Guide Updates
+
+Only when behavior visible to testers/CS/marketing changes AND the feature has an Active guide (currently only `rewards.md`). Skip for refactors, perf optimizations, bugfixes restoring documented behavior. Do NOT update archived drafts under `requirements/archive/feature-docs-draft/`. For writing rules, see `13-feature-guide-writing.mdc`.
 
 ### Rules
 
-- Do NOT defer doc updates — they are part of the same task as the code change
-- Doc updates triggered by an approved code change do not require separate approval — they are covered by the original approval
-- For CS domains, prefix requirement doc filenames with `CS_`
-- Keep entries factual — function name, type, one-line purpose. No aspirational descriptions.
-
-### Feature Guide Update
-
-Feature Guides (`requirements/feature-docs/`) describe user-visible behavior for non-technical audiences. They must stay in sync when behavior changes — but not on every code touch.
-
-**Creating or editing a feature guide?** Read `.cursor/rules/13-feature-guide-writing.mdc` FIRST — before gathering information or writing. It contains the template, 3-source gathering process, writing principles, and quality checklist.
-
-**When to update:** After implementing a change that alters anything a tester, CS agent, or marketer would notice:
-
-| Triggers update | Does NOT trigger update |
-|---|---|
-| New config option / field added to admin form | Internal refactor with no behavior change |
-| Status value added or renamed | Performance optimization |
-| New step in admin or member journey | Bugfix that restores intended behavior already described |
-| Business rule changed (eligibility, pricing, limits) | Migration that restructures without changing output |
-| New fulfillment method, visibility type, or enum value | Dependency upgrade |
-| BFF response shape change that affects what FE displays | Code cleanup |
-
-**How to check:** Read `requirements/feature-docs/INDEX.md`. If the affected domain has a guide marked "Complete," update it. If the guide is "Planned" or doesn't exist, skip — the guide will be written from current state later.
-
-**What to update:** Only the sections affected by the change. Don't rewrite the whole guide. Common patterns:
-- New config field → update Section 3 (Configuration Reference)
-- New journey step → update Section 4 or 5 + route map if route changed
-- New status value → update Section 2 (Key Concepts) + Section 6c (Testers)
-- Business rule change → update Section 7 (Business Rules)
-
-**Writing rules apply.** The glob trigger on `requirements/feature-docs/*.md` auto-loads `13-feature-guide-writing.mdc`. Follow it — especially context efficiency rules (define once, don't duplicate across sections).
-
-**Applies in both plan mode and agent mode.** When planning, include doc updates in the plan. When executing, update docs before marking the task complete.
+- Doc + registry updates are part of the task — no separate approval needed.
+- CS domains: prefix filenames with `CS_`.
+- Keep entries factual — no aspirational descriptions.
+- A task that touched an edge fn / queue / cron / Render service is NOT done until `REGISTRY_RENDER.md` reflects the change.

@@ -41,7 +41,8 @@ build/
 # but allow negation below. Use `requirements/*` (not `requirements/`) so the
 # directory itself stays visible to git and negation rules can take effect.
 requirements/*
-# Exceptions: registry artifacts are committed so the daily cron can update them.
+# Exceptions: registry artifacts are committed (regenerated on demand via the
+# `registry-regenerate` skill) so other contributors see the current snapshot.
 !requirements/REGISTRY_SUPABASE.md
 !requirements/REGISTRY_RENDER.md
 

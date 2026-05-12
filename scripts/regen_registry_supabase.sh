@@ -2,7 +2,10 @@
 # regen_registry_supabase.sh
 #
 # Regenerates requirements/REGISTRY_SUPABASE.md from the live Supabase DB.
-# Intended for daily cron (GitHub Actions) AND manual local runs.
+# Local-shell convenience wrapper. The canonical path is the
+# `registry-regenerate` Cursor skill, which runs the SQL via Supabase MCP
+# from inside the agent and writes the file directly — no DB credentials
+# on disk and no psql required.
 #
 # Usage:
 #   SUPABASE_DB_URL='postgresql://postgres:<password>@db.wkevmsedchftztoolkmi.supabase.co:5432/postgres' \
