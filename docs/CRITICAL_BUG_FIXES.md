@@ -2,6 +2,50 @@
 
 ---
 
+## 2026-05-15 — `inngest-currency-serve` Loop Hardening (One Bad Factor No Longer Aborts Siblings)
+
+**Triggered by**: New CRM (`merchant_id 8f67aa08-…`) currency awards stalling in production. Root cause traced to a single misconfigured `earn_factor` row (`b3006117-deb1-448a-914b-6174db8883be` — `earn_factor_type='rate'`, `target_currency='ticket'`, `earn_factor_amount=1000`) that aborted the entire Inngest run via an uncaught throw. Symptom was masked by setting that single factor to `active_status=false`; latent bug remained.
+
+**Scope**: 1 edge function (`inngest-currency-serve` v53 → v54). Zero DB / schema changes.
+
+### Root cause
+
+Both `currencyAward` and `currencyReversal` workflows iterate over per-row results from `calc_currency_for_source` / `wallet_ledger` and call `chokepoint_post_wallet_transaction` once per row inside `step.run("award-${i}", …)`. Each step body re-`throw`s on RPC error, and the throw was not caught at the loop level — so the moment one row's `chokepoint_post_wallet_transaction` failed (e.g. for a misconfigured factor), the whole `for` loop aborted, the function-level `try/catch` logged the workflow as failed, Inngest retried the function 3× (each retry hit the same bad row and re-aborted at the same `i`), and **every sibling factor row at index > i never got a chance to write a wallet ledger entry**.
+
+For New CRM the bad row was the very first iteration on every `currency/award` event, so legitimate `points` awards on the same purchase were silently dropped along with the bad ticket-rate factor. Other merchants would see the same cascade as soon as one of their factor rows broke (config drift, type mismatch, stale `target_entity_id`, etc.).
+
+### Fix (v54 — both workflows)
+
+Per-iteration `try/catch` around each `step.run("award-${i}", …)` and each `step.run("create-reversal-${i}", …)` / `step.run("check-balance-${i}", …)`. On caught error:
+- The failure is recorded into `results[]` with `{ step, index, currency, component, target_entity_id, amount, status: "failed", error }` (award) or `{ award_id, step, status: "failed", error, attempted_amount, proportion }` (reversal).
+- Loop continues to the next sibling row.
+- After the loop, partial / full failure is surfaced in `inngest_workflow_log.metadata` (`status ∈ {awarded, partial_success, all_failed}` for award; `{reversed, partial_success, all_failed}` for reversal) plus `failure_count` / `total_count` and `error_message` text on `partial_success` / `all_failed`.
+- `console.error` is also emitted per failed iteration for live tail visibility on Supabase logs.
+
+The function-level `try/catch` around `currencyAward` / `currencyReversal` is retained — it still catches anything outside the loop (RPC errors on `calc_currency_for_source`, `get-merchant-config`, etc.). The Inngest `idempotency` key and the `check-already-awarded` short-circuit are unchanged, so re-firing the same event remains a no-op for sources that already have any successful sibling award.
+
+### Trade-off (intentional, documented)
+
+Failed sibling rows are **not auto-retried** by Inngest after this fix — the workflow now completes (status = `partial_success`) instead of failing the whole run. To retry a failed row, an operator must (a) fix the root cause (e.g. repair the bad `earn_factor` config) and (b) manually re-fire `currency/award` for that source after deleting any partial success ledger entries (the per-row `dedup_key` `{source_type}_{source_id}_{user_id}_award_{i}` plus the `check-already-awarded` short-circuit means a naive re-fire will short-circuit unless the prior wins are cleared first). This is the correct trade-off for "loop hardening" — preserving the wins and letting siblings drain is strictly better than the current cascade-abort behaviour, and per-row retry is a separate (larger) workstream that would need either a dispatcher pattern or per-row Inngest events.
+
+### Edge Functions
+
+| Function | Version | Changes |
+|----------|---------|---------|
+| `inngest-currency-serve` | v54 | Per-iteration try/catch in `currencyAward`'s award loop and `currencyReversal`'s balance-check + create-reversal loops. Surfaces `partial_success` / `all_failed` status and `failure_count` / `failures[]` metadata in `inngest_workflow_log`. `verify_jwt:false` preserved (matches Inngest webhook signature verification path via `INNGEST_SIGNING_KEY`). No public event-shape change — existing callers see a strictly additive metadata payload. |
+
+### Deploy notes
+
+- Deployed via Supabase MCP `deploy_edge_function` with explicit `verify_jwt: false` (default is `true`; the same trap already documented for `receipt-preview-v2` and `shopify-webhooks` applies — must pass false explicitly or Inngest signature verification breaks).
+- Source code lives only in the deployed Supabase function (no in-tree mirror under `supabase/functions/`); next agent that needs to read it should `get_edge_function(slug='inngest-currency-serve')` via the Supabase MCP.
+
+### Verification
+
+- Bad factor `b3006117-deb1-448a-914b-6174db8883be` remains `active_status=false` for now (no behavioural regression risk during deploy). Once the root cause of that factor is fixed, it can be re-enabled to confirm the loop hardening behaves as expected on a real misconfigured row in production.
+- For other merchants: any future single-factor misconfiguration will only fail its own row instead of cascading, with the failure visible under `inngest_workflow_log.metadata.failures[]`.
+
+---
+
 ## 2026-03-01 — Wallet Deduplication & Data Integrity
 
 **Triggered by**: Ajinomoto wallet balance vs. ledger mismatch report
