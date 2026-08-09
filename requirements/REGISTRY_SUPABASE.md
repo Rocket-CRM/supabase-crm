@@ -274,11 +274,17 @@ F: bff_admin_sync_assets(p_asset_ids uuid[]) -> jsonb
 F: bff_admin_upsert_user_asset(p_user_id uuid, p_asset_type_code text, p_custom_fields jsonb, p_asset_id uuid DEFAULT NULL::uuid, p_section_k...) -> jsonb
 F: bff_get_asset_filters(p_language text DEFAULT 'th'::text) -> jsonb
 F: bff_get_user_assets(p_asset_id uuid DEFAULT NULL::uuid, p_category text DEFAULT NULL::text) -> jsonb
+F: bff_user_delete_asset(p_asset_id uuid) -> jsonb
+F: bff_user_get_assets(p_asset_type_code text DEFAULT 'CAR'::text) -> jsonb
+F: bff_user_get_parking_entrance_qr(p_asset_id uuid DEFAULT NULL::uuid) -> jsonb
+F: bff_user_set_asset_status(p_asset_id uuid, p_status text) -> jsonb
+F: bff_user_upsert_asset(p_asset_type_code text, p_custom_fields jsonb, p_asset_id uuid DEFAULT NULL::uuid, p_section_key text DEFAULT 'genera...) -> jsonb
 F: fn_asset_assert_plate_unique(p_merchant_id uuid, p_plate text, p_exclude_asset_id uuid DEFAULT NULL::uuid) -> jsonb
 F: fn_asset_config_is_vip(p_tags jsonb) -> boolean
 F: fn_asset_enforce_quota_after_tier_change(p_merchant_id uuid, p_user_id uuid) -> jsonb
 F: fn_asset_mark_sync_pending(p_merchant_id uuid, p_asset_id uuid) -> void
 F: fn_asset_normalize_plate(p_plate text) -> text
+F: fn_asset_resolve_auth_member() -> jsonb
 F: fn_asset_resolve_sections(p_merchant_id uuid, p_user_id uuid, p_asset_type_id uuid) -> jsonb
 F: fn_asset_user_has_vip(p_merchant_id uuid, p_user_id uuid) -> boolean
 F: validate_asset_custom_fields(p_merchant_id uuid, p_asset_type_id uuid, p_custom_fields jsonb) -> jsonb
