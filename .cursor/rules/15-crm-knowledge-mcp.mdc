@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+---
+
+# CRM Knowledge MCP — Requirements Doc-Index
+
+Use `user-crm-knowledge` / `crm-knowledge` for product, feature, CS, proposal, frontend, backend, or QA questions that need Rocket CRM product context from **canonical requirement docs**.
+
+## Corpus
+
+- **Search (`search_docs`):** Supabase CRM `requirements/**/*.md` only (chunked in `doc_knowledge_chunks`).
+- **Narrative get:** `get_section` on `docs/PRODUCT_NARRATIVE.md` + a heading. Do not `search_docs` for narrative.
+- Edit product truth in those markdown files. Hubs (Shopify, FuturePark, etc.) point here; they are not a second wiki.
+- Writing craft / proposal process stays in agent plugins or `Writing Principles/` — not this MCP.
+
+## Tools (v2)
+
+| Tool | When |
+|------|------|
+| `search_docs` | **Default.** Hybrid full-text + semantic search over requirement chunks. |
+| `get_section` | Expand a known `path` + optional heading (`SECTION: …` or `##` title); neighbors on by default. Sales explain/journey: path `docs/PRODUCT_NARRATIVE.md`. |
+| `get_my_context` | Auth + short usage guidance. |
+
+## Retrieval order
+
+1. Call `search_docs` with the user’s actual question (`limit` ~6–8). Optionally `path_prefix` like `requirements/Tier.md` when scoped. Default search does not include the product narrative.
+2. If a hit is incomplete, call `get_section` on that path/heading. Sales explain/journey: also `get_section` on `docs/PRODUCT_NARRATIVE.md` + heading.
+3. Answer from returned excerpts only; cite `path#heading`.
+4. For implementation/debugging, verify live schema/RPCs/Edge via Supabase MCP — docs can lag runtime.
+
+Batch independent calls per `16-tool-batching.mdc`.
+
+## Truth boundary
+
+- Docs = product/system narrative.
+- Live Supabase = exact signatures and runtime behavior.
+- Do not use `generated/internal-knowledge/**` or legacy typed knowledge blocks.
+- Do not full-read huge `requirements/*.md` when MCP search returns the relevant sections.
+
+## Index maintenance
+
+- Chunks reconciled from `requirements/` via `scripts/doc-knowledge-reconcile.mjs` (hash-skip).
+- Embeddings filled asynchronously (`embed-jobs`). If OpenAI credits are down, FTS still works; re-enable embedding cron after credits are restored.

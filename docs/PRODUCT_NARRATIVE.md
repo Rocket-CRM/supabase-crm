@@ -11,11 +11,11 @@ Maintenance contract: `workflows/product-feature-catalog/REFERENCE.md`.
 - **Proposal / sales writing** — lift buyer-facing phrasing; do not invent capabilities that are absent from the catalog.
 - **AI input** — feed sections into proposal or sales agents. Prefer matching `<!-- feature_key: … -->` markers to catalog rows.
 - **Out of scope** — schemas, function names, queues, entitlement registry. Those stay in requirements / eng packs.
-- **Do not index** this file into CRM Knowledge.
+- **Do not put this file in `search_docs`.** Retrieve a heading with Knowledge `get_section` on path `docs/PRODUCT_NARRATIVE.md`. Reconcile uploads it for get-by-heading only.
 
 ## Structure
 
-Public modules: **Loyalty**, **Marketing Automation**, **Customer Service**.
+Public modules: **Loyalty**, **Shopify**, **Marketing Automation**, **Customer Service**.
 
 Campaign mechanics and former App foundation capabilities are part of **Loyalty** (not separate sellable modules). Older `## Campaigns` / `## Platform` headings below are retained as narrative anchors and should be read as Loyalty sub-journeys until those sections are fully resynced.
 

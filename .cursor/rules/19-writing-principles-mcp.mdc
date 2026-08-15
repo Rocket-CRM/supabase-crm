@@ -1,0 +1,29 @@
+---
+description: Writing Principles retrieval for copy, proposals, decks, web content, and localization. Use for craft; compose with CRM Knowledge MCP for product facts.
+alwaysApply: false
+---
+
+# Writing Principles (local files)
+
+Use markdown under `Writing Principles/` for writing craft: structure, voice, checklists, persuasion.
+
+Hosted Writing MCP tools and `internal_knowledge_*` writing blocks are **retired**. Do not call `writing_get_*` tools.
+
+## Routing
+
+| Task | Load |
+|------|------|
+| Any structured writing | `Writing Principles/CORE_WRITING_PRINCIPLES.md` first |
+| B2B / Rocket proposal | `PROPOSAL_WRITING_PRINCIPLES.md` + CRM Knowledge `search_docs` for product facts |
+| Custom / government proposal | Core + `workflows/general-proposal/` scaffolds; **no** CRM product facts unless the bid needs them |
+| Sales slides | `SALES_PRESENTATION_SLIDE_PRINCIPLES.md` |
+| Catalog names / summaries | `SALES_FEATURE_COPY_PRINCIPLES.md` (after Core §6–8) |
+| Pricing sheet / features summary | `CANONICAL_VIEW_COPY_PRINCIPLES.md` (after Core §6–8) |
+| Sales agent consult (client-ready + briefing) | `SALES_AGENT_OUTPUT_PRINCIPLES.md` (after Core §1, §9) |
+| Web copy | `WEB_PAGE_COPY_PRINCIPLES.md` |
+| Feature guides | `FEATURE_GUIDE_WRITING_PRINCIPLES.md` |
+| Localization | `TRANSLATION_PRINCIPLES.md` / `TRANSLATION_PHILOSOPHY.md` |
+
+See `Writing Principles/INDEX.md` and `docs/WRITING_PRINCIPLES_MCP.md`.
+
+**Truth boundary:** Writing Principles = how to write. CRM Knowledge MCP (`search_docs`) = what the product does.

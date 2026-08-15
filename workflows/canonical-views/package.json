@@ -1,0 +1,17 @@
+{
+  "name": "canonical-views-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export:pricing": "node scripts/md-to-pricing-html.mjs --input ../../docs/canonical-views/COMMERCIAL_PRICING_SHEET.md --output ../../docs/canonical-views/export/commercial-pricing-sheet.html --mode pricing --title \"Pricing sheet\" --product \"ROCKET CRM\" --doc-label \"PRICING SHEET\"",
+    "export:features": "node scripts/md-to-pricing-html.mjs --input ../../docs/canonical-views/FEATURES_SUMMARY.md --output ../../docs/canonical-views/export/features-summary.html --mode checklist --title \"Features summary\" --product \"ROCKET CRM\" --doc-label \"FEATURES SUMMARY\"",
+    "export:all": "npm run export:pricing && npm run export:features",
+    "export:pricing:th": "node scripts/md-to-pricing-html.mjs --input ../../docs/canonical-views/th/COMMERCIAL_PRICING_SHEET.md --output ../../docs/canonical-views/export/th/commercial-pricing-sheet.html --mode pricing --title \"ใบเสนอราคา\" --product \"ROCKET CRM\" --doc-label \"ใบเสนอราคา\"",
+    "export:features:th": "node scripts/md-to-pricing-html.mjs --input ../../docs/canonical-views/th/FEATURES_SUMMARY.md --output ../../docs/canonical-views/export/th/features-summary.html --mode checklist --title \"สรุปฟีเจอร์\" --product \"ROCKET CRM\" --doc-label \"สรุปฟีเจอร์\"",
+    "export:all:th": "npm run export:pricing:th && npm run export:features:th",
+    "build:features-md": "node scripts/build-features-summary-md.mjs --from-json .cache/catalog-features.json --output ../../docs/canonical-views/FEATURES_SUMMARY.md",
+    "build:features-md:th": "node scripts/build-features-summary-md.mjs --from-json .cache/catalog-features.th.json --output ../../docs/canonical-views/th/FEATURES_SUMMARY.md --lang th",
+    "fill-prices": "node scripts/fill-prices.mjs",
+    "publish-sales-commercial": "node scripts/publish-sales-commercial.mjs"
+  }
+}
