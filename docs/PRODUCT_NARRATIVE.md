@@ -35,7 +35,7 @@ Voice: consultative, specific, outcome-led, proposal-ready. Mark `beta` / `plann
 
 ## Loyalty
 
-Loyalty covers acquisition → engagement → campaigns → analysis → activation: members join, earn and burn value, move through tiers and campaigns, and the brand analyzes and activates next actions. Foundation (signup, privacy, languages, layout), campaigns, Customer 360, segmentation/RFM, and 30+ reports all sit in this module.
+Loyalty covers acquisition → engagement → campaigns → analysis → activation: members join, earn and burn value, move through tiers and campaigns, and the brand analyzes and activates next actions. Signup, campaigns, segmentation/RFM, loyalty admin (including PDPA, languages, Member 360, and 30+ reports), and Front Line all sit in this module.
 
 ### Rewards
 

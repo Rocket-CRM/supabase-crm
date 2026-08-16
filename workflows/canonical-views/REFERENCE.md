@@ -31,8 +31,9 @@ Out of scope: deal THB amounts in baselines; Rocket Deck web proposal builder as
 ### Locales
 
 - Maintain **dual baselines** (EN + TH). Same `billable_unit_key` / `feature_group_key` structure so the HTML exporter is locale-agnostic.
-- **Features summary TH** is a localize of the EN features-summary **lines** (same keys, shorthand). Do not rebuild TH by dumping `name_th` + `summary_th`. Module / feature-group titles stay English unless a localize pass says otherwise.
+- **Features summary TH** is a localize of the EN features-summary **lines** (same keys, shorthand). Do not rebuild TH by dumping `name_th` + `summary_th`. Module and feature-group **display titles** use `English (Thai)` — English key name first, Thai gloss in parentheses (e.g. `Signup & login (สมัครและเข้าสู่ระบบ)`). Keep `feature_group_key` unchanged.
 - **Pricing sheet TH** is curated Thai for the same billable units as EN (labels + sparse bullets). Follow Writing Principles localize-not-translate; keep market-standard English terms (OTP, Tier, API, Shopify, …). After an English sales-copy rewrite, **do not ship TH until a localize pass** — translating the old concatenated-name bullets is not localization.
+- **Thai vocabulary is canonical.** Any TH pass must use `Writing Principles/THAILAND_CONTEXT.md` §2 (earn = `สะสมคะแนน`, tier ladder ≠ `บันได`, per seat = `ต่อผู้ใช้งาน`, …) and §4 for heading/gloss rules. Do not re-derive terms per pass.
 - A sales run picks **one language** in `brief.md` and copies from the matching baseline folder. Do not mix EN/TH content in one run unless the human explicitly asks for a bilingual pack.
 
 ---
@@ -68,7 +69,7 @@ Out of scope: deal THB amounts in baselines; Rocket Deck web proposal builder as
 - **Notes / PS** (unit definitions, allowances, packaging) are **not** feature bullets. Write a whole-line italic `*…*` after the bullets. The HTML exporter renders `<em>` — no leading `·`, no bold keyword. Use for “what is a campaign unit”, SMS included quota, “this price covers 10 workflows”, Shopify lead-in.
 - **Columns** (Merz / Rocket Deck contract): **Feature | Unit | Price**.
 - Baseline **Price** is always `—`. **Unit** is the billing period (`Per month`, `Per receipt`, `Per seat / month`, `Per campaign unit / month`) — never the member-scale band. Scale only selects the amount in `list-prices.json`. Packaging (10 active workflows) and allowances (`{{sms_included}}`) live in bullets.
-- **Omit from both views** (catalog stays): `loyalty.currency.tickets`, `loyalty.event_promo.engine`. Store attributes fold into earn-rate copy — no standalone view line. **Omit from the pricing sheet:** `customer_service_phone` (phone numbers).
+- **Omit from both views** (catalog stays): `loyalty.currency.tickets`, `loyalty.event_promo.engine`. Store attributes fold into earn-rate copy — no standalone view line. **Fold into Admin portal and reports** (features summary): `platform.governance.pdpa_consent`, `platform.governance.translation`, `loyalty.frontline.customer_360` (Member 360 as a key area). **Omit from the pricing sheet:** `customer_service_phone` (phone numbers).
 - HTML meta-bar: product `ROCKET CRM`; RHS doc label `PRICING SHEET`.
 
 **Hard rules for bullets (regression from the 2026-08-12 sheet):**
@@ -79,7 +80,7 @@ Out of scope: deal THB amounts in baselines; Rocket Deck web proposal builder as
 4. Do not bundle unrelated **program areas** (rewards + burn rate; earn rates + tickets; store directory + Front Line). **Do** fold platform plumbing into the parent area: PDPA and languages belong in **Admin portal**, not their own Core lines (right altitude — see `CANONICAL_VIEW_COPY_PRINCIPLES.md` §4). Phone numbers are omitted from the pricing sheet (catalog stays).
 5. Config objects are not copy (`store master`, `maintain mode`, `tier windows`, `burn rate` as a bare term). Explain the program (**Member tiers** with upgrade/maintenance conditions; **Burn** as points-to-discount at checkout).
 6. Prove coverage where the buyer needs it (**Reports** 30+ covering …; **Open API** members, purchases, points, redemptions, assets — not only earn-from-own-system).
-7. Respect commercial grain: Core earn methods (including receipt upload) on the Core **row**; Receipt AI and Open API are Loyalty **rows** (different fee model), not extra modules. Shopify is its own module. **Front Line** (Customer 360) is Core, one line below admin.
+7. Respect commercial grain: Core earn methods (including receipt upload) on the Core **row**; Receipt AI and Open API are Loyalty **rows** (different fee model), not extra modules. Shopify is its own module. **Front Line** is Core (store-staff lookup and assisted actions), one line below admin. Member 360 is an admin area, not the Front Line title.
 8. Member-facing UI configuration is **Member app UI CMS**, not “layout” only.
 9. Marketing Automation is one module with Workflows and AI as **rows** (plan grouping). Customer Service is one module with Software, AI Customer Service Agent, and Phone numbers as **rows**. Do not title a CS row “Advanced.” Omit stored value until it is GA.
 
@@ -87,7 +88,7 @@ Worked rewrites: `CANONICAL_VIEW_COPY_PRINCIPLES.md` §5.
 
 ### 3.2 Features summary
 
-- **Sections** = same modules.
+- **Sections** = same modules (one H2 / one ModuleBlock when exported).
 - **Rows** = catalog feature groups (`feature_group_key` stays in the heading).
 - **Bullets** = **every** active non-deprecated feature in that group — **not** sparse, **not** a catalog photocopy.
   - Format per feature:
@@ -96,9 +97,9 @@ Worked rewrites: `CANONICAL_VIEW_COPY_PRINCIPLES.md` §5.
       One shorthand sales sentence (not the catalog summary reprinted).
     ```
   - **Write** the line from the catalog row (+ narrative only if the catalog summary is too thin). Do not run `build-features-summary-md.mjs` as the published voice — that script is a coverage inventory only.
-- Same Merz table chrome when rendered; Capabilities column holds the shorthand list.
+- Same Merz table chrome when rendered; one table per module; Capabilities column holds the shorthand list.
 - Pricing sheet stays sparse (clustered); features summary is exhaustive coverage at shorthand grain.
-- HTML meta-bar RHS label: `FEATURES SUMMARY` (not company name).
+- HTML meta-bar RHS label: `FEATURES SUMMARY` (EN) / `สรุปฟีเจอร์` (TH). Never one ModuleBlock per feature group.
 
 ---
 
@@ -169,9 +170,13 @@ H2 = module (section). Each H3 is one table **row** (plan grouping and/or fee mo
 *Note or PS — unit definition, allowance, packaging. Italic, not a feature bullet.*
 ```
 
-### Checklist block (per feature group)
+### Checklist block (per feature group under its module)
+
+H2 = module (section). Each H3 is one table **row** (feature group), with its bullets under that row. The HTML exporter renders **one ModuleBlock per H2**, with one table row per H3 — same section grain as the pricing sheet.
 
 ```markdown
+## <Module>
+
 ### <Group name> (`<feature_group_key>`)
 
 | Feature group | Capabilities |
@@ -181,7 +186,6 @@ H2 = module (section). Each H3 is one table **row** (plan grouping and/or fee mo
 - **<feature name>**
   <one shorthand sales sentence>
 ```
-
 Voice: **sales shorthand** per `Writing Principles/CANONICAL_VIEW_COPY_PRINCIPLES.md` (load with CORE §6–8 before drafting). Pricing bullets are `**Keyword** description` in journey order. Features-summary lines are one rewritten sentence per feature — not catalog `name`+`summary` verbatim, not proposal prose. No package slogans (“included in Pro”). Status `planned` / `beta` may be noted after the name.
 
 ---
@@ -263,9 +267,11 @@ Visual + structure contract matches Rocket Deck Merz pricing (`/Users/rangwan/ro
 
 - A4 canvas (1080×1527), cream `--slide-surface`, left/top rails, meta bar (date · product · ROCKET)
 - Plus Jakarta Sans; typ-heading / typ-caption tokens from `globals.css`
-- **One ModuleBlock per module (H2)** — caption is the module name; Feature/Unit/Price table has **one row per billable unit** (plan grouping and/or fee model)
+- **One ModuleBlock per module (H2)** for both exports — caption is the module name
+  - Pricing: Feature/Unit/Price/Qty/Total table has **one row per billable unit** (plan grouping and/or fee model); Qty defaults to 12 months; Total = Price × 12
+  - Features summary: Feature group/Capabilities table has **one row per feature group** (not one ModuleBlock per group)
 - Feature column left-aligned (`th` must not center); `·` include lines under Feature name in that row
-
+- Footnotes and headers follow `--lang` (`en` | `th`). Thai pricing title/doc-label: `ใบสรุปราคา`; Thai body font: Sarabun via Google Fonts. Do not emit the blank-baseline internal note on customer exports.
 | Stage | Owner |
 |---|---|
 | Content | Baseline or run markdown |
@@ -305,10 +311,10 @@ Sales Cursor thread: after editing the run MD, run the script on that run’s fi
 - [ ] Baseline prices are all `—`
 - [ ] Pricing sheet **sections** match live public modules; **rows** match §4 keys (plan grouping and/or fee model) in **both** EN and TH
 - [ ] Features summary groups match live `feature_group_key`s for active modules (EN + TH)
-- [ ] Pricing sheet bullets are `**Keyword** description` (bold, not all caps); notes/PS are italic `*…*` lines, not feature bullets; Core in journey order including receipt upload on earn methods; PDPA/languages folded into admin; Front Line under admin; Open API is a Loyalty **row** (integration product, not earn-only); Shopify is its own module; MA and CS are one section each with rows by plan grouping / fee model; no stored-value row; no catalog-name concatenation; `CANONICAL_VIEW_COPY` §5 would pass
-- [ ] Features summary includes every active **GA** feature as one rewritten shorthand line **except** the omit list (tickets, event promo); not catalog summary verbatim; no eng jargon. `planned` / not-launched rows are omitted or marked planned, not sold as GA.
+- [ ] Pricing sheet bullets are `**Keyword** description` (bold, not all caps); notes/PS are italic `*…*` lines, not feature bullets; Core in journey order including receipt upload on earn methods; PDPA/languages folded into admin; Front Line under admin (not titled Customer 360); reports name Members / Member 360 / Redemptions / Transactions / Campaigns; Open API is a Loyalty **row** (integration product, not earn-only); Shopify is its own module; MA and CS are one section each with rows by plan grouping / fee model; no stored-value row; no catalog-name concatenation; `CANONICAL_VIEW_COPY` §5 would pass
+- [ ] Features summary includes every active **GA** feature as one rewritten shorthand line **except** the omit/fold list (tickets, event promo; PDPA / languages / Customer 360 fold into Admin portal and reports); not catalog summary verbatim; no eng jargon. `planned` / not-launched rows are omitted or marked planned, not sold as GA.
 - [ ] List prices are only in `list-prices.json`; baselines stay `—`; `fill-prices` is for run copies.
-- [ ] TH views are a localize of EN view lines (not a dump of `name_th`/`summary_th`); module/group titles remain English unless a localize pass says otherwise
+- [ ] TH views are a localize of EN view lines (not a dump of `name_th`/`summary_th`); module/group display titles use `English (Thai)`
 - [ ] Sales threads only mutate `runs/<customer>-…/` and copy the baseline matching `brief.md` Language
 - [ ] No reverse writes from views → catalog
 

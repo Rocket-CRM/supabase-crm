@@ -20,7 +20,8 @@ Canonical writing-principles library compiled from Rocket Deck, Rocket CRM marke
 | MECE / same level in feature grids (bento boxes) | Part 1 §7 | `CORE_WRITING_PRINCIPLES.md` §4–7 |
 | Localize, don't translate | `TRANSLATION_PHILOSOPHY.md` (core) | `TRANSLATION_PRINCIPLES.md` (proposals) |
 | Keep standard tech terms in English | `TRANSLATION_PHILOSOPHY.md` | Part 1 §21 (Thai pages); `TRANSLATION_PRINCIPLES.md` |
-| Tone calibration by market (e.g. Thai B2B/SME direct) | `TRANSLATION_PHILOSOPHY.md` | — |
+| Tone calibration by market (e.g. Thai B2B/SME direct) | `TRANSLATION_PHILOSOPHY.md` | `THAILAND_CONTEXT.md` §1 (register by surface) |
+| Canonical Thai product vocabulary | `THAILAND_CONTEXT.md` §2 | — |
 | Proposal Thai smoothness / English backup | `TRANSLATION_PRINCIPLES.md` | general-proposal REFERENCE stage 11 |
 | Structure fidelity (title vs description roles) | `TRANSLATION_PHILOSOPHY.md` | — |
 | Name the decision, not the tech | `TRANSLATION_PHILOSOPHY.md` | Part 1 §10 |
@@ -49,6 +50,7 @@ Canonical writing-principles library compiled from Rocket Deck, Rocket CRM marke
 | [WEB_PAGE_COPY_PRINCIPLES.md](./WEB_PAGE_COPY_PRINCIPLES.md) | Web content (LP, blog, SEO, links) | **Part 1** landing copy · **Part 2** blog/articles · **Part 3** SEO strategy · **Part 4** internal linking |
 | [TRANSLATION_PHILOSOPHY.md](./TRANSLATION_PHILOSOPHY.md) | Localization | Localize-don't-translate, English term policy, complexity spectrum, market-specific overrides |
 | [TRANSLATION_PRINCIPLES.md](./TRANSLATION_PRINCIPLES.md) | Proposal Thai | Formal proposal localize craft, smoothness rules, English-first + `th/` convert with English backup |
+| [THAILAND_CONTEXT.md](./THAILAND_CONTEXT.md) | Thai market context | Canonical Thai vocabulary for Rocket product terms, register by surface, recurring calque traps |
 | [FEATURE_GUIDE_WRITING_PRINCIPLES.md](./FEATURE_GUIDE_WRITING_PRINCIPLES.md) | CRM feature guides | 8-section template, multi-audience, route maps, status models, line budget |
 
 ---
@@ -149,7 +151,7 @@ Compose both for Rocket proposals, decks, and feature guides that mention platfo
 | Sales / marketing deck | `core-writing` → `sales-slides` | CRM `get_feature_context` if feature-specific |
 | Catalog names / summaries | `core-writing` → `SALES_FEATURE_COPY_PRINCIPLES.md` | CRM Knowledge; live catalog |
 | Pricing sheet / features summary | `core-writing` → `CANONICAL_VIEW_COPY_PRINCIPLES.md` | Live catalog (required); Product Narrative optional color |
-| Thai / JP / TW copy | `core-writing` → genre → `translation` | Proposals: prefer `TRANSLATION_PRINCIPLES.md` over web tone |
+| Thai / JP / TW copy | `core-writing` → genre → `translation` → market context doc | Thai: `THAILAND_CONTEXT.md` for vocabulary. Proposals: prefer `TRANSLATION_PRINCIPLES.md` over web tone |
 | CRM feature guide | `core-writing` → `feature-guide-writing` | CRM `get_feature_context` for the feature |
 | Web content | `core-writing` → `web-page-copy` (routing) → one part slug | See part map below |
 

@@ -1,0 +1,75 @@
+{
+  "currency": "THB",
+  "scales": [10000, 30000, 100000, 300000],
+  "comment": "Scale picks the amount. billing_unit_* is the table Unit column (month / receipt / seat / campaign unit). Packaging and quotas belong in view copy, via {{vars}}.",
+  "units": {
+    "loyalty_core": {
+      "charge": "monthly",
+      "billing_unit_en": "Per month",
+      "billing_unit_th": "ต่อเดือน",
+      "by_scale": { "10000": 12000, "30000": 25000, "100000": 39000, "300000": 68000 }
+    },
+    "loyalty_advanced": {
+      "charge": "monthly",
+      "billing_unit_en": "Per month",
+      "billing_unit_th": "ต่อเดือน",
+      "by_scale": { "10000": 5000, "30000": 13000, "100000": 22000, "300000": 39000 }
+    },
+    "loyalty_sms": {
+      "charge": "free",
+      "billing_unit_en": "Per month",
+      "billing_unit_th": "ต่อเดือน",
+      "overage_unit_price": 0.25,
+      "vars": {
+        "sms_included": { "10000": 500, "30000": 1500, "100000": 5000, "300000": 15000 }
+      }
+    },
+    "loyalty_campaigns": {
+      "charge": "monthly",
+      "billing_unit_en": "Per campaign unit / month",
+      "billing_unit_th": "ต่อหน่วยแคมเปญ / เดือน",
+      "by_scale": { "10000": 6000, "30000": 13000, "100000": 20000, "300000": 35000 }
+    },
+    "loyalty_open_api": {
+      "charge": "monthly",
+      "billing_unit_en": "Per month",
+      "billing_unit_th": "ต่อเดือน",
+      "by_scale": { "10000": 3500, "30000": 7500, "100000": 12000, "300000": 19000 }
+    },
+    "loyalty_receipt_auto_approve": {
+      "charge": "consumption",
+      "billing_unit_en": "Per receipt",
+      "billing_unit_th": "ต่อใบเสร็จ",
+      "unit_price": 0.5
+    },
+    "loyalty_shopify": {
+      "charge": "enquire",
+      "billing_unit_en": "Per month",
+      "billing_unit_th": "ต่อเดือน"
+    },
+    "marketing_automation_core": {
+      "charge": "monthly",
+      "billing_unit_en": "Per month",
+      "billing_unit_th": "ต่อเดือน",
+      "by_scale": { "10000": 7200, "30000": 15000, "100000": 25000, "300000": 39000 }
+    },
+    "marketing_automation_advanced": {
+      "charge": "enquire",
+      "billing_unit_en": "Per month",
+      "billing_unit_th": "ต่อเดือน"
+    },
+    "customer_service_core": {
+      "charge": "consumption",
+      "billing_unit_en": "Per seat / month",
+      "billing_unit_th": "ต่อที่นั่ง / เดือน",
+      "unit_price": 800
+    },
+    "customer_service_ai": {
+      "charge": "consumption_range",
+      "billing_unit_en": "Per resolved case",
+      "billing_unit_th": "ต่อเคสที่ปิดได้",
+      "unit_price_min": 3,
+      "unit_price_max": 15
+    }
+  }
+}
