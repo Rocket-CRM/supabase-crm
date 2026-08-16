@@ -109,7 +109,7 @@ These four produced almost every bad line in the 2026-08 pass.
 
 ## 4. Structure rules for Thai canonical views
 
-- **Module and feature-group headings stay English** (`workflows/canonical-views/REFERENCE.md` § Locales). A Thai gloss in parentheses is allowed only when it adds meaning.
+- **Module and feature-group headings stay English** (`rocket-sales/commercial/REFERENCE.md` § Locales). A Thai gloss in parentheses is allowed only when it adds meaning.
 - **Drop the gloss when it is a transliteration** — `Loyalty (ลอยัลตี้)`, `Omnichannel (ออมนิชาแนล)` teach the reader nothing. Gloss `Loyalty` as `(ระบบสมาชิกและสะสมคะแนน)` or not at all.
 - **The heading gloss and the table-row label must match**, or the HTML export shows two different names for one group.
 - **Keep EN/TH structurally identical** — same `billable_unit_key` / `feature_group_key`, same row count. The exporter is locale-agnostic; verify with the row counts it prints.

@@ -4,7 +4,7 @@ Executable contract for keeping the Rocket CX product catalog, Product Narrative
 
 **Repo:** `Rocket-CRM/supabase-crm`  
 **Live DB:** Supabase project `wkevmsedchftztoolkmi` only  
-**Related paths:** `docs/PRODUCT_NARRATIVE.md` (derived), `docs/canonical-views/` (derived commercial views — see `workflows/canonical-views/REFERENCE.md`), `requirements/**/*.md` (behavior evidence), CRM Knowledge MCP (indexed requirements chunks)
+**Related paths:** `docs/PRODUCT_NARRATIVE.md` (derived), CRM Knowledge MCP (indexed requirements chunks), `requirements/**/*.md` (behavior evidence). Commercial Canonical Views (pricing sheet, features summary, list prices) are authored in `rocket-agent-plugins/plugins/rocket-sales/commercial/` — not this repo.
 
 ---
 
@@ -216,7 +216,7 @@ Keep non-AI operations, AI service/AOP actions, and supervisor scoring cleanly s
 
 **Required reading before any `name` / `summary` write:** `Writing Principles/CORE_WRITING_PRINCIPLES.md` §6–8, then `Writing Principles/SALES_FEATURE_COPY_PRINCIPLES.md`. Catalog copy is sales explanation, not a dump of config objects.
 
-Canonical Views are a **separate write** (`CANONICAL_VIEW_COPY_PRINCIPLES.md`). They rewrite from these rows; they do not inherit `name` / `summary` verbatim.
+Canonical Views are a **separate write** in the sales pack (`rocket-sales/commercial/COPY_PRINCIPLES.md`). They rewrite from these rows; they do not inherit `name` / `summary` verbatim.
 
 - Exactly three levels: Module → Feature group → Feature.
 - A row represents a distinct end-user capability that can be recognized, compared, or sold.
@@ -441,7 +441,7 @@ Rules:
 - Every active sellable feature has exactly one `commercial_nature`.
 - When `commercial_nature = consumption`, `consumption_unit` is required. Otherwise `consumption_unit` is null.
 - Canonical unit keys (extend only with product approval): `campaign_month` (one campaign feature enabled for one calendar month), `receipt` (one receipt processed by AI/OCR auto-approve). Add new unit keys in this REFERENCE before writing rows.
-- Do **not** encode price amounts or SKU prices on the feature row — only nature + unit type. Canonical View list prices live in `workflows/canonical-views/list-prices.json` (scale × billable unit). Do not add a third price table. `internal_pricing_blocks` remains the proposal/deck SKU pointer only.
+- Do **not** encode price amounts or SKU prices on the feature row — only nature + unit type. Canonical View list prices live in the sales pack (`rocket-agent-plugins/plugins/rocket-sales/commercial/list-prices.json`). Do not add a third price table. `internal_pricing_blocks` remains the proposal/deck SKU pointer only.
 - `includes` / `summary` must not invent commercial claims (“included in Pro”) — nature lives in columns.
 - Changing `commercial_nature` requires explicit product/pricing owner confirmation (same bar as package reassignment).
 
@@ -470,7 +470,7 @@ Treat a feature as **overdue** when:
 2. **Gather** targeted CRM Knowledge evidence; scoped requirement reads only when needed.
 3. **Classify** each candidate: `add` | `update` | `move` | `deprecate` | `no_change` | `localize_th`.
 4. **Update** the Supabase catalog and audit log **transactionally** (single SQL transaction / migration apply). For English changes that need Thai, rewrite `name_th`/`summary_th` per §6.1 in the same transaction.
-5. **Synchronize** only affected Product Narrative sections (English narrative; Thai catalog columns are not mirrored into `PRODUCT_NARRATIVE.md` unless a future Thai narrative is requested). When commercial identity or fuel copy changed (`commercial_nature`, groups, active set, names/summaries that views use), **rewrite** affected Canonical View sections per `workflows/canonical-views/REFERENCE.md` and `Writing Principles/CANONICAL_VIEW_COPY_PRINCIPLES.md` — do not JSON-flatten catalog strings into the views. Prices stay blank; do not touch sales `runs/`.
+5. **Synchronize** only affected Product Narrative sections (English narrative; Thai catalog columns are not mirrored into `PRODUCT_NARRATIVE.md` unless a future Thai narrative is requested). When commercial identity or fuel copy changed (`commercial_nature`, groups, active set, names/summaries that views use), **do not rewrite Canonical Views in this repo.** Report a handoff: refresh affected sheets in `rocket-agent-plugins/plugins/rocket-sales/commercial/` per that pack’s `REFERENCE.md`. Prices stay blank; do not touch sales `sales-run/`.
 6. **Validate** hierarchy, statuses, packages, source references, narrative anchors, proposal references, and Thai completeness for active sellable rows when Thai is in scope.
 7. **Report** changed/skipped/conflicting rows, Thai localize counts, and the narrative Git diff.
 
@@ -537,6 +537,7 @@ Apply once (before first audited weekly run):
 - [ ] Product Narrative is not indexed into CRM Knowledge
 - [ ] Proposal workflow resolves the renamed narrative path
 - [ ] Automation / run logs all direct catalog changes and produces reviewable narrative diffs
+- [ ] If commercial identity changed, a Canonical Views **handoff** is reported for `rocket-sales/commercial/` — view files are not written in this repo
 
 ### Run-summary format (chat)
 
