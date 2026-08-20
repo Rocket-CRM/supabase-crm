@@ -127,6 +127,7 @@ C: amp_run_due_scheduled_workflows — `* * * * *` → `fn_amp_run_due_scheduled
 E: cs-loyalty-bridge (public)
 E: cs-phone-numbers (jwt)
 E: cs-send-message (public)
+E: cs-web-push (public, `verify_jwt: false`) — Web Push to `cs_agent_push_subscriptions`; auth via vault `cs_web_push_secret` header. Triggered on assigned + inbound contact messages. See `CS_Platform_Features.md` §9.1.
 E: cs-test-delivery (public)
 E: line-webhook (public)
 E: webhook-line (public)
