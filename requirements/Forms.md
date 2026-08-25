@@ -70,6 +70,7 @@ Default field values are stored directly in user tables:
 ```
 form_templates
 ├── id, merchant_id, code, name, description
+├── banner_url (optional survey header image; null/blank hides the member header)
 ├── status (draft, published, archived)
 └── created_at, updated_at
 
