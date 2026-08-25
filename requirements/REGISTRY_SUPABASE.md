@@ -675,6 +675,11 @@ F: bff_admin_rollback_user_import(p_batch_id uuid) -> jsonb
 F: bff_admin_run_user_import(p_batch_id uuid) -> jsonb
 F: bff_admin_run_user_import_postprocess(p_batch_id uuid, p_options jsonb) -> jsonb
 F: bff_admin_start_user_export(p_batch_name text, p_field_keys text[], p_filters jsonb DEFAULT '{}'::jsonb, p_source jsonb DEFAULT NULL::json...) -> jsonb
+F: bff_admin_start_analytics_export(p_extract_id text, p_from timestamptz, p_to timestamptz, p_filters jsonb DEFAULT '{}'::jsonb) -> jsonb
+F: bff_admin_get_analytics_export_progress(p_batch_id uuid) -> jsonb
+F: fn_analytics_export_allowed(p_extract_id text) -> boolean
+F: fn_analytics_export_pg_count(p_merchant_id uuid, p_extract_id text, p_from timestamptz, p_to timestamptz, p_filters jsonb DEFAULT '{}'::jsonb) -> integer
+F: fn_analytics_export_pg_chunk(p_merchant_id uuid, p_extract_id text, p_from timestamptz, p_to timestamptz, p_filters jsonb DEFAULT '{}'::jsonb, p_offset integer DEFAULT 0, p_limit integer DEFAULT 1000) -> jsonb
 F: bff_admin_start_user_import(p_batch_name text, p_file_name text, p_import_mode text DEFAULT 'ongoing'::text, p_match_on text[] DEFAULT ARR...) -> jsonb
 F: bulk_import_redemptions_chunk(p_rows jsonb, p_user_map jsonb, p_valid_reward_ids text[], p_merchant_id uuid, p_batch_id uuid, p_chunk_index ...) -> jsonb
 F: bulk_import_redemptions_chunk(p_rows jsonb, p_user_map jsonb, p_valid_reward_ids text[], p_reward_code_map jsonb, p_merchant_id uuid, p_batc...) -> jsonb

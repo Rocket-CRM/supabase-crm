@@ -212,6 +212,7 @@ E: futurepark_ui_translation (public)
 
 ## Bulk Import / Customer Import
 
+E: admin-user-export-csv (public) — Inngest serve (`crm-user-export`): `export-users-csv` on `export/users-csv` (customer CSV); `export-analytics-csv` on `export/analytics-csv` (report fact extracts → Storage `exports` + messaging-service email).
 E: inngest-bulk-import-currency-serve (public)
 E: inngest-bulk-import-customers-serve (public)
 E: inngest-bulk-import-purchase-serve (public)
