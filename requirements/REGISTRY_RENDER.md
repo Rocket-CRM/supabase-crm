@@ -130,7 +130,7 @@ E: cs-send-message (public)
 E: cs-web-push (public, `verify_jwt: false`) — Web Push to `cs_agent_push_subscriptions`; auth via vault `cs_web_push_secret` header. Triggered on assigned + inbound contact messages. See `CS_Platform_Features.md` §9.1.
 E: cs-test-delivery (public)
 E: line-webhook (public)
-E: webhook-line (public)
+E: webhook-line (public) — inbound LINE events (HMAC per-merchant); handles `message` + `postback`. After HMAC, fire-and-forget fan-out of the raw body + `x-line-signature` to `credentials.webhook_fanout_destinations` (https only; `{messaging_channel_id}` substituted). AMP `src=amp` postbacks: HMAC whole `a=` (comma-separated keys allowed, max 5 × 64); `selection_mode=single` continues first key only, `multiple` fans out with `webhook_event_id` `:{key}`. Unsigned resource postbacks ingest via `cs_api_receive_message` (`src=resource&resource_id=<uuid>&action=<keys>`). See `CS_Channels.md` §LINE Messaging webhook fan-out and `Resource_Content.md` §Button Actions
 E: send-line-message (public)
 E: send-sms-8x8 (public)
 E: voice-custom-llm (public)
