@@ -1107,10 +1107,10 @@ F: get_receipt_upload_history(p_external_user_ref text DEFAULT NULL::text) -> js
 F: jorakay_notify_receipt_webhook() -> trigger
 F: sync_ocr_prompt_monolithic() -> trigger
 F: trg_log_receipt_upload_admin_review() -> trigger
-F: upload_receipts(p_image_urls text[], p_earning_channel_id uuid, p_seller_code text, p_store_id uuid DEFAULT NULL::uuid) -> jsonb
-F: upload_receipts(p_image_url text, p_earning_channel_id uuid, p_seller_code text, p_store_id uuid DEFAULT NULL::uuid) -> jsonb
-F: upload_receipts(p_image_urls text[], p_earning_channel_id uuid DEFAULT NULL::uuid, p_store_id uuid DEFAULT NULL::uuid) -> jsonb
-F: upload_receipts(p_image_url text, p_earning_channel_id uuid DEFAULT NULL::uuid, p_store_id uuid DEFAULT NULL::uuid) -> jsonb
+F: upload_receipts(p_image_urls text[], p_earning_channel_id uuid, p_seller_code text, p_store_id uuid, p_language text, p_receipt_number text, p_transaction_date timestamptz) -> jsonb
+F: upload_receipts(p_image_url text, p_earning_channel_id uuid, p_seller_code text, p_store_id uuid, p_language text, p_receipt_number text, p_transaction_date timestamptz) -> jsonb
+F: upload_receipts(p_image_urls text[], p_earning_channel_id uuid, p_store_id uuid, p_language text, p_receipt_number text, p_transaction_date timestamptz) -> jsonb
+F: upload_receipts(p_image_url text, p_earning_channel_id uuid, p_store_id uuid, p_language text, p_receipt_number text, p_transaction_date timestamptz) -> jsonb
 X: custom_futurepark_receipt_confirm_jobs -> trg_custom_futurepark_receipt_confirm_jobs_updated_at (BEFORE UPDATE)
 X: custom_futurepark_receipt_groundtruth -> set_updated_at (BEFORE UPDATE)
 X: custom_futurepark_receipt_groundtruth -> trg_sync_gt_prediction_class (BEFORE INSERT)
