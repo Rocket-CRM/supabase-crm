@@ -492,18 +492,6 @@ serve(async (req) => {
     const isSignupFormComplete = userAccount.is_signup_form_complete ?? false;
     console.log(`[PERSONA_FILTER] User persona: ${userPersonaId || 'none'}, selected persona: ${selectedPersonaId || 'none'}, effective persona: ${effectivePersonaId || 'none'}, is_signup_form_complete: ${isSignupFormComplete}`);
 
-    if (!isNewUser && isSignupFormComplete) {
-      console.log(`[FINAL] Returning complete - user has is_signup_form_complete=true`);
-      const refreshToken = crypto.randomUUID() + '-' + crypto.randomUUID();
-      await supabase.from('refresh_tokens').insert({ user_id: userAccount.id, token: refreshToken, expires_at: new Date(Date.now() + REFRESH_TOKEN_EXPIRY * 1000).toISOString() });
-      let userAccountPayload: any = { id: userAccount.id, tel: userAccount.tel, line_id: userAccount.line_id, email: userAccount.email, fullname: userAccount.fullname, persona_id: userAccount.persona_id, profile_complete: true };
-      const { data: summaryData } = await userSupabase.rpc('get_user_summary');
-      if (summaryData && typeof summaryData === 'object' && !('error' in summaryData)) {
-        userAccountPayload = { ...summaryData, id: userAccount.id, line_id: userAccount.line_id, email: userAccount.email, profile_complete: true };
-      }
-      return new Response(JSON.stringify({ success: true, next_step: 'complete', user_account: userAccountPayload, access_token: accessTokenJwt, refresh_token: refreshToken, expires_in: ACCESS_TOKEN_EXPIRY, is_new_user: false, is_signup_form_complete: true, missing: { tel: false, line: false, shopify_email: false, consent: false, profile: false, address: false }, missing_data: null }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
     const { data: profileTemplate, error: profileTemplateError } = await userSupabase.rpc('bff_get_user_profile_template', {
       p_language: language,
       p_mode: 'edit',
@@ -524,14 +512,29 @@ serve(async (req) => {
     const { missingData, hasMissingConsent, hasMissingProfile, hasMissingAddress } = filterToMissingOnly(profileTemplate || {}, effectivePersonaId);
 
     const missing = { tel: false, line: false, shopify_email: false, consent: hasMissingConsent, profile: hasMissingProfile, address: hasMissingAddress };
+    const profileActuallyComplete = !isNewUser && isSignupFormComplete && !hasMissingConsent && !hasMissingProfile;
+
+    if (profileActuallyComplete) {
+      console.log(`[FINAL] Returning complete - required profile and consent are filled`);
+      const refreshToken = crypto.randomUUID() + '-' + crypto.randomUUID();
+      await supabase.from('refresh_tokens').insert({ user_id: userAccount.id, token: refreshToken, expires_at: new Date(Date.now() + REFRESH_TOKEN_EXPIRY * 1000).toISOString() });
+      let userAccountPayload: any = { id: userAccount.id, tel: userAccount.tel, line_id: userAccount.line_id, email: userAccount.email, fullname: userAccount.fullname, persona_id: userAccount.persona_id, profile_complete: true };
+      const { data: summaryData } = await userSupabase.rpc('get_user_summary');
+      if (summaryData && typeof summaryData === 'object' && !('error' in summaryData)) {
+        userAccountPayload = { ...summaryData, id: userAccount.id, line_id: userAccount.line_id, email: userAccount.email, profile_complete: true };
+      }
+      return new Response(JSON.stringify({ success: true, next_step: 'complete', user_account: userAccountPayload, access_token: accessTokenJwt, refresh_token: refreshToken, expires_in: ACCESS_TOKEN_EXPIRY, is_new_user: false, is_signup_form_complete: true, missing: { tel: false, line: false, shopify_email: false, consent: false, profile: false, address: false }, missing_data: null }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const nextStep = isNewUser ? 'complete_profile_new' : 'complete_profile_existing';
 
     let missingDataResult: any = null;
-    if (nextStep === 'complete_profile_new') {
+    if (isNewUser || !isSignupFormComplete) {
       missingDataResult = extractFullFormData(profileTemplate || {}, effectivePersonaId);
-      console.log(`[FORM_DATA] New user form: defaultGroups=${missingDataResult.default_fields_config?.length ?? 0}, defaultFields=${missingDataResult.default_fields_config?.[0]?.fields?.length ?? 0}, pdpa=${missingDataResult.pdpa?.length ?? 0}`);
+      console.log(`[FORM_DATA] Full form: defaultGroups=${missingDataResult.default_fields_config?.length ?? 0}, defaultFields=${missingDataResult.default_fields_config?.[0]?.fields?.length ?? 0}, pdpa=${missingDataResult.pdpa?.length ?? 0}`);
     } else {
-      missingDataResult = extractFullFormData(profileTemplate || {}, effectivePersonaId);
+      missingDataResult = missingData;
+      console.log(`[FORM_DATA] Missing-only form: defaultGroups=${missingDataResult.default_fields_config?.length ?? 0}, defaultFields=${missingDataResult.default_fields_config?.[0]?.fields?.length ?? 0}, pdpa=${missingDataResult.pdpa?.length ?? 0}`);
     }
 
     const refreshToken = crypto.randomUUID() + '-' + crypto.randomUUID();
