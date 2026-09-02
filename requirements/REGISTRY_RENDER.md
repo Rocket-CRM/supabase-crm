@@ -302,7 +302,8 @@ C: wal-lag-alert — `0 */8 * * *` → alert via Lark if `crm_cdc_slot` lag >2 G
 C: refresh-constraint-usage — `*/10 * * * *` → `fn_refresh_constraint_usage()`
 C: refresh-form-aggregation — `*/10 * * * *` → `fn_refresh_form_response_aggregation()`
 C: chokepoint_outbox_cleanup — `0 3 * * *` → `DELETE FROM public.chokepoint_event_outbox WHERE published_at < now() - 7d` (housekeeping for chokepoint→Kafka outbox)
-C: loyalty-cache-refresh — Render Cron Job `*/5 * * * *` → dirty `fn_loyalty_cache_refresh_5m()` + due `fn_loyalty_cache_catchup_chunk` (5000-user)
+C: loyalty-cache-dirty-5m — Render Cron Job `*/5 * * * *` → dirty `fn_loyalty_cache_refresh_5m()`
+C: loyalty-cache-catchup-daily — Render Cron Job `0 19 * * *` → due `fn_loyalty_cache_catchup_chunk` (5000-user)
 
 ---
 
@@ -313,7 +314,8 @@ C: loyalty-cache-refresh — Render Cron Job `*/5 * * * *` → dirty `fn_loyalty
 R: amp-ai-service — Inngest-driven AMP worker (marketing agent + analysis: recommendation generation, distil, refresh crons); source in `amp-analysis-service/` per its README
 R: crm-event-processors — Kafka consumers (Currency, Tier, Mission, AMP, OutcomeAttribution, Reward, Marketplace, Notification) reading CDC topics from Confluent Cloud + chokepoint event topics (`crm.events.purchase{,_item}`, `crm.events.wallet`, `crm.events.tier_change`, `crm.events.user`, `crm.events.redemption` — DB layer live 2026-05-16; consumer-side (`AmpConsumer` + `OutcomeAttributionConsumer`) extended 2026-05-16 with subscribe/predicate/dispatch for redemption events; **Confluent topic provisioning + Render redeploy is the last R-2 step in `.cursor/plans/chokepoint-redemption-event.md`**) when `CHOKEPOINT_EVENTS_ENABLED=true`. `NotificationConsumer` (gated by `NOTIFICATION_CONSUMER_ENABLED`) subscribes to `crm.events.{purchase,purchase_item,wallet,tier_change,user,redemption}`, maps purchase `created`/`completed`, purchase_item item-completion events, and existing wallet/tier/signup/redemption catalog rows; enriches `detail_url` (loyalty-app deep links) + `hero_image_url` (reward/tier/merchant branding); calls `fn_resolve_notification_for_event`, renders flex v2 templates (hero + footer CTA + richer rows), pushes to LINE Messaging API (override via `MESSAGING_SERVICE_URL`), writes `public.notification_log`. Also hosts the OutboxPublisher worker (drains `public.chokepoint_event_outbox` to Kafka via LISTEN/NOTIFY + KafkaJS, gated by `OUTBOX_PUBLISHER_ENABLED`); source in `crm-event-processors/`
 R: currency-expiry-daily — Render Cron Job (`0 19 * * *` UTC ≈ 02:00 ICT); one-shot `npm run job:currency-expiry-daily` on `crm-event-processors` image; loops `process_currency_expiry_batch` until `has_more=false`. Replaces pg_cron `daily-currency-expiry` (retired 2026-09-02).
-R: loyalty-cache-refresh — Render Cron Job (`*/5 * * * *`); one-shot `npm run job:loyalty-cache-refresh` on `crm-event-processors` image; dirty `fn_loyalty_cache_refresh_5m` then due catch-up via `fn_loyalty_cache_catchup_chunk` (5000 users, `SUPABASE_DB_DIRECT_URL`).
+R: loyalty-cache-dirty-5m — Render Cron Job (`*/5 * * * *`); one-shot `npm run job:loyalty-cache-dirty-5m` on `crm-event-processors` image; dirty `fn_loyalty_cache_refresh_5m` only.
+R: loyalty-cache-catchup-daily — Render Cron Job (`0 19 * * *` UTC ≈ 02:00 ICT); one-shot `npm run job:loyalty-cache-catchup-daily`; loops `fn_loyalty_cache_catchup_chunk` (5000 users, `SUPABASE_DB_DIRECT_URL`). Manual trigger after invalidate or interrupted run.
 R: mcp-crm-server — read-only MCP server exposing Supabase CRM data via Cursor MCP; source in `mcp-crm-server/`
 R: n8n-replacement — receipt + contact webhook handler that proxies to CRM/HubSpot; source in `n8n-replacement/`
 
