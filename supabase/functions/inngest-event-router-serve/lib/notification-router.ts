@@ -68,7 +68,11 @@ export interface ResolvedMapping {
   sourceEventId: string;
   sourceTopic: string; // legacy Kafka topic name kept for notification_log continuity
   payload: ChokepointEvent;
+  /** Delivery channel for the resolver. Defaults to 'line'. */
+  channel?: string;
 }
+
+const DEFAULT_CHANNEL = "line";
 
 interface NotificationResolveResult {
   should_send: boolean;
@@ -306,6 +310,7 @@ export async function processNotification(
     p_sub_event: mapping.subEvent,
     p_user_id: userId,
     p_source_event_id: mapping.sourceEventId,
+    p_channel: mapping.channel ?? DEFAULT_CHANNEL,
   });
   if (error) {
     // Throw so the step retries — the ALREADY_SENT backstop makes re-resolution safe.
