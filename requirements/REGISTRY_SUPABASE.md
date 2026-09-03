@@ -1887,6 +1887,10 @@ F: fn_jsonb_to_uuid_array(p_json jsonb) -> uuid[]
 F: fn_kickoff_event_registration_import(p_batch_id uuid) -> jsonb
 F: fn_lifecycle_event_shopify_feature_key(p_event text) -> text
 F: fn_merchant_deferred_crm_confirm(p_merchant_id uuid) -> boolean
+F: fn_find_points_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_lead_days integer DEFAULT 7, p_channel text DEFAULT 'line', p_after_user_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
+F: fn_find_rewards_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_timezone text DEFAULT 'Asia/Bangkok', p_lead_days integer DEFAULT 3, p_channel text DEFAULT 'line', p_after_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
+F: fn_list_due_expiry_reminder_merchants(p_now timestamptz DEFAULT now(), p_after_merchant_id uuid DEFAULT NULL, p_limit integer DEFAULT 50, p_channel text DEFAULT 'line') -> TABLE
+F: fn_mark_expiry_reminder_ran(p_merchant_id uuid, p_local_date date) -> void
 F: fn_merchant_shopify_feature_enabled(p_merchant_id uuid, p_feature_group text, p_feature_key text DEFAULT NULL::text) -> boolean
 F: fn_merge_values_into_config(p_config jsonb, p_default_values jsonb, p_custom_values jsonb) -> jsonb
 F: fn_migration_validate_syngenta() -> jsonb
