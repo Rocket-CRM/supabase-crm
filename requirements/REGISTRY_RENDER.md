@@ -223,6 +223,7 @@ E: inngest-bulk-import-redemptions-serve (public)
 ## Inngest (other)
 
 E: inngest-currency-serve (public)
+E: inngest-event-router-serve (public, verify_jwt=false) — chokepoint outbox → Inngest routers including `notification-referral-router` (`crm.events.referral`).
 E: inngest-mission-serve (public)
 E: internal-proposal-inngest (public)
 

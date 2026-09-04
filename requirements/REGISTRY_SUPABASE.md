@@ -1077,6 +1077,7 @@ F: bff_upsert_receipt_ocr_channel_products(p_store_attribute_id uuid, p_products
 F: bff_upsert_receipt_ocr_hints(p_store_attribute_id uuid, p_hints jsonb) -> jsonb
 F: bff_upsert_receipt_ocr_set_rule(p_store_attribute_set_id uuid, p_rules jsonb, p_is_active boolean DEFAULT true) -> jsonb
 F: chokepoint_post_receipt_event(p_event text, p_merchant_id uuid, p_user_id uuid, p_receipt_upload_id uuid, p_reject_reason text DEFAULT NULL:...) -> jsonb
+F: chokepoint_post_referral_event(p_event text, p_merchant_id uuid, p_user_id uuid, p_referral_ledger_id uuid DEFAULT NULL, p_claim_id uuid DEFAULT NULL, p_recipient_role text DEFAULT NULL, p_skip_emit boolean DEFAULT false, p_extras jsonb DEFAULT '{}') -> jsonb
 F: custom_futurepark_receipt_confirm_jobs_set_updated_at() -> trigger
 F: fn_check_receipt_upload_daily_image_limit(p_merchant_id uuid, p_user_id uuid DEFAULT NULL::uuid, p_external_user_ref text DEFAULT NULL::text, p_proposed...) -> jsonb
 F: fn_classify_receipt_crm_sync_error(p_error text) -> jsonb

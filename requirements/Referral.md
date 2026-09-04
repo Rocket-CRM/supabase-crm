@@ -28,6 +28,19 @@ The system provides:
 - **Source Tracking**: Complete audit trail through existing ledger systems
 - **Mission Integration**: Inviter rewards seamlessly integrated with achievement system
 
+## Notifications (outbox)
+
+`chokepoint_post_referral_event` emits `crm.events.referral` after the existing writers succeed (emit-only; not the sole ledger writer). Copy-link share is not an event. There is no `referral.shared`.
+
+| Domain `event` | When | Notification map |
+|---|---|---|
+| `applied` | Signup apply; purchase attributed | Dropped at notification router |
+| `claimed` | Purchase claim/mint (`api_claim_referral`) | `referral.friend_rewarded` (friend; often no `user_id`) |
+| `settled` | Rewards paid (`fn_settle_referral`; signup apply now goes through settle) | `referral.completed` (referrer); `referral.friend_rewarded` (signup friend) |
+| `clawed_back` | Purchase clawback | Dropped at notification router |
+
+Requires `OUTBOX_PUBLISH_TOPICS` on Render `crm-event-processors` to include `crm.events.referral`, and `notification-referral-router` on `inngest-event-router-serve`. See `requirements/Notification_Service.md`.
+
 ## Core Tables and Structure
 
 ### 1. merchant_master Table (Extended)
