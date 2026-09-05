@@ -1077,7 +1077,6 @@ F: bff_upsert_receipt_ocr_channel_products(p_store_attribute_id uuid, p_products
 F: bff_upsert_receipt_ocr_hints(p_store_attribute_id uuid, p_hints jsonb) -> jsonb
 F: bff_upsert_receipt_ocr_set_rule(p_store_attribute_set_id uuid, p_rules jsonb, p_is_active boolean DEFAULT true) -> jsonb
 F: chokepoint_post_receipt_event(p_event text, p_merchant_id uuid, p_user_id uuid, p_receipt_upload_id uuid, p_reject_reason text DEFAULT NULL:...) -> jsonb
-F: chokepoint_post_referral_event(p_event text, p_merchant_id uuid, p_user_id uuid, p_referral_ledger_id uuid DEFAULT NULL, p_claim_id uuid DEFAULT NULL, p_recipient_role text DEFAULT NULL, p_skip_emit boolean DEFAULT false, p_extras jsonb DEFAULT '{}') -> jsonb
 F: custom_futurepark_receipt_confirm_jobs_set_updated_at() -> trigger
 F: fn_check_receipt_upload_daily_image_limit(p_merchant_id uuid, p_user_id uuid DEFAULT NULL::uuid, p_external_user_ref text DEFAULT NULL::text, p_proposed...) -> jsonb
 F: fn_classify_receipt_crm_sync_error(p_error text) -> jsonb
@@ -1126,6 +1125,7 @@ X: receipt_ocr_set_rule -> trigger_receipt_ocr_set_rule_updated_at (BEFORE UPDAT
 
 T: referral_ledger
 T: referral_outcomes
+T: referral_reward_save_requests
 F: bff_get_referral_settings() -> jsonb
 F: bff_list_referral_ledger(p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_inviter_user_id uuid DEFAULT NULL::uuid, p_invitee_u...) -> jsonb
 F: bff_upsert_referral_settings(p_config jsonb) -> jsonb
@@ -1184,8 +1184,10 @@ F: bff_admin_list_reward_claim_links(p_reward_id uuid DEFAULT NULL::uuid, p_is_a
 F: bff_admin_push_reward(p_user_id uuid, p_reward_id uuid, p_quantity integer DEFAULT 1, p_notes text DEFAULT NULL::text, p_store_id uu...) -> jsonb
 F: bff_admin_set_reward_claim_link_active(p_link_id uuid, p_is_active boolean) -> jsonb
 F: bff_admin_upsert_reward_claim_link(p_link_id uuid DEFAULT NULL::uuid, p_reward_id uuid DEFAULT NULL::uuid, p_name text DEFAULT NULL::text, p_note...) -> jsonb
+F: bff_attach_campaign_reward(p_slot jsonb, p_reward_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_claim_reward_via_link(p_token text, p_selected_variants jsonb DEFAULT NULL::jsonb) -> jsonb
 F: bff_delete_reward_group(p_group_id uuid) -> jsonb
+F: bff_detach_campaign_reward(p_slot jsonb, p_reward_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_get_reward_claim_preview(p_token text) -> jsonb
 F: bff_get_reward_details(p_mode text DEFAULT 'edit'::text, p_reward_id uuid DEFAULT NULL::uuid) -> jsonb
 F: bff_get_reward_group_details(p_group_id uuid DEFAULT NULL::uuid, p_mode text DEFAULT 'new'::text) -> jsonb
@@ -1194,6 +1196,7 @@ F: bff_get_reward_store_stock(p_reward_id uuid) -> jsonb
 F: bff_list_reward_groups() -> jsonb
 F: bff_list_rewards() -> jsonb
 F: bff_list_rewards_for_mission_outcomes() -> jsonb
+F: bff_upsert_campaign_reward_atomic(p_reward jsonb, p_slot jsonb, p_request_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_reward(p_config jsonb) -> jsonb
 F: bff_upsert_reward_group_with_limits(p_group_id uuid DEFAULT NULL::uuid, p_group_code text DEFAULT NULL::text, p_name text DEFAULT NULL::text, p_de...) -> jsonb
 F: bff_upsert_reward_group_with_limits(p_group_id uuid DEFAULT NULL::uuid, p_group_code text DEFAULT NULL::text, p_name text DEFAULT NULL::text, p_de...) -> jsonb
@@ -1206,6 +1209,8 @@ F: bulk_upload_promo_codes_chunked(p_codes text[], p_source_id uuid, p_merchant_
 F: bulk_upload_promo_codes_validated(p_codes text[], p_source_id uuid, p_merchant_id uuid, p_lot_code text DEFAULT NULL::text, p_reward_id uuid DEF...) -> jsonb
 F: check_reward_eligibility_enhanced(p_user_id uuid, p_reward_id uuid) -> boolean
 F: cleanup_old_promo_code_imports() -> void
+F: fn_campaign_reward_slot_attach(p_slot jsonb, p_reward_id uuid) -> jsonb
+F: fn_campaign_reward_slot_detach(p_slot jsonb, p_reward_id uuid) -> jsonb
 F: fn_check_reward_group_limits(p_user_id uuid, p_reward_id uuid, p_quantity integer, p_merchant_id uuid) -> jsonb
 F: fn_check_reward_store_stock_on_use(p_redemption_id uuid, p_store_id uuid DEFAULT NULL::uuid) -> jsonb
 F: fn_get_reward_store_stock(p_reward_id uuid, p_merchant_id uuid DEFAULT NULL::uuid) -> jsonb
@@ -1214,6 +1219,7 @@ F: fn_invalidate_merchant_rewards_cache(p_merchant_id uuid) -> void
 F: fn_redeem_member_message(p_key text, p_language text DEFAULT 'en'::text, p_params text[] DEFAULT NULL::text[]) -> text
 F: fn_resolve_reward_variant_selection(p_variant_config jsonb, p_selected jsonb, p_enforce boolean DEFAULT true) -> jsonb
 F: fn_reward_claim_link_url(p_merchant_id uuid, p_token text) -> text
+F: fn_reward_references(p_reward_id uuid) -> jsonb
 F: get_my_reward_prices() -> jsonb
 F: get_promo_code_summary() -> TABLE(id uuid, reward_name text, merchan...
 F: get_promo_code_summary_by_merchant(p_merchant_id uuid) -> TABLE(promo_batch_name text, reward_id u...
@@ -1397,21 +1403,26 @@ T: stg_mongo_tier_txns
 T: stg_mongo_tiers
 T: tier_conditions
 T: tier_evaluation_tracking
+T: tier_entry_reward_grants
+T: tier_entry_rewards
 T: tier_master
 T: tier_pending_upgrades
 T: tier_program_config
 T: tier_progress
 F: admin_delete_tier(p_tier_id uuid) -> jsonb
 F: apply_tier_change(p_user_id uuid, p_merchant_id uuid, p_to_tier_id uuid, p_change_type text DEFAULT 'upgrade'::text, p_pending_i...) -> jsonb
+F: bff_get_tier_entry_rewards(p_tier_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_get_tier_history(p_filter text DEFAULT NULL::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) -> TABLE(id uuid, title text, description t...
 F: bff_get_tier_program_config(p_user_type user_type DEFAULT NULL::user_type) -> jsonb
 F: bff_upsert_tier_display(p_tier_id uuid, p_display jsonb) -> jsonb
+F: bff_upsert_tier_entry_rewards(p_tier_id uuid, p_rewards jsonb, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_tier_program_config(p_config jsonb) -> jsonb
 F: bff_upsert_tier_with_conditions(tier_data jsonb) -> jsonb
 F: calculate_tier_metric_value(p_user_id uuid, p_merchant_id uuid, p_metric metric, p_user_type user_type, p_window_start date, p_window_end ...) -> numeric
 F: chokepoint_post_tier_change(p_user_id uuid, p_merchant_id uuid, p_from_tier_id uuid, p_to_tier_id uuid, p_change_type tier_change_type, p_...) -> uuid
 F: ensure_tier_progress(p_user_id uuid, p_merchant_id uuid) -> void
 F: evaluate_user_tier_status(p_user_id uuid, p_merchant_id uuid, p_evaluation_date date DEFAULT CURRENT_DATE) -> jsonb
+F: fn_grant_tier_entry_rewards(p_user_id uuid, p_merchant_id uuid, p_to_tier_id uuid) -> void
 F: fn_tier_conditions_enforce_unique_upgrade_amount() -> trigger
 F: fn_tier_ladder_for_user(p_user_id uuid, p_merchant_id uuid) -> TABLE(tier_id uuid, upgrade_amount numer...
 F: fn_tier_window(p_merchant_id uuid, p_user_type user_type, p_evaluation_date date DEFAULT CURRENT_DATE) -> TABLE(window_start date, window_end date...
@@ -1888,6 +1899,10 @@ F: fn_jsonb_to_uuid_array(p_json jsonb) -> uuid[]
 F: fn_kickoff_event_registration_import(p_batch_id uuid) -> jsonb
 F: fn_lifecycle_event_shopify_feature_key(p_event text) -> text
 F: fn_merchant_deferred_crm_confirm(p_merchant_id uuid) -> boolean
+F: fn_find_points_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_lead_days integer DEFAULT 7, p_channel text DEFAULT 'line', p_after_user_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
+F: fn_find_rewards_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_timezone text DEFAULT 'Asia/Bangkok', p_lead_days integer DEFAULT 3, p_channel text DEFAULT 'line', p_after_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
+F: fn_list_due_expiry_reminder_merchants(p_now timestamptz DEFAULT now(), p_after_merchant_id uuid DEFAULT NULL, p_limit integer DEFAULT 50, p_channel text DEFAULT 'line') -> TABLE
+F: fn_mark_expiry_reminder_ran(p_merchant_id uuid, p_local_date date) -> void
 F: fn_merchant_shopify_feature_enabled(p_merchant_id uuid, p_feature_group text, p_feature_key text DEFAULT NULL::text) -> boolean
 F: fn_merge_values_into_config(p_config jsonb, p_default_values jsonb, p_custom_values jsonb) -> jsonb
 F: fn_migration_validate_syngenta() -> jsonb

@@ -48,7 +48,21 @@ The system's distinguishing features include:
 **Visibility Types**:
 - `user`: Public catalog - visible to all eligible end users
 - `admin`: Administrative rewards - only visible in admin interfaces
-- `campaign`: Campaign-specific - distributed through targeted campaigns
+- `campaign`: Campaign-specific - distributed through targeted campaigns. Never listed in the member catalog. `fallback_points = 0`.
+
+### Campaign reward relation layer
+
+A campaign points at a campaign reward through a **slot** `{ source, target }`. Only these functions write that relation:
+
+| Function | Role |
+|---|---|
+| `fn_campaign_reward_slot_attach(p_slot, p_reward_id)` | Idempotent attach. Sources: `referral` (`kind` signup\|purchase, `party` referrer\|friend → DB inviter\|invitee), `tier_entry` (`tier_id`), `lifecycle` (`workflow_id`, `node_id` on a `push_reward` action node). Friend purchase writes `referral_program.friend_offer.reward_id`. Never deletes `reward_master`. |
+| `fn_campaign_reward_slot_detach(p_slot, p_reward_id)` | Mirror detach. Never deletes `reward_master`. |
+| `fn_reward_references(p_reward_id)` | Counts per source plus redemptions; human `summary`. |
+| `bff_attach_campaign_reward` / `bff_detach_campaign_reward` | Admin wrappers. |
+| `bff_upsert_campaign_reward_atomic(p_reward, p_slot, p_request_id)` | Save reward + attach. Idempotency table `referral_reward_save_requests` (`slot jsonb`). `bff_upsert_referral_reward_atomic_core` is a purchase-slot wrapper. |
+
+`admin_delete_reward` calls `fn_reward_references` first and refuses with `title: 'Reward is in use'`, `description = summary` when any slot or redemption references the reward.
 
 **Fulfillment Methods**:
 - `digital`: Electronic delivery (codes, vouchers, downloads)
