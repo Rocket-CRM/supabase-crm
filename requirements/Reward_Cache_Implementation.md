@@ -686,8 +686,18 @@ $$;
 **Single Redis Key Contains:**
 ```json
 {
-  "data": [ /* all rewards */ ],
-  "categories": [ /* all categories including "All" */ ]
+  "data": [ /* all rewards — each row includes reward_group_ids[] */ ],
+  "categories": [ /* all categories including "All" */ ],
+  "groups": {
+    "<group_uuid>": {
+      "id": "<group_uuid>",
+      "name": "Cinema Tickets",
+      "is_featured": true,
+      "limits": [
+        { "metric": "distinct_reward", "count": 1, "scope": "user", "time_unit": "all_time" }
+      ]
+    }
+  }
 }
 ```
 
@@ -753,7 +763,31 @@ EXECUTE FUNCTION trigger_invalidate_rewards_cache_on_redemption();
 **Fires when:** User redeems a reward  
 **Reason:** Affects redemption counts in availability stats
 
-#### 5. Category Changes (Future Enhancement)
+#### 5. Reward Group Changes (Added Apr 2026)
+
+```sql
+CREATE TRIGGER reward_group_cache_invalidation
+AFTER INSERT OR UPDATE OR DELETE ON reward_group
+FOR EACH ROW
+EXECUTE FUNCTION trigger_invalidate_rewards_cache_on_group_change();
+```
+
+**Fires when:** Group created/updated/deleted (name, is_featured, is_active, etc.)
+**Reason:** `groups{}` map is embedded in the cached payload
+
+#### 6. Transaction Limits Changes — reward_group entity type (Added Apr 2026)
+
+```sql
+CREATE TRIGGER transaction_limits_group_cache_invalidation
+AFTER INSERT OR UPDATE OR DELETE ON transaction_limits
+FOR EACH ROW
+EXECUTE FUNCTION trigger_invalidate_rewards_cache_on_group_limit_change();
+```
+
+**Fires when:** A limit row with `entity_type = 'reward_group'` is inserted/updated/deleted
+**Reason:** Limits are embedded inside each group in the `groups{}` map. The trigger function checks `entity_type` before invalidating to avoid unnecessary cache busts from non-group limit changes.
+
+#### 7. Category Changes (Future Enhancement)
 
 **Note:** Currently category changes do NOT invalidate the cache automatically. If categories are edited, manually invalidate:
 ```sql
@@ -999,7 +1033,7 @@ FROM information_schema.triggers
 WHERE trigger_name LIKE '%cache%';
 ```
 
-**Expected:** 4 triggers on reward_master, translations, reward_promo_code, reward_redemptions_ledger
+**Expected:** 6 triggers on reward_master, translations, reward_promo_code, reward_redemptions_ledger, reward_group, transaction_limits
 
 **Manual Fix:**
 ```sql

@@ -152,7 +152,7 @@ Capability groups (target shape):
 | Points and earn channels | Currency, earn rates (basic/advanced), multipliers, earn channels |
 | Rewards and burn | Catalog redeem, eligibility, pricing, promo codes, burn-to-discount |
 | Tiers | Ladder, upgrade/maintain, windows, per-tier benefits |
-| Campaigns | Missions, referral, check-in, spin, lucky draw (stay inside Loyalty) |
+| Campaigns | Missions, referral, check-in, spin, lucky draw, leaderboard (stay inside Loyalty) |
 | Lifecycle automations | Rename away from “Lifecycle outcomes”; signup/birthday/anniversary/tier-change automations |
 | Customer profile | Forms/profile fields. Surveys stay here. |
 | Segmentation and RFM | Tags/personas/user types, RFM, funnel stages |
@@ -165,7 +165,10 @@ Required corrections vs prior catalog:
 - Fold App foundation rows into Loyalty; preserve stable feature keys.
 - Keep Campaigns inside Loyalty (not a separate module).
 - Stored value stays inside Loyalty (not a module) and is **not** a pricing-sheet row until `status = ga`.
-- Receipt upload is a Core **earn method** (`commercial_nature = core`). Receipt AI/OCR auto-approve stays `consumption`.
+- Core earn methods: Front Line manual + **one** of marketplace / QR / receipt upload (`commercial_nature = core`). Extra licensed mechanics are a sales-pack **addon billable unit** (not a fourth nature on the feature row). Receipt AI/OCR auto-approve stays `consumption`.
+- POS / own-store purchase earn is Open API or Shopify (`loyalty.earn.purchase_sync` = `addon`) — not a Core earn channel.
+- Surveys, tier evaluation windows, persona-scoped ladders, and shared reward quota are **Core**.
+- Advanced bundle: earn rates / multipliers, flash rewards, persona / member type, segments + LINE/SMS broadcast. Campaigns stay `consumption` (`campaign_month`); the Advanced license includes **6 campaign units per year** (amounts live in the sales pack).
 - Rename Lifecycle outcomes → lifecycle automation language.
 - Advanced earn rates: different rates by channel (and related dimensions already sold).
 - Multipliers: double points for selected products/categories.
@@ -432,7 +435,7 @@ Package membership answers “which SKU bundle lists this feature.”
 | `commercial_nature` | Meaning | Typical pattern |
 |---|---|---|
 | `core` | Included in the standard / most common license packages | Signup, points balance, basic earn rate, reward catalog, core CS inbox |
-| `advanced` | Bundled only when the merchant takes the premium/advanced package — they get the **advanced set as a bundle**, not à la carte | Tickets, advanced earn rates, multipliers, persona-scoped tiers, most advanced Loyalty depth |
+| `advanced` | Bundled only when the merchant takes the premium/advanced package — they get the **advanced set as a bundle**, not à la carte | Advanced earn rates, multipliers, flash rewards, persona / member type, segments + broadcast |
 | `addon` | Sold / enabled **per feature** (toggle or line item), not only via the advanced bundle | Open API; other true à la carte entitlements |
 | `consumption` | Charged by metered units of use | Campaigns (`campaign_month`); receipt AI/OCR auto-approve (`receipt`) |
 

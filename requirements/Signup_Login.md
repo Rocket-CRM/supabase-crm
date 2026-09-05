@@ -206,12 +206,16 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
 7. Link missing auth methods to existing user
 8. Generate JWT with merchant context
 9. **Early return optimization:** if required auth method is still missing (`verify_line` / `verify_tel`), return immediately (still includes `access_token` + `refresh_token`) and **skip** profile template evaluation
-10. Check profile completion using `bff_get_user_profile_template` (only when auth methods are satisfied); returned field lists are **persona-filtered** for the session JWT—see §5
+10. Check profile completion using `bff_get_user_profile_template` (only when auth methods are satisfied), calling it with the **member JWT** just minted so `fn_apply_user_profile_edit_overlay` can pre-fill saved `user_accounts` / address / custom-field values; returned field lists are **persona-filtered** for that JWT—see §5
 11. Determine `next_step` based on profile completion
 12. Build `missing_data` payload (full form or missing-only)
 13. Generate refresh token
 14. If `next_step === "complete"`, also merge `get_user_summary()` output into `user_account` (flat)
 15. Return comprehensive response
+
+**Member code (auto-assigned on create):** `bff-auth-complete` does **not** set `member_code` itself. New users are created via `chokepoint_post_user_event(event_type=create)`; when `member_code` is omitted from `p_changes`, the chokepoint derives an **8-digit** code from `user_accounts.id` + per-merchant pepper (`fn_derive_member_code`). Retry on unique violation only (`attempt` 1..5). Explicit `member_code` in `p_changes` is stored as-is. Updates never auto-fill a null `member_code`. Bulk import: blank column → same auto-assign; supplied codes validated in Pass 1 (`DUPLICATE_MEMBER_CODE_IN_BATCH`, `MEMBER_CODE_EXISTS`, `INVALID_MEMBER_CODE`).
+
+**Member code on summary / login payload:** `get_user_summary()` returns additive `member_code` (nullable text from `user_accounts.member_code`). When `next_step === "complete"`, `bff-auth-complete` merges that summary into `user_account`, so the login response includes `member_code` for My QR and other storefront consumers.
 
 ---
 
@@ -272,6 +276,8 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
 - Call with the **end-user’s JWT** (not only a service role with no `auth.uid()`), otherwise persona cannot be resolved and **only universal fields** are returned.
 - **`phone` / `line_id`:** Still governed by merchant field config and product rules (often treated as auth-managed rather than free-text profile fields).
 
+**Field type `external_code`:** A persona-scoped, pre-uploaded code field (e.g. company tax ID, dealer code). Each `default_fields_config` field whose `field_type = 'external_code'` exposes a `config.external_code` object: `{ pool_label, max_consumers, target_user_column }`. Frontend renders a text input + Validate button; see `bff_validate_signup_code` below. Final consumption happens inside `bff_save_user_profile` and is atomic (rolls back the entire profile save on failure).
+
 **Related RPC:** `bff_save_user_profile` accepts the filled payload; ensure saves validate required fields in line with what this template exposed for that user’s persona.
 
 ---
@@ -282,11 +288,12 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
 **Input:** The entire payload from `bff_get_user_profile_template` with user-filled `value` fields
 
 **Tables updated:**
-- `user_accounts` - default fields, persona, channels, **sets `is_signup_form_complete = true`**
+- `user_accounts` - default fields, persona, channels, **sets `is_signup_form_complete = true`**. If a default field has `field_type = 'external_code'` and its `config.external_code.target_user_column` is set to one of `external_user_id` / `member_code` / `id_card`, the consumed code value is also written there.
 - `user_address` - address fields
 - `form_submissions` + `form_responses` - custom fields
 - `user_consent_ledger` - PDPA consents
 - `user_communication_preferences` - topics
+- `signup_codes` + `signup_code_claims` - for any `external_code` field present in payload, the code is consumed atomically via `fn_consume_signup_code` (persona check → race-safe `UPDATE ... WHERE consumed_count < max_consumers RETURNING ...` → insert into claims). Failures (invalid, inactive, exhausted, persona mismatch, missing field) raise `SIGNUP_CODE:<code>:<message>` which the function converts into a structured error response and **rolls back the entire transaction**.
 
 **Output:**
 ```json
@@ -298,7 +305,60 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
 }
 ```
 
+**Error response for signup code failure:**
+```json
+{
+  "success": false,
+  "title": "Code validation failed",
+  "description": "This code has reached its consumption limit",
+  "data": { "error_code": "CODE_EXHAUSTED" }
+}
+```
+
+Possible `error_code` values: `INVALID_CODE`, `CODE_INACTIVE`, `CODE_EXHAUSTED`, `FIELD_NOT_FOUND`, `PERSONA_MISMATCH`.
+
 **Authentication:** Uses `auth.uid()` from bearer token
+
+Locked default fields (`editable_by_user = false`) are write-once: the first empty→value write is kept; later member updates are stripped. Completeness (`fn_check_profile_complete`) still requires required+visible fields regardless of editability.
+
+---
+
+### 7. `bff_validate_signup_code(p_field_key, p_code, p_selected_persona_id?)`
+**Purpose:** Validate (without consuming) a signup code for an `external_code` field. Powers the FE Validate button.
+
+**Input:**
+| Param | Type | Notes |
+|---|---|---|
+| `p_field_key` | `text` | Default field key on `user_field_config` (matches `field_type='external_code'`) |
+| `p_code` | `text` | The code the user entered |
+| `p_selected_persona_id` | `uuid` (nullable) | Required for new users whose persona isn't saved yet; mirrors the same param on `bff_get_user_profile_template` and `bff-auth-complete` |
+
+**Output (success):**
+```json
+{
+  "success": true,
+  "title": "Code valid",
+  "data": {
+    "valid": true,
+    "preview_metadata": { "company_name": "Acme Corp" },
+    "prefill": {
+      "default": { "firstname": "Acme", "external_user_id": "ACME-00123" },
+      "custom":  { "company_name": "Acme Corp", "department": "Sales" }
+    },
+    "already_claimed": false,
+    "remaining_seats": 49
+  }
+}
+```
+
+**Output (failure):** `success=false` with `data.error_code` ∈ `EMPTY_CODE`, `FIELD_NOT_FOUND`, `PERSONA_MISMATCH`, `INVALID_CODE`, `CODE_INACTIVE`, `CODE_EXHAUSTED`, `NO_MERCHANT`.
+
+**Notes:**
+- Read-only. Does NOT consume. Same code can be validated repeatedly without effect.
+- If the code has already been claimed by the current user, returns `success=true` with `already_claimed=true` (idempotent).
+- The race-safe consumption happens inside `bff_save_user_profile`, so the FE Validate is a UX nicety; the save is the final source of truth and re-checks persona scope before consuming.
+- **Prefill auto-fill (FE):** when `data.prefill.default.<field_key>` or `data.prefill.custom.<field_key>` is present, the FE seeds those values into the corresponding default-field / custom-field inputs after Validate succeeds. The user can review and override before Submit. Server does **not** re-stamp these values during consume — submitted form values flow through `bff_save_user_profile` like any other user-entered values. Keys for fields that have been deleted/renamed/hidden since the code was uploaded are silently dropped from the response (admin sets the prefill schema once on the pool via `bff_set_signup_code_prefill_schema`, which is what guarantees keys were valid at upload time).
+- For the full code/claim tables, admin BFFs (`bff_set_signup_code_prefill_schema`, `bff_get_signup_code_prefillable_fields`, `bff_upload_signup_codes`, `bff_list_signup_codes`, `bff_delete_signup_codes`), metadata shape (`preview` + `prefill.{default,custom}`), pool prefill schema, upload validation rules, and naming model (one `external_code` field = one pool, no separate `pools` table), see `requirements/domains/signup-code-validation.md`.
 
 ---
 
@@ -734,9 +794,10 @@ const showError = checkInvalidFields();
 
 **user_accounts**
 - Primary user table
-- Columns: `id`, `merchant_id`, `tel`, `line_id`, `email`, `fullname`, `persona_id`, `channel_*`, `is_signup_form_complete`
+- Columns: `id`, `merchant_id`, `tel`, `line_id`, `email`, `fullname`, `persona_id`, `channel_*`, `is_signup_form_complete`, `skip_cdc`
 - Auth methods stored here: `tel`, `line_id`
 - `auth_user_id` = `id` (self-referencing for custom auth)
+- `skip_cdc = true` is reserved for migration/import rows so CDC consumers do not treat them as native signup events
 
 **user_address**
 - 1:1 relationship with user_accounts
@@ -999,6 +1060,91 @@ variables['45691153-f0a5-42fa-ac9a-5729a9853be2']
   ...context.workflow['workflow-2-id'].result
 }
 ```
+
+---
+
+## Signup Code System
+
+A merchant-managed pool of one-time-or-quota codes that gate signup, prefill profile data, and (since 2026-05-14) optionally link the registering user to a specific `store_master` row.
+
+### Schema
+
+- `signup_codes (id, merchant_id, field_config_id, code, metadata jsonb, max_consumers, consumed_count, is_active, store_id)` — codes are scoped to a "pool" defined by a `user_field_config` row of type `external_code`. `store_id` (added 2026-05-14) is an optional FK to `store_master`; a `BEFORE INSERT/UPDATE` trigger (`trg_signup_codes_check_store_merchant`) enforces `store_master.merchant_id = signup_codes.merchant_id`.
+- `signup_code_claims (id, merchant_id, code_id, user_id, claimed_at)` — one row per consumption, primary audit trail.
+- `user_accounts.store_id` (added 2026-05-14) — nullable FK to `store_master`. Mirrors the cross-merchant trigger guard. Currently written only by `fn_consume_signup_code`; reset to NULL by `store_master` deletion (`ON DELETE SET NULL`).
+
+### Pool configuration (`user_field_config.config.external_code`)
+
+| key | values | meaning |
+|---|---|---|
+| `prefill_schema.default` | `text[]` | Whitelisted built-in field keys whose values codes may carry in `metadata.prefill.default` |
+| `prefill_schema.custom` | `text[]` | Whitelisted `form_templates(code='USER_PROFILE')` custom field keys for `metadata.prefill.custom` |
+| `target_user_column` | `external_user_id` \| `member_code` \| `id_card` \| `null` | If set, consume calls `chokepoint_post_user_event` to copy the code into the corresponding column on `user_accounts` |
+| `store_binding` *(new)* | `off` (default) \| `optional` \| `required` | Controls whether codes in this pool may / must carry a `store_code` at upload time |
+
+### Lifecycle
+
+1. **Admin uploads codes** — `bff_upload_signup_codes(p_field_config_id, p_codes jsonb)`.
+   - Each row: `{ code, store_code?, max_consumers?, is_active?, metadata?: { preview, prefill: { default, custom } } }`.
+   - **Validation pass (all-or-nothing):** any `store_code` mismatch with the pool's `store_binding`, any unresolvable `store_code`, or any `KEY_NOT_IN_POOL_SCHEMA` aborts the entire upload with `STORE_VALIDATION_FAILED`. No partial writes.
+   - **Write pass:** upserts by `(field_config_id, code)`. Existing prefill-schema row errors continue to be collected per-row in `data.errors[]` and skipped (existing behavior). `store_id` is overwritten from `store_code` on update.
+2. **User enters code** during signup → FE calls `bff_validate_signup_code(p_field_key, p_code, p_selected_persona_id?)`.
+   - Returns `data.preview_metadata` (with `data.preview_metadata.store = { id, code, name }` if bound) + `data.prefill.{default, custom}` + `data.store` (top-level convenience).
+   - Pre-claim gates: `EMPTY_CODE`, `FIELD_NOT_FOUND`, `PERSONA_MISMATCH`, `INVALID_CODE`, `CODE_INACTIVE`, `CODE_EXHAUSTED`, plus (if code carries a store and caller is authenticated) `NOT_SELLER` and `STORE_CONFLICT`.
+3. **Account is created / signup form submitted** → `fn_consume_signup_code(p_user_id, p_field_config_id, p_code)`.
+   - Atomic `UPDATE … RETURNING` on `consumed_count`, insert into `signup_code_claims`.
+   - If `signup_codes.store_id IS NOT NULL`: enforce `user_accounts.user_type = 'seller'` (else `NOT_SELLER`). Then **first-wins**: if `user_accounts.store_id IS NULL` set it to the code's store; if it equals the code's store, no-op (idempotent); else raise `STORE_CONFLICT`.
+   - `already_claimed=true` short-circuit returns the existing linkage without retrying.
+   - Returns `linked_store_id` so the caller can show "You're linked to store X".
+
+### Error codes (consume-time `RAISE EXCEPTION`, format `SIGNUP_CODE:<CODE>:<message>`)
+
+| code | when |
+|---|---|
+| `FIELD_NOT_FOUND` | `field_config_id` doesn't exist |
+| `PERSONA_MISMATCH` | Pool has `persona_ids` and user's persona isn't in the list |
+| `INVALID_CODE` | No `signup_codes` row matches `(field_config_id, code)` |
+| `CODE_INACTIVE` | Row exists but `is_active = false` |
+| `CODE_EXHAUSTED` | `consumed_count >= max_consumers` and user hasn't already claimed |
+| `NOT_SELLER` | Code carries a `store_id` but `user_accounts.user_type <> 'seller'` |
+| `STORE_CONFLICT` | Code carries a `store_id` but the seller is already linked to a different store |
+
+### Frontend contract changes (2026-05-14)
+
+- `bff_validate_signup_code` response gains `data.store = { id, code, name } \| null` (and the same object also appears inside `data.preview_metadata.store` for backward-compatible rendering paths).
+- `bff_list_signup_codes` response items gain `store_id`, `store_code`, `store_name`. The list response also returns `data.store_binding` (the pool's mode) so the admin UI can switch between showing or hiding the store column.
+- `bff_upload_signup_codes` accepts a new per-row `store_code` field and a new top-level failure shape: `success=false, data.error_code='STORE_VALIDATION_FAILED', data.errors[]` with per-row `{ row, code, store_code, error_code, message }`. Existing `data.errors[]` for prefill-schema mismatches still uses `KEY_NOT_IN_POOL_SCHEMA` and continues to skip-but-write the other rows.
+- `fn_consume_signup_code` response now includes `linked_store_id uuid \| null`.
+
+---
+
+## Acquisition Source (first-touch attribution)
+
+Merchants define channel codes in `acquisition_source_master`. On member signup, the loyalty app passes `acquisition_source` (URL param or local storage from prior visit) into `bff-auth-complete` and `bff_save_user_profile`; `chokepoint_post_user_event` writes `user_accounts.acquisition_source` once (first-touch, immutable after set).
+
+### Schema — `acquisition_source_master`
+
+| column | type | notes |
+|---|---|---|
+| `id` | uuid | PK |
+| `merchant_id` | uuid | FK → `merchant_master` |
+| `source_code` | text | Unique per merchant; URL-safe (`a-z`, `0-9`, `_`); **immutable after create** |
+| `source_name` | text | Admin display label |
+| `description` | text | Optional |
+| `created_at` / `updated_at` | timestamptz | |
+
+### Admin BFFs (JWT / `get_current_merchant_id()`)
+
+| function | purpose |
+|---|---|
+| `bff_list_acquisition_sources()` | List all sources for merchant; each row includes `member_count` (active users with matching `user_accounts.acquisition_source`) |
+| `bff_get_acquisition_source_details(p_mode, p_acquisition_source_id)` | `p_mode='new'` → empty template; `p_mode='edit'` + id → single source + `member_count` |
+| `bff_upsert_acquisition_source(p_data jsonb)` | Create (`id` omitted, `source_code` + `source_name` required) or update (`id` set; `source_name`, `description` only) |
+| `bff_delete_acquisition_source(p_acquisition_source_id)` | Hard delete; blocked with `SOURCE_IN_USE` when `member_count > 0` |
+
+**Upsert payload:** `{ id?, source_code?, source_name, description? }`
+
+**Member link pattern (frontend-built):** `{loyalty_app_base_url}?acquisition_source={source_code}` — QR export is client-side; no backend RPC.
 
 ---
 

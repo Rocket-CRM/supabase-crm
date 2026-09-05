@@ -6,6 +6,7 @@
       "env": {
         "SUPABASE_URL": "https://wkevmsedchftztoolkmi.supabase.co",
         "SUPABASE_ANON_KEY": "your_anon_key_here",
+        "SUPABASE_SERVICE_ROLE_KEY": "omit_for_downstream_read_only_or_set_for_trusted_authoring",
         "CRM_EMAIL": "tester@yourmerchant.internal",
         "CRM_PASSWORD": "your_password_here"
       }

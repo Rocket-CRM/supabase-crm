@@ -1,8 +1,9 @@
 # Tier Management System - Complete Business Description
 
-**Version**: 4.4  
-**Last Updated**: March 2026  
-**Architecture**: CDC → Render Consumer → Inngest (Upgrades) + pg_cron Batch (Maintains)  
+**Version**: 7.0  
+**Last Updated**: September 2026  
+**Architecture**: CDC → Render Consumer → Inngest (standard upgrades) + Render batch (maintains/downgrades); custom merchants use cache + eval wrappers (see `LOYALTY_PROGRESS_EXPIRY_CACHE.md`)  
+**New in 7.0**: Cache-first tier progress for custom-evaluation merchants — cron refreshes `tier_progress`; BFFs read cache only; `fn_loyalty_custom_apply_tier` for custom upgrade/downgrade batches  
 **New in 4.4**: Tier Benefits Display — configurable benefit lines (icon + header + description) per tier, separate display management function, and enriched user-facing tier progress API  
 **New in 4.3**: Burn Rate - Direct point-to-discount conversion with tier-based rates and future extensibility  
 **New in 4.2**: Persona-based tier segmentation with independent optional dimensions  
@@ -562,18 +563,32 @@ The system tracks maintenance deadlines through the `tier_evaluation_tracking` t
 - Both use the same evaluation functions (`evaluate_user_tier_status`) for the actual calculation
 
 ### Progress Tracking
-The `tier_progress` table maintains real-time progress information:
 
-- **One record per user per merchant**: Each user has exactly one progress record that tracks their current status
-- Updated on each qualifying transaction (purchase or currency change)
-- **Best Path Selection**: When multiple upgrade paths exist (multiple conditions per tier), the system automatically selects and displays the condition with the highest `progress_percent`
-- **Dynamic Path Switching**: As different conditions progress at different rates, the displayed "best path" may switch between conditions (e.g., from points-based to sales-based progress). This switching behavior is intentional and beneficial - it ensures users always see their most promising opportunity to advance
-- **User Experience**: Shows the most achievable path ("Earn 500 more points by Dec 31 to reach Gold" vs "Spend 20,000 more THB by Dec 31 to reach Gold")
-- Used for reminder notifications and engagement campaigns
+Full architecture (cache tables, eval wrappers, standard vs custom, cron split): **`requirements/LOYALTY_PROGRESS_EXPIRY_CACHE.md`**.
 
-Progress updates occur through:
-- Real-time triggers: On new records in `purchase_ledger` or `wallet_ledger`
-- Daily reconciliation cron: Ensures data accuracy and catches any missed updates
+The `tier_progress` table is the **display cache** for tier progress — one row per `(user_id, merchant_id)`.
+
+#### Standard evaluation (`evaluation_mode` ≠ `custom`)
+
+- **Write path:** Event-driven. Wallet/purchase CDC → `process_tier_event` for applies; `ensure_tier_progress` → `ensure_tier_progress_standard` refreshes display on the event path.
+- **Read path:** BFFs (`get_user_tier_progress`, `fn_admin_get_tier_progress_enriched`, `get_user_summary`) read `tier_progress`.
+- **Batch applies:** Render `tier-daily-batch` (pending upgrades, maintain, downgrade) — unchanged.
+
+#### Custom evaluation (`tier_program_config.evaluation_mode = 'custom'`)
+
+- **Write path:** Bulk work moves off the request path.
+  - **5-minute dirty refresh:** Render `loyalty-cache-dirty-5m` → `fn_loyalty_cache_refresh_5m` scans recent wallet/purchase activity and calls `fn_loyalty_cache_upsert_tier_progress` for affected users.
+  - **Daily catch-up:** Render `loyalty-cache-catchup-daily` → `fn_loyalty_cache_catchup_chunk` (5000 users per RPC) for users missing cache rows.
+  - **Apply:** `fn_loyalty_custom_apply_tier(merchant, date, 'uptier' | 'downtier')` runs the merchant calculator and calls `apply_tier_change`, then refreshes cache.
+- **Calculator:** `fn_loyalty_resolve_calculator(merchant_id, 'tier_progress')` → `custom_function.{merchant_code}_tier_progress(merchant_id, user_ids[], as_of_date)`. Example: `custom_function.futurepark_tier_progress`.
+- **Read path:** BFFs read `tier_progress` only — **no on-demand `evaluate_user_tier_status` on read**.
+- **Extended cache columns:** `upgrade_metric_current`, `upgrade_threshold` (populated by cache writer).
+
+#### Display semantics (both modes)
+
+- **Best path selection:** When multiple upgrade paths exist, display favors the highest `upgrade_progress_percent`.
+- **User experience:** Surfaces the most achievable path and deadlines for reminders and campaigns.
+- **Invalidate:** `fn_loyalty_cache_invalidate_merchant` after calculator or config changes (custom merchants).
 
 ### Reversal Handling
 Reversals (refunds, point deductions) trigger immediate re-evaluation:

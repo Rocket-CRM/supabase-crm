@@ -1,5 +1,8 @@
 # Tag & Persona Management System - Complete Business & Technical Documentation
 
+> **Accuracy note (2026-08-09):** Live objects are `persona_group_master`, `persona_master`, `tag_master`, `user_tags`, `assign_persona`, `assign_tag` (5-arg), `bff_upsert_persona_master`, `upsert_persona_group_with_personas`. HTTP REST paths and `user_complete_profile` view below are **aspirational / not deployed** — prefer BFFs/RPCs. Production status metrics are aging snapshots.
+
+
 ## Overview
 
 ### Core Segmentation Concept
@@ -316,10 +319,11 @@ graph TB
 - Persona or group inactive
 - Database constraint violations
 
-#### `assign_tag(p_user_id UUID, p_tag_id UUID, p_action TEXT)`
+#### `assign_tag(p_user_id UUID, p_tag_id UUID, p_action TEXT DEFAULT 'add', p_source_type TEXT DEFAULT NULL, p_source_id UUID DEFAULT NULL)`
 **Purpose**: Manages tag assignments with duplicate prevention  
 **Security**: SECURITY DEFINER - Ensures merchant boundary enforcement  
 **Actions**: 'add' or 'remove'  
+**Provenance**: optional `p_source_type` / `p_source_id` (who/what assigned the tag)  
 **Returns**: JSONB with operation result
 
 **Detailed Logic Flow**:
@@ -713,7 +717,8 @@ WHERE tag_id IN (
 #### Query Performance Patterns
 ```sql
 -- Optimized user profile query with all dimensions
-CREATE OR REPLACE VIEW user_complete_profile AS
+-- NOT DEPLOYED (absent from live DB / registry) — illustrative only
+-- CREATE OR REPLACE VIEW user_complete_profile AS
 SELECT 
     u.id,
     u.user_type,
@@ -917,6 +922,7 @@ Request:
 - Tag removal of non-existent assignments returns success
 - Tags must belong to the same merchant as the user
 - Inactive tags cannot be assigned
+- Admin / Front Line UI: `bff_admin_assign_member_tag` (`customer-360.update` **or** `front_line.update`) wraps `assign_tag`. Catalog create remains `bff_upsert_tag` on User groups → Tags. Member tags are not an input to tier eval.
 
 ### Data Integrity Rules
 - Foreign key constraints ensure referential integrity

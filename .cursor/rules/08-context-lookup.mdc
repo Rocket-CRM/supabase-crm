@@ -1,90 +1,175 @@
 ---
-description: How to look up domain context, business rules, and function signatures from indexes and MCP. Use for any backend task.
+description: Context Lookup Procedure for DB / function / business-rule tasks. Read at the start of any build, fix, modify, plan, design, explain, or analyze task that touches the database, functions, or business logic. Covers the 4-step procedure, SQL templates, workflow examples, and the skip-read list. Supplements 00-core.mdc imperatives.
 alwaysApply: false
 ---
 
-> **This rule supplements `00-overview.mdc`.** The 5-Step Context Lookup Procedure in `00-overview.mdc` is the authoritative sequence. Layer 2 (MCP) is ALWAYS required — do NOT stop early. Workflow examples below must follow the Step 1→2→3 order.
+# Context Lookup — 4-Step Procedure, SQL Templates, Workflows
 
-## 3-Layer Context Lookup
+Run Steps 1–3 at the START of a new task or thread. On follow-up turns within the same task, only re-run if (a) a new domain enters scope, (b) you need a column/function you haven't checked yet, or (c) the user explicitly asks to re-check.
 
-Follow these layers in order. Layers 1 and 2 are always required. Layer 3 only when needed for complex business rules.
+The four discovery imperatives in `00-core.mdc` (registry-first, grep-not-full-read, batch independent calls, verify via MCP) apply throughout — this rule is the SQL templates and worked examples for those imperatives.
 
-### Layer 1 — Domain Index (always start here)
+| Request type | Steps required |
+|---|---|
+| **Product Q&A** ("Do we have…", "Does X support…") | Layer 1–2 per `20-discovery-discipline.mdc` — **2 turns max**, then answer. No function bodies. |
+| Build / fix / create / modify | Steps 1–4 (full) |
+| Plan / design / propose | Steps 1–3, present, wait for approval |
+| Explain / analyze | Steps 1–3, present |
+| **Schema-only** ("add column", "for now") | Step 2 (verify table) → `apply_migration` → verify. No function wiring. |
+| "Read this file and extract X" | Read the file + Step 3 alongside |
+| Meta tasks (edit `.cursor/rules/`, README) | Use judgement; domain/DB tasks require Steps 1–3 |
+| Migration tasks (`newcrm-migration/`, `Data migration/`) | Skip Steps 1–3 — separate repo with its own conventions |
 
-Read ONLY your domain's section from `requirements/INDEX_DOMAIN.md` using offset + limit. NEVER read the full file.
+Full layer stack: `docs/PROJECT_CONTEXT_STRUCTURE.md`.
 
-Extract:
-- **Keywords** — confirm you're in the right domain
-- **Tables** — which tables this domain uses
-- **Functions** — which functions exist, their types (BFF/Backend/Trigger)
-- **Business rules** — key rules summarized inline
+## Step 1 — Identify the domain (single batched turn)
 
-This layer alone is often enough for simple tasks.
+In one turn, fire these in parallel:
 
-### Layer 2 — Supabase MCP (for live schema and function details)
+- Grep `requirements/domains/_index.md` for the user's keywords → domain slug.
+- Grep `requirements/REGISTRY_SUPABASE.md` for the same keywords → candidate tables / functions / triggers.
+- Grep `requirements/REGISTRY_RENDER.md` for the same keywords → edge fns / queues / crons.
+- If product / feature-shaped, also call CRM Knowledge MCP per `15-crm-knowledge-mcp.mdc` (`resolve_feature_term` + `search_semantic` + `get_feature_context` in the same turn).
 
-When you need exact column types, function signatures, or return shapes:
+**Loyalty domain hints:** Missions (`mission_*`), Rewards (`reward_*`, `redemption_*`, `promo_code_*`), Currency (`wallet_*`, `points_*`, `tickets_*`), Tier (`tier_*`), Tag/Persona (`persona_*`, `tag_*`), Referral (`referral_*`), Forms (`form_*`), Checkin (`checkin_*`), Stored Value Card (`svc_*`), Store Classification (`store_*`, `location_*`, `partner_*`), Activity/Earning (`activity_*`, `earn_*`), Purchase (`purchase_*`, `transaction_*`), AMP Workflows (`workflow_master`, `workflow_node`), AMP AI Agent (`amp_agent*`).
 
-**Project ID:** `wkevmsedchftztoolkmi`
+**CS domain hints:** Overview (`cs_*`), Conversations (`cs_conversations`, `cs_messages`), Knowledge Base (`cs_knowledge_*`), Procedures (`cs_procedures`), Channels (`cs_channels`, `cs_platform_identities`), Customers (`cs_customers`, `cs_customer_memory`).
 
-Function signature (lightweight):
+## Step 2 — Confirm candidates via Supabase MCP (live truth)
+
+Project_id `wkevmsedchftztoolkmi`. **NEVER** guess column names — docs can be stale; `pg_proc` / `information_schema` is live truth. Batch independent introspection queries in one turn.
+
+### SQL Templates
+
+**Table schema:**
 ```sql
-SELECT proname, pg_get_function_arguments(oid), pg_get_function_result(oid)
-FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
-WHERE n.nspname = 'public' AND p.proname = 'FUNCTION_NAME';
-```
-
-Full function body (when you need logic):
-```sql
-SELECT pg_get_functiondef(p.oid)
-FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
-WHERE n.nspname = 'public' AND p.proname = 'FUNCTION_NAME';
-```
-
-Table schema:
-```sql
-SELECT column_name, data_type, is_nullable
+SELECT column_name, data_type, is_nullable, column_default
 FROM information_schema.columns
-WHERE table_schema = 'public' AND table_name = 'TABLE_NAME'
+WHERE table_schema = 'public' AND table_name = '<table>'
 ORDER BY ordinal_position;
 ```
 
-This layer gives live, accurate data. Prefer MCP over doc reading for schema/function details.
+**Function signature (lightweight):**
+```sql
+SELECT proname, pg_get_function_arguments(oid), pg_get_function_result(oid)
+FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public' AND p.proname = '<name>';
+```
 
-### Layer 3 — Requirement Doc Sections (complex business rules only)
+**Function body (full logic) — build/fix only; named function required:**
 
-Only read the source doc when Layers 1-2 don't cover detailed business rules, state machines, or edge cases. NEVER read a full doc — use offset + limit with line ranges from Layer 1.
+Do **not** use during Product Q&A or to confirm feature absence. Fetch only when (a) editing that function, or (b) a bug is pinned to it after registry + requirement-doc contract.
 
-### Function Index — When to Use
+```sql
+SELECT pg_get_functiondef(p.oid)
+FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public' AND p.proname = '<function_name>';
+```
 
-Read `requirements/INDEX_FUNCTION.md` (specific domain section only, never full file) when you need to:
-- Find ALL functions in a domain (not just the key ones from INDEX_DOMAIN)
-- Understand function types: BFF (frontend-facing), Backend (internal), Trigger, Edge, Inngest
-- Find related functions for a data flow: trigger → backend function → edge function → Inngest
-- Check if a function already exists before creating a new one
+**Never** scan all functions with `pg_get_functiondef` ILIKE — grep `REGISTRY_SUPABASE.md` first.
 
-### Typical Workflows
+**Find functions by keyword (use ONLY after grepping `REGISTRY_SUPABASE.md` came up empty):**
+```sql
+SELECT proname, pg_get_function_arguments(oid)
+FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid
+WHERE n.nspname = 'public' AND p.proname LIKE '%<keyword>%';
+```
 
-**Bug fix** (e.g., "wallet balance is wrong"):
-1. Layer 1: Read Currency domain in INDEX_DOMAIN → get tables, key functions, business rules
-2. Layer 2: MCP — read `post_wallet_transaction` function body → find the logic bug
-3. Fix the function
+**Find triggers on a table:**
+```sql
+SELECT trigger_name, event_manipulation, action_timing, action_statement
+FROM information_schema.triggers
+WHERE event_object_schema = 'public' AND event_object_table = '<table>';
+```
 
-**New function** (e.g., "add a BFF to get CS conversations"):
-1. Layer 1: Read CS Conversations in INDEX_DOMAIN → get existing functions, tables
-2. Layer 2: MCP — check table schema, check if function already exists
-3. Layer 2: MCP — read a similar BFF function body to match patterns
-4. Write the function following existing patterns
+## Step 3 — Read requirement-doc sections (often earlier than you think)
 
-**Analysis** (e.g., "how does tier evaluation work?"):
-1. Layer 1: Read Tier domain in INDEX_DOMAIN → get business rules summary
-2. Layer 2: MCP — read `evaluate_user_tier_status` function body
-3. Layer 3: Read Tier.md specific sections if MCP output isn't enough
-4. Present findings
+For complex business rules, state machines, edge cases, or **any bug that smells like a documented contract** (key-present semantics, round-trip contracts, soft-delete behavior, state transitions, "field is set but doesn't show up"-style issues), read the relevant section of `requirements/<Domain>.md` BEFORE reading function bodies. Documented contracts answer in ~10 lines what function-body reading needs ~200 lines to derive.
 
-### Rules
+Follow `12-doc-search.mdc`: grep headings → offset + limit. **Never** full-read a `<Domain>.md` file (they are 100KB+).
 
-- NEVER guess business rules — look them up
-- NEVER read a full requirement doc — use indexes + line ranges
-- Prefer MCP over docs for schema and function details (MCP is always current)
-- When user mentions a table or function name, match it to a domain first
+### Bug Diagnosis Shortcut
+
+For bug reports, before deep MCP body reads, batch these in one turn:
+- Grep `requirements/<Domain>.md` for the symbol or behavior the user described.
+- Grep `REGISTRY_SUPABASE.md` for related functions.
+- Grep `REGISTRY_RENDER.md` for related edge fns / crons / queues.
+
+If a documented contract turns up, read that section first. Use function-body reads to **confirm** the contract, not to **discover** it.
+
+## Step 4 — Present findings, then wait
+
+Present: tables, functions, business rules, proposed approach. WAIT for approval before changes.
+
+**Show your work** — state which step you're on before each tool call.
+
+## Discovery Loop Checkpoint
+
+Discovery is meant to converge, not expand. Turn budgets by task class: `20-discovery-discipline.mdc`.
+
+- **Product Q&A:** 2 discovery turns max — then answer (yes/no + what exists instead).
+- **Explain / analyze:** 3 discovery turns max — then present.
+- **Build / fix:** 3 discovery turns before checkpoint — present hypothesis + evidence + proposed fix.
+
+Within any class:
+
+- **If a turn produces no new information** (same hypothesis, no new evidence), stop immediately and present.
+- **If you're tempted to "just check one more thing"** for the third time in the same task, that's the checkpoint trigger — present instead.
+
+The cost of an unnecessary discovery turn is the same as an unnecessary fix: a full context replay. Premature consolidation is cheaper than perfect certainty.
+
+## Skip-Read List
+
+Never auto-`Read` these — scratchpads or stale artifacts:
+
+- `requirements/INDEX_FUNCTION.md` — deprecated 100KB artifact. Use `REGISTRY_SUPABASE.md` or Supabase MCP.
+- `requirements/INDEX_DOMAIN.md` — deprecated monolith.
+- `generated/internal-knowledge/**` — CRM Knowledge **write** artifacts (`seed.json`, `load-chunks/`). For product Q&A use CRM Knowledge MCP, not these files.
+- `.cursor/plans/*.plan.md` — per-feature scratchpads.
+- `Component prompts/*.md` — one-off FE drafts.
+- `Data migration/*`, `newcrm-migration/*` — separate migration repo; only when task is migration-scoped.
+- `Samitivej/*`, `Yuanta/*`, `docs/*_PROPOSAL*`, `docs/*_GUIDE*`, `exports/*` — proposals and one-offs.
+
+Read these only when the user explicitly names one or the task is clearly scoped to it.
+
+### Legacy per-domain slug files (transitional)
+
+`requirements/domains/<slug>.md` files are being merged into authoritative `<Domain>.md` (Phase 6 of the agent context refactor). For new lookups, **prefer** `REGISTRY_SUPABASE.md` grep + scoped read of the authoritative `<Domain>.md`. Touch a slug file only if the registry + authoritative doc grep came up empty AND the slug file still exists.
+
+## Workflow Examples
+
+**Bug fix** ("wallet balance is wrong"):
+1. Turn 1 (batched): grep `_index.md`, `REGISTRY_SUPABASE.md`, `REGISTRY_RENDER.md` for `wallet|balance|currency`; grep `requirements/Currency.md` for the symbol.
+2. Turn 2 (batched): introspect candidate function signatures via `execute_sql`; read the documented contract section of `Currency.md` with offset+limit.
+3. Turn 3: read the function body that the contract pins; identify divergence; propose fix.
+
+**New function** ("add BFF for CS conversations"):
+1. Turn 1 (batched): grep `REGISTRY_SUPABASE.md` for `cs_conversations` + similar BFFs; introspect schema via `execute_sql`.
+2. Turn 2: read a similar BFF body to match patterns.
+3. Turn 3 (after `10-function-conventions.mdc`): present plan + wait for approval.
+
+**Product Q&A** ("Do we have traffic source URL capture?"):
+1. Turn 1 (batched): `resolve_feature_term` + `search_semantic` + `get_feature_context` on resolved slug; grep `REGISTRY_SUPABASE.md` for keywords.
+2. Turn 2 (optional, batched): one targeted schema check on the named table (column filter — not full column list).
+3. **Answer.** Do not pull auth/signup function bodies to confirm absence.
+
+**Analysis** ("how does tier evaluation work?"):
+1. Turn 1 (batched): grep `REGISTRY_SUPABASE.md` for `tier_`, grep `requirements/Tier.md` headings, `resolve_feature_term`("tier evaluation").
+2. Turn 2: read `evaluate_user_tier_status` body via MCP; scoped read of relevant Tier.md section.
+3. Present.
+
+## Analyzing System Components
+
+When asked about functions, triggers, queues, edge functions, or crons:
+- **DB functions:** signatures, parameters, return types, dependencies — `REGISTRY_SUPABASE.md` then MCP.
+- **Triggers:** timing (BEFORE/AFTER), operations (INSERT/UPDATE/DELETE), cascade effects.
+- **Edge functions / queues / crons:** start with `REGISTRY_RENDER.md`, then `02-functions-queues-triggers.mdc`.
+
+Explain current implementation, connect to business logic, identify dependencies, and assess production criticality.
+
+## Rules
+
+- Prefer MCP over docs for schema/function details (MCP is live truth).
+- Never full-read requirement docs — use `12-doc-search.mdc`.
+- Never guess business rules — look them up.
+- `INDEX_FUNCTION.md` is deprecated; never full-read.

@@ -8,11 +8,14 @@ The Activity-Based Earning system enables users to upload activity images (exerc
 - User self-service image upload with frequency limits
 - Admin approval workflow with dynamic field entry
 - Multi-dimensional currency matrix (2D combinations) with pivot table display
-- Direct currency award integration (no CDC needed)
+- Direct currency award integration (sync chokepoint; no earn-router hop)
 - Full audit trail in wallet_ledger
+- **Edit + recalculate** for already-approved or rejected uploads, with delta earn / FIFO partial reversal (2026-05-14)
 - WeWeb Data Grid optimized response with dynamic columns
 
-**Architecture Pattern:** Synchronous admin action → Direct `post_wallet_transaction()` call (same as reward redemption)
+**Architecture Pattern:** Synchronous admin action → Direct `chokepoint_post_wallet_transaction()` call (same as reward redemption)
+
+**Edit flow (2026-05-14):** Admins can re-enter field values for an already-approved or rejected upload via `bff_edit_activity_upload`. The function recalculates the target totals through `fn_calculate_activity_currency`, diffs against the current net per `(currency, target_entity_id)` from `wallet_ledger`, and posts one chokepoint call per non-zero delta — `component='adjustment'`+`transaction_type='earn'` for delta-up, `component='reversal'`+`transaction_type='burn'` for delta-down, `component='base'`+`transaction_type='earn'` when transitioning from `rejected`. FIFO consumption is `fn_allocate_fifo_burn` inside `chokepoint_post_wallet_transaction` (oldest-expiry-first earn lots; points fungible, tickets isolated by `target_entity_id`). Partial-cover clamping is applied when current balance is insufficient: the function reads `user_wallet.points_balance` / `user_ticket_balances.balance` first, posts `min(|delta|, current_balance)`, and records the shortfall as `unreversed_amount` in both the chokepoint metadata and `activity_upload_ledger.edit_history`. Edits to a rejected row also flip the row to `approved` and clear `rejected_at` / `rejected_by` / `rejection_reason`. No time-window cap. Each edit increments `edit_version` and appends one entry to `edit_history`.
 
 **Terminology:**
 - **Primary Dimension:** The field that creates columns in matrix view (e.g., time_of_day, display_size)
@@ -60,7 +63,7 @@ The Activity-Based Earning system enables users to upload activity images (exerc
 │    - Match field_values to activity_currency_config             │
 │    - Find matching primary_value + secondary_value combos       │
 │         ↓                                                        │
-│  Award currency DIRECTLY (post_wallet_transaction)              │
+│  Award currency DIRECTLY (chokepoint_post_wallet_transaction)              │
 │    - source_type: 'activity'                                    │
 │    - source_id: upload_id                                       │
 │    - component: 'base'                                          │
@@ -256,7 +259,7 @@ When `bff_approve_activity_upload()` awards currency, it creates `wallet_ledger`
     "image_url": "https://storage.../image.jpg"
   },
   "description": "Activity: exercise-uuid",
-  "expiry_date": "2026-07-22",         ← Calculated by post_wallet_transaction
+  "expiry_date": "2026-07-22",         ← Calculated by chokepoint_post_wallet_transaction
   "deductible_balance": 50,
   "created_at": "2026-01-22T14:30:00Z"
 }
@@ -697,34 +700,34 @@ Evening       | 40pts | 55pts   | 65pts
 
 | Source Type | Flow | Reason |
 |-------------|------|--------|
-| `purchase` | CDC → Kafka → Consumer → Inngest | Async event from external systems |
-| `mission` | CDC → Kafka → Consumer → Inngest | Async completion events |
-| `reward_redemption` | **Direct `post_wallet_transaction()`** | Synchronous user action |
-| `manual` | **Direct `post_wallet_transaction()`** | Synchronous admin action |
-| **`activity`** | **Direct `post_wallet_transaction()`** | Synchronous admin action |
+| `purchase` | Outbox → Inngest currency routers → chokepoint | Async earn from purchase ledger |
+| `mission` | Mission / outcome routers → chokepoint | Async completion awards |
+| `reward_redemption` | **Direct `chokepoint_post_wallet_transaction()`** | Synchronous user action |
+| `manual` | **Direct `chokepoint_post_wallet_transaction()`** | Synchronous admin action |
+| **`activity`** | **Direct `chokepoint_post_wallet_transaction()`** | Synchronous admin action |
 
 ### Why Direct Call for Activities
 
-✅ **Admin approval is synchronous** - Admin waits for result
-✅ **Immediate feedback needed** - Did currency award succeed or fail?
-✅ **Same as rewards** - Uses identical pattern to `redeem_reward_with_points()`
-✅ **Simpler** - No CDC consumer code needed
-✅ **Full audit trail** - Complete metadata in wallet_ledger
-✅ **Same reliability** - Atomic transaction with rollback on failure
+- Admin approval is synchronous — admin waits for result
+- Immediate feedback needed — did currency award succeed or fail?
+- Same pattern as `redeem_reward_with_points()`
+- No async router hop for the award itself
+- Full audit trail in `wallet_ledger` metadata
+- Atomic with rollback on failure
 
 ### Complete wallet_ledger Population
 
 **All required fields properly set:**
-- ✅ `source_type: 'activity'` - Clear source identification
-- ✅ `source_id: upload_id` - Traceable to exact submission
-- ✅ `component: 'base'` - Standard earned currency
-- ✅ `transaction_type: 'earn'` - Earning transaction
-- ✅ `target_entity_id` - NULL for points, ticket_type_id for tickets
-- ✅ `metadata` - Full field_values, matrix match, approval context
-- ✅ `expiry_date` - Calculated by post_wallet_transaction
-- ✅ `balance_before/after` - Balance snapshots
+- `source_type: 'activity'` — clear source identification
+- `source_id: upload_id` — traceable to exact submission
+- `component: 'base'` — standard earned currency
+- `transaction_type: 'earn'`
+- `target_entity_id` — NULL for points, ticket_type_id for tickets
+- `metadata` — field_values, matrix match, approval context
+- `expiry_date` — calculated by chokepoint
+- `balance_before/after` — balance snapshots
 
-**No data loss** - Same audit capability as CDC flow!
+Same audit capability as the async earn path.
 
 ---
 
@@ -923,8 +926,8 @@ Long     | 50pts + 1 tix  | 70pts + 3 tickets
    - `cancelled` → User cancelled before review
 
 5. **Direct Currency Award**
-   - Uses `post_wallet_transaction()` directly
-   - No CDC/Inngest needed for synchronous admin action
+   - Uses `chokepoint_post_wallet_transaction()` directly
+   - Sync chokepoint award (wallet outbox may still emit for tier/notification/AMP)
    - Same pattern as `redeem_reward_with_points()`
    - Atomic transaction: approval + currency award together
    - Rollback if currency award fails
@@ -1231,10 +1234,10 @@ LIMIT 10;
 - Rationale: Easier FE integration, simpler queries, better performance
 - Trade-off: Fixed to 2-dimension matrices (acceptable for current use cases)
 
-**2. Direct Currency Award (No CDC)**
-- Decision: Call `post_wallet_transaction()` directly in approval function
+**2. Direct Currency Award**
+- Decision: Call `chokepoint_post_wallet_transaction()` directly in approval function
 - Rationale: Synchronous admin action, immediate feedback, same pattern as rewards
-- Result: No CDC consumer needed, simpler architecture
+- Result: No async earn-router hop for the award; wallet outbox still emits for tier/notification/AMP unless skipped
 
 **3. Pivot Table Response**
 - Decision: Return both raw data (`currency_matrices`) and pivoted grid data
@@ -1255,30 +1258,31 @@ LIMIT 10;
 
 | Function | Purpose | Caller |
 |----------|---------|--------|
-| `api_get_activity_full(id, mode)` | Get activity with pivot grid data | Admin UI |
-| `upload_activity_image(activity_id, image_url)` | User upload | Customer app |
-| `bff_approve_activity_upload(id, field_values)` | Approve + award currency | Admin UI |
-| `bff_reject_activity_upload(id, reason)` | Reject upload | Admin UI |
-| `bff_get_activity_uploads(status, activity_id)` | List uploads | Admin UI |
-| `bff_upsert_activity_master(...)` | Create/update activity | Admin UI |
-| `bff_upsert_activity_currency_matrix(id, configs)` | Update matrix | Admin UI |
-| Direct query on `activity_master` table | List activities | Admin UI |
+| `api_get_activity_full` | Get activity with pivot grid data | Admin UI |
+| `api_get_activity_display` / `api_get_my_activity_uploads` | User-facing activity views | Customer app |
+| `upload_activity_image` | User upload | Customer app |
+| `bff_approve_activity_upload` | Approve + award currency | Admin UI |
+| `bff_edit_activity_upload` | Edit approved/rejected + wallet delta | Admin UI |
+| `bff_reject_activity_upload` | Reject upload | Admin UI |
+| `bff_get_activity_uploads` | List uploads | Admin UI |
+| `bff_upsert_activity_master` / `bff_upsert_activity_currency_matrix` | Create/update activity + matrix | Admin UI |
+| `fn_calculate_activity_currency` / `fn_check_activity_upload_limits` / `fn_check_activity_approval_limits` | Award + limit helpers | Internal |
 
 ### Database Tables
 
-| Table | Rows (newcrm) | Rows (Ajinomoto) | Purpose |
-|-------|---------------|------------------|---------|
-| `activity_master` | 1 | 1 | Activity type definitions |
-| `activity_currency_config` | 27 | 6 | Matrix cells (currency awards) |
-| `activity_upload_ledger` | 0 | 0 | User submissions |
-| `transaction_limits` | 3 | 1 | Frequency limits |
+| Table | Purpose |
+|-------|---------|
+| `activity_master` | Activity type definitions |
+| `activity_currency_config` | Matrix cells (currency awards) |
+| `activity_upload_ledger` | User submissions |
+| `transaction_limits` | Frequency limits (`entity_type = activity`) |
 
-**Total:** 3 new tables + extended 1 enum + reused 1 table
+**Disambiguation:** upload earning (`activity_master`) ≠ CDP log (`activity_ledger`) ≠ report grouping (`campaign_activity`).
 
 ---
 
-*Document Version: 2.0*  
-*Last Updated: January 2026*  
+*Document Version: 2.1*  
+*Last Updated: 2026-08-09*  
 *System: Supabase CRM - Activity-Based Earning*  
 *Architecture: Direct currency award with pivot table display*  
 *Production: 2 activities configured (newcrm Exercise, Ajinomoto POSM)*

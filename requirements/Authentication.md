@@ -205,6 +205,19 @@ Works with Supabase RPC, RLS, and external services
 }
 ```
 
+**Optional persona-scoped signup fields:**
+```json
+{
+  "merchant_code": "newcrm",
+  "tel": "+66966564526",
+  "otp_code": "123456",
+  "session_id": "uuid",
+  "selected_persona_id": "uuid"
+}
+```
+
+When the frontend has a persona selected before the profile is saved, pass `selected_persona_id`. `bff-auth-complete` uses it to return persona-scoped `missing_data.custom_fields_config`; otherwise it falls back to the saved `user_accounts.persona_id`.
+
 **Output:**
 ```json
 {
@@ -231,6 +244,65 @@ Works with Supabase RPC, RLS, and external services
   "missing_data": { ... }
 }
 ```
+
+### User Lookup & Duplicate Handling
+
+When `bff-auth-complete` resolves a LINE id or phone to an existing account, it queries `user_accounts` via `.maybeSingle()` with a five-level ORDER BY designed to pick a *useful* row out of legacy duplicates, not just a deterministic one:
+
+```typescript
+.order('is_signup_form_complete', { ascending: false, nullsFirst: false })
+.order('persona_id',               { ascending: false, nullsFirst: false })
+.order('updated_at',               { ascending: false, nullsFirst: false })
+.order('created_at',               { ascending: true })
+.order('id',                       { ascending: true })
+.limit(1)
+.maybeSingle()
+```
+
+The ordering is intentionally hierarchical:
+
+1. **`is_signup_form_complete DESC NULLS LAST`** — among duplicates, a finished profile beats an unfinished one. This is what prevents the "registration form reappears on every login" symptom for users whose oldest row is a stale test record but who have a complete profile in a newer sibling row.
+2. **`persona_id DESC NULLS LAST`** — if step 1 ties (typical for the legacy-import cohort where no row is complete yet), prefer a row that at least has a persona over one that doesn't.
+3. **`updated_at DESC NULLS LAST`** — among rows that tied on steps 1 and 2 (e.g. two complete profiles on the same LINE id), the most recently active is the closest the runtime can get to a canonical row before a merge migration assigns one.
+4. **`created_at ASC, id ASC`** — final deterministic tiebreaker, identical to the previous behaviour. For the legacy-only case (every row is incomplete with no persona), this preserves "oldest row wins" semantics, so JWT `sub` is stable across logins.
+
+This applies symmetrically to the LINE finder and the tel finder. Both lookups must agree on the same row when both credentials match; if they disagree (`userByLine.id !== userByTel.id`), the function returns HTTP 409 *Credentials belong to different accounts*.
+
+Side-effects of the ordering:
+
+- **Idempotent across legacy duplicates.** Same end-user always receives the same JWT `sub` across sessions (the choice can only change when the underlying row state changes — e.g., a complete row appears).
+- **Safe on "not found".** Zero matching rows returns `data: null` cleanly (no PGRST116 thrown), and the function falls through to the standard create/verify branches.
+- **Self-stabilising.** Once a user saves their profile (via `bff_save_user_profile`, which heals the canonical row in place — see next section), that row immediately wins step 1 of the ordering on the next login, so they cannot get bounced back to the form.
+
+**`line_user_id` is normalized before any DB read or write** (via the `normalizeLineId` helper):
+
+| Input | Stored / queried as |
+|---|---|
+| `null`, `undefined`, empty string, whitespace-only | `null` |
+| Literal strings `'undefined'` or `'null'` | `null` |
+| Any other value | `.trim()`-ed value |
+
+This prevents new empty-string `line_id` rows from being inserted.
+
+**Known limitation (not yet enforced at the DB level):** `user_accounts.(merchant_id, line_id)` has **no** unique constraint. Historical duplicates exist (~2.9k groups, ~13k rows to merge). A future migration will backfill those duplicates (merge into oldest canonical, re-point ~44 declared FKs, soft-delete losers) and then add a partial unique index `ON user_accounts (merchant_id, line_id) WHERE line_id IS NOT NULL AND length(btrim(line_id)) > 0 AND line_id NOT IN ('undefined','null') AND deleted_at IS NULL`. Until that lands, the five-level `.maybeSingle()` ordering above is the runtime defence.
+
+### Profile Save — Lookup by `id` (not `auth_user_id`)
+
+`bff_save_user_profile` resolves the calling user with:
+
+```sql
+SELECT id INTO v_user_id FROM user_accounts
+WHERE id = v_auth_user_id AND merchant_id = v_merchant_id;
+```
+
+`v_auth_user_id := auth.uid()` returns the JWT `sub` claim, which `bff-auth-complete` always sets to `user_accounts.id`. Looking up by `id` (instead of `auth_user_id`) is the only correct join here because legacy/imported `user_accounts` rows can have `auth_user_id IS NULL` — at the time of writing, **153,184 active rows** for the Syngenta merchant alone (`8f67aa08-…`) are in this state. Joining by `auth_user_id` against those rows would return zero, fall through to the INSERT branch, and create a sibling row with `is_signup_form_complete = true` while leaving the original row untouched and incomplete; the next login (which still finds the original by `line_id`) would then re-show the registration form forever.
+
+The function additionally:
+
+- Self-heals `auth_user_id` on the canonical row in the UPDATE branch (`auth_user_id = COALESCE(auth_user_id, v_auth_user_id)`) so any other RPC that still reads `auth_user_id` converges to the correct value as users save their profile.
+- Pins the new row's `id` to `v_auth_user_id` in the (now rare) INSERT branch, so a stale JWT whose `sub` no longer points to a row recreates the same `id` rather than spawning yet another orphan.
+
+This eliminates the "registration form keeps reappearing on second login" bug for the entire legacy-import cohort without any data migration.
 
 ### JWT Generation (Custom Claims)
 
@@ -310,8 +382,71 @@ Works with all Supabase features
 
 **Differences from end-user JWTs:**
 - `iss`: Full Supabase Auth URL (not just "supabase")
-- No custom claims (merchant_id, phone, line_id)
+- Merchant claims are injected by `custom_access_token_hook` (top-level `merchant_id` / `merchant_code`, plus `user_metadata` / `app_metadata`)
 - User exists in `auth.users` table (not just `user_accounts`)
+
+### Multi-merchant admin selection
+
+Admins may have many `admin_users` rows (one per merchant). Authoritative selection is `auth.users.raw_app_meta_data.active_merchant_id` (also mirrored into JWT `app_metadata` by `custom_access_token_hook`).
+
+| Function | Role |
+|---|---|
+| `admin_set_active_merchant(p_merchant_code)` | Writes `app_metadata.active_merchant_id` + `user_metadata.merchant_id` / `merchant_code` / `merchant_name` for a membership the caller can access |
+| `custom_access_token_hook` | Prefers membership matching `active_merchant_id`; emits matching `merchant_code` / `merchant_name`; falls back to newest active membership if selection vanished |
+| `sync_admin_to_user_metadata` (trigger on `admin_users`) | Always syncs profile fields (`admin_name`, `admin_email`, `admin_phone`, `is_admin`, `admin_active`). Syncs merchant_* only when `active_merchant_id` is null or equals `NEW.merchant_id` — never stomps a different selected merchant |
+| `sync_admin_metadata_after_login` | Prefers `active_merchant_id` membership; else newest active (`ORDER BY created_at DESC`); keeps app + user merchant metadata aligned |
+| `get_current_merchant_id()` | Unchanged priority: headers → `app_metadata.active_merchant_id` → other JWT claims → lookups |
+
+### Shopify Admin (embedded app) — `auth-shopify-admin`
+
+Public edge function. Verifies Shopify session token → resolves/creates `admin_users` → **hand-mints** a Rocket access JWT (does **not** go through Supabase Auth sign-in, so `custom_access_token_hook` does not run).
+
+**Minted JWT must mirror the hook's merchant claim surface** so `get_current_merchant_id()` and FE session readers resolve merchant without relying on headers alone:
+
+| Location | Claims |
+|---|---|
+| Top-level | `merchant_id`, `merchant_code`, `is_admin` |
+| `user_metadata` | `merchant_id`, `merchant_code`, `is_admin`, `source: shopify_admin`, … |
+| `app_metadata` | `active_merchant_id`, `merchant_id`, `merchant_code`, `is_admin` |
+
+Existing sessions keep working until re-login. Auth user row still gets `user_metadata` / `app_metadata.active_merchant_id` via `auth.admin.updateUserById` / create.
+
+### Admin Invitations
+
+Admin invitations are managed by `admin_manage_invitation`.
+
+**Create requirements:**
+- `p_role_id` is required.
+- At least one identity is required: `p_email` or `p_phone`.
+- `p_phone` is normalized with `fn_normalize_thai_phone`.
+- Existing active members and pending invitations are checked by email OR normalized phone.
+
+**Delivery behavior:**
+- Email invites send the existing invitation email and return `data.delivery = "email"`.
+- Phone-only invites are valid backend records and return `data.delivery = "manual_or_sms"` plus `data.invite_url`; FE or an SMS delivery path must send that URL.
+
+**Accept behavior:**
+- The invite token must be active and unexpired.
+- The signed-in Supabase Auth user may accept if `auth.users.email` matches the invite email OR normalized `auth.users.phone` matches the invite phone.
+- Acceptance creates the `admin_users` row for the invited merchant and role.
+
+---
+
+## Platform Superadmin MCP Access Tokens
+
+Rocket internal staff use normal Supabase Auth admin accounts. A platform superadmin is an `admin_users` row whose `role_id` points to `admin_roles.role_code = 'platform_superadmin'`.
+
+Personal MCP access keys are stored in `system_mcp_access_tokens`. The raw token is shown once in the admin UI; only its SHA-256 hash is stored. Hosted MCP services validate keys through `fn_validate_mcp_access_token(p_token_hash)` using the service role.
+
+Functions:
+- `superadmin_create_mcp_access_token(p_token_hash, p_token_prefix, p_label, p_scopes, p_allowed_tools, p_allowed_feature_slugs, p_expires_at, p_metadata)` — current `platform_superadmin` creates a personal MCP key record.
+- `superadmin_list_my_mcp_access_tokens()` — current `platform_superadmin` lists their own token metadata.
+- `superadmin_revoke_my_mcp_access_token(p_token_id)` — current `platform_superadmin` revokes their own key.
+- `fn_validate_mcp_access_token(p_token_hash)` — service-role validation for hosted MCP servers; returns owner, scopes, allowed tools, and allowed feature slugs.
+
+Initial scopes:
+- `knowledge:read` — allows knowledge retrieval tools.
+- `knowledge:write` — allows knowledge authoring tools.
 
 ---
 
@@ -689,19 +824,7 @@ const session = data.session;
 - `auth.users` table (Supabase Auth table)
 - May also have record in `user_accounts` for profile data
 
-**JWT Claims (Standard Supabase):**
-```json
-{
-  "sub": "uuid",
-  "email": "admin@example.com",
-  "role": "authenticated",
-  "aud": "authenticated",
-  "iss": "https://wkevmsedchftztoolkmi.supabase.co/auth/v1",
-  "exp": 1234567890
-}
-```
-
-**No custom claims** - standard Supabase Auth format
+**JWT Claims:** Supabase Auth base claims plus merchant/admin claims from `custom_access_token_hook` (`merchant_id`, `merchant_code`, `app_metadata.active_merchant_id`, `user_metadata.merchant_*`, `is_admin`). See §Multi-merchant admin selection.
 
 ---
 

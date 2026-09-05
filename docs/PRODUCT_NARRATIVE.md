@@ -3246,7 +3246,7 @@ Configurable per merchant for regulated industries.
 
 Campaign mechanics are part of **Loyalty**, not a separate public module. They are short-burst engagement activities that turn member attention into wallet spend, repeat visits, social acquisition, and habit formation. Each mechanic has its own configuration surface, but all plug into Currency, Rewards, Missions progress, and Marketing Automation for triggered communication.
 
-The five core campaign mechanics are: **Spin Wheel**, **Mass Lucky Draw**, **Missions**, **Referral**, and **Check-in**.
+The core campaign mechanics are: **Spin Wheel**, **Mass Lucky Draw**, **Missions**, **Referral**, **Check-in**, and **Leaderboard**.
 
 ---
 
@@ -3602,6 +3602,42 @@ To drive daily/weekly active-user metrics and to give the brand a low-friction w
 - With `require_condition_match = true`, a missing condition rejects the entire check-in — no ledger entry, no streak update.
 - A reward outcome with an invalid or unavailable reward can fail while the check-in and streak still advance.
 - Streaks reset automatically when the required frequency window is missed; no manual reset/override is defined.
+
+---
+
+### Leaderboard
+
+<!-- feature_key: loyalty.campaign.leaderboard -->
+
+**What it enables**
+
+A public ranked table — typically top spender — that a brand can stand up for a campaign without building a one-off page. Members see a banner, title, description, and a configured table. The brand chooses whether looking is open or requires a Participate tap.
+
+**How it works**
+
+1. Admin opens Leaderboards and chooses **New CRM** or **Legacy CRM**. That choice changes both the data source and the member URL.
+2. **New CRM:** engineering publishes a Supabase view or materialized view (`v_lb_*` / `mv_lb_*`, usually cron-refreshed). Admin pastes the name, clicks Check, then picks visible columns, center-masking, the rank field, top X, banner, and copy. Members open `/lb/{path}` while signed into the loyalty app.
+3. **Legacy CRM:** admin pastes a Metabase card ID. Members open `/leaderboard/{path}` with an old CRM token. Existing live campaigns stay on this path until rebuilt.
+4. If Participate is on, the member does not see the table or their personal quota until they join. The join is stored on `campaign_participation`. Whether the ranked set itself includes only joiners is decided in the view SQL, not in the form.
+
+**What differentiates it**
+
+The product configures **display and access**, not the ranking math. Native ranking data is a merchant-specific view (purchases, tickets, or a custom join) so unusual campaign rules do not force a generic engine. Column labels, order, and center-masking are the same controls on both versions.
+
+**Key controls**
+
+| Control | Why it matters |
+|---|---|
+| **CRM version** | New CRM view + `/lb/{path}` vs legacy Metabase + `/leaderboard/{path}` |
+| **View name / Metabase card** | Where ranks come from |
+| **Participate required** | Hide table and quota until the member joins |
+| **Columns + center mask** | What the public sees (e.g. mask the middle of a name or phone) |
+| **Member key + personal quota** | How the signed-in member finds “your amount” |
+| **Rank field + top X** | Sort and public list length |
+
+**Example**
+
+A top-spender month: ops materializes `mv_lb_kao_merries` from purchases (optionally inner-joined to participation), admin Checks it, shows masked name + spend, ranks by spend descending, top 100. Members open `/lb/topspendermerries`, tap Participate if required, and see the table plus their own spend.
 
 ---
 

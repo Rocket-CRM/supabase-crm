@@ -33,7 +33,7 @@ This table defines transaction headers with complete financial and operational m
 | `transaction_number` | text | Human-readable unique identifier per merchant for customer reference |
 | `transaction_date` | timestamptz | When transaction occurred (business date, may differ from created_at) |
 | `user_id` | uuid | Customer who made the purchase (buyer perspective) |
-| `seller_id` | uuid | Merchant/distributor who processed sale (seller perspective, nullable) |
+| `seller_id` | uuid | Seller user (FK to `user_accounts.id`, typically `user_type = 'seller'`, nullable). Powers the seller self-service completion flow. FK is `NOT VALID` so 26 historical orphan rows were grandfathered; new and updated rows are enforced. |
 | `store_id` | text | Store code from store_master where purchase occurred |
 | `total_amount` | numeric | Sum of all line items before discounts/tax |
 | `discount_amount` | numeric | Total discounts applied to transaction |
@@ -52,8 +52,14 @@ This table defines transaction headers with complete financial and operational m
 | `notes` | text | Additional transaction notes or context |
 | `created_at` | timestamptz | Record creation timestamp (system time) |
 | `updated_at` | timestamptz | Last modification timestamp |
+| `skip_cdc` | boolean | When true, row is excluded from **chokepoint outbox publish** (migration/backfill). Default false. |
+| `completed_by_user_id` | uuid | `user_accounts.id` of the actor that flipped the row to `completed` (NULL for system/admin/API). Stamped on every transition by writers and the rollup helper. |
+| `completed_by_source` | text | Free-form source tag explaining how the row was completed: `seller_self_service`, `seller_line_item_completion`, `api_external`, `system_bulk_import`, `refund_flow`, `marketplace_claim`, `historical_backfill`, or `parent_cascade`. |
+| `completed_at` | timestamptz | Timestamp of the transition to `completed`. **Invariant** (forward-looking): `status = 'completed'` ⇒ `completed_at IS NOT NULL`. Historical pre-2026-05-10 rows may have NULL completed_at. |
 
-**Unique Constraint**: `transaction_number` must be unique per merchant for customer-facing reference
+**Unique Constraint**: `transaction_number` must be unique per merchant for customer-facing reference (NOT enforced — see "Transaction Number Disambiguation" below).
+
+**Transaction Number Disambiguation**: Historical data contains duplicate `(merchant_id, transaction_number)` pairs. Seller self-service functions disambiguate by also filtering on `seller_id = caller`. If multiple pending rows still match, the BFFs return `AMBIGUOUS_TRANSACTION_NUMBER`.
 
 ### 2. purchase_items_ledger Table
 This table stores individual line items within each transaction with SKU-level detail. Key fields include:
@@ -64,15 +70,36 @@ This table stores individual line items within each transaction with SKU-level d
 | `transaction_id` | uuid | References parent transaction in purchase_ledger |
 | `merchant_id` | uuid | Merchant context for data isolation |
 | `sku_id` | uuid | References product_sku_master for product variant detail |
-| `quantity` | numeric | Number of units purchased (supports decimals for weight-based products) |
+| `quantity` | numeric | Number of units ordered (supports decimals for weight-based products). Immutable after insert except via `api_update_purchase` items replacement. |
+| `quantity_completed` | numeric | How much of `quantity` has been picked up / fulfilled. Defaults to `0`. **CHECK constraint**: `0 ≤ quantity_completed ≤ quantity`. Set to `quantity` at insert time when the parent is born `completed` (api_create_purchase, bulk_insert_purchases_with_items, 
+### Marketplace order landing (live)
+
+Shopee/Lazada/TikTok: `webhook-marketplace-*` → Inngest `marketplace/order-received` → `upsert_marketplace_order` → member `claim_marketplace_order` (see [`Marketplace.md`](./Marketplace.md)). Shopify: `shopify-webhooks` may auto-claim via `fn_claim_marketplace_order_service` when the buyer matches. Manual claim RPC remains for the member Order Claims UI.
+
+claim_marketplace_order, refund_purchase). Updated by `bff_seller_complete_purchase_items` (per-line partial pickup) and by `trg_purchase_complete_cascade_items` (when parent is force-completed). Monotonic non-decreasing — the BFF rejects requests that would lower `quantity_completed`. |
 | `unit_price` | numeric | Price per unit before discounts |
 | `discount_amount` | numeric | Discount applied to this line (nullable, defaults 0) |
 | `tax_amount` | numeric | Tax charged on this line (nullable, defaults 0) |
 | `line_total` | numeric | Final line amount: (quantity × unit_price) - discount + tax |
+| `status` | enum | Per-line lifecycle (same `purchase_status` enum as parent). Default `'pending'`. **Derived from `quantity_completed`** at every write site: `quantity_completed = quantity` ⇒ `'completed'`, anything less ⇒ `'pending'` (no separate "partial" state — items stay pending until fully complete). Cascades to `'completed'` when the parent flips, via `trg_purchase_complete_cascade_items` (which also sets `quantity_completed = quantity`). Sellers update individual lines via `bff_seller_complete_purchase_items`. |
+| `completed_by_user_id` | uuid | `user_accounts.id` of the actor that completed this line (NULL for cascade or default writes). |
+| `completed_by_source` | text | Source tag, parallel to `purchase_ledger.completed_by_source`. Adds `parent_cascade` for cascaded rows. |
+| `completed_at` | timestamptz | Per-line completion timestamp. |
 | `created_at` | timestamptz | Line item creation timestamp |
 | `updated_at` | timestamptz | Last modification timestamp |
 
 **Relationship**: Multiple items belong to one transaction (one-to-many)
+
+**Status Cascade Rules**:
+- Parent → children: parent flipping to `completed` cascades to all children via a **statement-level** trigger (one fire per UPDATE statement, regardless of row count). The cascade also stamps `quantity_completed = quantity` on each child so the line-level invariant `status='completed' ⇔ quantity_completed = quantity` holds.
+- Children → parent: rolled up **inline** by the seller line-item BFF (no row-level trigger on this high-volume table). Reusable rollup is exposed as `fn_recompute_purchase_status(p_purchase_id, p_completed_by_user_id, p_completed_by_source)`. Parent flips only when **every** child has `status='completed'` (i.e. `quantity_completed = quantity` for every line).
+- Bulk admin scripts can opt out of the cascade by setting `SET LOCAL app.purchase_cascade_skip = 'on';` before their UPDATE.
+
+**Partial Pickup Invariant**:
+- `quantity_completed` is the source of truth for line-level fulfillment. `status` is derived from it at every write — no row-level trigger.
+- A line can sit at any `0 ≤ quantity_completed < quantity` indefinitely; status remains `'pending'` until the line is fully fulfilled. The parent therefore stays `'pending'` while any line is partial.
+- `quantity_completed` is **monotonic non-decreasing** within a line's lifecycle. The seller BFF rejects requests that would lower it (`MONOTONIC_VIOLATION`). To "undo" a pickup, cancel/refund the line via the appropriate flow — never decrement `quantity_completed` directly.
+- Earning (currency / tier / mission) is still keyed off `quantity` (the ordered amount), not `quantity_completed`. Partial pickup does not partially award points.
 
 ### 3. Integration Tables
 
@@ -179,27 +206,29 @@ The `payment_status` field provides **independent financial lifecycle tracking**
 
 **Not Constrained**: Text field allows flexible values from various payment processors
 
-### Design Decision: No Fulfillment Tracking
+### Design Decision: Quantity-Driven Line Fulfillment
 
-**Current Model**: Single `status` field handles transaction lifecycle without separate fulfillment dimension
+**Current Model**: Header `status` is a coarse lifecycle (pending → completed → cancelled / refunded). Per-line fulfillment is tracked by `purchase_items_ledger.quantity_completed`, and the line's `status` is derived from the ratio at every write.
 
 **Rationale**:
-- Optimized for **instant fulfillment scenarios** (fuel stations, in-store retail, digital goods, services)
-- Avoids complexity of three-dimensional status tracking (order/payment/fulfillment)
-- `status = 'completed'` collapses "payment confirmed + fulfillment done" into single trigger point
+- Supports **instant fulfillment** (fuel, convenience store, digital, services) — items are born `completed` with `quantity_completed = quantity` so the line is final from inception.
+- Supports **deferred / partial pickup** (manual orders, the seller pickup flow shown in `bff_seller_complete_purchase_items`) — items are born `pending` with `quantity_completed = 0` and the seller increments `quantity_completed` over one or more pickup events.
+- Status is **derived, not orthogonal** — there is no third "fulfillment status" dimension to maintain in sync. `status='completed'` ⇔ `quantity_completed = quantity` at the line level.
+- Partial state is represented by data, not by a new enum value: a line with `0 < quantity_completed < quantity` is still `pending`. The header stays `pending` until every line is fully fulfilled. This was a deliberate choice to avoid splintering downstream consumers (currency, tier, mission) that filter on `status = 'completed'`.
 
 **Use Cases Supported**:
-- Fuel purchases (instant consumption)
-- Convenience store transactions (customer takes items)
-- Digital product delivery (instant activation)
-- Service consumption (on-site)
-- In-store retail (immediate possession)
+- Fuel purchases (instant consumption — born completed)
+- Convenience store transactions (customer takes items — born completed)
+- Digital product delivery (instant activation — born completed)
+- Service consumption (on-site — born completed)
+- In-store retail (immediate possession — born completed)
+- **Manual orders with deferred pickup** (born pending; seller increments `quantity_completed` per pickup event)
+- **Multi-event pickup** (e.g. customer orders 100 units, picks up 80 today and 20 next week — line stays `pending` and parent stays `pending` until the full 100 is collected)
 
-**Extension Path**: Could add fulfillment fields if merchants require e-commerce delivery tracking (shipping status, carrier info, tracking numbers), but not required for current transaction-based loyalty focus.
-
-**E-commerce Integration Note**: When integrating with platforms like Shopify that have order/payment/fulfillment status dimensions, map their multi-status to your single `status` based on business rules:
-- Shopify "Payment Paid + Fulfillment Fulfilled" → `status = 'completed'`
-- Shopify "Payment Refunded" → `status = 'refunded'`
+**E-commerce Integration Note**: When integrating with platforms like Shopify that have order/payment/fulfillment status dimensions, map their multi-status to your single `status` + `quantity_completed` based on business rules:
+- Shopify "Payment Paid + Fulfillment Fulfilled" → insert items with `quantity_completed = quantity` and `status = 'completed'`
+- Shopify "Payment Paid + Fulfillment Partial" → insert items with `quantity_completed = fulfilled_qty` and `status = 'pending'` (header stays pending)
+- Shopify "Payment Refunded" → header `status = 'refunded'` (line `quantity_completed` left as-is — the refund is a separate debit record)
 - Choose trigger point (payment vs fulfillment) based on merchant's refund risk tolerance
 
 ### Record Type - Credit/Debit Pattern
@@ -275,7 +304,7 @@ When `status` changes to `'completed'`:
 - Purchase completes → Trigger fires → Message queued to PGMQ
 - Transaction returns immediately (non-blocking checkout)
 - Queue processor runs every 30-60 seconds
-- Calls `calc_currency_for_transaction()` → `post_wallet_transaction()`
+- Calls `calc_currency_for_transaction()` → `chokepoint_post_wallet_transaction()`
 - Currency appears in wallet within 1 minute
 - **Benefit**: High throughput, no checkout delays
 
@@ -307,16 +336,9 @@ Purchase completions trigger tier evaluation through event-driven architecture:
 
 #### Trigger Logic
 
-Database trigger `trigger_tier_eval_on_purchase()` fires:
-- When status changes to `'completed'` (wasn't completed before)
-- Or new INSERT with `status = 'completed'`
 
-**Processing Flow**:
-1. Trigger detects completion
-2. Calls `queue_tier_evaluation()` with user_id
-3. Deduplication check (30-second window)
-4. Message queued to PGMQ if not duplicate
-5. Batch processor evaluates within 30 seconds
+**Live tier path:** purchase/wallet chokepoints → outbox → Inngest tier routers → `process_tier_event` (see [`Tier.md`](./Tier.md)). DB triggers `trigger_tier_eval_on_purchase` / `queue_tier_evaluation` were removed.
+
 
 #### Metric Contribution
 
@@ -489,15 +511,15 @@ The `store_id` field enables **location-aware business rules**:
 
 #### Store Resolution
 
-**Storage Format**: Text-based store code (human-readable)  
-**Resolution**: Joins to `store_master.store_code` for UUID lookup  
-**Rationale**: External systems (POS, e-commerce) use text codes, not UUIDs
+**Storage Format**: `purchase_ledger.store_id` is the store UUID; `purchase_ledger.store_code` is the optional human-readable code. Event payloads may send either.  
+**Resolution**: Mission evaluate accepts UUID (`store_master.id`) first, then `event.store_code`, then legacy `store_master.store_code = event.store_id` (POS text codes).  
+**Rationale**: Front Line / current ledger writes UUIDs; external POS still sends text codes.
 
 #### Store Attribute Integration
 
 Purchase evaluation resolves store classifications:
-1. `purchase_ledger.store_id` (text code)
-2. → `store_master` WHERE `store_code` match
+1. Event `store_id` (UUID or text code) and optional `store_code`
+2. → `store_master` by `id` (UUID) or `store_code`
 3. → `store_attribute_assignments` for classification
 4. → `store_attribute_set_members` for set membership
 5. → Returns array of attribute set UUIDs
@@ -579,6 +601,31 @@ The purchase system employs a **multi-trigger event-driven architecture** where 
 - Skip method for special cases
 - Configurable per transaction
 
+**5. Single Write Chokepoint (Phase 1 of the event chokepoint migration — initial 2026-05-13, extended for items 2026-05-14)**
+
+Every INSERT, UPDATE, or DELETE on `purchase_ledger` AND `purchase_items_ledger` is routed through one canonical writer: `chokepoint_post_purchase_event(p_event, p_merchant_id, p_payload jsonb)`. Direct table writes from BFFs, APIs, RPCs, edge functions, bulk imports, and admin tools are forbidden on both tables.
+
+The chokepoint dispatches on `p_event`:
+
+| `p_event` | Purpose | Key payload fields |
+|---|---|---|
+| `created` | Insert 1..N header rows + their items in one set-based pass (powers `api_create_purchase`, `api_create_manual_purchase_order`, `bulk_insert_purchases_with_items`, `claim_marketplace_order`, and the recursive debit insert inside `refunded`). Per-item completion fields (`status`, `quantity_completed`, `completed_at`, `completed_by_user_id`, `completed_by_source`) on each item entry override the row-level fallback when present (added 2026-05-14 for partial-pickup at order creation). | `rows: [{...header_fields, items: [{...sku_fields, quantity_completed?, status?, completed_*?}, ...]}, ...]` |
+| `updated` | Generic single-row patch (powers both `api_update_purchase` overloads). Caller is responsible for whatever business gates it enforces on amount/item edits; the chokepoint stamps `completed_at` / `completed_by_source` whenever status transitions to `completed`. | `purchase_id`, `fields: {...}` |
+| `completed` | Idempotent `pending → completed` transition for the seller self-service and rollup paths. Guarded to `status = 'pending'`. | `purchase_id`, `seller_user_id`, `completed_by_user_id`, `completed_by_source` |
+| `cancelled` | `pending\|processing → cancelled`. | `purchase_id`, `reason` |
+| `refunded` | Validate the original, recursively post a `record_type='debit'` row via `event='created'`, flip the parent to `'refunded'` only on a full refund. | `original_transaction_id`, `refund_amount`, `reason` |
+| `promo_applied` | Apply the event-promo engine's discount delta + `reward_list` to an in-flight pending purchase. Also used by `fn_apply_manual_staff_discount` after event promos (`additional_discount` = staff baht). | `purchase_id`, `additional_discount`, `reward_list` |
+| `items_added` | Append items to an existing parent. Used by `fn_apply_event_promos` to insert engine-granted freebies and tiered pool-pick items. | `purchase_id`, `items: [{sku_code, quantity, unit_price, line_total, item_type, ...}]` |
+| `items_replaced` | DELETE all existing items + INSERT new set. Returns `items_deleted`, `items_created`, `new_total_amount`. Powers both `api_update_purchase` overloads; rejected when parent status is terminal. | `purchase_id`, `items: [...]` |
+| `item_quantity_completed` | Increment `quantity_completed` on each listed item (caller-supplied delta), stamp `completed_at`/`completed_by_*` when `quantity_completed` reaches `quantity`, stamp parent `seller_id`, and if every item is now terminal recursively re-invoke the chokepoint with `event='completed'`. Powers `bff_seller_complete_purchase_items`. Replaces the deprecated `line_completed` event. Additive deltas only — `CONTINUE`s when item is already `completed`, rejects negative deltas. | `purchase_id`, `items: [{item_id, quantity_completed_delta}]`, `seller_user_id`, `completed_by_user_id`, `completed_by_source` |
+| `item_completion_set` | **Absolute target value** with bounded reversal — set each listed item's `quantity_completed` to the supplied value (`0..quantity`). Reaching `quantity` flips item to `completed` and stamps `completed_at`/`completed_by_*`; dropping below `quantity` flips item back to `pending` and **clears** the `completed_*` columns. Rolls parent forward to `completed` only when all items terminal (never reverses parent). Rejects when parent is `completed` (`PARENT_COMPLETED_USE_REFUND`) or terminal (`PARENT_TERMINAL_STATE`). Added 2026-05-14 for admin operator overrides on event orders; powers `bff_admin_set_event_order_item_completion`. | `purchase_id`, `items: [{item_id, quantity_completed}]`, `completed_by_user_id`, `completed_by_source`, `completed_at` |
+| `item_cancelled` | Flip listed items to `cancelled` (skips items already `cancelled` or `refunded`); does not roll up to the parent. | `purchase_id`, `items: [{item_id}]`, `cancelled_by_user_id`, `cancelled_by_source` |
+| `item_refunded` | Flip listed items from `completed` to `refunded` (status-only mutation; money-side debit row is handled separately by the parent `refunded` event). | `purchase_id`, `items: [{item_id}]`, `refunded_by_source` |
+
+Why one chokepoint instead of N: OutboxPublisher needs exactly one place to emit per logical event, and the dispatcher pattern lets `bulk_insert_purchases_with_items` send a whole chunk through a single chokepoint call (set-based, no per-row plpgsql loop). The data-integrity trigger `trg_purchase_complete_cascade_items` is preserved unchanged (it now coexists with `item_quantity_completed`-driven parent rollup; both paths converge through the chokepoint's recursive `completed` re-invocation). The dead function `trigger_process_purchase_currency` was dropped as part of the 2026-05-14 extension.
+
+Event publish is live via outbox → Inngest; see `requirements/architecture/event-chokepoints.md`.
+
 ### Transaction Creation Flow
 
 #### Primary Creation Path
@@ -611,116 +658,26 @@ The purchase system employs a **multi-trigger event-driven architecture** where 
 
 ### Trigger Architecture
 
-#### Currency Award Trigger
+#### Currency Award (Async via outbox → Inngest — no DB trigger)
 
-**Trigger**: After INSERT or UPDATE on `purchase_ledger`  
-**Condition**: Status changes to `'completed'` AND `earn_currency = true`  
-**Function**: `trigger_process_purchase_currency()`
+**Trigger**: There is no longer a database trigger on `purchase_ledger` for currency awarding. The legacy `trigger_process_purchase_currency()` function was dropped on 2026-05-14.
 
-**Routing Logic**:
-- Checks `processing_method` field
-- Queue: Calls `enqueue_wallet_transaction()`
-- Direct: Calls `post_wallet_transaction()` immediately
-- Skip: No action taken
+**New pipeline (parent scope, `award_scope='purchase'`)**:
+**Live currency path:** `chokepoint_post_purchase_event` → outbox → Inngest currency routers → `inngest-currency-serve` (see [`Currency.md`](./Currency.md)).
+4. Consumer calls `calc_currency_for_source('purchase_item', item_id, …)` → `calc_currency_for_purchase_item(item_id)`, which filters to `earn_factor.award_scope = 'purchase_item' AND item.status = ANY(ef.allowed_item_statuses)` and uses `purchase_items_ledger.line_total` as the basis (whole-item — no pro-rata).
+5. Multi-status dedup is one award per `(item_id, earn_factor_id)` enforced at the wallet writer via Redis.
 
-**Currency Processor**: Edge function or cron reads queue, processes batches
+`processing_method` on `purchase_ledger` is preserved as a hint for the Inngest workflow but is no longer routed by a database trigger.
 
 #### Tier Evaluation Trigger
 
 **Trigger**: After INSERT or UPDATE on `purchase_ledger`  
 **Condition**: Status changes to `'completed'`  
-**Function**: `trigger_tier_eval_on_purchase()`
-
-**Processing**:
-- Calls `queue_tier_evaluation(user_id, merchant_id, 'purchase', transaction_id)`
-- Deduplication: Skips if user queued within 30 seconds
-- Queue processor evaluates within 30 seconds
-- Updates tier_id if thresholds met
-
-**Perspective Awareness**: For seller tiers, uses seller_id instead of user_id
-
-#### Mission Evaluation Trigger
-
-**Manual Missions**:
-- Trigger: `trigger_mission_evaluation_realtime()`
-- Immediate evaluation of accepted missions
-- Real-time progress updates
-
-**Auto Missions**:
-- Trigger: `queue_mission_evaluation_batch()`
-- Queues for batch processing
-- 30-second processing cycle
-
-**Condition Matching**: Evaluates product filters, amount ranges, store sets against transaction and line items
-
 ### System Flow Diagrams
 
 ### Complete Purchase-to-Currency Flow
 
-```mermaid
-graph TB
-    subgraph "Transaction Creation"
-        A[📱 External System<br/>API/POS/Admin] --> B[create_purchase_via_api]
-        B --> C[Generate transaction_number]
-        C --> D[Resolve user_id from identifier]
-        D --> E[INSERT purchase_ledger<br/>status = completed]
-        E --> F[INSERT purchase_items_ledger<br/>Line items]
-    end
-    
-    subgraph "Trigger Cascade"
-        E --> G[trigger_process_purchase_currency]
-        E --> H[trigger_tier_eval_on_purchase]
-        E --> I[trigger_mission_evaluation]
-        
-        G --> J{processing_method}
-        J -->|queue| K[enqueue_wallet_transaction<br/>PGMQ message]
-        J -->|direct| L[post_wallet_transaction<br/>Immediate]
-        J -->|skip| M[❌ No Processing]
-        
-        H --> N[queue_tier_evaluation<br/>30s dedup]
-        I --> O{activation_type}
-        O -->|manual| P[trigger_mission_evaluation_realtime]
-        O -->|auto| Q[queue_mission_evaluation_batch]
-    end
-    
-    subgraph "Currency Processing"
-        K --> R[Queue Processor<br/>30-60s cycle]
-        R --> S[calc_currency_for_transaction]
-        L --> S
-        
-        S --> T[get_eligible_earn_factors]
-        T --> U[evaluate_earn_conditions<br/>Line item matching]
-        U --> V[Calculate base + multipliers]
-        V --> W[post_wallet_transaction]
-        
-        W --> X[wallet_ledger INSERT<br/>source_type = purchase]
-        W --> Y[Update user balance]
-    end
-    
-    subgraph "Tier Processing"
-        N --> Z[Tier Queue Processor<br/>30s cycle]
-        Z --> AA[evaluate_user_tier_status]
-        AA --> AB[calculate_tier_metric_value<br/>Query purchase_ledger]
-        AB --> AC{Tier Change?}
-        AC -->|Yes| AD[Update user_accounts.tier_id]
-        AC -->|No| AE[Update tier_progress only]
-    end
-    
-    subgraph "Mission Processing"
-        P --> AF[fn_evaluate_mission_conditions<br/>Immediate]
-        Q --> AG[Batch Processor<br/>30s cycle]
-        AG --> AF
-        
-        AF --> AH{Conditions Met?}
-        AH -->|Partial| AI[fn_update_mission_progress<br/>Increment progress]
-        AH -->|Complete| AJ[Create completion<br/>Process outcomes]
-    end
-    
-    style E fill:#4caf50,color:#fff
-    style S fill:#2196f3,color:#fff
-    style AA fill:#ff9800,color:#fff
-    style AF fill:#9c27b0,color:#fff
-```
+
 
 ### Purchase Data Architecture
 
@@ -815,7 +772,72 @@ graph LR
 
 **Used By**: API functions to resolve external identifiers to internal user_id
 
+#### Seller Self-Service Functions (BFF)
+
+End-user functions for sellers (users with `user_accounts.user_type = 'seller'`) to read and complete their assigned purchases without going through the admin panel. All three resolve the seller via `auth.uid()` against the user JWT and validate `user_type = 'seller'` before doing any work.
+
+##### `bff_seller_get_purchase_by_transaction_number(p_transaction_number text) → jsonb`
+
+**Purpose**: Read a purchase header + line items the calling seller is assigned to.
+**Auth**: end-user JWT (no admin context needed).
+**Lookup**: `(merchant_id, transaction_number, seller_id = auth.uid())`.
+**Returns**: `{ purchase: {...}, items: [...] }` where each item includes its own `status`, `completed_*`, **`quantity`**, **`quantity_completed`**, and **`quantity_remaining = GREATEST(quantity - quantity_completed, 0)`**. Returns `AMBIGUOUS_TRANSACTION_NUMBER` if multiple rows match (legacy duplicate `transaction_number`).
+
+##### `bff_seller_complete_purchase_by_transaction_number(p_transaction_number text) → jsonb`
+
+**Purpose**: Flip the whole pending purchase to `completed` in one shot.
+**Lookup**: `(merchant_id, transaction_number, seller_id = auth.uid(), status = 'pending')`.
+**Effect**: Single UPDATE on the parent stamps `status = 'completed'`, `completed_by_user_id = caller`, `completed_by_source = 'seller_self_service'`, `completed_at = NOW()`. The cascade trigger handles all children atomically — every child is flipped to `'completed'` AND stamped with `quantity_completed = quantity`. No per-row work in this function.
+**Errors**: `PURCHASE_NOT_FOUND`, `AMBIGUOUS_TRANSACTION_NUMBER`, `FORBIDDEN_NOT_SELLER`.
+
+##### `bff_seller_complete_purchase_items(p_transaction_number text, p_line_items jsonb) → jsonb`
+
+**Purpose**: Set the picked-up quantity on selected line items. Supports partial pickup — a line can sit at `0 < quantity_completed < quantity` indefinitely; status only flips to `'completed'` when `quantity_completed = quantity`.
+
+**Input shape** (`p_line_items`):
+```json
+[
+  { "line_item_id": "<uuid>", "quantity_completed": 80 },
+  { "line_item_id": "<uuid>", "quantity_completed": 12 }
+]
+```
+`quantity_completed` is the **new absolute total** for that line (not a delta). Idempotent on retry — submitting the same value twice is a no-op on the second call.
+
+**Validation** (whole call rolled back on any failure):
+- `INVALID_INPUT` — `p_line_items` not a non-empty array, missing fields, non-numeric `quantity_completed`, or a duplicate `line_item_id` in the same call.
+- `INVALID_LINE_ITEMS` — any `line_item_id` does not belong to this purchase + merchant.
+- `INVALID_QUANTITY` — `quantity_completed < 0`, `< current quantity_completed` (`MONOTONIC_VIOLATION`), `> quantity` (`QUANTITY_EXCEEDS_ORDER`), or the line is `cancelled` / `refunded` (`LINE_ITEM_LOCKED`). Violations returned in `data.violations[]`.
+- `INVALID_TRANSITION` — parent status not in `('pending', 'processing')`.
+
+**Effect**:
+1. Rows are SELECT'd `FOR UPDATE` to prevent concurrent partial pickups racing on the same line.
+2. One UPDATE applies the new `quantity_completed` per line. `status` flips to `'completed'` only when `quantity_completed = quantity`; otherwise the line stays `'pending'`.
+3. `completed_by_user_id`, `completed_by_source = 'seller_line_item_completion'`, `completed_at = NOW()` are stamped only on the `pending → completed` transition.
+4. `purchase_ledger.seller_id` is claimed (`COALESCE(seller_id, caller)`) when at least one line's `quantity_completed` actually changed.
+5. Inline rollup via `fn_recompute_purchase_status` — parent flips to `'completed'` only if **every** child is now `'completed'` (i.e. fully picked up).
+
+**Returns**:
+```json
+{
+  "purchase_id": "<uuid>",
+  "transaction_number": "...",
+  "items": [
+    { "line_item_id": "<uuid>", "ordered_quantity": 100, "quantity_completed": 80, "status": "pending" }
+  ],
+  "items_changed": 1,
+  "items_unchanged": 0,
+  "parent_completed": false,
+  "parent_status": "pending"
+}
+```
+
 ### ⚙️ PROCESSING FUNCTIONS (Currency & Tier Integration)
+
+#### Receipt approval seller earning (`bff_approve_receipt_upload`, action `approve`)
+
+When the approved upload has a `seller_id`, the BFF creates the purchase via `api_create_purchase`, then loops `calc_currency_for_transaction(transaction_id, 'seller')` and posts each row **synchronously** via `chokepoint_post_wallet_transaction` with dedup key `seller_earn:<transaction_id>:<earn_factor_id>:<currency>:<component>[:<target_entity_id>]` (unique on `wallet_ledger.dedup_key` — retried approvals cannot double-credit).
+
+**History (2026-07-07)**: previously called `enqueue_wallet_transaction` → `pgmq.send('wallet_queue', …)`. The `wallet_queue` PGMQ queue was never created and has no consumer (`process_wallet_queue` does not exist; `process_wallet_queue_batch` / `get_wallet_queue_status` are orphaned wrappers), so approve failed with `relation "pgmq.q_wallet_queue" does not exist`. Per the "C-sync first" decision in `.cursor/plans/purchase-line-item-earning.md`, the call site was switched to the synchronous chokepoint. The async wallet-queue worker remains unbuilt; `enqueue_wallet_transaction` now has no production caller.
 
 #### `trigger_process_purchase_currency()`
 **Purpose**: Routes completed purchases to currency calculation  
@@ -827,30 +849,11 @@ graph LR
 IF (status = 'completed' AND earn_currency = true) THEN
   CASE processing_method
     WHEN 'queue' THEN enqueue_wallet_transaction()
-    WHEN 'direct' THEN post_wallet_transaction()
+    WHEN 'direct' THEN chokepoint_post_wallet_transaction()
     WHEN 'skip' THEN NULL
   END
 END IF
 ```
-
-#### `trigger_tier_eval_on_purchase()`
-**Purpose**: Routes completed purchases to tier evaluation  
-**Category**: Trigger Function  
-**Execution**: AFTER INSERT OR UPDATE ON purchase_ledger
-
-**Activation Condition**:
-```
-IF (status = 'completed') THEN
-  PERFORM queue_tier_evaluation(
-    user_id,      -- Or seller_id for seller-type users
-    merchant_id,
-    'purchase',
-    NEW.id
-  )
-END IF
-```
-
-**Deduplication**: 30-second window prevents queue flooding
 
 #### `trigger_mission_evaluation_realtime()` / `queue_mission_evaluation_batch()`
 **Purpose**: Routes purchases to mission evaluation based on activation type  
@@ -1221,6 +1224,31 @@ The system's architecture enables future enhancements:
 **Trigger Framework**: Additional triggers for new subsystems  
 **Status Extension**: Add new status states if needed  
 **Queue Integration**: Additional processing queues for new features
+
+---
+
+## Admin Member 360 Purchase History RPC
+**Status:** Deployed to Production  
+**Implementation Date:** May 6, 2026  
+**Migration:** `frontline_admin_be_rpcs`
+
+`admin_get_user_purchases(p_user_id uuid, p_limit int default 10, p_offset int default 0, p_search text default null, p_sort text default 'date_desc')` returns the Member 360 purchase/receipt history envelope:
+
+```json
+{ "success": true, "data": { "items": [], "total": 0, "totals": { "bill_count": 0, "points": 0, "amount": 0 } } }
+```
+
+Rows include purchase id, transaction number/date, store id/name/code/channel label, amount, item count, awarded points/tickets, payment method, status, batch id, and image URLs. Store property labels are joined once per distinct store via `fn_store_property_labels` (not per history row). Auth is admin-only: caller must resolve a merchant via `get_current_merchant_id()` and have an active `admin_users` row for that merchant; `p_user_id` must belong to the same merchant.
+
+`bff_admin_search_members(p_query, p_limit, p_store_id)` identifier path (digits, min 2: phone / 8-digit `member_code` / normalized id card) uses btree equality+prefix. Compact strip is POSIX `[[:space:]+-]` (hyphen last). Phone prefix folds `0` / `+66` / `66`. Name path (min 3) is one `fn_member_search_text(...) ILIKE`. Does not `ILIKE ANY` three patterns. Hits are ranked and limited **before** joining tier/persona/wallet. Does not return the raw `id_card` value. Optional `p_store_id` keeps the purchase/redemption store filter.
+
+`bff_admin_create_member(...)` creates members through a SECURITY DEFINER admin BFF. Overload with `p_profile jsonb`, `p_language`, `p_image` applies extra profile fields and avatar in the same write. It resolves merchant via `get_current_merchant_id()`, requires an active `admin_users` row for the caller, checks duplicate phone/email/external user ID/member code/LINE ID within the merchant, and returns `{ success, data: { user_id } }`. Frontends should use this RPC instead of direct `user_accounts` inserts.
+
+`bff_admin_get_frontline_member(p_user_id, p_language)` is the Front Line booth header (not Customer 360). Returns profile, notes, `points_balance`, `fn_wallet_today_stats`, tier progress plus `tier_pending_upgrades` overlay, and `profile_incomplete`. No store credit.
+
+`bff_admin_create_frontline_receipt_batch(p_user_id, p_batch_id, p_admin_user_id, p_receipts jsonb)` set-based queued Front Line insert (`status=approved`, `approved_method=frontline`, `crm_sync_status=queued`). Duplicate ledger/upload rows are skipped. Duplicate / `fn_preview_purchase_limits` stay as FE pre-checks.
+
+`bff_get_frontline_reward_catalog(p_language, p_user_id)` optional `p_user_id` prices + eligibility-flags in one set-based pass. `admin_redeem_and_use` embeds `lucky_draw_slip` and `fn_wallet_today_stats`.
 
 ---
 

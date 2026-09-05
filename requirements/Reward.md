@@ -9,6 +9,33 @@ The system's distinguishing features include:
 - **Intelligent promo code management** supporting bulk imports with partner attribution and real-time availability tracking
 - **Flexible fulfillment architecture** accommodating digital, physical, and hybrid reward delivery methods
 
+## Store Stock
+
+`reward_stock_store` stores per-store reward stock allocation:
+
+- `merchant_id`
+- `reward_id`
+- `store_id`
+- `stock_total`
+
+Used stock is derived from `reward_redemptions_ledger`; no reserved/redeemed/used counters are stored on `reward_stock_store`.
+
+Store stock is consumed at claim/use time. The claim/use validation uses successful ledger rows where `used_status = true`, `cancelled IS NOT TRUE`, and `COALESCE(used_store_id, redeemed_store_id)` matches the store allocation.
+
+Existing reward flows remain backward compatible. If a reward has no store stock rows, existing global stock and promo-code behavior applies.
+
+## Store Stock Functions
+
+- `fn_get_reward_store_stock(p_reward_id, p_merchant_id)` returns configured store allocations with derived `used_qty` and `available_stock`.
+- `fn_check_reward_store_stock_on_use(p_redemption_id, p_store_id)` validates claim/use availability.
+- `bff_get_reward_store_stock(p_reward_id)` loads store stock for admin reward setup.
+- `bff_upsert_reward_store_stock(p_reward_id, p_store_stock)` replaces store stock rows for admin reward setup.
+
+## Enforcement
+
+`validate_reward_store_stock_on_use` runs on `reward_redemptions_ledger` after insert/update of use-related fields. It blocks claim/use when `reward_master.stock_control = true`, store stock is configured for the reward, and the selected/effective store has insufficient allocation.
+
+
 ## Table of Contents
 - [Core Concepts & Glossary](#core-concepts--glossary)
 - [Business Requirements](#business-requirements)
@@ -46,15 +73,18 @@ The system's distinguishing features include:
 ### Reward Properties
 
 **Visibility Types**:
-- `user`: Public catalog - visible to all eligible end users
-- `admin`: Administrative rewards - only visible in admin interfaces
-- `campaign`: Campaign-specific - distributed through targeted campaigns
+- `user`: Member catalog **and** Front Line spend. Staff can redeem on behalf of the member at the counter. Relabeled in admin as **User and admin**.
+- `user_only`: Member catalog only. Staff cannot spend points or push-gift this reward on Front Line. Staff can still mark an already-claimed voucher as used. Member APIs `api_get_rewards_full_cached` / `api_get_reward_detail` / `preview_user_reward_points` include this value.
+- `admin`: Administrative rewards — only visible in admin / Front Line. Admin redeems on behalf of user (e.g. at counter). Not in the member catalog.
+- `campaign`: Push-only distribution — **never shown in user catalog**. Distributed through AMP workflows, campaigns, or direct admin push. Consolidates the old CRM's QR coupon (`qrtables`) model where coupons were exclusively pushed via claim links. Users see campaign rewards only after receiving them (in "my redemptions"), never in the browse catalog.
+
+Existing `user` rows stay **User and admin** (no data rewrite). New member-self-serve rewards should use `user_only`.
 
 **Fulfillment Methods**:
 - `digital`: Electronic delivery (codes, vouchers, downloads)
 - `shipping`: Physical delivery requiring address
 - `pickup`: Collection at designated store location
-- `printed`: Self-print vouchers/certificates
+- `printed`: Lucky Draw thermal slip — Frontline also prints a raffle slip on redeem/claim (Mongo `isPhysicalDraw`). Slip title/body live in `physical_draw_name` / `physical_draw_description` (not `description_slip`, which is member redeem-instruction copy).
 
 **Online Store** (`online_store[]`): Free-text array of marketplace/storefront identifiers where the reward should be displayed (e.g. `shopify`, `bigcommerce`, `lazada`). NULL or empty means no marketplace distribution. No enum — values are merchant-defined.
 
@@ -233,108 +263,7 @@ The Reward Redemption System is architected as a modular, event-driven platform 
 
 ### High-Level Architecture Diagram
 
-```mermaid
-graph TB
-    subgraph "User Interface Layer"
-        UI1[Mobile App]
-        UI2[Web Portal]
-        UI3[Admin Dashboard]
-    end
-    
-    subgraph "API Layer"
-        API1[Reward Catalog API]
-        API2[Redemption API - Render]
-        API3[Fulfillment API]
-    end
-    
-    subgraph "Event Streaming Layer"
-        ES1[Kafka: reward_redemptions topic]
-        ES2[Event Processor Worker]
-    end
-    
-    subgraph "Business Logic Layer"
-        BL1[redeem_reward_with_points]
-        BL2[Eligibility Validator]
-        BL3[Points Calculator]
-        BL4[Limit Enforcer]
-        BL5[Promo Code Manager]
-        BL6[Wallet Manager]
-    end
-    
-    subgraph "Points Calculation Engine"
-        PC1[calculate_redemption_points]
-        PC2[Multi-Dimensional Matcher]
-        PC3[Fallback Handler]
-        PC4[Persona Validator]
-    end
-    
-    subgraph "Data Layer"
-        DL1[reward_master]
-        DL2[reward_points_conditions]
-        DL3[reward_redemptions_ledger]
-        DL4[reward_promo_code]
-        DL5[transaction_limits]
-        DL6[user_wallet]
-        DL7[wallet_ledger]
-    end
-    
-    subgraph "Integration Layer"
-        INT1[Currency System]
-        INT2[Tier System]
-        INT3[Persona System]
-        INT4[Tag System]
-        INT5[Notification Service]
-        INT6[Supabase Realtime: postgres_changes + Broadcast]
-    end
-    
-    UI1 --> API1
-    UI1 --> API2
-    UI2 --> API1
-    UI2 --> API2
-    UI3 --> API3
-    
-    API2 --> ES1
-    ES1 --> ES2
-    ES2 --> BL1
-    
-    API1 --> BL2
-    API3 --> DL3
-    
-    BL1 --> BL2
-    BL1 --> BL3
-    BL1 --> BL4
-    BL1 --> BL5
-    BL1 --> BL6
-    
-    BL3 --> PC1
-    PC1 --> PC2
-    PC1 --> PC3
-    PC1 --> PC4
-    
-    BL2 --> DL1
-    BL2 --> INT2
-    BL2 --> INT3
-    BL2 --> INT4
-    BL3 --> DL2
-    BL4 --> DL5
-    BL5 --> DL4
-    BL6 --> DL6
-    BL6 --> DL7
-    
-    DL3 --> INT6
-    INT6 --> UI1
-    INT6 --> UI2
-    
-    API3 --> INT5
-    
-    style UI1 fill:#e3f2fd
-    style BL1 fill:#fff3e0
-    style PC1 fill:#e8f5e9
-    style DL1 fill:#e1f5fe
-    style INT1 fill:#fce4ec
-    style ES1 fill:#fff9c4
-    style ES2 fill:#fff9c4
-```
+
 
 ### Asynchronous Processing Model
 
@@ -342,8 +271,8 @@ The system uses an **event-driven architecture** for redemption processing to en
 
 **Request Flow:**
 1. Frontend → Render API (immediate response with `event_id`)
-2. Render API → Kafka topic (`reward_redemptions`)
-3. Event Processor → Consumes from Kafka
+2. Render API / crm-api → Inngest event `reward/redemption.requested` → `inngest-reward-serve`
+3. `inngest-reward-serve` → consumes Inngest `reward/redemption.requested`
 4. Event Processor → Calls Supabase RPC function (`redeem_reward_with_points`)
 5. **On success**: Supabase creates ledger records → Supabase Realtime `postgres_changes` INSERT on `reward_redemptions_ledger` → Frontend receives success
 6. **On failure**: Event Processor → Supabase Realtime **Broadcast** (HTTP) on channel `redemption:{user_id}` → Frontend receives error with title/description
@@ -356,7 +285,7 @@ The system uses an **event-driven architecture** for redemption processing to en
 
 **Benefits:**
 - **Non-blocking**: UI responds immediately (<50ms)
-- **Reliable**: Kafka guarantees message delivery
+- **Reliable**: Inngest retries + `p_event_id` idempotency on `redeem_reward_with_points`
 - **Scalable**: Parallel processing of redemptions — 10k users hold WebSocket connections, not HTTP polls
 - **Resilient**: Automatic retry on transient failures (up to 5 retries with exponential backoff)
 - **Observable**: Full event trail for debugging
@@ -482,13 +411,16 @@ CREATE TABLE reward_master (
     description_headline TEXT,
     description_body TEXT,
     description_tc TEXT,        -- Terms & Conditions
-    description_slip TEXT,       -- Redemption slip text
+    description_slip TEXT,       -- Member redeem-instruction copy (not Lucky Draw)
+    physical_draw_name TEXT,     -- Lucky Draw thermal slip title (when fulfillment_method = printed)
+    physical_draw_description TEXT, -- Lucky Draw thermal slip body
     image TEXT[],               -- Array of image URLs
     
     -- Categorization
     group_id UUID[],            -- Reward groups
     category_id UUID[],         -- Reward categories
     ranking SMALLINT,           -- Display order
+    is_featured BOOLEAN DEFAULT false, -- Pin: member catalog Special Reward first
     
     -- Eligibility Rules (Layer 1: WHO can redeem)
     allowed_tier UUID[],        -- Eligible tier IDs
@@ -499,7 +431,7 @@ CREATE TABLE reward_master (
     
     -- Points Configuration (Layer 2: HOW MANY points)
     fallback_points NUMERIC,    -- Default points if no condition matches (NEW)
-    require_points_match BOOLEAN DEFAULT false, -- If true, must match a condition (NEW)
+    require_points_match BOOLEAN DEFAULT false, -- If true, unmatched members cannot redeem (fallback ignored)
     
     -- Redemption Configuration
     visibility reward_visibility,
@@ -520,9 +452,170 @@ CREATE TABLE reward_master (
     fulfillment_method reward_fulfillment_method,
     
     -- Marketplace Distribution
-    online_store TEXT[]              -- Storefronts to display on (e.g. 'shopify', 'bigcommerce', 'lazada')
+    online_store TEXT[],             -- Storefronts to display on (e.g. 'shopify', 'bigcommerce', 'lazada')
+    
+    -- Reward Group Membership
+    reward_group_ids UUID[]          -- Array of reward_group IDs this reward belongs to
 );
 ```
+
+#### Table: `reward_category`
+**Purpose**: Merchant-defined labels for browsing and filtering the rewards catalog (member chips + admin list/filter). Distinct from `reward_group` (shared redemption limits).
+
+```sql
+CREATE TABLE reward_category (
+    id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    merchant_id   UUID        NOT NULL,
+    category_code TEXT        NOT NULL,  -- unique per merchant
+    name          TEXT        NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    mongo_id      TEXT
+);
+```
+
+**Relationship**: `reward_master.category_id UUID[]` — a reward can belong to multiple categories. Assigned on the reward config form.
+
+**Admin BFFs** (current merchant via `get_current_merchant_id()`):
+
+| Function | Purpose |
+|---|---|
+| `bff_list_reward_categories()` | List name, code, and how many rewards use each category |
+| `bff_upsert_reward_category(p_category_id, p_name, p_category_code, p_language)` | Create/update. NULL id → insert; blank code → slug from name |
+| `bff_delete_reward_category(p_category_id, p_language)` | Delete. Blocked (`CATEGORY_IN_USE`) while any reward still references it; also removes `translations` rows for `entity_type = 'reward_category'` |
+
+Admin UI: Rewards page `/reward-list?tab=categories` (standalone).
+
+#### Table: `reward_group`
+**Purpose**: Groups multiple rewards together for shared redemption limit enforcement
+
+```sql
+CREATE TABLE reward_group (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    merchant_id UUID        NOT NULL REFERENCES merchant_master(id),
+    group_code  TEXT,                   -- Human-readable identifier (unique per merchant)
+    name        TEXT        NOT NULL,   -- Display name
+    description TEXT,
+    is_active   BOOLEAN     DEFAULT true,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    updated_at  TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**Group Limits** are stored in `transaction_limits` with `entity_type = 'reward_group'` and `entity_id = reward_group.id`. Same scope/time_unit options as per-reward limits (user/total, day/week/month/year/all_time).
+
+**Relationship**: `reward_master.reward_group_ids UUID[]` — a reward can belong to multiple groups. Group membership is assigned on the reward config form.
+
+**Limit Enforcement**: During redemption (`redeem_reward_with_points`), after per-reward limit checks, the system calls `fn_check_reward_group_limits` which:
+1. Loads the reward's `reward_group_ids`
+2. For each active group, loads limits from `transaction_limits`
+3. Counts redemptions across ALL rewards in the group (sibling rewards)
+4. Blocks redemption if any group limit would be exceeded
+
+#### Three Limit Concepts (`transaction_limits.metric`)
+
+The `transaction_limits` table carries a `metric` column (enum `reward_limit_metric`) that determines **what** `count` is measuring. Combined with `entity_type`, this yields three distinct concepts merchants can configure:
+
+| Concept | `entity_type` | `metric` | `scope` | What `count` means |
+|---|---|---|---|---|
+| **Reward Quota Limit** | `reward` | `quantity` | `user` / `total` | Total units of **this one reward** a user (or everyone) may redeem |
+| **Group Quantity Limit** | `reward_group` | `quantity` | `user` / `total` | Total units redeemed across **all rewards** in the group combined |
+| **Max Distinct Reward** | `reward_group` | `distinct_reward` | `user` only | Number of **distinct reward types** a user may pick inside the group |
+
+**Max Distinct Reward** (introduced April 2026) answers the business case "User can pick 2 reward types from this group, in any quantity allowed by each reward's own quota." Re-redeeming a reward the user already owns in the group does **not** grow the distinct count — only a brand-new `reward_id` does.
+
+**Counting semantics** (inside `fn_check_reward_group_limits`):
+
+```sql
+-- quantity metric (existing)
+SELECT COALESCE(SUM(qty), 0) FROM reward_redemptions_ledger
+WHERE user_id = :user AND reward_id = ANY(:sibling_ids)
+  AND redeemed_status = true AND cancelled IS NOT TRUE
+  AND created_at >= :window_start;
+
+-- distinct_reward metric (new)
+SELECT COUNT(DISTINCT reward_id) FROM reward_redemptions_ledger
+WHERE user_id = :user AND reward_id = ANY(:sibling_ids)
+  AND redeemed_status = true AND cancelled IS NOT TRUE
+  AND created_at >= :window_start;
+-- Increment by 1 only if :reward_id is NEW to the user in window, else 0.
+```
+
+Both queries use the partial index `idx_redemptions_group_check_active` on
+`(user_id, reward_id, created_at) WHERE redeemed_status AND NOT cancelled`.
+
+**Configuration Guardrail**: `bff_upsert_reward_group_with_limits` rejects the unsatisfiable combination where, on the same group at `scope = user`, `max_distinct > group_quantity`. Example: "pick 2 distinct types" with "total 1 redemption allowed" is contradictory — returns error code `CONFLICTING_GROUP_LIMITS`.
+
+**CHECK Constraint**: `transaction_limits_metric_entity_ok` enforces that `metric = 'distinct_reward'` is only allowed when `entity_type = 'reward_group'` AND `scope = 'user'`.
+
+**Summary Matrix** (business-visible outcomes):
+
+| Max Distinct | Group Qty (user) | Reward Qty (user) | Behavior |
+|---|---|---|---|
+| 1 | — | 1 per reward | User picks **one** type, up to 1 unit. |
+| 1 | — | N per reward | User picks **one** type, up to N units. |
+| M (>1) | — | 1 per reward | User picks M types, 1 unit each. |
+| M (>1) | — | N per reward | User picks M types, up to N units each. |
+| 1 | 1 | — | User redeems 1 unit total, locked to one type. |
+| 1 | N | — | User redeems up to N units, **all of the same type**. |
+| M (>1) | N (≥ M) | — | User redeems N units total, across up to M distinct types. |
+| M (>1) | 1 | — | **Rejected at save** (`CONFLICTING_GROUP_LIMITS`). |
+
+**Rejection payload** (example, when limit exceeded at redemption time):
+
+```json
+{
+  "allowed": false,
+  "group_id": "uuid",
+  "group_name": "Zone Tickets",
+  "metric": "distinct_reward",
+  "limit_scope": "user",
+  "limit_count": 1,
+  "time_unit": "all_time",
+  "current_count": 1,
+  "remaining": 0,
+  "requested": 1,
+  "title": "Reward type limit reached",
+  "description": "You can pick up to 1 distinct reward(s) in Zone Tickets. You have already picked 1."
+}
+```
+
+**Functions**:
+| Function | Type | Purpose |
+|---|---|---|
+| `bff_upsert_reward_group_with_limits` | BFF | Create/update group + limits |
+| `bff_get_reward_group_details(p_group_id, p_mode)` | BFF | New/edit form for group |
+| `bff_list_reward_groups` | BFF | List groups for admin table |
+| `bff_delete_reward_group(p_group_id)` | BFF | Delete group + cleanup |
+| `fn_check_reward_group_limits(p_user_id, p_reward_id, p_quantity, p_merchant_id)` | Internal | Check group limits at redemption time |
+| `api_get_rewards_full_cached()` | API (user) | Reward catalog — now includes `reward_group_ids uuid[]` per reward |
+| `api_get_my_reward_group_usage()` | API (user) | Returns `MyGroupUsage[]` for the auth'd user — current distinct-reward usage vs limit per group |
+
+#### `MyGroupUsage` type
+
+Returned by `api_get_my_reward_group_usage()` — one entry per active `distinct_reward` limit in the group, for the current window.
+
+```typescript
+interface MyGroupUsage {
+  group_id:      string;   // uuid of reward_group
+  group_name:    string;
+  metric:        'distinct_reward';
+  limit_count:   number;   // configured max distinct reward types
+  time_unit:     'day' | 'week' | 'month' | 'year' | 'all_time';
+  scope:         'user';
+  current_count: number;   // distinct reward_ids the user has redeemed in window
+  remaining:     number;   // GREATEST(limit_count - current_count, 0)
+  window_start:  string | null;  // ISO timestamp or null
+  window_end:    string | null;
+}
+```
+
+**Counting semantics** (mirrors `fn_check_reward_group_limits`):
+- Counts `COUNT(DISTINCT reward_id)` from `reward_redemptions_ledger` for `redeemed_status = true`, `cancelled IS NOT TRUE`, excluding `source_type IN ('package_assignment','persona_entitlement')`.
+- If the merchant has no `distinct_reward` limits, returns `[]` (never an error).
+- Limits whose own `window_start`/`window_end` places them outside the current time are silently skipped (same skip logic as enforcement).
+
+---
 
 #### 2. `reward_points_conditions` (NEW)
 Dynamic points pricing conditions based on customer attributes.
@@ -682,6 +775,56 @@ CREATE TABLE partner_merchant (
 
 ---
 
+## Admin Push & Claim Links
+
+Admin **push** is free issuance: `redeem_reward_with_points` with `p_mode='direct'` (0 points), `source_type='admin_gift'`.
+
+**Claim via QR/link** uses the same points engine as catalog redeem: `p_mode='calc'`, `source_type='claim_link'`. Members pay the reward’s configured cost (tier conditions, else fallback; **0 only when the brand set 0**). Insufficient points, eligibility, redeem window, and shipping address follow the member redeem path.
+
+Do **not** use `admin_redeem_and_use` for “push to wallet” — that path issues **and** marks used (frontline consume-now).
+
+### Table: `reward_claim_link`
+
+Shareable QR/claim-link definition per merchant/reward.
+
+| Column | Notes |
+|---|---|
+| `token` | Opaque public token in URL/QR (`?page=claim&token=…`) |
+| `window_start` / `window_end` | Optional claim window |
+| `max_total_claims` | Optional global cap; NULL = unlimited |
+| `max_per_user` | Default 1 |
+| `is_active` | Soft disable |
+
+Claim counts are derived from `reward_redemptions_ledger` where `source_type='claim_link'` and `source_id=link.id` (non-cancelled).
+
+### Admin BFFs (frontline / loyalty admin)
+
+| Function | Purpose |
+|---|---|
+| `bff_admin_push_reward(p_user_id, p_reward_id, p_quantity=1, p_notes, p_store_id, p_selected_variants)` | Issue reward into member wallet (unused). Calls engine `direct` + `admin_gift`. |
+| `bff_admin_upsert_reward_claim_link(...)` | Create/update claim link; returns `token` + `claim_url`. |
+| `bff_admin_list_reward_claim_links(p_reward_id, p_is_active, p_limit, p_offset)` | List links + `claims_total` + `claim_url`. |
+| `bff_admin_set_reward_claim_link_active(p_link_id, p_is_active)` | Activate/deactivate. |
+
+Supporting reads (existing): `bff_admin_search_members`, `bff_list_rewards(p_include_inactive default false)`, `bff_admin_get_reward_redemption_history`. Pin: `bff_set_reward_featured`. Active: `bff_set_reward_active`.
+
+### Member BFFs (loyalty app)
+
+| Function | Purpose |
+|---|---|
+| `bff_get_reward_claim_preview(p_token)` | Preview for Claim UI (auth optional). Returns reward content (incl. `fulfillment_method`, `fallback_points`, `points_cost`), `can_claim`, `block_reason`, `is_authenticated`. |
+| `bff_claim_reward_via_link(p_token, p_selected_variants)` | Authenticated claim → engine `calc` + `claim_link` (charges configured points; 0 if brand set 0). Shipping requires a saved address (`ADDRESS_REQUIRED`). Other errors: `UNAUTHENTICATED`, `ALREADY_CLAIMED`, `SOLD_OUT`, `EXPIRED`, insufficient points, etc. |
+
+URL helper: `fn_reward_claim_link_url(merchant_id, token)` → `https://{merchant_code}.rocket-loyalty.app/?page=claim&token=…`.  
+`fn_member_app_deep_link(..., 'claim_link', link_id)` resolves the same via link id.
+
+### Expected journeys
+
+1. **Admin push reward:** search member → pick reward → Push → wallet entitlement created (not used). (Old CRM called this “push coupon”; new CRM always says **reward**.)
+2. **QR/link claim:** open URL → preview → Claim → if logged out, auth first → if `fulfillment_method=shipping`, confirm/save delivery address first → engine `calc` deducts the reward’s points cost (0 if brand set 0) → wallet entitlement + toast.
+
+---
+
 ## Promo Code Management
 
 ### Overview
@@ -711,11 +854,13 @@ The system tracks promo codes through two distinct phases:
 - Set when reward is actually consumed
 - Tracks fulfillment completion
 - Enables usage analytics and expiry management
+- Shopify: a paid order webhook that carries the issued redeem code (`reward_redemptions_ledger.code`) calls `fn_mark_redemptions_used_from_discount_codes`. Staff / member / Open API mark-used stays on `api_mark_redemption_used`.
 
 ### Data Access Views
 
 **Individual Code View** (`v_reward_promo_code_list`):
-- **Joins**: `reward_promo_code` → `reward_master`, `partner_merchant`, `reward_redemptions_ledger`
+- **Joins**: `reward_promo_code` → `reward_master`, `partner_merchant`, `reward_redemptions_ledger` on `(merchant_id, promo_code)`
+- **Merchant access path**: `idx_reward_promo_code_merchant_reward` `(merchant_id, reward_id)` and partial `idx_rrl_merchant_promo_code` `(merchant_id, promo_code) WHERE promo_code IS NOT NULL` — list queries seek this merchant’s codes, not the global ledger
 - **Purpose**: Real-time tracking of individual promo codes with their current status
 - **Use Cases**: Code lookup, availability checking, partner attribution analysis
 
@@ -844,6 +989,8 @@ api_get_rewards_full_cached() → JSON
 - `reward_promo_code` INSERT/UPDATE
 - `reward_redemptions_ledger` INSERT/UPDATE
 
+**Invalidation Behavior:** Reward cache invalidation is best-effort and batched through one Upstash pipeline request per merchant per transaction. Cache HTTP failures/timeouts must not block reward or tier admin writes; stale catalog entries expire by the 5-minute TTL.
+
 ### Frontend Usage
 
 **REST API:**
@@ -867,15 +1014,16 @@ const name = reward.translations[userLanguage].name;
 
 ### Implementation Details
 
+**Visibility Filter:** Only returns rewards with `visibility = 'user'`. Rewards with `admin` or `campaign` visibility are excluded from the user catalog. Campaign rewards (migrated QR coupons, push-only promotions) are delivered through AMP workflows and appear in the user's redemption history after being pushed — they are never browseable.
+
 **Query Execution:**
 1. Extract `merchant_id` from JWT token context
 2. Check Redis for cache key
 3. **Cache hit:** Return JSON immediately (2-5ms)
 4. **Cache miss:** Execute complex PostgreSQL query:
-   - Join `reward_master` with `translations`
-   - Aggregate `reward_stock` for availability
-   - Count `reward_redemptions_ledger` for redemption stats
-   - Aggregate `reward_promo_code` usage
+   - Filter `reward_master` by `visibility = 'user'` and `active_status = true`
+   - Join with `translations`
+   - Aggregate stock and promo code availability
 5. Store result in Redis with 5-min TTL
 6. Return to frontend
 
@@ -946,7 +1094,7 @@ graph TD
 1. **Specificity First**: Conditions matching more dimensions take precedence
 2. **Priority Tiebreaker**: When specificity is equal, higher priority wins
 3. **Customer-Favorable**: When all else is equal, lowest points wins
-4. **Fallback Mechanism**: When no conditions match, use fallback_points
+4. **Unmatched**: If `require_points_match` then block (ignore fallback). Else use `fallback_points`, or 0 if unset.
 
 ### Calculation Flow
 
@@ -1137,16 +1285,16 @@ The system supports redeeming multiple quantities of the same reward in a single
 │                    RENDER API (crm-api)                         │
 │  1. Validate JWT (extract user_id, merchant_id)                │
 │  2. Validate reward_id and quantity (1-1000)                   │
-│  3. Publish to Kafka: { event_id, user_id, reward_id,         │
+│  3. Publish Inngest event reward/redemption.requested     │
 │                         quantity, merchant_id, timestamp }      │
 │  4. Return: { success: true, event_id }                        │
 └────────────────────────────┬────────────────────────────────────┘
                              │
-                             ↓ (Kafka: reward_redemptions topic)
+                             ↓ (Inngest: reward/redemption.requested)
                              │
 ┌─────────────────────────────────────────────────────────────────┐
 │               EVENT PROCESSOR (crm-event-processors)            │
-│  1. Consume Kafka event                                         │
+│  1. Consume Inngest reward/redemption.requested                  │
 │  2. Extract: user_id, reward_id, quantity, merchant_id         │
 │  3. Check idempotency (already processed?)                     │
 │  4. Call Supabase RPC:                                          │
@@ -1264,6 +1412,152 @@ const response = await fetch('https://crm-api-67ej.onrender.com/redemptions', {
 - **Default:** quantity = 1 if omitted (backward compatible)
 - **Invalid Values:** Return 400 error immediately
 
+### Redemption Reversal
+
+Two admin-initiated reversal modes are supported. Both rely on the live-availability model: store stock, group-limit usage, and tier-progress queries all derive consumption from `reward_redemptions_ledger` rows where `used_status = true AND cancelled IS NOT TRUE`, so flipping either flag automatically restores the underlying state without counter updates.
+
+**Mode A — `admin_unmark_redemption_used`** (revive without cancel)
+
+Returns a used redemption to the redeemed-but-not-used state. Points stay deducted, promo code stays issued, redemption can be used again. Intended for "scanner double-fired", "wrong-customer scan caught immediately", or any case where the customer has not actually consumed the reward at the counter.
+
+| State guard | Result |
+|---|---|
+| `cancelled = true` | `CANCELLED` error — use cancel/uncancel flow instead |
+| `used_status = false` | `NOT_USED` error — nothing to revert |
+| Multi-use entitlement (`source_type IN ('package_assignment','persona_entitlement')` AND `qty > 1`) | `MULTI_USE_ENTITLEMENT` error — out of scope |
+
+On success: `used_status=false`, `used_at=NULL`, `used_store_id=NULL`, `fulfillment_status='pending'`. Writes one `redemption_usage_log` row with `action='reverse_use'`, `qty_change = -qty`, `source_type='admin_unmark_used'`, `admin_user_id` resolved from `auth.uid()`, plus `store_id` and `notes` from the call.
+
+**Mode B — `api_cancel_redemption(..., p_force_used := true)`** (full reversal)
+
+Equivalent to Mode A followed by the standard cancel flow: refund points via `chokepoint_post_wallet_transaction(source_type='redemption_cancellation', component='adjustment', transaction_type='earn')`, return promo code to pool, set `cancelled=true / cancelled_at / cancelled_reason / cancelled_by`. Intended for "frontline redeemed AND used the wrong reward" recovery.
+
+`p_force_used` defaults to `false`, preserving the original behavior — used redemptions still return `REWARD_ALREADY_USED` unless the caller explicitly opts in.
+
+**Audit trail for a redeem → use → reverse → cancel sequence**
+
+| action | qty_change | admin_user_id | source_type |
+|---|---|---|---|
+| `redeem` | +qty | (frontline) | `frontline_redeem` |
+| `use` | +qty | (frontline) | `frontline_use` |
+| `reverse_use` | −qty | (admin) | `cancel_force_used` (Mode B) or `admin_unmark_used` (Mode A) |
+
+The cancel itself is recorded on the ledger row (`cancelled=true`, `cancelled_at`, `cancelled_reason`, `cancelled_by`) plus a `wallet_transaction` row tying the points refund back to the original redemption id.
+
+**Out of scope**: multi-use entitlements (`api_use_entitlement` consumers) — those need an entitlement-specific reverse path. Tier progression rollback — points are refunded as a wallet credit only; tier recomputation downstream (if any) is not handled here.
+
+---
+
+## Lucky Draw thermal slip (live 2026-08-09)
+
+When `fulfillment_method = 'printed'`, Frontline should also print a raffle / Lucky Draw slip at redeem (direct or mission-claim paths that call `redeem_reward_with_points`) and on reprint/lookup.
+
+**Config (admin)** — `reward_master.physical_draw_name`, `physical_draw_description`; exposed on `bff_get_reward_details` / `bff_upsert_reward_with_conditions_and_limits` (`p_physical_draw_name`, `p_physical_draw_description`). Do not reuse `description_slip` (member redeem instructions).
+
+**On/off** — `fulfillment_method = 'printed'` (migrated from Mongo `isPhysicalDraw`). No separate boolean.
+
+**Runtime payload** — `fn_build_lucky_draw_slip(...)` returns JSON when printed, else `null`:
+
+```json
+{
+  "should_print": true,
+  "name": "...",
+  "description": "...",
+  "lucky_no": "<reward_redemptions_ledger.code>",
+  "member_name": "...",
+  "member_tel": "...",
+  "printed_at": "..."
+}
+```
+
+Surfaced as `lucky_draw_slip` on each redemption object from `redeem_reward_with_points`, and at top level from `api_get_redemption` / `get_redemption_details`.
+
+---
+
+## Shipping Fulfillment & Delivery Address (live 2026-07-12)
+
+Rewards with `fulfillment_method = 'shipping'` capture the member's saved address at redemption time.
+
+**Member address surface (loyalty user-app, user JWT via PostgREST RPC):**
+
+- `bff_get_user_address()` → `{success, data: {has_address boolean, address jsonb|null}}`. Address object keys: `addressline_1`, `addressline_2`, `province_code`, `district_code`, `subdistrict_code`, `province_name`, `district_name`, `subdistrict_name`, `postcode`, `country_code`. `*_name` maps to legacy `user_address.city/district/subdistrict` text columns — import-seeded rows may echo codes there until the member re-saves.
+- `bff_save_user_address(p_data jsonb)` — full replace upsert on `(user_id, merchant_id)` (one address per member, unique index `user_address_user_merchant_key`). Requires `addressline_1` + `postcode`, else `ADDRESS_INVALID` with `data.missing[]`. `country_code` defaults `'TH'`.
+- Snapshot shape is produced by `fn_get_user_address_snapshot(p_user_id, p_merchant_id)` (shared by both BFFs and the redeem path).
+
+**Redeem-time behavior (`redeem_reward_with_points`):**
+
+- FE contract: save address first (form save), then `POST /redemptions` unchanged (`reward_id`, `quantity`). The RPC reads the saved address itself.
+- `fulfillment_method='shipping'` → ledger rows get `fulfillment_status='pending'` and `delivery_address` (jsonb, immutable snapshot — later address edits do not affect past redemptions). All rows of a multi-quantity/promo-code redemption carry the same snapshot.
+- Member path (`mode='calc'`): no usable saved address (missing row, `addressline_1`, or `postcode`) → reject `{success:false, title:'Shipping address required', data:{error_code:'ADDRESS_REQUIRED', reward_id}}`, surfaced via the failure broadcast `redemption:{user_id}`.
+- Direct grants (`mode='direct'` — missions, admin push): stamp best-effort, never reject on address.
+- **Claim via QR/link** (`bff_claim_reward_via_link`, `mode='calc'`): charges the reward’s points cost (same engine as catalog redeem; 0 only when the brand set 0). Shipping still requires a usable saved address (`ADDRESS_REQUIRED`). Member app opens the same delivery-address drawer as catalog redeem, then claims. Admin push and missions stay `direct`.
+- Non-shipping methods: `fulfillment_status` and `delivery_address` stay NULL (unchanged behavior).
+
+**RLS (2026-07-12):** `user_address` read/insert/update policies now require merchant match AND (admin via `is_current_user_admin()`, or own row via `user_id = auth.uid()` / `user_accounts.auth_user_id` linkage). Previously any member JWT could read all addresses in its merchant. `service_role` policy unchanged; BFFs are SECURITY DEFINER.
+
+**Open (phase 2, not built):** ops surface to advance `fulfillment_status` (pending→shipped→delivered), `tracking_number`/`shipped_at` columns, and exposing `delivery_address` + fulfillment fields in admin redemption views (`admin_get_user_redemptions`, `api_get_redemption`) and member history.
+
+---
+
+## Reward Variants (live 2026-07-29)
+
+Tier A: fulfillment/display choices on a single reward (e.g. Size / Color). Not per-variant stock, points, or promo codes. Not Shopify product variants.
+
+**Config (`reward_master.variant_config` jsonb, nullable):**
+
+```json
+{
+  "dimensions": [
+    {
+      "code": "size",
+      "label": "Size",
+      "required": true,
+      "options": [
+        { "code": "m", "label": "M" },
+        { "code": "l", "label": "L" }
+      ]
+    }
+  ]
+}
+```
+
+- `NULL` / empty `dimensions` = no variants (legacy behavior).
+- Dimension `required` defaults `true` when omitted.
+- Admin write: `bff_upsert_reward_with_conditions_and_limits(..., p_variant_config)` or `bff_upsert_reward({ ..., variant_config })`.
+- Admin read: `bff_get_reward_details` returns `variant_config`.
+- Member detail: `api_get_reward_detail` returns `variant_config` on `data`.
+
+**Redeem-time selection (`reward_redemptions_ledger.selected_variants` jsonb snapshot):**
+
+```json
+{
+  "dimensions": [
+    { "code": "size", "label": "Size", "option_code": "m", "option_label": "M" }
+  ]
+}
+```
+
+- Helper: `fn_resolve_reward_variant_selection(p_variant_config, p_selected, p_enforce)`.
+- Accepted selection shapes: `{ "dimensions":[{ "code","option_code" }] }` or flat `{ "size":"m" }`.
+- `redeem_reward_with_points(..., p_selected_variants jsonb DEFAULT NULL)`:
+  - Member path (`mode='calc'`): enforces required dimensions → `VARIANT_REQUIRED` / `VARIANT_INVALID`.
+  - System grants (`direct` / missions / outcomes): best-effort (`p_enforce=false`); snapshot null if omitted.
+- Multi-qty / promo-code rows share the same snapshot (same as shipping address).
+- Edge: `inngest-reward-serve` forwards event `selected_variants` → RPC `p_selected_variants`.
+- Render `crm-api` (`Rocket-CRM/crm-api` main `7baecf4`, 2026-07-29): `POST /redemptions` accepts optional `selected_variants` object and includes it on `reward/redemption.requested`. Wait for Render auto-deploy before E2E.
+
+**Readers exposing the snapshot:**
+
+| Surface | Field |
+|---|---|
+| `get_user_redemptions` | column `selected_variants` |
+| `bff_get_reward_history` | `details[]` key `selected_variants` + `metadata.selected_variants` |
+| `admin_get_user_redemptions` | column `selected_variants` |
+| `api_get_redemption` | `selected_variants` (+ also exposes `delivery_address`) |
+| `admin_redeem_and_use` | optional `p_selected_variants` passthrough |
+
+**Out of scope (Tier A):** per-variant stock/pricing/promo pools; catalog cache field; chokepoint payload; import CSV column.
+
 ---
 
 ## Implementation Details
@@ -1301,9 +1595,9 @@ Output: points_required, matched_condition_id, calculation_metadata
    - Select condition with lowest points_required
 
 6. If no conditions match:
-   - Return reward.fallback_points if defined
-   - Return null if require_points_match = true
-   - Return 0 for free redemption otherwise
+   - If require_points_match = true: return null (blocked; fallback ignored)
+   - Else return reward.fallback_points if defined
+   - Else return 0 for free redemption
 ```
 
 #### Idempotency Protection
@@ -1433,9 +1727,8 @@ function filterFieldsByPersona(fields: any[], userPersonaId: string | null): any
 - Customer-favorable tiebreaker
 
 #### No Matching Conditions
-- Fallback points applied
-- Free redemption if allowed
-- Clear error if match required
+- If require_points_match: block (fallback ignored)
+- Else fallback points applied, or free (0) if fallback is unset
 
 ---
 
@@ -1598,6 +1891,14 @@ GET /api/users/{user_id}/rewards/available
 - Validates eligibility, calculates points, deducts balance
 - Assigns promo codes from pool if configured
 - Returns redemption details including codes and expiry
+- Frontline/admin redemptions with `p_store_id` or `p_source_type='admin_frontline'` write one `redemption_usage_log` row per created redemption with `action='redeem'`, the selected store, `performed_by=auth.uid()::text`, and `admin_user_id` when the actor is an admin/staff user.
+
+**Frontline redemption audit**:
+- `api_get_redemption(..., p_store_id)` validates the store belongs to the merchant before writing a lookup audit row.
+- `admin_redeem_and_use` relies on `redeem_reward_with_points` for the redeem audit and writes the use audit itself.
+- `admin_mark_redemptions_used` and `api_mark_redemption_used` keep `used_store_id` and `redemption_usage_log.store_id`; admin/staff actors are resolved through `redemption_usage_log.admin_user_id`.
+- `admin_get_user_redemptions` and `api_get_redemption` return the existing `redeemed_by_*` / `used_by_*` fields, preferring the `redeem` audit actor over lookup-only history, resolving `admin_users.name` for staff actions first, then falling back to `user_accounts.fullname`.
+- `admin_get_user_redemptions` `p_filter` values: `my_reward` (redeemed, unused, not cancelled), `used` (used_status=true, not cancelled — Customer 360 “Already used” tab), `history` (used or redeemed, **including cancelled** so Front Line History can show status Cancelled), `all` (not cancelled; unknown filters fall through here).
 
 **`calculate_redemption_points(user_id, reward_id)`**:
 - Preview points required without redeeming
@@ -1608,6 +1909,12 @@ GET /api/users/{user_id}/rewards/available
 - Comprehensive eligibility validation
 - Returns specific rejection reasons
 - Checks tier, persona, tags, time windows, stock
+
+**`bff_get_reward_history` / `bff_get_entity_history(p_entity='reward')`** (member My Rewards / Use Reward reopen):
+- `description` = `COALESCE(NULLIF(TRIM(promo_code), ''), code)` — prefers the assigned promo code over the generated redemption code (`RW…`) so Use Reward from history or LINE Notice shows the usable code.
+- `metadata` includes both `code` and `promo_code`; `details` still lists both as separate rows.
+- Immediate post-redeem UI continues to use the redeem response `promo_codes` array (unchanged).
+- Excludes cancelled ledger rows (`cancelled IS NOT TRUE`). Front Line History (`admin_get_user_redemptions` `p_filter=history`) **keeps** cancelled rows; member Activity History / Wallet Rewards still drop them.
 
 #### Promo Code Management Functions
 
@@ -1749,7 +2056,8 @@ channel.on(
   ({ payload }) => {
     // payload: { event_id, reward_id, title, description }
     showError(payload.title, payload.description);
-    // e.g. "Personal redemption limit reached", "Limit: 1 per year. Used: 1."
+    // Localized by redeem_reward_with_points(p_language) — FE/crm-api must send language.
+    // TH personal limit: "คุณได้แลกเกินสิทธิ์ตามจำนวนที่กำหนด"
   }
 )
 
@@ -1763,19 +2071,36 @@ setTimeout(() => {
 }, 15000);
 ```
 
-**Broadcast payload shape** (sent by Event Processor on failure):
+**Broadcast payload shape** (sent by Event Processor / `inngest-reward-serve` on failure):
 ```json
 {
   "event_id": "uuid",
   "reward_id": "uuid",
-  "title": "Personal redemption limit reached",
-  "description": "Limit: 1 per year. Used: 1. Requested: 1."
+  "title": "ครบโควตาส่วนบุคคลแล้ว",
+  "description": "จำกัด: 1 ต่อตลอดเวลา ใช้ไปแล้ว: 1 ขอแลก: 1"
 }
 ```
+
+Titles/descriptions are localized by `redeem_reward_with_points` (see §Member envelope i18n below). The broadcast passes RPC `title`/`description` through unchanged. Structured `data` still uses machine tokens (`time_unit: "all_time"`, `error_code`, etc.).
 
 **For Multi-Quantity with Promo Codes**: Frontend will receive N separate INSERT events (one per unique code assigned).
 
 **Important**: The failure broadcast is ephemeral — not stored anywhere. If the user disconnects before the message arrives, they won't see it. This is safe because failed redemptions make no database changes (no points deducted, no records created).
+
+### Member envelope i18n (live 2026-07-29; `p_language` 2026-08-09)
+
+Member-facing `title` / `description` on `redeem_reward_with_points` (and therefore on Realtime `redemption_failed`) are built via `fn_redeem_member_message(p_key, p_language, p_params)`.
+
+| Concern | Behavior |
+|---|---|
+| Language source | Request `p_language` (optional, **default `en`**). Normalized by `fn_normalize_ui_language` → `th` \| `en`. |
+| Async path | Member app / `crm-api` `POST /redemptions` must put `language` on Inngest event `reward/redemption.requested`; `inngest-reward-serve` forwards → `p_language`. Omit → English. |
+| Languages | `th`, `en` (other codes fall back to `en`) |
+| Templates | Inline in `fn_redeem_member_message` (same pattern as `translate_activity_message` / `fn_receipt_crm_sync_member_message`) |
+| Time units in sentences | Humanized (`all_time` → EN `all time` / TH `ตลอดเวลา`). Raw enum remains in `data.time_unit`. |
+| Contract | Envelope shape and `error_code` / limit `data` fields unchanged — only sentence language. |
+
+Example (`p_language = 'th'`, personal all-time limit): title `คุณได้แลกเกินสิทธิ์ตามจำนวนที่กำหนด`, description `จำกัด: 1 ต่อตลอดเวลา ใช้ไปแล้ว: 1 ขอแลก: 6`.
 
 ---
 
@@ -2108,6 +2433,8 @@ The system's architecture ensures accuracy through atomic operations, scales via
 | RWD015 | No matching points configuration | Required match but no conditions met |
 | RWD016 | Persona-type conflict | Persona incompatible with user type |
 | RWD017 | Invalid quantity | Quantity must be between 1 and 1000 |
+| RWD018 | Reward type limit reached | User reached `Max Distinct Reward` inside a reward group |
+| RWD019 | Conflicting group limits | Config: `max_distinct > group_quantity` on same group (save blocked) |
 
 ### B. Database Indexes
 
@@ -2221,7 +2548,7 @@ WHERE fulfillment_status != 'completed';
 
 #### Scalability Roadmap
 - **Distributed Caching**: Redis integration for condition matching
-- **Event Streaming**: Kafka for real-time fulfillment updates
+- **Event Streaming**: Inngest + Supabase Realtime for redemption/fulfillment updates
 - **Microservice Extraction**: Separate fulfillment service
 - **Global Distribution**: Multi-region deployment support
 
@@ -2274,7 +2601,7 @@ WHERE fulfillment_status != 'completed';
 **Implementation Date:** February 3, 2026  
 **Services Updated:**
 - Supabase Function: `redeem_reward_with_points` - supports quantity parameter (1-1000)
-- Render API (`crm-api`): Validates and passes quantity through Kafka
+- Render API (`crm-api`): Validates and passes quantity via Inngest `reward/redemption.requested`
 - Event Processor (`crm-event-processors`): Extracts quantity from events
 
 **Key Features:**
@@ -2342,7 +2669,7 @@ END IF;
 **Key Technical Details:**
 
 **Event-Driven Idempotency Pattern:**
-- Render API generates `event_id` (UUID) and publishes to Kafka
+- Render API generates `event_id` (UUID) and publishes to Inngest
 - Event processor passes `event_id` as `p_event_id` to Supabase function
 - Function uses `event_id` as the redemption record ID for idempotency
 - Duplicate events return existing record instead of creating new one
@@ -2438,6 +2765,8 @@ Both BFF functions call `shopify-get-discount-products` centrally. All Shopify l
 | % or fixed off specific products | `entitled` | `line_item` | `true` | `percentage` / `fixed_amount` |
 | Collection discount | `entitled` | `line_item` | `true` | `percentage` / `fixed_amount` |
 
+**Shopify free-product amount.** Admin type `free_product` creates a Basic fixed-amount code on one product (`appliesOnEachItem: false`). The amount prefills to the highest variant price (item is free) and can be lowered. `reward_master.shopify_free_product_sync_price` (default true) retargets the amount to the live max on `products/update` and daily `shopify-reconcile-free-product-prices`. False when the merchant saved an amount below catalog max — those values are left alone. Shopify rejects amount 0.
+
 **Response Format (`shopify_discount_detail`):**
 ```json
 {
@@ -2487,6 +2816,56 @@ Both BFF functions call `shopify-get-discount-products` centrally. All Shopify l
 
 ---
 
-*Document Version: 3.2*  
-*Last Updated: March 13, 2026*  
-*System: Supabase CRM - Reward Redemption System with Dynamic Points, Multi-Quantity, Persona Filtering, Fixed Promo Code Processing, and Shopify Product Lookup*
+### Reward Group IDs in Cached Catalog + Group Usage RPC
+**Status:** ✅ **Deployed to Production**
+**Implementation Date:** April 24, 2026
+**Migrations:** `extend_api_get_rewards_full_cached_reward_group_ids`, `add_api_get_my_reward_group_usage`
+
+**Changes:**
+- `api_get_rewards_full_cached` now includes `reward_group_ids: uuid[]` on every reward object in `data[]`. Rewards with no group membership return `[]`. Existing callers are unaffected — additive field.
+- New `api_get_my_reward_group_usage()` returns `MyGroupUsage[]` for the auth'd user. Queries `transaction_limits` (metric=`distinct_reward`, entity_type=`reward_group`) joined with `reward_group`, mirrors the counting logic in `fn_check_reward_group_limits`. Returns `[]` for merchants without any `distinct_reward` group limits.
+
+**Backward compatibility:**
+- Cache key and TTL unchanged. Old cached payloads (without `reward_group_ids`) expire within 5 min.
+- `/rewards-v2` renders identically to `/rewards` until FE starts consuming the new fields — no errors, no broken UI.
+
+---
+
+### Max Distinct Reward (Reward Group)
+**Status:** ✅ **Deployed to Production**
+**Implementation Date:** April 22, 2026
+**Migrations:** `add_reward_limit_metric_distinct_reward`, `update_fn_check_reward_group_limits_metric`, `update_bff_reward_group_metric_support`
+
+**Changes:**
+- New enum `reward_limit_metric` with values `quantity` (default, legacy) and `distinct_reward`.
+- `transaction_limits.metric` column added, default `quantity` — existing rows untouched.
+- New CHECK `transaction_limits_metric_entity_ok` restricts `distinct_reward` to `entity_type='reward_group'` + `scope='user'`.
+- New partial index `idx_redemptions_group_check_active` on `(user_id, reward_id, created_at) WHERE redeemed_status AND NOT cancelled` — accelerates both `SUM(qty)` and `COUNT(DISTINCT reward_id)` paths.
+- `fn_check_reward_group_limits` branches on `metric`. For `distinct_reward`, the incoming reward only increments the user's count if it's a **new** `reward_id` within the window — re-redeeming an already-owned reward does not consume a distinct slot.
+- `bff_upsert_reward_group_with_limits` accepts `metric` per limit + rejects `max_distinct > group_quantity` at save with `CONFLICTING_GROUP_LIMITS`.
+- `bff_get_reward_group_details` and `bff_list_reward_groups` now surface `metric` on every limit row.
+
+**Backward compatibility:** All existing `transaction_limits` rows default to `metric='quantity'`. Existing admin frontends that don't send `metric` continue to work — `bff_upsert_reward_group_with_limits` coalesces missing values to `'quantity'`.
+
+**Performance:** No new tables, no counters, no triggers. `COUNT(DISTINCT reward_id)` runs on the same pre-filtered row set as the existing `SUM(qty)` check and hits the same partial index — effective cost per group ≈ same as before.
+
+---
+
+### Front Line Store Attribution RPCs
+**Status:** Deployed to Production  
+**Implementation Date:** May 6, 2026  
+**Migration:** `frontline_admin_be_rpcs`
+
+**Changes:**
+- `api_get_redemption(p_merchant_id, p_redemption_id, p_redemption_code, p_store_id)` accepts optional `p_store_id` for lookup audit only. Store does not restrict redemption lookup. When provided, lookup is recorded in `redemption_usage_log` with `action='lookup'`.
+- `api_mark_redemption_used(..., p_store_id)` accepts optional `p_store_id`, validates the store belongs to the merchant, sets `reward_redemptions_ledger.used_store_id`, and writes a `redemption_usage_log` use row.
+- `redeem_reward_with_points(..., p_store_id)` accepts optional `p_store_id`, validates merchant ownership, and stores it in `reward_redemptions_ledger.redeemed_store_id`.
+- `admin_redeem_and_use(..., p_store_id)` uses the same dedicated `p_store_id`, stores both `redeemed_store_id` and `used_store_id`, and writes usage audit rows.
+
+**Decision:** Front Line uses dedicated `p_store_id`; `p_source_id` remains reserved for the business source entity such as mission/manual/campaign/package.
+
+---
+
+*Document Version: 3.4*
+*Last Updated: April 24, 2026*
+*System: Supabase CRM - Reward Redemption System with Dynamic Points, Multi-Quantity, Persona Filtering, Fixed Promo Code Processing, Shopify Product Lookup, Max Distinct Reward, and Reward Group IDs in Catalog + Group Usage RPC*

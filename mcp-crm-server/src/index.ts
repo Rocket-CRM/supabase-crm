@@ -25,6 +25,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CRM_EMAIL = process.env.CRM_EMAIL;
 const CRM_PASSWORD = process.env.CRM_PASSWORD;
 
@@ -73,6 +74,7 @@ interface QueryFilter {
 // ---------------------------------------------------------------------------
 
 let supabase: SupabaseClient;
+let serviceSupabase: SupabaseClient | null = null;
 let roleCode: string = "unknown";
 let permissions: Map<string, RolePermission> = new Map();
 
@@ -82,6 +84,9 @@ let permissions: Map<string, RolePermission> = new Map();
 
 async function initializeClient(): Promise<void> {
   supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+  if (SUPABASE_SERVICE_ROLE_KEY) {
+    serviceSupabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY);
+  }
 
   const { data: authData, error: authError } =
     await supabase.auth.signInWithPassword({
@@ -132,7 +137,7 @@ async function initializeClient(): Promise<void> {
   }
 
   console.error(
-    `[CRM MCP] Authenticated as ${CRM_EMAIL} | role: ${roleCode} | merchant: ${ctx.merchant_id} | tables: ${permissions.size}`
+    `[CRM MCP] Authenticated as ${CRM_EMAIL} | role: ${roleCode} | merchant: ${ctx.merchant_id} | tables: ${permissions.size} | knowledge authoring: ${serviceSupabase ? "enabled" : "disabled"}`
   );
 }
 
@@ -381,8 +386,225 @@ async function toolGetMyContext(): Promise<string> {
     `- No schema changes (CREATE TABLE, ALTER, DROP, migrations)`,
     `- No function creation or modification`,
     `- No access to auth system tables`,
-    `- No service role key ever used — all queries run as your user JWT`,
+    `- Generic CRM table tools always run as your user JWT`,
+    ``,
+    `**Knowledge MCP**`,
+    `- Read tools are available through authenticated internal_knowledge RPCs`,
+    `- For mapping a buyer/marketing term (e.g. "omnichannel", "journey builder") to an internal feature slug, call resolve_feature_term first`,
+    `- For paraphrased or multi-feature questions, call search_semantic (vector similarity, cross-feature)`,
+    `- For keyword-precise lookups, call search_feature_knowledge (full-text)`,
+    `- Authoring tools are ${serviceSupabase ? "enabled with service-role RPC access" : "disabled because SUPABASE_SERVICE_ROLE_KEY is not configured"}`,
+    `- Implementation object blocks are pointers; verify exact schemas/functions from live tools before coding`,
   ].join("\n");
+}
+
+function optionalTextArray(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null;
+  const values = value
+    .map((item) => String(item).trim())
+    .filter((item) => item.length > 0);
+  return values.length > 0 ? values : null;
+}
+
+function optionalString(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  const text = String(value).trim();
+  return text.length > 0 ? text : null;
+}
+
+function jsonResult(data: unknown): string {
+  return JSON.stringify(data, null, 2);
+}
+
+async function callKnowledgeRpc(
+  client: SupabaseClient,
+  fnName: string,
+  args?: Record<string, unknown>
+): Promise<string> {
+  const { data, error } = await client.rpc(fnName, args ?? {});
+  if (error) return `Knowledge RPC error (${fnName}): ${error.message}`;
+  return jsonResult(data);
+}
+
+function getAuthoringClient(): SupabaseClient | string {
+  if (!serviceSupabase) {
+    return (
+      "Knowledge authoring is not enabled for this MCP server. " +
+      "Configure SUPABASE_SERVICE_ROLE_KEY only for trusted upstream authoring environments."
+    );
+  }
+  return serviceSupabase;
+}
+
+async function toolGetFeatureTree(rootSlug?: unknown): Promise<string> {
+  return callKnowledgeRpc(supabase, "internal_knowledge_get_feature_tree", {
+    p_root_slug: optionalString(rootSlug),
+  });
+}
+
+async function toolGetFeatureContext(args: Record<string, unknown>): Promise<string> {
+  return callKnowledgeRpc(supabase, "internal_knowledge_get_feature_context", {
+    p_feature_slug: String(args.feature_slug),
+    p_knowledge_types: optionalTextArray(args.knowledge_types),
+    p_perspectives: optionalTextArray(args.perspectives),
+    p_output_uses: optionalTextArray(args.output_uses),
+    p_scopes: optionalTextArray(args.scopes),
+    p_include_children: args.include_children === undefined ? true : Boolean(args.include_children),
+    p_include_parents: args.include_parents === undefined ? false : Boolean(args.include_parents),
+  });
+}
+
+async function toolSearchFeatureKnowledge(args: Record<string, unknown>): Promise<string> {
+  return callKnowledgeRpc(supabase, "internal_knowledge_search_feature_knowledge", {
+    p_query: String(args.query),
+    p_feature_slug: optionalString(args.feature_slug),
+    p_knowledge_types: optionalTextArray(args.knowledge_types),
+    p_perspectives: optionalTextArray(args.perspectives),
+    p_output_uses: optionalTextArray(args.output_uses),
+    p_scopes: optionalTextArray(args.scopes),
+    p_limit: Math.min(Number(args.limit ?? 20), 50),
+  });
+}
+
+async function toolGetRelatedFeatures(featureSlug: unknown): Promise<string> {
+  return callKnowledgeRpc(supabase, "internal_knowledge_get_related_features", {
+    p_feature_slug: String(featureSlug),
+  });
+}
+
+async function toolListKnowledgeTypeTemplates(): Promise<string> {
+  return callKnowledgeRpc(supabase, "internal_knowledge_list_knowledge_type_templates");
+}
+
+async function toolResolveFeatureTerm(query: unknown): Promise<string> {
+  return callKnowledgeRpc(supabase, "internal_knowledge_resolve_feature_term", {
+    p_query: String(query),
+  });
+}
+
+async function embedQuery(query: string): Promise<number[]> {
+  const { data, error } = await supabase.functions.invoke("embed-text", {
+    body: { text: query },
+  });
+  if (error || !data) {
+    throw new Error(
+      `embed-text edge function failed: ${error?.message ?? "empty response"}`
+    );
+  }
+  if (!Array.isArray(data.embeddings) || data.embeddings.length === 0) {
+    throw new Error(`embed-text returned no embeddings: ${JSON.stringify(data)}`);
+  }
+  return data.embeddings[0] as number[];
+}
+
+async function toolSearchSemantic(args: Record<string, unknown>): Promise<string> {
+  const query = String(args.query ?? "").trim();
+  if (!query) return "Error: query is required";
+
+  let embedding: number[];
+  try {
+    embedding = await embedQuery(query);
+  } catch (err) {
+    return `Failed to embed query: ${err instanceof Error ? err.message : String(err)}`;
+  }
+
+  return callKnowledgeRpc(supabase, "internal_knowledge_search_semantic", {
+    p_query_embedding: embedding,
+    p_top_k: Math.min(Number(args.top_k ?? 12), 50),
+    p_feature_slugs: optionalTextArray(args.feature_slugs),
+    p_knowledge_types: optionalTextArray(args.knowledge_types),
+    p_min_similarity:
+      args.min_similarity === undefined || args.min_similarity === null
+        ? null
+        : Number(args.min_similarity),
+  });
+}
+
+async function toolSuggestBlockMetadata(knowledgeType: unknown): Promise<string> {
+  const client = getAuthoringClient();
+  if (typeof client === "string") return client;
+  return callKnowledgeRpc(client, "internal_knowledge_suggest_block_metadata", {
+    p_knowledge_type: String(knowledgeType),
+  });
+}
+
+async function toolValidateKnowledgeBlock(args: Record<string, unknown>): Promise<string> {
+  const client = getAuthoringClient();
+  if (typeof client === "string") return client;
+  return callKnowledgeRpc(client, "internal_knowledge_validate_knowledge_block", {
+    p_title: String(args.title),
+    p_content: String(args.content),
+    p_knowledge_type: String(args.knowledge_type),
+    p_perspectives: optionalTextArray(args.perspectives),
+    p_output_uses: optionalTextArray(args.output_uses),
+    p_scope: optionalString(args.scope),
+  });
+}
+
+async function toolCreateFeatureItem(args: Record<string, unknown>): Promise<string> {
+  const client = getAuthoringClient();
+  if (typeof client === "string") return client;
+  return callKnowledgeRpc(client, "internal_knowledge_create_feature_item", {
+    p_slug: String(args.slug),
+    p_name: String(args.name),
+    p_item_type: String(args.item_type),
+    p_parent_id: optionalString(args.parent_id),
+    p_description: optionalString(args.description),
+    p_sort_order: Number(args.sort_order ?? 0),
+    p_metadata: (args.metadata as Record<string, unknown>) ?? {},
+  });
+}
+
+async function toolUpdateFeatureItem(args: Record<string, unknown>): Promise<string> {
+  const client = getAuthoringClient();
+  if (typeof client === "string") return client;
+  return callKnowledgeRpc(client, "internal_knowledge_update_feature_item", {
+    p_item_id: String(args.item_id),
+    p_slug: optionalString(args.slug),
+    p_name: optionalString(args.name),
+    p_item_type: optionalString(args.item_type),
+    p_parent_id: optionalString(args.parent_id),
+    p_description: optionalString(args.description),
+    p_sort_order: args.sort_order === undefined ? null : Number(args.sort_order),
+    p_metadata: (args.metadata as Record<string, unknown> | undefined) ?? null,
+    p_is_active: args.is_active === undefined ? null : Boolean(args.is_active),
+  });
+}
+
+async function toolCreateKnowledgeBlock(args: Record<string, unknown>): Promise<string> {
+  const client = getAuthoringClient();
+  if (typeof client === "string") return client;
+  return callKnowledgeRpc(client, "internal_knowledge_create_knowledge_block", {
+    p_feature_item_id: String(args.feature_item_id),
+    p_title: String(args.title),
+    p_content: String(args.content),
+    p_knowledge_type: String(args.knowledge_type),
+    p_perspectives: optionalTextArray(args.perspectives) ?? ["general"],
+    p_output_uses: optionalTextArray(args.output_uses) ?? ["agent_context"],
+    p_scope: optionalString(args.scope) ?? "general",
+    p_source_ref: optionalString(args.source_ref),
+    p_metadata: (args.metadata as Record<string, unknown>) ?? {},
+    p_content_format: optionalString(args.content_format) ?? "markdown",
+  });
+}
+
+async function toolUpdateKnowledgeBlock(args: Record<string, unknown>): Promise<string> {
+  const client = getAuthoringClient();
+  if (typeof client === "string") return client;
+  return callKnowledgeRpc(client, "internal_knowledge_update_knowledge_block", {
+    p_block_id: String(args.block_id),
+    p_feature_item_id: optionalString(args.feature_item_id),
+    p_title: optionalString(args.title),
+    p_content: optionalString(args.content),
+    p_knowledge_type: optionalString(args.knowledge_type),
+    p_perspectives: optionalTextArray(args.perspectives),
+    p_output_uses: optionalTextArray(args.output_uses),
+    p_scope: optionalString(args.scope),
+    p_source_ref: optionalString(args.source_ref),
+    p_metadata: (args.metadata as Record<string, unknown> | undefined) ?? null,
+    p_content_format: optionalString(args.content_format),
+    p_is_active: args.is_active === undefined ? null : Boolean(args.is_active),
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -423,6 +645,260 @@ const TOOL_DEFINITIONS = [
         },
       },
       required: ["table_name"],
+    },
+  },
+  {
+    name: "get_feature_tree",
+    description:
+      "Knowledge MCP read tool. Returns the active internal feature hierarchy. Use this to discover feature slugs before requesting context. Optional root_slug narrows the tree.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        root_slug: {
+          type: "string",
+          description: "Optional feature/domain slug to use as the tree root, e.g. rewards, loyalty, customer-service.",
+        },
+      },
+      required: [],
+    },
+  },
+  {
+    name: "get_feature_context",
+    description:
+      "Knowledge MCP read tool. Returns typed reusable knowledge blocks for a feature. Use filters by project type: marketing uses overview/value_proposition/related_features; frontend uses configuration_reference/admin_journey/user_experience/testing_guidance; backend uses technical_overview/implementation_objects/technical_flow/implementation_constraints; QA uses testing_guidance/business_rules/limitations. Editorial convention: technical knowledge types attach at FEATURE level; journey types (overview/user_experience/admin_journey/business_rules) typically attach at SUB-FEATURE level. When you land on a sub-feature and need technical content, set include_parents=true to walk UP to the parent feature.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        feature_slug: { type: "string", description: "Feature or sub-feature slug, e.g. rewards, tier-upgrade, cs-knowledge-base, amp-workflows." },
+        knowledge_types: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional knowledge type filters, e.g. ['overview','business_rules'].",
+        },
+        perspectives: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional perspective filters, e.g. ['frontend','testing'].",
+        },
+        output_uses: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional output-use filters, e.g. ['frontend_context','qa_testing'].",
+        },
+        scopes: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional scope filters: general, admin_fe, user_fe, be, integration.",
+        },
+        include_children: {
+          type: "boolean",
+          description: "Walk DOWN the tree and include descendant (sub-feature) blocks. Default true.",
+        },
+        include_parents: {
+          type: "boolean",
+          description: "Walk UP the tree and include ancestor (parent feature, domain) blocks. Default false. Set true when querying a sub-feature for content that lives at the parent level (typically technical content).",
+        },
+      },
+      required: ["feature_slug"],
+    },
+  },
+  {
+    name: "search_feature_knowledge",
+    description:
+      "Knowledge MCP read tool. Full-text searches internal feature knowledge. Best for keyword-precise lookups. For paraphrased questions or cross-feature queries, prefer search_semantic. For mapping a buyer/marketing term to an internal slug, use resolve_feature_term first.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        query: { type: "string", description: "Search text, e.g. redemption points, CS knowledge base embedding." },
+        feature_slug: { type: "string", description: "Optional feature slug to restrict search." },
+        knowledge_types: { type: "array", items: { type: "string" } },
+        perspectives: { type: "array", items: { type: "string" } },
+        output_uses: { type: "array", items: { type: "string" } },
+        scopes: { type: "array", items: { type: "string" } },
+        limit: { type: "number", description: "Max results. Default 20, capped at 50." },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "resolve_feature_term",
+    description:
+      "Knowledge MCP read tool. Resolves an external/buyer-facing term (e.g. 'omnichannel', 'journey builder', 'marketing automation', 'spin wheel') to internal feature_items via curated aliases, slug, and name matching. Returns matches ordered by match strength (slug_exact > alias_exact > name_exact > partial) then by item type (domain > feature > sub_feature). Use this BEFORE get_feature_context when the user's term might not be the internal slug.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        query: {
+          type: "string",
+          description: "Term as the user said it, e.g. 'omnichannel', 'spin wheel', 'journey builder'.",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "search_semantic",
+    description:
+      "Knowledge MCP read tool. Cross-feature semantic block retrieval. Embeds the query (OpenAI text-embedding-3-large @ 1536) and returns the top-K most similar active blocks across ALL features. Best for paraphrased questions, multi-feature questions ('how do tier-based campaigns work for VIP win-back'), or any case where the right answer spans multiple features. Follow up with get_feature_context on the highest-similarity feature for canonical detail. OpenAI key is centralised in Supabase; downstream installs do not need their own.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        query: {
+          type: "string",
+          description: "Natural-language question or topic, e.g. 'how do tier-based bonus point campaigns work for VIP win-back'.",
+        },
+        top_k: {
+          type: "number",
+          description: "Number of top matches to return. Default 12, capped at 50.",
+        },
+        feature_slugs: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional. Restrict search to specific feature slugs.",
+        },
+        knowledge_types: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional. Restrict to specific knowledge types, e.g. ['overview','value_proposition'].",
+        },
+        min_similarity: {
+          type: "number",
+          description: "Optional. Cosine similarity floor in [0,1]. Filters out low-similarity matches.",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "get_related_features",
+    description:
+      "Knowledge MCP read tool. Returns hierarchy and related-feature blocks for a feature. Use this when a task spans multiple features or needs dependency context.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        feature_slug: { type: "string", description: "Feature slug, e.g. rewards." },
+      },
+      required: ["feature_slug"],
+    },
+  },
+  {
+    name: "list_knowledge_type_templates",
+    description:
+      "Knowledge MCP read tool. Lists authoring guidance for each knowledge_type, including expected content, scopes, and quality rules.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+      required: [],
+    },
+  },
+  {
+    name: "suggest_block_metadata",
+    description:
+      "Knowledge MCP upstream authoring tool. Returns recommended scopes and quality rules for a knowledge_type. Requires SUPABASE_SERVICE_ROLE_KEY on this MCP server.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        knowledge_type: { type: "string", description: "Knowledge type, e.g. testing_guidance." },
+      },
+      required: ["knowledge_type"],
+    },
+  },
+  {
+    name: "validate_knowledge_block",
+    description:
+      "Knowledge MCP upstream authoring tool. Validates a proposed block before creation/update. Requires SUPABASE_SERVICE_ROLE_KEY on this MCP server.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        title: { type: "string" },
+        content: { type: "string" },
+        knowledge_type: { type: "string" },
+        perspectives: { type: "array", items: { type: "string" } },
+        output_uses: { type: "array", items: { type: "string" } },
+        scope: { type: "string" },
+      },
+      required: ["title", "content", "knowledge_type"],
+    },
+  },
+  {
+    name: "create_feature_item",
+    description:
+      "Knowledge MCP upstream authoring tool. Creates a domain, feature, or sub_feature item. Requires SUPABASE_SERVICE_ROLE_KEY on this MCP server. Use get_feature_tree first to avoid duplicate slugs.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        slug: { type: "string" },
+        name: { type: "string" },
+        item_type: { type: "string", enum: ["domain", "feature", "sub_feature"] },
+        parent_id: { type: "string", description: "Optional parent feature item UUID." },
+        description: { type: "string" },
+        sort_order: { type: "number" },
+        metadata: { type: "object" },
+      },
+      required: ["slug", "name", "item_type"],
+    },
+  },
+  {
+    name: "update_feature_item",
+    description:
+      "Knowledge MCP upstream authoring tool. Updates or deactivates an existing feature item. Requires SUPABASE_SERVICE_ROLE_KEY on this MCP server.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        item_id: { type: "string", description: "Feature item UUID." },
+        slug: { type: "string" },
+        name: { type: "string" },
+        item_type: { type: "string", enum: ["domain", "feature", "sub_feature"] },
+        parent_id: { type: "string" },
+        description: { type: "string" },
+        sort_order: { type: "number" },
+        metadata: { type: "object" },
+        is_active: { type: "boolean" },
+      },
+      required: ["item_id"],
+    },
+  },
+  {
+    name: "create_knowledge_block",
+    description:
+      "Knowledge MCP upstream authoring tool. Creates a typed Markdown/plain-text knowledge block. Requires SUPABASE_SERVICE_ROLE_KEY on this MCP server. Call validate_knowledge_block first.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        feature_item_id: { type: "string", description: "Feature item UUID from get_feature_tree/get_feature_context." },
+        title: { type: "string" },
+        content: { type: "string" },
+        knowledge_type: { type: "string" },
+        perspectives: { type: "array", items: { type: "string" } },
+        output_uses: { type: "array", items: { type: "string" } },
+        scope: { type: "string" },
+        source_ref: { type: "string" },
+        metadata: { type: "object" },
+        content_format: { type: "string", enum: ["markdown", "plain_text"] },
+      },
+      required: ["feature_item_id", "title", "content", "knowledge_type"],
+    },
+  },
+  {
+    name: "update_knowledge_block",
+    description:
+      "Knowledge MCP upstream authoring tool. Updates or deactivates an existing knowledge block. Requires SUPABASE_SERVICE_ROLE_KEY on this MCP server. Call validate_knowledge_block when changing title/content/type metadata.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        block_id: { type: "string", description: "Knowledge block UUID." },
+        feature_item_id: { type: "string" },
+        title: { type: "string" },
+        content: { type: "string" },
+        knowledge_type: { type: "string" },
+        perspectives: { type: "array", items: { type: "string" } },
+        output_uses: { type: "array", items: { type: "string" } },
+        scope: { type: "string" },
+        source_ref: { type: "string" },
+        metadata: { type: "object" },
+        content_format: { type: "string", enum: ["markdown", "plain_text"] },
+        is_active: { type: "boolean" },
+      },
+      required: ["block_id"],
     },
   },
   {
@@ -568,6 +1044,45 @@ async function main() {
           break;
         case "get_table_context":
           result = await toolGetTableContext(String(a.table_name));
+          break;
+        case "get_feature_tree":
+          result = await toolGetFeatureTree(a.root_slug);
+          break;
+        case "get_feature_context":
+          result = await toolGetFeatureContext(a);
+          break;
+        case "search_feature_knowledge":
+          result = await toolSearchFeatureKnowledge(a);
+          break;
+        case "resolve_feature_term":
+          result = await toolResolveFeatureTerm(a.query);
+          break;
+        case "search_semantic":
+          result = await toolSearchSemantic(a);
+          break;
+        case "get_related_features":
+          result = await toolGetRelatedFeatures(a.feature_slug);
+          break;
+        case "list_knowledge_type_templates":
+          result = await toolListKnowledgeTypeTemplates();
+          break;
+        case "suggest_block_metadata":
+          result = await toolSuggestBlockMetadata(a.knowledge_type);
+          break;
+        case "validate_knowledge_block":
+          result = await toolValidateKnowledgeBlock(a);
+          break;
+        case "create_feature_item":
+          result = await toolCreateFeatureItem(a);
+          break;
+        case "update_feature_item":
+          result = await toolUpdateFeatureItem(a);
+          break;
+        case "create_knowledge_block":
+          result = await toolCreateKnowledgeBlock(a);
+          break;
+        case "update_knowledge_block":
+          result = await toolUpdateKnowledgeBlock(a);
           break;
         case "query_table":
           result = await toolQueryTable(

@@ -1,5 +1,7 @@
 # Prompt 1: Supabase Backend Project — Workflow Improvements + CS Module
 
+> **Canonical context-structure reference (2026):** See [`docs/PROJECT_CONTEXT_STRUCTURE.md`](./PROJECT_CONTEXT_STRUCTURE.md) for the current layer stack, retrieval budgets, skip-read list, and discovery discipline. This document is the historical implementation spec; rules live in `.cursor/rules/`.
+
 > **What this is:** Instructions for upgrading this Supabase backend project. Two goals: (1) fix the project's own AI workflow so it auto-looks-up context instead of guessing, (2) add CS module support (requirement docs, indexes, table naming).  
 > **Where to run:** In the `Supabase CRM` Cursor workspace.  
 > **Important:** This project has NO local code files. All DB work happens via Supabase MCP (`execute_sql`, `apply_migration`, `deploy_edge_function`). Rules use `alwaysApply: true` because there are no file edits to glob against.  

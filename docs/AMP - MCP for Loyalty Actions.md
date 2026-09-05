@@ -67,8 +67,8 @@ https://amp-ai-service.onrender.com/mcp
 │  │  remove_tag          → user_tags delete                  │ │
 │  │  assign_persona      → user_accounts update              │ │
 │  │  assign_earn_factor  → earn_factor_user insert           │ │
-│  │  send_line_message   → send-line-message edge fn         │ │
-│  │  send_sms            → send-sms-8x8 edge fn             │ │
+│  │  send_line_message   → messaging-service POST /send (via inngest-amp-serve) │
+│  │  send_sms            → messaging-service POST /send (via inngest-amp-serve) │
 │  │  submit_form         → submit_form_response RPC          │ │
 │  │  add_to_audience     → fn_add_to_audience RPC            │ │
 │  │  remove_from_audience → fn_remove_from_audience RPC      │ │
@@ -311,7 +311,7 @@ Send a text message via LINE.
 | message | string | Yes | Message text — write in campaign's tone |
 | workflow_id | string | No | Enables tracking |
 
-**Executes:** `send-line-message` edge function. Requires user to have linked LINE account.
+**Executes:** Rule-based workflows deliver via `inngest-amp-serve` → shared delivery service (`messaging-service` `POST /send`, auth via `get_messaging_auth_key()`). Requires user to have linked LINE account (`line_id` on `user_accounts`).
 **Cost:** Per message
 
 ---
@@ -327,7 +327,7 @@ Send an SMS message.
 | message | string | Yes | SMS text — keep concise (160 chars) |
 | workflow_id | string | No | Enables tracking |
 
-**Executes:** `send-sms-8x8` edge function. Requires user to have phone number.
+**Executes:** Rule-based workflows deliver via `inngest-amp-serve` → shared delivery service (`messaging-service` `POST /send`). Requires user to have phone number.
 **Cost:** Per message (higher than LINE)
 
 ---

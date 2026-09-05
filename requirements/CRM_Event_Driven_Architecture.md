@@ -2,11 +2,67 @@
 
 ## Overview
 
-The CRM system uses an event-driven architecture built on **Change Data Capture (CDC)**, **Kafka**, and **consumer microservices** for real-time processing of loyalty program events (currency awards, tier evaluations, missions, etc.).
+**Live path (2026-07+):** chokepoint writers → `chokepoint_event_outbox` → **OutboxPublisher** (Render `crm-event-processors`, Inngest mode) → **Inngest** → **`inngest-event-router-serve`** (domain routers) → downstream workflows (`inngest-currency-serve`, notification engine, etc.). `KAFKA_CONSUMERS_ENABLED=false` for these domains.
+
+**Historical path (below):** CDC → Kafka → `crm-event-processors` consumers. Kept for reference during decommission; do not treat as the live purchase/currency/tier/mission/notification pipeline.
+
+See also `requirements/Inngest_Primer.md` (event vs function vs serve) and `requirements/architecture/event-chokepoints.md`.
 
 ---
 
-## Architecture Components
+## Live architecture (chokepoint outbox → Inngest)
+
+```
+chokepoint_post_*  (same DB transaction as ledger write)
+        │
+        ├─► ledger table
+        └─► chokepoint_event_outbox  (topic: crm.events.*)
+                │
+                ▼
+        OutboxPublisher (Render crm-event-processors)
+                │  POST batches of up to 50 events/request (API chunking — NOT rate limiting)
+                ▼
+        Inngest  (crm/<domain>.event)
+                │  registry from deploy sync: event name → function id → serve URL
+                ▼
+        inngest-event-router-serve  (many *-router functions; fan-out)
+                │
+                ├─► currency-*-router  → currency/award  → inngest-currency-serve
+                ├─► tier-*-router      → process_tier_event
+                ├─► mission-*-router   → mission/evaluate
+                ├─► notification-*-router → processNotification (see Notification_Service.md)
+                ├─► amp-*-router       → amp-dispatch-realtime-event
+                └─► expiry-reminder-*  → clock scan (NOT outbox; see Notification_Service.md §Reminders)
+```
+
+### OutboxPublisher vs throttling
+
+| Layer | Role |
+|---|---|
+| **OutboxPublisher** | Reliable, **fast** drain of `chokepoint_event_outbox`. Batches of 50 = Inngest API payload chunking. Loops immediately after a full batch. **Not** downstream rate limiting. |
+| **Inngest function `concurrency`** | **Actual backpressure** on each router/workflow. Excess work queues in Inngest. |
+
+Per-router concurrency caps on `inngest-event-router-serve` (representative):
+
+| Router group | Inngest concurrency |
+|---|---|
+| `currency-*-router` | 10 |
+| `tier-*-router` | 10 global + **1 per `user_id`** |
+| `mission-*-router` | 5 |
+| `outcome-*-router` | 3 |
+| `notification-*-router` | 5 (per router id) |
+| `amp-*-router` | 10 global + **5 per `merchant_id`** (`amp-user-router` also throttles 60 batches/min per merchant) |
+| `expiry-reminder-merchant` | **1 per `merchant_id`**, 5 global |
+
+**Idempotency** (separate from concurrency): deterministic Inngest event ids from outbox row id; per-router `idempotency` keys (e.g. `purchase_id:event`).
+
+### One purchase example
+
+`crm/purchase.event` invokes **multiple routers in parallel** (currency, tier, mission, notification, AMP, …). Each router is a separate Inngest function on the same serve URL. Currency may emit a **new** event `currency/award`, which Inngest routes to `inngest-currency-serve` (second hop).
+
+---
+
+## Architecture Components (historical — CDC / Kafka)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -34,6 +90,7 @@ The CRM system uses an event-driven architecture built on **Change Data Capture 
 │  Topics:                                                             │
 │  - crm.public.purchase_ledger                                       │
 │  - crm.public.wallet_ledger                                         │
+│  - crm.public.form_submissions                                      │
 │  - crm.public.referral_ledger                                       │
 │  - crm.public.mission_claims                                        │
 │  - crm.public.codes                                                 │
@@ -64,9 +121,18 @@ The CRM system uses an event-driven architecture built on **Change Data Capture 
 │                                                                      │
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │  MissionConsumer (crm-event-processors-mission)             │   │
-│  │  - Subscribes: purchase_ledger, form_submissions            │   │
+│  │  - Subscribes: purchase_ledger, wallet_ledger,              │   │
+│  │    form_submissions                                         │   │
 │  │  - Evaluates mission progress and completion                │   │
 │  │  - Output: Publishes mission evaluation to Inngest          │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  AmpConsumer (crm-event-processors-amp)                     │   │
+│  │  - Subscribes: purchase_ledger, wallet_ledger,              │   │
+│  │    form_submissions, amp_workflow_log                       │   │
+│  │  - Dispatches matching workflow triggers                    │   │
+│  │  - Output: POST dispatch-workflow-trigger → Inngest AMP     │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                                                      │
 │  (Additional consumers: RewardConsumer, MarketplaceConsumer)        │
@@ -94,11 +160,16 @@ The CRM system uses an event-driven architecture built on **Change Data Capture 
 The CDC connector relies on PostgreSQL's logical replication:
 
 ```sql
--- Publication (defines which tables to track)
+-- Publication (defines which tables to track, with row filters)
+-- Row filters added April 2026 for migration safety — skip_cdc=true rows
+-- never enter the replication stream.
 CREATE PUBLICATION crm_cdc_publication 
 FOR TABLE 
-  public.purchase_ledger, 
-  public.wallet_ledger;
+  public.purchase_ledger WHERE (skip_cdc IS NOT TRUE),
+  public.wallet_ledger WHERE (skip_cdc IS NOT TRUE),
+  public.tier_change_ledger WHERE (skip_cdc IS NOT TRUE),
+  public.form_submissions WHERE (skip_cdc IS NOT TRUE),
+  public.cdc_heartbeat;
 
 -- Replication Slot (tracks position in WAL log)
 -- Created automatically by the connector
@@ -106,7 +177,8 @@ SELECT * FROM pg_replication_slots WHERE slot_name = 'crm_cdc_slot';
 ```
 
 **Key Concepts:**
-- **Publication**: Defines which tables/operations (INSERT/UPDATE/DELETE) to capture
+- **Publication**: Defines which tables/operations (INSERT/UPDATE/DELETE) to capture. Supports row filters (PG 15+) to exclude rows matching a condition.
+- **Row Filter (`skip_cdc`)**: All CDC-monitored tables have a `skip_cdc boolean NOT NULL DEFAULT false` column. Rows with `skip_cdc = true` are excluded at the WAL level — zero Kafka events. Used for data migration and historical imports.
 - **Replication Slot**: Tracks the LSN (Log Sequence Number) position in the Write-Ahead Log (WAL)
 - **WAL (Write-Ahead Log)**: PostgreSQL's transaction log - contains all database changes
 
@@ -154,7 +226,7 @@ The Confluent CDC connector is built on Debezium, which:
   
   "slot.name": "crm_cdc_slot",
   "publication.name": "crm_cdc_publication",
-  "table.include.list": "public.purchase_ledger, public.wallet_ledger",
+  "table.include.list": "public.purchase_ledger, public.wallet_ledger, public.tier_change_ledger, public.form_submissions, public.cdc_heartbeat",
   
   "snapshot.mode": "when_needed",  // CRITICAL: Allows recovery from WAL loss
   "topic.prefix": "crm",           // Creates topics: crm.public.purchase_ledger
@@ -179,6 +251,35 @@ The consumer service runs as a **Render Background Worker** (Node.js):
 
 **Repository:** `Rocket-CRM/crm-event-processors`  
 **Service:** `srv-d56v5pogjchc7399dfqg` on Render
+
+### Consumer Topic Map
+
+| Consumer | Topics | Output |
+|----------|--------|--------|
+| CurrencyConsumer | `crm.public.purchase_ledger` | Publishes `currency/award` events |
+| TierConsumer | `crm.public.purchase_ledger`, `crm.public.wallet_ledger` | Direct tier processing or `tier/upgrade` events |
+| MissionConsumer | `crm.public.purchase_ledger`, `crm.public.wallet_ledger`, `crm.public.form_submissions` | Publishes `mission/evaluate` events |
+| AmpConsumer | `crm.public.purchase_ledger`, `crm.public.wallet_ledger`, `crm.public.form_submissions`, `crm.public.amp_workflow_log` | Calls `dispatch-workflow-trigger`, which emits `amp/workflow.trigger` |
+
+`form_submissions` events are used for form/survey completion behavior, including hidden system workflows such as "complete survey, get currency".
+
+### AMP Workflow Executor
+
+Supabase Edge Function: `inngest-amp-serve`
+
+The executor handles Inngest event `amp/workflow.trigger`.
+
+Current workflow tables:
+- `workflow_master`
+- `workflow_node`
+- `workflow_edge`
+- `workflow_log`
+
+Do not use old `amp_workflow*` table names. The live database does not expose compatibility views for those names.
+
+For AMP wallet actions, the executor substitutes `{{trigger.*}}` and `{{user.*}}` templates in action config before calling `fn_execute_amp_action`. This supports survey reward dedup keys:
+- `survey_reward:{{trigger.form_id}}:{{user.id}}`
+- `survey_reward:{{trigger.form_id}}:{{trigger.record_id}}:{{user.id}}`
 
 ### Key Features
 

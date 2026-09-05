@@ -1,610 +1,227 @@
-# Referral Management System - Complete Business Description
+# Referral
 
-## Overview
+One referral program. Two conversions: **signup** and **purchase**. People are **referrer** (the member who shares) and **friend** (the other person). Signup identity is `member_code`. The commerce artifact is a **code**.
 
-### Core Referral Concept
-Our referral management system implements a **dual-reward architecture** that incentivizes both inviters and invitees through a sophisticated tracking and reward distribution mechanism. The system recognizes that successful referral programs must balance immediate gratification for new users with progressive rewards for active advocates.
+The friend does **not** need to join loyalty to use a purchase offer. Visit or cookie without a **claim** never pays.
 
-#### Referral Participation Model
-- **Inviter (Referrer)**: Existing users who share their unique invite codes to bring new customers
-- **Invitee (Referred)**: New users who join using an invite code and receive welcome benefits
-- **Source**: Tracked in `referral_ledger` with complete relationship mapping
+## Concept
 
-#### Reward Distribution Philosophy  
-- **Invitee Rewards**: Direct, immediate benefits distributed through `wallet_ledger` and `reward_redemptions_ledger`
-- **Inviter Rewards**: Progressive achievement-based rewards managed through the existing mission system
-- **Source**: Leverages existing infrastructure without creating redundant reward mechanisms
+Referral is member-led acquisition. A logged-in member shares a personal link. What happens next depends on which conversion is on:
 
-### Referral Activation Philosophy
-The system supports two fundamental activation triggers that determine when both parties receive their rewards:
+| Conversion | Friend must join? | When the referrer is paid | Friend’s benefit |
+|---|---|---|---|
+| **Signup** | Yes — apply `member_code` after they become a member | On successful apply | Configured signup outcomes (both parties) |
+| **Purchase** | No | First qualifying **paid** order after claim | Commerce discount minted at claim |
 
-- **Signup-Based Activation**: Immediate rewards upon successful registration, maximizing conversion rates
-- **Purchase-Based Activation**: Quality-focused rewards requiring first transaction, ensuring engaged users
-- **Hybrid Potential**: Architecture supports different triggers for inviter vs invitee (future enhancement)
+Sharing a link does **not** mint a discount. Mint happens at claim. Attribution for purchase is SMART: an open `referral_claim` matching the buyer (email / phone / Shopify customer id) first; a code on the order is optional confirmation.
 
-The system provides:
-- **Unique Invite Codes**: One permanent code per user per merchant for simplified UX
-- **Flexible Limits**: Period-based restrictions differentiated by user type (buyer/seller)
-- **Source Tracking**: Complete audit trail through existing ledger systems
-- **Mission Integration**: Inviter rewards seamlessly integrated with achievement system
+`source_type` stays `'referral'`. There is no `purchase_referral` source. Do not subscribe to `crm/purchase.event`.
 
-## Core Tables and Structure
+## Notifications (outbox)
 
-### 1. merchant_master Table (Extended)
-Additional fields for referral configuration:
+`chokepoint_post_referral_event` emits `crm.events.referral` after the existing writers succeed (emit-only; not the sole ledger writer). Copy-link share is not an event. There is no `referral.shared`.
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `referral_activation_trigger` | text | Either 'signup' or 'first_purchase' - determines reward timing |
-| `referral_active` | boolean | Master switch for referral program activation |
+| Domain `event` | When | Notification map |
+|---|---|---|
+| `applied` | Signup apply; purchase attributed | Dropped at notification router |
+| `claimed` | Purchase claim/mint (`api_claim_referral`) | `referral.friend_rewarded` (friend; often no `user_id`) |
+| `settled` | Rewards paid (`fn_settle_referral`; signup apply now goes through settle) | `referral.completed` (referrer); `referral.friend_rewarded` (signup friend) |
+| `clawed_back` | Purchase clawback | Dropped at notification router |
 
-### 2. referral_inviter_limits Table
-Defines participation limits for different user types. A merchant can have different limits for buyers vs sellers:
+Requires `OUTBOX_PUBLISH_TOPICS` on Render `crm-event-processors` to include `crm.events.referral`, and `notification-referral-router` on `inngest-event-router-serve`. See `requirements/Notification_Service.md`.
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | uuid | Unique identifier for the limit configuration |
-| `merchant_id` | uuid | References merchant_master |
-| `user_type` | enum | Either 'buyer' or 'seller' - determines which users these limits apply to |
-| `max_referrals_per_day` | integer | Daily limit for new referrals |
-| `max_referrals_per_week` | integer | Weekly limit for new referrals |
-| `max_referrals_per_month` | integer | Monthly limit for new referrals |
-| `max_referrals_per_year` | integer | Yearly limit for new referrals |
-| `max_referrals_lifetime` | integer | Total lifetime limit for referrals |
-| `priority` | integer | Resolution order when user matches multiple types |
-| `created_at` | timestamptz | Timestamp of configuration creation |
+## People and terms
 
-### 3. referral_invitee_outcomes Table
-Defines what rewards invitees receive when referral conditions are met:
+| Term | Meaning |
+|---|---|
+| **Referrer** | Existing loyalty member who shares. Not “advocate.” |
+| **Friend** | The other person. Signup: new member. Purchase: shopper, membership optional. |
+| **`member_code`** | Permanent per user/merchant. Signup share identity. Also the `r=` on purchase hops. |
+| **Code** | Commerce voucher minted **at claim** (`referral_code`). Not the thing the member copies. |
+| **Hop URL** | Rocket `/r/{merchant_code}` page members actually copy for purchase. Crawlers get OG; humans 302. |
+| **Claim** | Friend identifies themselves (email or phone) so we can mint and later match the order. |
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | uuid | Unique identifier for the outcome |
-| `merchant_id` | uuid | References merchant_master |
-| `outcome_type` | enum | Type of reward: 'points', 'tickets', or 'reward' |
-| `entity_id` | uuid | For tickets: ticket_type_id; For rewards: reward_id; NULL for points |
-| `amount` | numeric | Quantity of points or tickets (NULL for rewards - always qty 1) |
-| `valid_for_days` | integer | Validity period after activation trigger |
-| `created_at` | timestamptz | Timestamp of outcome creation |
+Do not say “token.” Signup invitee/inviter still appear in older signup copy; prefer referrer/friend in new UI.
 
-### 4. referral_codes Table
-Stores unique invite codes for each user-merchant combination:
+## Surfaces
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | uuid | Unique identifier |
-| `user_id` | uuid | References auth.users - the inviter |
-| `merchant_id` | uuid | References merchant_master |
-| `invite_code` | varchar | Unique 8-character alphanumeric code |
-| `created_at` | timestamptz | Timestamp of code generation |
-| **Unique Constraints** | | (user_id, merchant_id) - one code per user per merchant |
+| Surface | What it does |
+|---|---|
+| **Referral settings** `/referral-settings` | Program on/off, conversions, platforms, outcomes, friend offer, Shopify wrapper, limits, ledger |
+| **Standalone admin** | Full page (signup + purchase + Shopee + shop-cap) |
+| **Shopify embedded admin** | Same page, **section-gated**: hide signup, Shopee, shop-cap 800, tickets on purchase outcomes. App Bridge nav shows **Referral**. Saves `platform_shopify` instead of replacing `platforms`. |
+| **Earn Channels** | Signup CMS card only (`method_type='referral'`). Active does **not** turn the engine on. |
+| **Member app** | Signup share (`/?invite=`). Purchase hop `/r/{merchant_code}` (OG + Shopify 302 or Shopee claim landing). |
+| **Shopify widget / storefront** | Member: copy/share `purchase.shopify.share_url`. Friend: claim popup on `?r=` (works if launcher is hidden). Storefront job: `rewarding-shopify/widget-builder/REFERRAL_SHOPIFY_FE.md`. |
 
-### 5. referral_ledger Table
-Central tracking table for all referral relationships and their status:
+Customer 360 / analytics **signup** KPIs stay standalone-only.
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | uuid | Unique identifier for the referral |
-| `merchant_id` | uuid | References merchant_master |
-| `inviter_user_id` | uuid | References auth.users - who sent the invite |
-| `invitee_user_id` | uuid | References auth.users - who accepted the invite |
-| `invite_code` | varchar | References referral_codes.invite_code used |
-| `signed_up_at` | timestamptz | When invitee registered |
-| `first_purchase_at` | timestamptz | When invitee made first purchase (if applicable) |
-| `created_at` | timestamptz | Timestamp of referral creation |
-| **Unique Constraints** | | (invitee_user_id, merchant_id) - one referral per invitee per merchant |
+## Signup journey
 
-### 6. Integration with Existing Tables
+1. Referrer opens the member-app referral earn card → `bff_user_get_invite` → copy `{member-app}/?invite={member_code}`.
+2. Friend joins, then `bff_user_apply_referral` → `fn_attribute_referral(kind=signup)` → ledger `applied` → settle + `fn_process_referral_rewards`.
+3. Limits and self-refer still apply. Friend must become a member.
 
-#### wallet_ledger (Points/Tickets Distribution)
-- `source_type = 'referral'`: Identifies referral-sourced rewards
-- `source_id`: References referral_ledger.id for complete traceability
-- `component`: Uses 'bonus' for points, 'base' for tickets to handle uniqueness constraints
-- `metadata`: Stores outcome type and sequence for multiple rewards
+## Purchase journey (Shopify)
 
-#### reward_redemptions_ledger (Physical/Digital Rewards)
-- `source_type = 'referral'`: Identifies referral-sourced rewards
-- `source_id`: References referral_ledger.id
-
-#### mission_evaluation_queue (Inviter Rewards)
-- `event_type`: New types 'referral_signup' and 'referral_purchase'
-- `event_data`: Contains referral_ledger_id and invitee_user_id
-
-## Business Logic and Concepts
-
-### Invite Code Generation - Lazy Creation Pattern
-
-The system employs **lazy generation** of invite codes rather than pre-generating for all users:
-
-- **On-Demand Creation**: Codes generated only when user first requests their referral link
-- **Permanent Assignment**: Once generated, code remains constant for user experience consistency
-- **Uniqueness Algorithm**: 8-character alphanumeric using MD5 hash with collision detection
-- **Resource Efficiency**: Avoids millions of unused codes in database
-
-**Example Flow**:
-1. User clicks "Get My Referral Link" → System checks for existing code
-2. If none exists → Generate unique code → Store in referral_codes
-3. Return consistent code for all future requests
-
-### Limit Enforcement - Period-Based Restrictions
-
-The referral limit system provides granular control over invitation velocity:
-
-#### Period Calculation Logic
-- **Daily**: Current calendar day (midnight to midnight)
-- **Weekly**: Sunday to Saturday (uses date_trunc('week'))
-- **Monthly**: 1st to last day of month (uses date_trunc('month'))
-- **Yearly**: January 1 to December 31 (uses date_trunc('year'))
-- **Lifetime**: Total count since user's first referral
-
-#### User Type Differentiation
-```
-Buyer Limits (Conservative):
-- Daily: 2 referrals
-- Weekly: 5 referrals  
-- Monthly: 10 referrals
-- Lifetime: 100 referrals
-
-Seller Limits (Aggressive):
-- Daily: 5 referrals
-- Weekly: 20 referrals
-- Monthly: 50 referrals
-- Lifetime: 500 referrals
+```text
+Referrer (widget)                         Friend (store)
+─────────────────                         ──────────────
+Copy/share hop URL                        Opens hop (OG preview in LINE/FB/WA)
+                                          Human 302 → landing URL or shop + ?r=
+                                          Claim popup (email) → mint redeem code
+                                          Shops. Code at checkout is optional.
+                                                    ↓
+                              First paid / partially_paid / authorized order
+                                                    ↓
+                              Referrer outcomes settle. Refund/cancel → clawback.
 ```
 
-### Activation Trigger - Quality vs Quantity Trade-off
+Hop URL (members copy this — **not** the raw store URL):
 
-#### Signup Activation (`referral_activation_trigger = 'signup'`)
-**Business Rationale**: Maximize conversion with immediate gratification
-- **Invitee Experience**: Instant reward upon registration
-- **Inviter Credit**: Immediate mission progress
-- **Risk Profile**: Higher fraud potential, lower quality users
-- **Use Case**: Growth-focused campaigns, market penetration
-
-#### Purchase Activation (`referral_activation_trigger = 'first_purchase'`)
-**Business Rationale**: Ensure quality users with proven engagement
-- **Invitee Experience**: Reward after first transaction
-- **Inviter Credit**: Mission progress after invitee purchase
-- **Risk Profile**: Lower fraud risk, higher quality users
-- **Use Case**: Quality-focused growth, sustainable acquisition
-
-### Mission Integration - Inviter Reward Architecture
-
-The system leverages the existing mission infrastructure for inviter rewards, providing rich achievement patterns without code duplication:
-
-#### Referral-Specific Mission Conditions
-Two new condition types extend the mission system:
-
-**`referral_signup` Condition**:
-- Evaluates: COUNT of referral_ledger records where signed_up_at is not NULL
-- User Perspective: Always evaluated from inviter perspective
-- Use Case: "Invite 3 friends to join" missions
-
-**`referral_purchase` Condition**:
-- Evaluates: COUNT of referral_ledger records where first_purchase_at is not NULL
-- User Perspective: Always evaluated from inviter perspective
-- Use Case: "Get 5 friends to make their first purchase" missions
-
-#### Mission Configuration Examples
-
-```sql
--- Milestone Mission: Progressive Referral Rewards
-Mission: "Referral Champion"
-Type: Milestone
-Levels:
-  1. Bronze Referrer: 1 signup → 200 points
-  2. Silver Referrer: 3 signups → 500 points
-  3. Gold Referrer: 5 signups → 1000 points
-
--- Single Mission: Purchase Quality Focus
-Mission: "Purchase Influencer"
-Type: Single
-Condition: 2 referral purchases → 500 points
+```text
+{first-label}.rocket-loyalty.app/r/{merchant_code}?p=shopify&r={member_code}
 ```
 
-### Reward Distribution - Ledger Integration Pattern
+Dotted Shopify codes stay in the **path**, not the hostname (`fn_referral_share_hop`). Admin **landing URL** is the human destination after 302. No merchant custom CNAME.
 
-The system uses existing ledger infrastructure with proper source tracking:
+### Shopify share copy (three objects)
 
-#### Points Distribution
-```sql
-INSERT INTO wallet_ledger (
-    currency: 'points',
-    transaction_type: 'earn',
-    component: 'bonus',  -- Referral rewards are bonuses
-    source_type: 'referral',
-    source_id: [referral_ledger.id],
-    metadata: {outcome_type: 'points', sequence: 1}
-)
-```
+Share message is **casual** (friend → friend). Link preview and friend-claim popup are **official** (store → friend). Blank wrapper fields use the system default. Custom text replaces that field only. `Use default` stores `null`.
 
-#### Tickets Distribution
-```sql
-INSERT INTO wallet_ledger (
-    currency: 'ticket',
-    transaction_type: 'earn',
-    component: 'base',  -- Different component to avoid constraint
-    source_type: 'referral',
-    source_id: [referral_ledger.id],
-    metadata: {outcome_type: 'tickets', sequence: 2}
-)
-```
+| Field | Voice | Default template |
+|---|---|---|
+| `share_message` | Casual | `Thought you'd like this — {{friend_offer}} at {{store_name}}` |
+| Email subject (member form only, not admin) | Casual | `A gift from a friend` |
+| `og_title` | Official | `Get {{friend_offer}} at {{store_name}}` |
+| `og_description` | Official | `Claim {{friend_offer}} on your first order.` |
+| `popup_title` | Official | `Get your {{friend_offer}}` |
+| `popup_button` | Official | `Claim your gift` |
 
-### Duplicate Prevention - Idempotency Guarantees
+Variables: share message may use `{{store_name}}`, `{{friend_offer}}`, `{{referral_url}}`. Preview + popup use the first two. The runtime **always attaches the invite link** next to the share message — do not put `{{referral_url}}` in the default. Facebook cannot prefill a caption; the OG card is what Facebook friends see.
 
-Multiple safeguards prevent duplicate processing:
+Widget buttons: Facebook, Email, native Share. Email is the in-widget form (To + subject + body). Subject defaults to `A gift from a friend`; body defaults to the resolved share message; we append the link. Send is the member’s own mail app (`mailto:`), not a branded notification template.
 
-1. **Referral Level**: UNIQUE constraint on (invitee_user_id, merchant_id)
-2. **Code Level**: UNIQUE constraint on invite_code
-3. **Distribution Level**: Check for existing wallet_ledger entries before processing
-4. **Queue Level**: Mission evaluation queue handles duplicates gracefully
+**Do not** use `referral.shared` / Invite a friend in Notification settings. Keep `referral.completed` and `referral.friend_rewarded` (those are store emails after conversion).
 
-## Technical Implementation
+`og_title` / `og_description` / `og_image_url` drive LINE / Facebook / WhatsApp cards. `popup_title` / `popup_button` / `popup_icon_url` drive the storefront friend claim popup. Resolver: `fn_referral_resolve_share_copy` — invite and claim APIs return **resolved** strings.
 
-### Architectural Overview
+## Fraud gates (purchase)
 
-#### Event-Driven Hybrid Processing Architecture
+Claim-time typed email is a lookup, not OTP. Friend-facing copy for self / throwaway / existing is the generic line **This offer isn’t available.** Do not say the friend is the referrer.
 
-The referral system employs a **hybrid architecture** combining synchronous user interactions with asynchronous reward processing, optimized for both user experience and system reliability.
+| When | Rule | Result |
+|---|---|---|
+| Claim | Canonicalize email (lowercase; strip `+tag` on all domains; Gmail also strips dots and treats `googlemail` as `gmail`) and compare to the referrer | `SELF_REFERRAL` |
+| Claim | Local disposable-domain denylist (`disposable_email_domains`) | `DISPOSABLE_EMAIL` |
+| Claim | Already a loyalty member, or a prior marketplace order, or Shopify Admin customer/order for that email (2.5s, **fail-open** if Admin is down) | `EXISTING_CUSTOMER` |
+| Claim | One open/completed claim per email (canonical) | `ALREADY_CLAIMED` |
+| Order | Buyer is the referrer (canonical email / phone / Shopify customer id) | Ledger `status=blocked`, `block_reason=BLOCKED_SELF`. Friend may keep the coupon. Referrer is not paid. |
+| Order | Not first order (`customer.orders_count >= 2`, or another local marketplace order for that email/id) | `BLOCKED_EXISTING`. Same withhold. |
 
-```mermaid
-graph TB
-    subgraph "User Interaction Layer"
-        UI1[🔗 Request Invite Link] --> F1[fn_get_or_create_invite_code]
-        UI2[📝 Signup with Code] --> F2[fn_process_referral_signup]
-        UI3[💳 First Purchase] --> T1[trg_referral_purchase]
-    end
-    
-    subgraph "Core Processing Layer"
-        F1 --> DB1[(referral_codes)]
-        F2 --> DB2[(referral_ledger)]
-        F2 --> CHK{Activation<br/>Trigger?}
-        CHK -->|signup| DIST[fn_process_referral_rewards]
-        CHK -->|purchase| WAIT[⏸️ Wait for Purchase]
-        
-        T1 --> UPD[Update referral_ledger]
-        UPD --> CHK2{Purchase<br/>Trigger?}
-        CHK2 -->|Yes| DIST
-        CHK2 -->|No| SKIP[✓ Complete]
-    end
-    
-    subgraph "Reward Distribution Layer"
-        DIST --> PT[Points Distribution]
-        DIST --> TK[Tickets Distribution]
-        DIST --> RW[Rewards Distribution]
-        
-        PT --> WL[(wallet_ledger)]
-        TK --> WL
-        RW --> RR[(reward_redemptions_ledger)]
-        
-        DIST --> QM[Queue Mission Evaluation]
-        QM --> MQ[(mission_evaluation_queue)]
-    end
-    
-    subgraph "Mission Processing Layer"
-        MQ --> PROC[30-sec Processor]
-        PROC --> EVAL[fn_evaluate_mission_conditions]
-        EVAL --> CHECK{Referral<br/>Condition?}
-        CHECK -->|Yes| COUNT[Count Referrals]
-        COUNT --> RL[(referral_ledger)]
-        CHECK -->|No| OTHER[Other Conditions]
-    end
-    
-    style UI1 fill:#e3f2fd
-    style UI2 fill:#e8f5e9
-    style UI3 fill:#fff3e0
-    style DIST fill:#f3e5f5
-    style QM fill:#fce4ec
-```
+Do **not** hard-block same IP, same name, or shipping address. Do **not** call a third-party mailbox API at claim. Clawback on a blocked row is a no-op.
 
-#### Core Design Principles
+## Purchase journey (Shopee)
 
-**1. Separation of Concerns**
-- **Invitee Rewards**: Direct distribution through dedicated function
-- **Inviter Rewards**: Mission system handles progressive achievements
-- **Tracking**: Centralized in referral_ledger for single source of truth
+Same hop host/path with `p=shopee`. Friend stays on the Rocket landing and claims with **phone**. Mint is a hidden `add_voucher` (`display_channel_list: []`, 5-char code). Do not mix Shopee into the Shopify widget. Lazada is not v1.
 
-**2. Lazy Evaluation**
-- **Code Generation**: On-demand rather than pre-generated
-- **Reward Processing**: Only when activation conditions met
-- **Mission Evaluation**: Queued for batch processing
+## Program on / off
 
-**3. Idempotent Operations**
-- **Code Generation**: Returns existing if already created
-- **Signup Processing**: Rejects duplicate invitee registrations
-- **Reward Distribution**: Checks for prior distribution
+Active when `referral_program.is_active` AND (`signup_enabled` OR `purchase_enabled`). Helper: `fn_is_referral_program_active(merchant_id)`.
 
-### Function Architecture
+Earn channel Active does **not** turn the engine on. Existing merchants with an active referral earn channel were seeded `is_active=true, signup_enabled=true` so signup did not go dark at cutover.
 
-#### 🎯 CORE FUNCTIONS (Business Logic Orchestrators)
+## Ownership split (admin)
 
-##### `fn_get_or_create_invite_code(user_id, merchant_id)`
-**Purpose**: Generate or retrieve unique invite code with limit validation  
-**Returns**: VARCHAR invite code or exception on limit exceeded
+| Concern | Owner | Notes |
+|---|---|---|
+| Program on / off | **Referral settings** (`referral_program.is_active`) | Not the earn-channel Active toggle |
+| Signup / purchase conversions | **Referral settings** | `signup_enabled`, `purchase_enabled`, `platforms` |
+| Ways-to-earn card copy / assets | **Earn Channels** | Signup CMS card only (`method_type='referral'`) |
+| Signup outcomes | **Referral settings** | `referral_outcomes.kind='signup'` |
+| Purchase referrer outcomes | **Referral settings** | `kind='purchase'`, party always `inviter` |
+| Friend offer / Shopify wrapper | **Referral settings** | `friend_offer`, `shopify_wrapper`, mother discount on save |
+| Invite caps | **Referral settings** | `transaction_limits` `entity_type='referral'` |
+| Ledger | **Referral settings** | `bff_list_referral_ledger` with kind/platform filters |
+| Global Settings | **None** | Do not put enable here |
 
-**Business Logic Implementation**:
-1. **Existing Code Check**: Query referral_codes for user-merchant pair
-2. **User Type Resolution**: Determine buyer/seller from user_accounts
-3. **Limit Validation**: Check against configured period limits
-4. **Code Generation**: Create unique 8-char code with collision detection
-5. **Persistence**: Store in referral_codes table
+One admin page: `/referral-settings`. Shopify embedded **section-gates**; it does not hide the page.
 
-**Limit Enforcement Logic**:
-```sql
--- Lifetime limit check (most restrictive)
-IF v_limits.max_referrals_lifetime IS NOT NULL THEN
-    SELECT COUNT(*) FROM referral_ledger
-    WHERE inviter_user_id = p_user_id
-    
-    IF count >= limit THEN
-        RAISE EXCEPTION 'Lifetime referral limit reached'
-```
+## Conversions (engine)
 
-##### `fn_process_referral_signup(invitee_user_id, invite_code)`
-**Purpose**: Process new user referral with comprehensive validation  
-**Returns**: JSONB with success status and referral details
+### Signup
 
-**Validation Cascade**:
-1. **Code Validation**: Verify invite code exists and merchant active
-2. **Duplicate Check**: Ensure invitee not already referred
-3. **Inviter Limits**: Validate all period-based restrictions
-4. **Ledger Creation**: Insert referral_ledger record
-5. **Conditional Processing**: Trigger rewards if signup-activated
+Friend must become a member and apply `member_code`. `bff_user_apply_referral` → `fn_attribute_referral(kind=signup)` → ledger `applied` then settle + `fn_process_referral_rewards`.
 
-**Period Limit Calculation**:
-```sql
-SELECT 
-    COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE) as daily,
-    COUNT(*) FILTER (WHERE created_at >= date_trunc('week', CURRENT_DATE)) as weekly,
-    COUNT(*) FILTER (WHERE created_at >= date_trunc('month', CURRENT_DATE)) as monthly,
-    COUNT(*) FILTER (WHERE created_at >= date_trunc('year', CURRENT_DATE)) as yearly
-FROM referral_ledger
-WHERE inviter_user_id = inviter_id
-```
+Share URL: `{member-app}/?invite={member_code}`.
 
-##### `fn_process_referral_rewards(ledger_id)`
-**Purpose**: Distribute all configured invitee outcomes  
-**Returns**: VOID (side effects only)
+### Purchase
 
-**Distribution Strategy**:
-1. **Duplicate Prevention**: Check for existing distributions
-2. **Outcome Iteration**: Process each configured outcome
-3. **Type-Specific Logic**: Route to appropriate ledger system
-4. **Mission Queueing**: Trigger inviter mission evaluation
-5. **Metadata Tracking**: Store outcome type and sequence
+Platforms in v1: **Shopify** and **Shopee**.
 
-#### 🔄 TRIGGER FUNCTIONS (Event Handlers)
+| Surface | Friend identity | Mint | Share URL |
+|---|---|---|---|
+| Shopify | Email (existing shopper blocked — member, prior order, or Shopify customer) | Redeem code under one mother discount | Hop above |
+| Shopee | Phone | Hidden `add_voucher` at claim | Same hop, `p=shopee` |
 
-##### `fn_process_referral_purchase()`
-**Purpose**: Handle purchase-based referral activation  
-**Trigger**: AFTER INSERT OR UPDATE ON purchase_ledger
+Claim creates `referral_claim` + `referral_code` (`pending_mint` → `minted`). Caps: shop live unused (default 800, hidden on Shopify admin), per-referrer live unused (default 5). TTL ~24h at create.
 
-**Activation Logic**:
-```sql
--- Only completed purchases trigger evaluation
-IF NEW.status != 'completed' THEN
-    RETURN NEW;
+**SMART attribution** (`fn_attribute_referral` kind=purchase): open `referral_claim` matching canonical buyer email/phone/Shopify customer id first; minted code on the order is optional confirmation. First order per claim. If the buyer is the referrer or not a first order, insert ledger `blocked` and **do not** settle referrer rewards. Otherwise settle Shopify `paid`/`partially_paid`/`authorized`, Shopee `COMPLETED`. Cancel/refund → clawback (`fn_clawback_referral`); blocked rows skip clawback. Ingest: `upsert_marketplace_order` / `update_marketplace_order_status` / Shopify webhooks `discount_codes` + `buyer_orders_count`.
 
--- Find pending referral for buyer
-SELECT * FROM referral_ledger
-WHERE invitee_user_id = NEW.user_id
-  AND first_purchase_at IS NULL
+Purchase outcomes reward the **referrer only**. Friend gets the commerce discount. Receipt-upload `purchase_ledger` is not a purchase-referral trigger.
 
--- Update and process if purchase-triggered
-IF activation_trigger = 'first_purchase' THEN
-    PERFORM fn_process_referral_rewards(ledger_id)
-```
+## Tables
 
-### Integration Points
+- `referral_program` — master flags, platforms, friend_offer, shopify wrapper, mother discount id
+- `referral_outcomes` — `kind` `signup` \| `purchase`
+- `referral_ledger` — `kind`, `status` (`applied`/`attributed`/`settled`/`clawed_back`/`blocked`), `block_reason`, `platform`, `claim_id`, `code_id`, `order_key`, friend email/phone
+- `disposable_email_domains` — local throwaway inbox list used at claim
+- `referral_claim` — `open`/`completed`/`expired`/`aborted`
+- `referral_code` — commerce `code`, `pending_mint`/`minted`/`used`/`expired`/`aborted`
+- `transaction_limits` — signup invite caps (`entity_type='referral'`)
+- `order_ledger_mkp.discount_codes` — codes observed on ingest
 
-#### Purchase System Integration
-- **Trigger Addition**: `trg_referral_purchase` on purchase_ledger
-- **No Schema Changes**: Leverages existing purchase structure
-- **Conditional Processing**: Only affects referred users with pending activation
+## Public / Edge
 
-#### Mission System Extension
-- **Enum Extension**: Added 'referral_signup' and 'referral_purchase' to mission_condition_type
-- **Evaluation Logic**: Extended fn_evaluate_mission_conditions for referral counting
-- **Queue Integration**: Uses existing mission_evaluation_queue infrastructure
+| Entry | Role |
+|---|---|
+| `api_get_referral_claim_page` | Anon landing payload (offer + Shopify OG/landing fields) |
+| `api_claim_referral` | Anon claim (email or phone by platform) |
+| `api_confirm_referral_mint` / `api_abort_referral_claim` | **service_role only** |
+| Edge `referral-claim` (`verify_jwt: false`) | Shopee mint via `add_voucher` |
+| Edge `shopify-proxy` `POST /referral/claim` | HMAC storefront claim + `shopify-issue-reward-code` |
+| `fn_referral_share_hop` | DNS-safe hop host + `/r/{merchant_code}` |
 
-#### Wallet System Integration
-- **Source Tracking**: Existing 'referral' value in wallet_transaction_source_type
-- **Component Strategy**: Different components for points vs tickets
-- **Metadata Usage**: Stores outcome details for reporting
+## Admin / member BFFs
 
-### Data Flow Scenarios
+| Function | Role |
+|---|---|
+| `bff_get_referral_settings()` | Program, conversions, platforms, outcomes by kind, friend_offer, shopify, limits |
+| `bff_upsert_referral_settings(p_config)` | Merge; Shopify embedded sends `platform_shopify` not a full `platforms` replace |
+| `bff_list_referral_ledger(...)` | Optional `p_kind`, `p_platform` |
+| `bff_user_get_invite()` | Nested `signup` / `purchase.shopify` / `purchase.shopee` share URLs plus resolved `share.message` / `share.email_subject` / `share.url`. Shopify share URL is the Rocket `/r` hop. |
+| `bff_user_apply_referral` | Signup apply (unchanged contract) |
 
-#### Scenario 1: Signup-Triggered Referral
-```mermaid
-sequenceDiagram
-    participant User as New User
-    participant System
-    participant DB as Database
-    participant Mission as Mission Queue
-    
-    User->>System: Signup with code "ABC123"
-    System->>DB: Validate code in referral_codes
-    DB-->>System: Code valid, inviter found
-    System->>DB: Check referral_ledger duplicates
-    DB-->>System: No existing referral
-    System->>DB: Check inviter limits
-    DB-->>System: Within limits
-    System->>DB: INSERT referral_ledger
-    Note over System: activation_trigger = 'signup'
-    System->>DB: INSERT wallet_ledger (points)
-    System->>DB: INSERT wallet_ledger (tickets)
-    System->>Mission: Queue inviter evaluation
-    System-->>User: Welcome + Rewards!
-```
+## Apply / claim error codes
 
-#### Scenario 2: Purchase-Triggered Referral
-```mermaid
-sequenceDiagram
-    participant User as Referred User
-    participant Purchase as Purchase System
-    participant Trigger as Referral Trigger
-    participant DB as Database
-    participant Mission as Mission Queue
-    
-    User->>Purchase: Complete first purchase
-    Purchase->>DB: INSERT purchase_ledger
-    Purchase->>Trigger: Fire trg_referral_purchase
-    Trigger->>DB: Find pending referral
-    DB-->>Trigger: Referral found
-    Trigger->>DB: UPDATE first_purchase_at
-    Note over Trigger: activation_trigger = 'first_purchase'
-    Trigger->>DB: INSERT wallet_ledger (rewards)
-    Trigger->>Mission: Queue inviter evaluation
-    Trigger-->>Purchase: Continue
-    Purchase-->>User: Purchase complete!
-```
+| `code` | When |
+|---|---|
+| `REFERRAL_INACTIVE` | Program off or conversion/platform disabled |
+| `EMAIL_REQUIRED` / `PHONE_REQUIRED` | Claim identity missing |
+| `SELF_REFERRAL` | Friend is the referrer (canonical email / exact phone). Friend copy: *This offer isn’t available.* |
+| `EXISTING_CUSTOMER` | Already a member, prior order, or Shopify customer/order for that email. Friend copy: *This offer isn’t available.* |
+| `DISPOSABLE_EMAIL` | Throwaway inbox domain. Friend copy: *This offer isn’t available.* |
+| `ALREADY_CLAIMED` | Repeat claim (canonical email) |
+| `SHOP_CAP` / `REFERRER_CAP` | Live unused code caps |
+| `INVALID_REFERRER` / `INVALID_PLATFORM` / `NO_MERCHANT` | Claim input |
+| `MINT_FAILED` / `NO_MOTHER_DISCOUNT` | Commerce mint |
+| `INVALID_INVITE_CODE` / `ALREADY_REFERRED` / `LIMIT_EXCEEDED` | Signup apply |
+| `OK` | Success |
 
-## Automation & Configuration
+## Related
 
-### System Configuration
-
-#### Merchant-Level Settings
-```sql
--- Enable referrals with signup trigger
-UPDATE merchant_master SET
-    referral_activation_trigger = 'signup',
-    referral_active = true
-WHERE id = [merchant_id];
-
--- Configure inviter limits by user type
-INSERT INTO referral_inviter_limits (
-    merchant_id, user_type,
-    max_referrals_per_day, max_referrals_per_week,
-    max_referrals_per_month, max_referrals_per_year,
-    max_referrals_lifetime
-) VALUES
-    ([merchant_id], 'buyer', 2, 5, 10, 50, 100),
-    ([merchant_id], 'seller', 5, 20, 50, 200, 500);
-
--- Define invitee rewards
-INSERT INTO referral_invitee_outcomes (
-    merchant_id, outcome_type, amount, entity_id
-) VALUES
-    ([merchant_id], 'points', 100, NULL),
-    ([merchant_id], 'tickets', 50, NULL);
-```
-
-#### Mission Configuration for Inviters
-```sql
--- Create referral mission
-INSERT INTO mission (
-    merchant_id, mission_code, mission_name,
-    mission_type, progress_activation_type
-) VALUES (
-    [merchant_id], 'REF_CHAMPION', 'Referral Champion',
-    'milestone', 'auto'
-);
-
--- Add referral conditions
-INSERT INTO mission_conditions (
-    mission_id, condition_type, target_value, milestone_level
-) VALUES
-    ([mission_id], 'referral_signup', 1, 1),
-    ([mission_id], 'referral_signup', 3, 2),
-    ([mission_id], 'referral_purchase', 2, 3);
-```
-
-### Monitoring & Analytics
-
-#### Key Performance Indicators
-```sql
--- Referral funnel metrics
-WITH funnel AS (
-    SELECT 
-        COUNT(*) as total_invites_sent,
-        COUNT(invitee_user_id) as signups,
-        COUNT(first_purchase_at) as conversions
-    FROM referral_codes rc
-    LEFT JOIN referral_ledger rl ON rc.invite_code = rl.invite_code
-)
-SELECT 
-    total_invites_sent,
-    signups,
-    ROUND(100.0 * signups / NULLIF(total_invites_sent, 0), 2) as signup_rate,
-    conversions,
-    ROUND(100.0 * conversions / NULLIF(signups, 0), 2) as conversion_rate
-FROM funnel;
-```
-
-#### Limit Utilization Tracking
-```sql
--- Monitor limit usage by user type
-SELECT 
-    user_type,
-    AVG(daily_usage) as avg_daily_usage,
-    MAX(daily_usage) as max_daily_usage,
-    COUNT(*) FILTER (WHERE hit_daily_limit) as users_hitting_limit
-FROM (
-    SELECT 
-        ua.user_type,
-        COUNT(*) as daily_usage,
-        ril.max_referrals_per_day,
-        COUNT(*) >= ril.max_referrals_per_day as hit_daily_limit
-    FROM referral_ledger rl
-    JOIN user_accounts ua ON rl.inviter_user_id = ua.id
-    JOIN referral_inviter_limits ril ON ua.user_type = ril.user_type
-    WHERE DATE(rl.created_at) = CURRENT_DATE
-    GROUP BY ua.user_type, ua.id, ril.max_referrals_per_day
-) daily_stats
-GROUP BY user_type;
-```
-
-## System Requirements & Constraints
-
-### Functional Requirements
-1. Support unique invite codes per user per merchant
-2. Flexible activation triggers (signup vs purchase)
-3. Configurable limits by user type and time period
-4. Multiple reward types for invitees (points, tickets, rewards)
-5. Mission-based rewards for inviters
-6. Complete audit trail via ledger integration
-7. Duplicate referral prevention
-8. Source tracking across all reward distributions
-
-### Non-Functional Requirements
-1. Code generation within 100ms
-2. Referral processing within 500ms
-3. Support 10,000 concurrent referral signups
-4. Zero duplicate rewards through idempotency
-5. 99.9% availability for invite code generation
-6. Seamless integration without disrupting existing systems
-
-### Constraints
-1. One invite code per user per merchant (simplified UX)
-2. One referral per invitee per merchant (no double-dipping)
-3. PostgreSQL-native solution (Supabase platform)
-4. Must integrate with existing wallet and mission systems
-5. No modification to existing purchase flow
-6. Backward compatible with current infrastructure
-
-## Production Readiness
-
-### Validation Results
-
-#### Successful Test Coverage
-- ✅ **Invite Code Generation**: Unique codes with collision detection
-- ✅ **Signup Referrals**: Immediate reward distribution on registration
-- ✅ **Purchase Referrals**: Delayed rewards on first transaction
-- ✅ **Limit Enforcement**: Daily limits correctly blocking excess referrals
-- ✅ **Mission Integration**: Inviter progress tracked via mission system
-- ✅ **Duplicate Prevention**: Multiple safeguards preventing double rewards
-- ✅ **Source Tracking**: Complete audit trail in ledger systems
-
-#### Performance Metrics
-- **Code Generation**: ~10ms average
-- **Signup Processing**: ~50ms including reward distribution
-- **Purchase Trigger**: ~30ms additional overhead
-- **Mission Queue**: Processed within 30 seconds
-
-#### Edge Cases Validated
-- **Limit Exhaustion**: Graceful error messages when limits exceeded
-- **Duplicate Signups**: Properly rejected with clear messaging
-- **Concurrent Referrals**: Lock-free design handles race conditions
-- **Mixed Activation**: Different triggers coexist without conflict
-
-The referral management system demonstrates **production-ready stability** with comprehensive business logic, robust error handling, flexible configuration, and seamless integration with existing loyalty infrastructure. The architecture supports both immediate growth campaigns and quality-focused acquisition strategies while maintaining complete auditability and preventing fraud through multiple validation layers.
+- Earn channels: `requirements/Earn_Channel.md` — referral card is CMS only
+- Outcome dispatcher: `fn_dispatch_outcome`, `outcome_distribution_log` (`source_type='referral'`)
+- Shared limits: `transaction_limits`
+- Shopify widget FE: `rewarding-shopify/widget-builder/REFERRAL_SHOPIFY_FE.md`
+- Admin FE: `loyalty-admin/ProjectDocs/FE_docs/ReferralSettings.md`

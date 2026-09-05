@@ -52,68 +52,34 @@ Extracted from ~400 live functions. Follow these when creating or modifying func
 
 ## BFF Standard Structure
 
-Every BFF function follows this skeleton:
-
-```sql
-CREATE OR REPLACE FUNCTION public.bff_<verb>_<entity>(
-    p_entity_id uuid DEFAULT NULL,
-    p_field1 text DEFAULT NULL
-)
-RETURNS jsonb
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-DECLARE
-    v_merchant_id UUID;
-BEGIN
-    -- 1. Auth: always first line
-    v_merchant_id := get_current_merchant_id();
-    IF v_merchant_id IS NULL THEN
-        RETURN fn_response_error('Error', 'No merchant context found', 'NO_MERCHANT_CONTEXT');
-    END IF;
-
-    -- 2. Business logic (all queries filter by merchant_id)
-    ...
-
-    -- 3. Return success
-    RETURN fn_response_success('Title', 'Description', jsonb_build_object(...));
-
-EXCEPTION WHEN OTHERS THEN
-    RETURN fn_response_error('Error', SQLERRM, 'ERROR');
-END;
-$function$;
-```
+Every BFF follows: (1) `v_merchant_id := get_current_merchant_id()` + NULL check → (2) business logic filtered by merchant_id → (3) `fn_response_success(...)` return → EXCEPTION returns `fn_response_error(...)`. Read any existing `bff_*` via MCP for the full skeleton.
 
 ## BFF Upsert Pattern (parent + children)
 
-1. `p_entity_id IS NULL` → INSERT (create new), else UPDATE (edit existing)
-2. Children passed as `jsonb` array parameters (e.g., `p_conditions jsonb`)
-3. Loop through children:
-   - Child has `id` → UPDATE existing
-   - Child has no `id` → INSERT new
-   - Track kept IDs in `uuid[]` array
-4. Delete orphans: `DELETE FROM children WHERE parent_id = v_id AND id != ALL(v_kept_ids)`
-5. Return summary: `{success, code: 'CREATED'|'UPDATED', title, description, entity_id, conditions_created, conditions_updated, conditions_deleted, ...}`
+`p_entity_id IS NULL` → INSERT, else UPDATE. Children as `jsonb[]` params: has `id` → UPDATE, no `id` → INSERT, track kept IDs, delete orphans via `id != ALL(v_kept_ids)`. Return summary with counts.
 
 ## BFF Get Pattern (for edit forms)
 
-- `p_mode = 'new'` → return empty template with NULLs and empty arrays
-- `p_mode = 'edit'` → load entity + children as jsonb arrays
-- Children loaded via `jsonb_agg(jsonb_build_object(...) ORDER BY ...)` with `COALESCE(..., '[]'::jsonb)`
+`p_mode = 'new'` → empty template (NULLs + empty arrays). `p_mode = 'edit'` → load entity + children via `jsonb_agg(...)` with `COALESCE(..., '[]'::jsonb)`.
 
 ## Response Helpers
 
-Two standardized helpers exist — use them in new functions:
+`fn_response_success(p_title, p_description, p_data)` → `{success: true, title, description, data}`
+`fn_response_error(p_title, p_description, p_code, p_data)` → `{success: false, title, description, data: {error_code, ...}}`
 
-```sql
-fn_response_success(p_title, p_description, p_data)
--- Returns: {success: true, title, description, data}
+Do **not** put language logic inside `fn_response_*` — localize the strings first, then pass them in.
 
-fn_response_error(p_title, p_description, p_code, p_data)
--- Returns: {success: false, title, description, data: {error_code, ...}}
-```
+## Envelope language (`title` / `description`)
 
-Newer BFFs sometimes inline the response structure with extra fields alongside `success`, `title`, `description`. Both patterns are acceptable.
+FE paints backend `title` / `description` as-is. Every jsonb envelope RPC that returns those fields must:
+
+1. Accept optional `p_language text DEFAULT 'en'` (append with default — backward compatible).
+2. Resolve with `v_lang := fn_normalize_ui_language(p_language)` → only `th` | `en` (blank/unknown → `en`).
+3. Build copy via a domain helper (`fn_*_envelope_message` / `fn_redeem_member_message` / etc.), not hard-coded English.
+4. Return **one** language. Never return a multi-lang map for the FE to pick.
+5. Humanize enums in sentences (`all_time` → `ตลอดเวลา` / `all time`); keep machine tokens only in `data`.
+
+Async paths (e.g. redeem via Inngest) must forward `language` from the request into `p_language`.
 
 ## Language & Security
 

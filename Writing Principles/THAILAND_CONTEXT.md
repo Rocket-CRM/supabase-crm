@@ -47,6 +47,7 @@ Use these exactly. They are the terms Thai loyalty operators actually use.
 | evaluation window | รอบประเมิน | ช่วงเวลาประเมิน | |
 | lifecycle | วงจรสมาชิก | วงจรชีวิต | `วงจรชีวิต` is biological |
 | mission | ภารกิจ / Missions | | |
+| leaderboard | Leaderboard | กระดานผู้นำ / ลีดเดอร์บอร์ด | Keep the English product name, like Check-in and Spin wheel |
 | streak | สะสมวันต่อเนื่อง | | |
 | lucky draw entry | สิทธิ์ลุ้นรางวัล | | Entry is bought with points/tickets — **not** `สกุลเงิน` (fiat) |
 | quota | โควตา | โควต้า | Spelling: no ไม้โท |

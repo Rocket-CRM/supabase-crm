@@ -280,11 +280,11 @@ INNGEST_SIGNING_KEY=
 ## Part 3: Symlink Requirements (if not already done)
 
 ```bash
-cd ~/loyalty-admin
-ln -s "/Users/rangwan/Documents/Supabase CRM/requirements" requirements
+cd ~/Documents/rocket/loyalty-admin
+ln -s "~/Documents/rocket/supabase-crm/requirements" requirements
 ```
 
-Verify: `ls ~/loyalty-admin/requirements/INDEX_DOMAIN.md` should exist.
+Verify: `ls ~/Documents/rocket/loyalty-admin/requirements/INDEX_DOMAIN.md` should exist.
 
 This gives the FE workspace access to all requirement docs (loyalty + CS) for the `requirement-docs.mdc` layered lookup.
 

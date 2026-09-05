@@ -34,6 +34,11 @@ The workflow canvas supports these node types:
 
 **Note:** Trigger node is NOT in the palette. The first node (no incoming edges) is the entry point. The backend auto-detects which CRM events should start the workflow based on condition node collections.
 
+Lifecycle event presets may also create explicit triggers:
+- `user_accounts INSERT` for signup events.
+- `tier_change_ledger INSERT` for tier lifecycle events; filter `change_type = upgrade` or `change_type = downgrade`.
+- `scheduled` triggers for date lifecycle events such as birthday or membership anniversary.
+
 ---
 
 ## Backend API Reference
@@ -126,6 +131,12 @@ Returns: [
 ]
 ```
 
+Lifecycle date conditions on `user_accounts` support these operators for scheduled workflows:
+- `birthday_today` on `birth_date`
+- `anniversary_today` / `date_anniversary_today` on any date field, commonly `created_at`
+
+Optional condition keys: `timezone` and `days_offset` / `days_before`.
+
 ### Simple Condition Mode (Check single record)
 
 Check if any row exists matching field conditions.
@@ -185,6 +196,41 @@ Shown when collection has `supports_aggregate: true`. Checks SUM/COUNT/AVG acros
 ```
 
 The `join` and `time_field` values come from the collection's `joinable_to` metadata — pass them through as-is.
+
+### Content Engagement Condition Mode (split-only)
+
+The `content_engagement` entry in `bff_get_workflow_collections` carries `"contexts": ["split"]` — show it **only** in workflow condition-split nodes. Hide it in audience builders and entry-trigger conditions, and do **not** call `bff_amp_preview_condition` with it (the set-based compiler rejects the type by design; there is no population preview for per-enrollment conditions).
+
+Branches on engagement with tracked content: link clicks (any channel), and time-on-page / scroll-depth (only for destination URLs on Rocket-hosted pages that run the engagement beacon).
+
+**UI:**
+1. **Metric** select from `condition_kinds`: Link clicked (`clicked`, operators is_true / is_false, no value input) · Time on page in seconds (`page_time`) · Scroll depth percent (`scroll_depth`, 0–100). Numeric metrics take an operator (≥, >, ≤, <) + value.
+2. **Scope** select from the entry's `scopes`:
+   - `node` — "A specific message in this workflow (current run)". Show a **node picker** listing this workflow's message/action nodes; default to the nearest message node **upstream of the condition node** in the graph. Save its node id as `node_id`.
+   - `workflow` — "Any message in this workflow (current run)".
+   - `any` — "Any workflow"; only this scope shows the **time range** dropdown (from the kind's `time_ranges`).
+3. **Link label** (optional): when the selected message node contains multiple tracked links, offer the link labels from that node's message config as `link_label`. Omit to match any link.
+
+**Saved config:**
+```json
+{
+  "groups_operator": "AND",
+  "groups": [{
+    "type": "content_engagement",
+    "scope": "node",
+    "node_id": "<uuid of the message node>",
+    "metric": "clicked",
+    "operator": "is_true",
+    "link_label": "CTA"
+  }]
+}
+```
+
+Numeric example: `{ "type": "content_engagement", "scope": "workflow", "metric": "page_time", "operator": "gte", "value": 30 }`. For `scope: "any"` add `"time_range": "1 month"` (empty string = all time).
+
+Runtime context (`_workflow_id`, `_inngest_run_id`) is injected by the executor — the FE must never set those keys. `node` / `workflow` scopes count only the **current enrollment**: engagement from a previous run of the same workflow does not satisfy the condition.
+
+**Builder UX guidance:** a condition split placed immediately after a message node evaluates before the user has had time to click — the builder should nudge the admin to place a **Wait node** between the send and the engagement split (guidance only; no validation block).
 
 ### Edge Handles
 
@@ -489,15 +535,30 @@ Body: { "p_workflow_id": "uuid" }
 Returns: {
   "success": true,
   "workflow_id": "uuid",
-  "nodes": [
-    { "node_id": "uuid-1", "node_type": "condition", "node_name": "Check Balance", "unique_passed": 247, "currently_waiting": 0 },
-    { "node_id": "uuid-2", "node_type": "wait", "node_name": "Wait 10 days", "unique_passed": 195, "currently_waiting": 12 },
-    { "node_id": "uuid-3", "node_type": "action", "node_name": "Send LINE", "unique_passed": 183, "currently_waiting": 0 }
-  ]
+  "nodes": [...],   // also mirrored under "data" for FE compatibility
+}
+
+Each node element (2026-07-05 contract, v2):
+{
+  "node_id": "uuid-3", "node_type": "action", "node_name": "Send LINE",
+  "unique_passed": 183, "currently_waiting": 0,
+  "entered_count": 183, "completed_count": 178, "error_count": 5,
+  "engagement": {                    // null for non-message nodes (condition/wait/agent)
+    "messages_sent": 183,            // distinct users with a 'sent' action_executed log
+    "tracked_recipients": 178,       // recipients who received >=1 tracked link from this node
+    "unique_clickers": 61,
+    "total_clicks": 74,
+    "click_through_rate": 0.3427,    // 0–1 fraction; unique_clickers / tracked_recipients; null if tracked_recipients = 0
+    "avg_page_time_seconds": 41.5,   // member-app destinations only, else null
+    "median_page_time_seconds": 28.0,
+    "avg_scroll_depth_percent": 63.2,
+    "median_scroll_depth_percent": 70.0,
+    "engaged_sessions": 55           // distinct (token, session) pairs with >=1 page_time/scroll_depth beacon
+  }
 }
 ```
 
-Map `node_id` from the response to each node on the canvas and display the counts.
+Map `node_id` from the response to each node on the canvas and display the counts. `engagement` is `null` for nodes that never send messages (conditions, waits, agents); for message nodes with nothing sent yet it is present with zero counts and `click_through_rate: null`. Page-time/scroll metrics exist only when link destinations are Rocket Loyalty member-app pages. Per-link breakdown (destination URL, button label, clicks, page metrics) is a separate RPC: `bff_get_amp_node_link_stats(p_workflow_id, p_node_id, p_from_date?, p_to_date?)`.
 
 ### User List Popup
 

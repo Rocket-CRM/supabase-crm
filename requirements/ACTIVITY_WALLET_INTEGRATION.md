@@ -2,7 +2,7 @@
 
 ## The Question: Does Direct Call Support Proper Data?
 
-**Answer: YES!** Direct `post_wallet_transaction()` call provides **identical audit trail** to CDC flow.
+**Answer: YES.** Direct `chokepoint_post_wallet_transaction()` provides the same wallet_ledger audit trail as async earn paths (purchase/mission via chokepoint outbox → Inngest).
 
 ---
 
@@ -12,18 +12,20 @@
 
 ```sql
 -- Inside bff_approve_activity_upload()
-PERFORM post_wallet_transaction(
-  p_user_id := v_upload.user_id,              -- User who uploaded
-  p_merchant_id := v_merchant_id,             -- Merchant context
+PERFORM chokepoint_post_wallet_transaction(
+  p_user_id := v_upload.user_id,
+  p_merchant_id := v_merchant_id,
   p_currency := 'points',                     -- or 'ticket'
-  p_transaction_type := 'earn',               -- Earning currency
-  p_component := 'base',                      -- Standard earned (not bonus/adjustment/reversal)
-  p_amount := 50,                             -- From activity_currency_config
-  p_source_type := 'activity',                -- ← NEW enum value
-  p_source_id := p_upload_id,                 -- ← activity_upload_ledger.id
+  p_transaction_type := 'earn',
+  p_component := 'base',
+  p_amount := 50,
+  p_transaction_id := gen_random_uuid(),      -- required
+  p_dedup_key := 'activity_' || p_upload_id::text,  -- required for idempotency
+  p_source_type := 'activity',
+  p_source_id := p_upload_id,                 -- activity_upload_ledger.id
   p_target_entity_id := NULL,                 -- NULL for points, ticket_type_id for tickets
   p_description := 'Activity: exercise',
-  p_metadata := jsonb_build_object(           -- ← FULL AUDIT TRAIL
+  p_metadata := jsonb_build_object(
     'activity_id', v_activity_id,
     'activity_name', 'Exercise Activity',
     'activity_code', 'exercise',
@@ -119,27 +121,26 @@ PERFORM post_wallet_transaction(
 
 ---
 
-## Comparison: CDC Flow vs Direct Call
+## Comparison: Async Earn Path vs Direct Call
 
-### CDC Flow (Purchase, Mission, etc.)
+### Async path (Purchase, Mission, etc.)
 
 ```
-Event occurs → CDC captures → Kafka → Consumer calculates → Inngest orchestrates → post_wallet_transaction
-                                                                                            ↓
-                                                                                    wallet_ledger entry
+Ledger write → chokepoint_event_outbox → OutboxPublisher → Inngest routers
+  → calc / process → chokepoint_post_wallet_transaction → wallet_ledger
 ```
 
 **wallet_ledger result:**
-- source_type: 'purchase'
-- source_id: purchase_ledger.id
+- source_type: 'purchase' / 'mission' / …
+- source_id: source ledger id
 - component: 'base'/'bonus'
 - metadata: calculation details
 - **All fields populated ✅**
 
-### Direct Call Flow (Activity, Reward Redemption, Manual)
+### Direct call (Activity, Reward Redemption, Manual)
 
 ```
-Admin approves → bff_approve_activity_upload() → post_wallet_transaction
+Admin approves → bff_approve_activity_upload() → chokepoint_post_wallet_transaction
                                                             ↓
                                                     wallet_ledger entry
 ```
@@ -234,52 +235,99 @@ WHERE aul.id = 'specific-upload-uuid';
 
 ### Automatic Tier Re-evaluation
 
-When `post_wallet_transaction()` creates wallet_ledger entry with `transaction_type='earn'`:
+When `chokepoint_post_wallet_transaction()` creates a `wallet_ledger` earn row, the chokepoint emits a wallet domain event to `chokepoint_event_outbox` (unless emit is skipped). Live path:
 
-**Existing trigger fires:**
-```sql
-trigger_tier_eval_on_wallet()
-  ↓
-Queues tier evaluation for user
-  ↓
-User's tier re-evaluated based on ALL earn sources including activity
 ```
+wallet outbox event → OutboxPublisher → inngest-event-router-serve
+  → tier-wallet-router → process_tier_event
+```
+
+There is **no** `trigger_tier_eval_on_wallet` on `wallet_ledger`. Live triggers on that table are `set_dedup_key_on_wallet` and `trg_enqueue_shopify_store_credit_issue`. FIFO burn allocation lives in `chokepoint_post_wallet_transaction` (`fn_allocate_fifo_burn`), not in a ledger trigger.
 
 **Activity earnings count toward tier progression:**
 - Tier conditions with `metric='points'` include activity-earned points
 - Query: `SUM(amount) WHERE transaction_type='earn'` (includes all source_types)
-- Activity uploads can contribute to tier upgrades!
+- Activity uploads can contribute to tier upgrades
 
 ---
 
-## Reversal Support (Future)
+## Edit-and-Recalculate (implemented 2026-05-14)
 
-If you need to reverse activity currency (e.g., fraud detection):
+`bff_edit_activity_upload(p_upload_id, p_field_values, p_reason, p_language)` is the single entry point for editing an `approved` or `rejected` upload. It computes the target totals from the new field values, diffs against the current net per `(currency, target_entity_id)` in `wallet_ledger`, and posts one chokepoint call per non-zero delta.
 
-```sql
--- Find original award
-SELECT * FROM wallet_ledger
-WHERE source_type = 'activity'
-  AND source_id = 'upload-to-reverse';
+### Component routing
 
--- Create reversal entry
-PERFORM post_wallet_transaction(
-  p_user_id := v_user_id,
-  p_merchant_id := v_merchant_id,
-  p_currency := 'points',
-  p_transaction_type := 'earn',      -- Still 'earn' type
-  p_component := 'reversal',         -- But 'reversal' component
-  p_amount := 50,                    -- Positive amount
-  p_signed_amount := -50,            -- Negative signed amount
-  p_source_type := 'activity',
-  p_source_id := 'upload-uuid',
-  p_reference_id := 'original-wallet-ledger-id',  -- Links to original
-  p_metadata := jsonb_build_object(
-    'reversal_reason', 'Fraudulent upload detected',
-    'reversed_by', 'admin-uuid',
-    'original_field_values', {...}
-  )
-);
+| Direction | Source state | `component` | `transaction_type` | Amount |
+|---|---|---|---|---|
+| Re-approve a rejected upload | `rejected` → `approved` | `base` | `earn` | full new amount |
+| New > previous (admin gave higher value) | `approved` → `approved` | `adjustment` | `earn` | `Δ = new − previous` |
+| New < previous (admin gave lower value) | `approved` → `approved` | `reversal` | `burn` | `|Δ|` (clamped — see below) |
+| New == previous | — | (skipped) | — | — |
+
+All entries keep `source_type='activity'`, `source_id=upload_id`. Audit query `WHERE source_type='activity' AND source_id=upload_id` returns the original earn row plus every edit delta in time order.
+
+### FIFO partial reversal
+
+Burns allocate through `chokepoint_post_wallet_transaction` → `fn_allocate_fifo_burn`: oldest-expiry-first earn lots, points fungible within the wallet, tickets isolated by `target_entity_id`. No targeted-by-source-id consumption. Insufficient matching lots raise and roll back the burn.
+
+### Partial-cover clamping
+
+`chokepoint_post_wallet_transaction` raises `Insufficient balance` if a burn would drive the balance negative. The edit BFF prevents this by reading the current balance first and clamping:
+
+- Points: `current_balance := user_wallet.points_balance`
+- Tickets: `current_balance := user_ticket_balances.balance` per `target_entity_id`
+
+If `current_balance < |Δ|`:
+- Post `amount = current_balance` only
+- Record `unreversed_amount = |Δ| − current_balance` and `skipped_reason ∈ {zero_balance, partial_balance}` in `edit_history.deltas[i]` and in the wallet_ledger row's `metadata`
+- Status still flips to / stays at `approved`; `points_awarded` / `tickets_awarded` reflect the target totals (not the partially-applied balance)
+
+### Dedup key construction
+
+Explicit override to avoid collision with the original approve row and prior edits:
+
+```
+activity_<upload_id>_v<edit_version>_<currency>_<target_entity_id_or_'none'>
+```
+
+`edit_version` is incremented per edit, so repeat edits of the same upload in the same direction never collide.
+
+### Edit history entry shape
+
+Each edit appends one entry to `activity_upload_ledger.edit_history`:
+
+```json
+{
+  "edit_version": 2,
+  "edited_at": "2026-05-14T03:14:22Z",
+  "edited_by": "<admin_uuid>",
+  "edited_by_name": "Alice",
+  "reason": "Customer provided corrected field values",
+  "previous_status": "approved",
+  "new_status": "approved",
+  "previous_field_values": { ... },
+  "new_field_values": { ... },
+  "previous_points_awarded": 500,
+  "new_points_awarded": 350,
+  "previous_tickets_awarded_total": 3,
+  "new_tickets_awarded_total": 2,
+  "deltas": [
+    {
+      "currency": "points",
+      "target_entity_id": null,
+      "previous_amount": 500,
+      "new_amount": 350,
+      "delta_intended": -150,
+      "delta_applied": -100,
+      "unreversed_amount": 50,
+      "component": "reversal",
+      "transaction_type": "burn",
+      "ledger_id": "<wallet_ledger_id>",
+      "dedup_key": "activity_<upload>_v2_points_none",
+      "skipped_reason": "partial_balance"
+    }
+  ]
+}
 ```
 
 ---
@@ -303,7 +351,7 @@ PERFORM post_wallet_transaction(
 - No special handling needed - works like purchase/mission earnings
 
 ### ✅ Expiry Handling
-- `post_wallet_transaction()` calculates expiry_date based on merchant config
+- `chokepoint_post_wallet_transaction()` calculates expiry_date based on merchant config
 - Activity-earned currency expires same as purchase-earned
 - No special expiry logic needed
 
@@ -322,10 +370,10 @@ PERFORM post_wallet_transaction(
 | `reward_redemption` | User (redemption) | Direct call | ✅ Full (source_type, source_id, metadata) |
 | `manual` | Admin (adjustment) | Direct call | ✅ Full (source_type, source_id, metadata) |
 | **`activity`** | **Admin (approval)** | **Direct call** | **✅ Full (source_type, source_id, metadata)** |
-| `purchase` | CDC event | Async pipeline | ✅ Full (source_type, source_id, metadata) |
-| `mission` | CDC event | Async pipeline | ✅ Full (source_type, source_id, metadata) |
+| `purchase` | Outbox → Inngest currency routers | Async pipeline | ✅ Full (source_type, source_id, metadata) |
+| `mission` | Outcome / mission routers → chokepoint | Async pipeline | ✅ Full (source_type, source_id, metadata) |
 
-**Conclusion:** Direct call provides **identical data quality** to CDC flow. The only difference is synchronous vs asynchronous execution, not data completeness.
+**Conclusion:** Direct call provides the same data quality as the async earn path. The only difference is synchronous vs asynchronous execution, not data completeness.
 
 ---
 

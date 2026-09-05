@@ -130,7 +130,7 @@ POST /rest/v1/rpc/bff_get_entity_history
 | `reward` | `redeemed`, `used`, `expired`, `pending` | Align with menu / redemption state |
 | `tier` | usually omit or `NULL` | No sub-filter branch in SQL |
 | `currency` | `points` or `ticket` | Which wallet currency stream |
-| `upload_receipt` | usually omit | No sub-filter branch |
+| `upload_receipt` | `pending`, `approved` | Receipt review status; omit to return all receipt uploads |
 | `campaigns` | `mission`, `referral`, `checkin`, `activity` | Picks underlying ledger |
 | `purchases` | usually omit | No sub-filter branch |
 
@@ -146,7 +146,7 @@ Each row has the same **column names** (snake_case):
 |--------|----------------|----------------|
 | `id` | uuid | Stable id for keys / deep links |
 | `title` | text | Primary line |
-| `description` | text | Secondary line; may be null |
+| `description` | text | Secondary line; may be null. **Rewards:** prefers `promo_code` over generated redemption `code` (Use Reward display). |
 | `status` | text | Domain status (earn/burn, redeemed, mission progress, etc.) |
 | `filter` | text | Subtype key for UI chips (e.g. `mission`, `points`); use with tabs |
 | `icon` | text (URL) | Small pictogram |
@@ -156,7 +156,7 @@ Each row has the same **column names** (snake_case):
 | `dates` | jsonb (array) | `{ key, label, value }` for timestamps |
 | `details` | jsonb (array) | `{ key, label, value }` for extra facts |
 | `action` | jsonb or null | **Mostly null**; **reward** rows may return `{ "type": "use_reward", "label": "Use" }` |
-| `metadata` | jsonb (object) | Ids and raw fields for navigation or APIs |
+| `metadata` | jsonb (object) | Ids and raw fields for navigation or APIs. **Rewards:** includes `reward_id`, `fulfillment_method`, `online_store`, `external_ref_id`, `code`, `promo_code`. |
 
 **Rendering recipe:** Draw **`title` / `description` / `status`**; place **`icon`** (or **`image`**) on a circle filled with **`icon_bg`**; render **`results`** as badges; list **`dates`** and **`details`** as label–value rows; if **`action`** is non-null, show a primary button; use **`metadata`** for “view detail” routes without exposing everything in copy.
 
@@ -280,7 +280,7 @@ curl -sS -X POST "${SUPABASE_URL}/rest/v1/rpc/bff_get_entity_history" \
 | Symptom | Likely cause |
 |---------|----------------|
 | Menu `{ "success": false, "error": "No merchant context" }` | Missing / wrong **`x-merchant-id`** or JWT merchant claim; user not in **`user_accounts`** for that merchant |
-| Menu `{ "success": false, "error": "No plan assigned" }` | Merchant has no **`plan_id`** in **`merchant_master`** |
+| Menu `{ "success": false, "error": "No plan assigned" }` | Merchant has no **`plan_id`** in **`merchant_master`**. Shopify-created merchants now default to the **Enterprise** plan; existing active Shopify merchants were backfilled on 2026-06-15. |
 | History always `[]` | Wrong merchant; wrong user JWT; **`p_entity`** typo; **`p_filter`** mismatch (e.g. `campaigns` without `mission` / `referral` / …) |
 | Rewards not translated | Pass **`p_language`** (e.g. `th`); ensure **`translations`** rows exist for rewards |
 

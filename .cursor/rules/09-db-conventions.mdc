@@ -36,61 +36,17 @@ Extracted from the actual Supabase schema. Follow these when creating or modifyi
 | `created_at` | `timestamptz` | `now()` | Always present. |
 | `updated_at` | `timestamptz` | `now()` | On master/config tables. Maintained by `trigger_set_updated_at`. |
 
-## Standard Columns — By Purpose
+## Column Naming Patterns
 
-### Identity & Naming
-| Column | Type | When to use |
-|---|---|---|
-| `<entity>_code` | `text` | Human-readable identifier (mission_code, store_code, reward_code, workflow_code). Distinct from uuid `id`. |
-| `<entity>_name` | `text` | Display name when prefixed (mission_name, tier_name, persona_name, store_name). |
-| `name` | `text` | Display name for simpler tables (reward_master, workflow_master, form_templates). |
-| `description` | `text` | Single description. Use `description_<variant>` when multiple needed (description_headline, description_body, description_tc). |
+For new columns, follow these naming conventions. Inspect existing tables in the same domain via MCP to match established patterns.
 
-### Status & Flags
-| Column | Type | Default | Notes |
-|---|---|---|---|
-| `is_active` | `boolean` | `true` | **Standard for new tables.** On/off toggle. Legacy tables may use `active_status` — do not rename, but use `is_active` for all new work. |
-| `is_<state>` | `boolean` | varies | State flags: `is_claimed`, `is_milestone`, `is_featured`, `is_custom_answer`. Always `is_` prefix. |
-| `has_<feature>` | `boolean` | `false` | Feature presence: `has_time_conditions`. |
-| `status` | `enum` | varies | When lifecycle states are needed (form_status, purchase_status). Use PostgreSQL enum types. |
-
-### Time Windows
-| Column | Type | Notes |
-|---|---|---|
-| `window_start` | `timestamptz` | Eligibility/availability start. Pair with `window_end`. |
-| `window_end` | `timestamptz` | Eligibility/availability end. |
-| `window_start_time` / `window_end_time` | `time` | Time-of-day restrictions (without date). |
-| `<action>_at` | `timestamptz` | Action timestamps: `claimed_at`, `activated_at`, `completed_at`, `performed_at`, `expired_at`. |
-
-### Foreign Keys & References
-| Column | Type | Notes |
-|---|---|---|
-| `<entity>_id` | `uuid` | FK to another table (user_id, mission_id, tier_id, store_id, reward_id). |
-| `source_type` + `source_id` | `text` + `uuid` | Polymorphic reference — what triggered this record. |
-| `external_ref` | `text` | Reference to external system. |
-| `dedup_key` | `text` | Idempotency key to prevent duplicate processing. |
-
-### Arrays (Filter Lists)
-| Column | Type | Notes |
-|---|---|---|
-| `allowed_<entity>` | `uuid[]` | Eligibility filter arrays: `allowed_tier`, `allowed_persona`, `allowed_tags`. |
-| `<entity>_ids` | `uuid[]` | Multi-select references: `product_ids`, `sku_ids`, `category_ids`, `brand_ids`, `tier_ids`, `tag_ids`. |
-
-### Amounts & Metrics
-| Column | Type | Notes |
-|---|---|---|
-| `amount` | `numeric` | Monetary or point amounts. Never `float`. |
-| `<prefix>_amount` | `numeric` | Qualified amounts: `total_amount`, `final_amount`, `discount_amount`, `outcome_amount`. |
-| `balance_before` / `balance_after` | `integer` | Ledger balance snapshots. |
-| `points_required` | `numeric` | Cost in points. |
-
-### Flexible Data
-| Column | Type | Default | Notes |
-|---|---|---|---|
-| `metadata` | `jsonb` | `'{}'` | Generic extensible data. |
-| `config` | `jsonb` | `'{}'` | Structured configuration. |
-| `field_definitions` | `jsonb` | `'{}'` | Dynamic schema definitions. |
-| `images` | `text[]` or `jsonb` | — | Image URLs. Prefer `text[]` for simple lists, `jsonb` for structured. |
+- **Identity:** `<entity>_code` (text, human-readable), `<entity>_name` or `name` (display), `description`
+- **Status:** `is_active` (boolean, default true — standard for new tables), `is_<state>`, `has_<feature>`, `status` (enum for lifecycle)
+- **Time:** `window_start`/`window_end` (timestamptz), `<action>_at` (e.g. `claimed_at`, `completed_at`)
+- **References:** `<entity>_id` (uuid FK), `source_type`+`source_id` (polymorphic), `dedup_key` (idempotency)
+- **Arrays:** `allowed_<entity>` (uuid[], eligibility filters), `<entity>_ids` (uuid[], multi-select)
+- **Amounts:** `amount`/`<prefix>_amount` (numeric, never float), `balance_before`/`balance_after` (integer)
+- **Flexible:** `metadata`/`config` (jsonb, default `'{}'`)
 
 ## Data Type Rules
 
@@ -120,3 +76,26 @@ Master/config tables get an `updated_at` trigger:
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON <table>
   FOR EACH ROW EXECUTE FUNCTION trigger_set_updated_at();
 ```
+
+## Views
+
+- Regular views: `v_<domain>_<purpose>` (real-time, on-demand)
+- Materialized views: `mv_<domain>_<purpose>` (cached, requires explicit refresh)
+- BFF views: `bff_<purpose>` (enriched for frontend)
+- Views inherit RLS from underlying tables; materialized views need SECURITY DEFINER wrapper functions
+
+## CS Module — Cross-Domain Tables
+
+Shared workflow tables used by both loyalty and CS: `workflow_master`, `workflow_node`, `workflow_edge`, `workflow_trigger`, `workflow_log`. Use `domain` column to filter (`'loyalty'` or `'cs'`).
+
+When CS functions need loyalty data (tier, points, tags): read via existing loyalty functions (look them up via Supabase MCP `pg_proc` query — faster than the index). NEVER write to loyalty tables directly from CS. For writes, route through existing loyalty logic (e.g., `post_wallet_transaction`, `fn_execute_amp_action`).
+
+## Column-only migrations
+
+When the user asks to add a column or field without naming write paths ("for now", "just the table"):
+
+1. `apply_migration`: `ALTER TABLE … ADD COLUMN …` (+ optional `COMMENT ON COLUMN`).
+2. Verify via one `information_schema` query.
+3. **Stop.** Do not modify BFFs, chokepoints, overlays, or `get_default_user_fields` unless explicitly requested.
+
+Wiring the column into signup/profile flows is a separate task — propose it only after the schema change is done.

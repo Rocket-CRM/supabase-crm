@@ -71,6 +71,8 @@ This table defines the top-level classification dimensions available to each mer
 | `display_order` | smallint | UI ordering hint for admin interfaces |
 | `active_status` | boolean | Whether this category is currently in use |
 | `metadata` | jsonb | Additional category configuration |
+| `is_store_channel` | boolean | Exclusive per merchant: this category is the sales-channel dimension (dedup, reports, member `receipt_selection.mode=channel`). |
+| `is_store_property` | boolean | Exclusive per merchant: Front Line Store Property / print slips show this store’s **attribute names** in this category (not sub-attributes). Independent of `is_store_channel`. |
 | `created_at` | timestamptz | Category creation timestamp |
 | `updated_at` | timestamptz | Last modification timestamp |
 
@@ -602,6 +604,8 @@ erDiagram
 
 ## Function Categories & Architecture
 
+> **Accuracy note (2026-08-09):** Live resolver is `get_store_attribute_sets` (+ `get_store_classifications`, upsert helpers). Earn integration uses `evaluate_earn_conditions` / `evaluate_earn_conditions_core` with entity `store_attribute_set`. The following are **not deployed**: `evaluate_earn_conditions_with_store_sets`, `assign_store_attributes_batch`, cache/trigger helper names in older drafts. Prefer registry over Function Categories narrative for RPC names.
+
 ### 🎯 CORE FUNCTIONS (Business Logic Orchestrators)
 
 #### `get_store_attribute_sets(store_id UUID)` - Primary Resolution Engine
@@ -638,7 +642,7 @@ The function includes comprehensive error handling to ensure system stability. W
 
 Consider a Shopee store request: The system first identifies that this store is assigned to "Sales Channel → Online Marketplace → Shopee". It then searches for attribute sets that include either the "Online Marketplace" attribute (broad matching) or the specific "Shopee" sub-attribute (specific matching). The result typically includes multiple sets: Premium Channels (specific Shopee inclusion), All Online Channels (broad Online Marketplace inclusion), and Online Sales Channels (broad Online Marketplace inclusion).
 
-#### `evaluate_earn_conditions_with_store_sets()` - Integration Function
+#### ~~`evaluate_earn_conditions_with_store_sets()`~~ — NOT DEPLOYED (use `evaluate_earn_conditions_core`)
 **Purpose**: Enhanced earn condition evaluator that seamlessly integrates store attribute set logic  
 **Returns**: Condition evaluation results with store-based matching support
 
@@ -666,7 +670,7 @@ The integration leverages the existing condition evaluation infrastructure, addi
 
 ### ⚙️ PROCESSING FUNCTIONS (Data Management Orchestrators)
 
-#### `assign_store_attributes_batch()` - Batch Assignment Processor
+#### ~~`assign_store_attributes_batch()`~~ — NOT DEPLOYED
 **Purpose**: Efficiently assign multiple attributes to a store with comprehensive validation  
 **Input Format**: JSON array containing category/attribute/sub-attribute combinations  
 **Returns**: Detailed assignment results with success/error status per item

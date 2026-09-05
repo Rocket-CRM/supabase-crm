@@ -1,5 +1,5 @@
 ---
-description: "How to write Feature Guide docs in requirements/feature-docs/. Triggers when creating or editing feature guide files."
+description: "How to write Feature Guide docs in requirements/feature-docs/. Activate ONLY when user explicitly asks to create/edit a feature guide, or when editing a file in requirements/feature-docs/."
 globs:
   - "requirements/feature-docs/*.md"
 alwaysApply: false
@@ -8,6 +8,8 @@ alwaysApply: false
 # Feature Guide Writing Rules
 
 Feature Guides live in `requirements/feature-docs/`. They sit between deep technical requirement specs (`requirements/*.md`) and the codebase. They are NOT for engineers building the feature — those have the requirement docs.
+
+**Do not activate this rule for regular engineering tasks.** Only activate when the user explicitly asks to write/edit a feature guide, or when directly editing a file under `requirements/feature-docs/`. Archived drafts under `requirements/archive/feature-docs-draft/` are NOT in scope — do not update them unless the user explicitly requests resurrection.
 
 ## Audiences (all four, in every section)
 

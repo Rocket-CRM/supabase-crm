@@ -36,6 +36,10 @@ backups/
 dist/
 build/
 .cache/
+scripts/.cache/
+scripts/package-lock.json
+scripts/package.json
+scripts/node_modules/
 
 # Requirements docs (local only - not for GitHub) — ignore all entries inside,
 # but allow negation below. Use `requirements/*` (not `requirements/`) so the
@@ -48,6 +52,14 @@ requirements/*
 
 # Local service repos (maintained separately)
 crm-agent-service/
+amp-analysis-service/
+n8n-replacement/
+
+# Local-only data exports (not for git)
+exports/
 
 # Miscellaneous local files
 Gallery3DOrbit.tsx
+
+# Proposal mockup capture tooling
+workflows/general-proposal/.tools-playwright/

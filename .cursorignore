@@ -6,3 +6,36 @@ QUANTITY_LIMIT_INCREASE.md
 # Reference/migration docs - include explicitly when needed
 docs/SYNGENTA_MIGRATION_GUIDE.md
 docs/shopify-admin-flow-curls.md
+
+# Heavy scratchpads (2026-04 audit: biggest token sinks)
+# Data migration folder — ignore heavy artifacts by default, allow active knowledge docs
+Data migration/*.csv
+Data migration/.DS_Store
+Data migration/SYNGENTA_SNOWFLAKE_MIGRATION_PLAN.md
+# Active docs (DATA_MIGRATION_KNOWLEDGE_BASE.md, MIGRATION_IMPLEMENTATION.md) remain @-referenceable
+# Feature planning scratchpads — per-feature notes, not shared context
+.cursor/plans/*.plan.md
+# One-off FE component drafts
+Component prompts/
+# Proposals, exports, client-specific artifacts
+Samitivej/
+exports/
+# Draft feature guides archived in 2026-04 audit (no measured consumption)
+requirements/archive/
+# Large proposal/plan docs (read explicitly when needed)
+docs/*_PROPOSAL*.md
+docs/*_PROPOSAL*.pdf
+docs/*_GUIDE*.md
+docs/*_PLAN*.md
+docs/CS_PROJECT_SCAFFOLD.md
+docs/UNIVERSAL_ACTION_ENHANCEMENT_PLAN.md
+docs/universal_action_system.md
+docs/Content_Resource_Schema_Proposal.md
+
+# Deprecated monolithic index (split into requirements/domains/*.md)
+requirements/INDEX_DOMAIN.md
+
+# Regenerated artifact - do not edit by hand, do not auto-load
+requirements/INDEX_FUNCTION.md
+# Archived plans — finished or superseded, kept for history only
+.cursor/plans/archive/

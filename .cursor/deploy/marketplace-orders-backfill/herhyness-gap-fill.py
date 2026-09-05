@@ -30,8 +30,11 @@ SHOPS = {
 START = dt.datetime(2026, 6, 30, 17, tzinfo=dt.timezone.utc)
 END = dt.datetime(2026, 8, 10, 17, tzinfo=dt.timezone.utc)
 
-PROGRESS = Path("/tmp/herhyness-mkp-fill.progress")
-PIDFILE = Path("/tmp/herhyness-mkp-fill.pid")
+PLATFORM = os.getenv("HERHYNESS_PLATFORM", "shopee").strip().lower()
+if PLATFORM not in SHOPS:
+    raise SystemExit(f"HERHYNESS_PLATFORM must be one of {sorted(SHOPS)} (got {PLATFORM!r})")
+PROGRESS = Path(os.getenv("HERHYNESS_PROGRESS", f"/tmp/herhyness-{PLATFORM}-gap-fill.progress"))
+PIDFILE = Path(os.getenv("HERHYNESS_PIDFILE", f"/tmp/herhyness-{PLATFORM}-gap-fill.pid"))
 
 
 def detach():
@@ -445,10 +448,10 @@ def main():
         "start": START.isoformat(),
         "end": END.isoformat(),
         "pid": os.getpid(),
-        "platforms": ["shopee"],
-        "max_save": 50,
+        "platforms": [PLATFORM],
+        "max_save": initial_max_save(PLATFORM),
     }))
-    plan = [("shopee", 4)]
+    plan = [(PLATFORM, 4)]
     for platform, hours in plan:
         shop = SHOPS[platform]
         log("########", platform, shop, "########")

@@ -7,7 +7,39 @@ The architecture consists of two primary services:
 1. **Currency Calculation Engine** - Determines reward amounts without affecting balances
 2. **Currency Award Service** - Processes and records rewards to customer wallets
 
-**Architecture (v2.0)**: CDC → Render Consumer → Inngest (matching Tier architecture)
+**Architecture (v3.0, 2026-07-07 — post-Confluent)**: `chokepoint_post_purchase_event` → `chokepoint_event_outbox` → OutboxPublisher (Render `crm-event-processors`, Inngest mode) → Inngest `crm/purchase.event` + `crm/purchase_item.event` → `inngest-event-router-serve` (`currency-purchase-router` / `currency-purchase-item-router`) → `currency/award` → Inngest `inngest-currency-serve` → `chokepoint_post_wallet_transaction`.
+
+**Important**: Currency is not triggered by PostgreSQL triggers on `purchase_ledger`. The production event source is the chokepoint event outbox (`KAFKA_CONSUMERS_ENABLED=false`; no CDC path). The router functions in `inngest-event-router-serve` own filtering (`earn_currency` + status ∈ {pending, processing, completed}), dedup (Inngest idempotency on `<source_id>:<status>`), currency calculation (`calc_currency_for_source`), award timing (`merchant_master` config, timezone-aware), and publishing `currency/award` events. Inngest owns durable waiting, cancellation, retries, wallet posting, and workflow logs. The `currency/award` payload contract and `inngest-currency-serve` are unchanged from v2.0.
+
+## Seller Perspective Earning
+
+Seller-referenced receipt uploads use the existing user code as the seller code:
+
+- `user_accounts.member_code` is resolved by `fn_resolve_seller_reference(p_merchant_id, p_buyer_user_id, p_seller_code)`.
+- The resolver requires the code to belong to the same merchant, rejects buyer self-reference, and requires `fn_seller_resolve_user_type(...) = 'seller'`.
+- `purchase_receipt_upload.seller_id` carries the seller reference from upload until admin approval.
+- `bff_approve_receipt_upload` passes the seller into `api_create_purchase(p_seller_user_id := ...)`, landing on `purchase_ledger.seller_id`.
+
+Seller currency earning is configured through earn factor group perspective:
+
+- `earn_factor_group.perspective` is `buyer` by default and may be `seller`.
+- Existing buyer calculations call the buyer path and filter to buyer groups.
+- Seller calculations call `calc_currency_for_transaction(p_transaction_id, 'seller')`; this uses `purchase_ledger.seller_id` as the earning user and filters to seller groups.
+- Persona/tier conditions remain on `earn_conditions`; in the seller pass they evaluate against the seller user.
+- Receipt approval enqueues seller wallet transactions with `source_type='purchase'`, the purchase id as source id, and metadata `perspective='seller'`.
+
+Earn channel configuration for receipt upload:
+
+- `earn_channel_registry.default_config` for `purchase:receipt_upload` includes `seller_reference: { enabled: false, required: false }`.
+- `bff_get_earn_channels` returns `config`, `seller_reference`, and `default_award_scope`.
+- `bff_upsert_single_earn_channel` accepts either `config.seller_reference`, top-level `seller_reference`, or compatibility booleans `show_seller_reference` / `require_seller_reference`.
+
+Known follow-up:
+
+- `inngest-currency-serve` still awards/reverses the `user_id` from the incoming `currency/*` event. **Receipt seller earn is synchronous today** inside `bff_approve_receipt_upload` (not blocked on the worker). Non-receipt purchase events still need a currency-worker deploy to run the seller pass when payloads include `seller_id`.
+
+
+**Wallet chokepoint (Phase 1, 2026-05-13)**: `chokepoint_post_wallet_transaction` is the **single canonical writer** for `wallet_ledger`. Every BFF, edge function, RPC, admin tool, bulk import, and Inngest worker that needs to award/burn/expire/reverse currency MUST call this function — direct `INSERT INTO wallet_ledger` from anywhere else is forbidden. The old name `post_wallet_transaction` was dropped; there is no wrapper or alias. Event publish is live via `chokepoint_event_outbox` → OutboxPublisher → Inngest (CDC/Kafka consumers off). See `requirements/architecture/event-chokepoints.md`.
 
 ## Table of Contents
 - [Glossary of Terms](#glossary-of-terms)
@@ -51,6 +83,7 @@ The architecture consists of two primary services:
   - For tickets: Must specify which ticket type via `target_entity_id`
 - **Multiplier Factor**: Increases currency by a multiplication factor (e.g., "Triple points on shoes", "Double tickets for VIP")
   - Applies to specific currency and ticket type combinations
+- **Purchase Status Policy**: Purchase-status eligibility belongs on the `earn_factor` row via `allowed_purchase_statuses`, not in `earn_conditions`. Default is `['completed']`. A factor with no earn conditions still applies to all purchases, but only when the purchase status is allowed by that factor.
 
 **Earn Factor Group**: A container that bundles related earn factors together, defining shared properties like validity period and whether multipliers can stack
 
@@ -65,6 +98,8 @@ The architecture consists of two primary services:
 - `exclude = false` (default): **Include** — only items/users matching this condition are eligible
 - `exclude = true`: **Exclude** — items matching this condition are removed from the eligible set
 
+Earn conditions must describe customer, product, store, and threshold eligibility. They must not decide purchase lifecycle timing such as `pending` vs `completed`; that policy belongs to `earn_factor.allowed_purchase_statuses`.
+
 **Condition Exclude Flag**: A boolean on each `earn_condition` row that inverts its role from an include gate to an exclusion filter. Only meaningful for product entity types (`product_sku`, `product_product`, `product_brand`, `product_category`). Tier, persona, and store conditions are always include-only transaction-wide gates.
 
 **Credit Ticket Type**: A special `ticket_type` designation (`is_credit = true`) identifying a ticket type whose redemption triggers an external platform credit API call rather than a standard wallet burn. The `credit_platform` field specifies which platform (`shopify`, `woocommerce`, etc.) receives the credit API call at redemption time. One credit ticket type per platform per merchant is enforced at the database level.
@@ -74,18 +109,19 @@ The architecture consists of two primary services:
 - **Secondary UOM**: Bulk/wholesale units (e.g., TON, PALLET, CARTON, CASE)
 - Enables quantity-based thresholds for B2B and bulk purchase scenarios
 
-**Threshold**: Minimum or maximum quantity/amount requirements for earn factors:
-- Can be based on primary quantity, secondary quantity, or purchase amount
-- Enables rules like "Buy ≥50 units" or "Spend ≥5000 THB"
-- Supports caps to prevent abuse (e.g., "Max 1000 units eligible")
+**Threshold**: Minimum or maximum quantity/amount on a product condition card. Applied **only when evaluating a multiplier**. Each listed SKU / product / brand / category is judged alone (old EACH). A rate ignores thresholds. Write path rejects a real `min_threshold` on a group linked to a rate.
 
-**Stackable**: A group property determining if multiple multipliers combine (stackable) or if only the best one applies (non-stackable)
+**Stackable**: A program-level property (one value for all multipliers on the merchant). Non-stackable: each baht uses one bonus — line-specific first, bill-wide on the remainder. Stackable: bill-wide applies to the whole amount, then line-specific add on top. Configured on Advanced Earn (super admin default + merchant page toggle), not per row.
 
-**Operator**: A condition-level setting that determines how multiple entities in an earn condition are evaluated:
-- **OR (Aggregate)**: Sum quantities/amounts across all matching entities, check threshold on total
-- **AND (All Required)**: All entities must be present in purchase, each checked individually against threshold
-- **EACH (Independent)**: Each entity evaluated independently, only those meeting threshold are included
-- Only relevant for product/store entities (tier/persona use implicit OR since user has single value)
+**Advanced Earn (admin)**: Platform super admin enables `merchant_master.advanced_earn_enabled` and orders `advanced_earn_config.properties` at `/superadmin/advanced-earn`. The merchant then adds rows on Earn rules → Advanced earn. Earn Studio is hidden while the flag is on.
+
+**Condition evaluation** (engine; `operator` is ignored):
+- **Cards in a group are always ALL** — every include card must pass
+- **IDs on one card** = any matching line (old OR)
+- **Combo / old AND** (e.g. Yumyum + Rosdee qty 10) = two cards in the same group
+- **Thresholds** apply only on multiplier evaluation, EACH per listed entity
+- Product tags as a grouping dimension = later, not now
+- `operator` may still be persisted for Earn Studio; the engine does not read it
 
 **Multiplier Calculation Mode**: A merchant-level config (`multiplier_additive`) that determines how multiplier bonuses are calculated:
 - **false (Total Rate, default)**: Multiplier represents total earning rate - bonus = base × (M - 1)
@@ -120,10 +156,20 @@ The architecture consists of two primary services:
 
 **Source Types**: The origin of a wallet transaction (unified across all award paths):
 - `purchase`: Currency from buying products
-- `referral`: Rewards from referral program (inviter/invitee bonuses)
+- `referral`: Wallet awards from the referral program (signup both parties; purchase referrer only — the friend gets a commerce discount, not this source)
 - `mission`: Currency earned from completing missions/tasks
 - `campaign`: Special loyalty program awards (fixed amounts via metadata)
 - `manual`: Admin adjustments (fixed amounts via metadata)
+- `amp`: Currency awarded by AMP workflow actions, including hidden system workflows such as survey completion rewards
+
+AMP/system workflow awards are fixed wallet awards, not purchase earn-factor calculations. They must call `chokepoint_post_wallet_transaction` with an explicit `dedup_key` whenever the source event can replay or when one workflow may award the same user multiple times.
+
+`fn_execute_amp_action` passes `p_params.dedup_key` into `chokepoint_post_wallet_transaction` for AMP wallet actions:
+- `award_points`
+- `award_tickets`
+- `award_currency`
+
+For ticket awards, `ticket_type_id` / `target_entity_id` is required and must reference an active `ticket_type` owned by the merchant.
 
 **Currency Expiry**: Mechanism to automatically invalidate unused currency after a specified period, reducing financial liability and encouraging timely redemption.
 
@@ -169,6 +215,23 @@ To simplify loyalty program management, individual earn factors automatically in
 - Individual factors can be turned on/off independently
 - If not specified, factors are active by default
 - Business Benefit: Emergency stop for entire programs or selective factor control
+
+**Purchase Status Policy**:
+- Each `earn_factor` controls which purchase lifecycle statuses can trigger that factor through `allowed_purchase_statuses text[]`.
+- Default: `['completed']`.
+- Event-order or booking flows may opt specific factors into earlier earning by setting `['pending', 'completed']` or another explicit status list.
+- This is intentionally factor-level, not condition-level. Conditions answer "which customer/items qualify"; factor status answers "when this earning rule may be awarded."
+- A no-condition factor means "all purchases qualify for this factor," subject to the factor's active/window/status policy.
+- `earn_conditions_group.allowed_purchase_statuses` has been removed. New code must read and write only `earn_factor.allowed_purchase_statuses`.
+
+**Implementation status for factor-level purchase status**:
+1. `earn_factor.allowed_purchase_statuses text[] NOT NULL DEFAULT ARRAY['completed']::text[]` is live.
+2. Existing factors were backfilled from the old `earn_conditions_group.allowed_purchase_statuses` values where present; otherwise they use `['completed']`.
+3. `mv_earn_factors_complete` and `mv_earn_factor_users` expose `allowed_purchase_statuses`.
+4. `calc_currency_for_transaction` passes purchase status into the status-aware `calc_currency_core` / `get_eligible_earn_factors_core` path.
+5. Inngest currency routers allow `pending`, `processing`, and `completed` purchase changes to reach calculation when `earn_currency = true`.
+6. Inngest idempotency key `<source_id>:<status>` so a non-awarding `pending` event cannot suppress a later `completed` event.
+7. BFF/admin detail and upsert helpers expose and persist `allowed_purchase_statuses` on `earn_factor`.
 
 **Example: Seasonal Loyalty Program**
 ```
@@ -337,14 +400,36 @@ The system provides data for merchants to:
 - Include expiry information in transaction receipts
 - Generate expiry reminder campaigns
 
+#### Points expiry display cache (standard vs custom)
+
+Full architecture: **`requirements/LOYALTY_PROGRESS_EXPIRY_CACHE.md`**.
+
+| Mode | `points_expiry_mode` | Schedule read source | Apply (burn) path |
+|------|----------------------|----------------------|-------------------|
+| Standard | not `'custom'` | Live `wallet_ledger` earn lots (`deductible_balance > 0`, future `expiry_date`) via `fn_loyalty_expiry_buckets_for_user` | Render `currency-expiry-daily` → `process_currency_expiry_batch` |
+| Custom | `'custom'` | Precomputed `user_points_expiry_cache` (one row per expiry date) | `fn_loyalty_custom_apply_expiry` |
+
+**Fast calc envelope** — `fn_loyalty_expiry_envelope(user, merchant, as_of_date)` returns next expiry, within 30 days, end of calendar month, end of calendar year, and month-by-month buckets from the active read source above. Used by member summary and `bff_get_points_expiry_schedule`.
+
+**Custom cache refresh:**
+
+- `fn_loyalty_cache_upsert_points_expiry` resolves `custom_function.{merchant_code}_points_expiry` and upserts `user_points_expiry_cache`.
+- Same 5-minute dirty + daily catch-up crons as tier cache (`loyalty-cache-dirty-5m`, `loyalty-cache-catchup-daily`).
+- Display gate: `fn_loyalty_expiry_display_enabled` — merchant expiry active **or** custom mode.
+
+Inline expiry date on earn (`wallet_ledger.expiry_date`) still applies at award time for standard merchants. Custom merchants may use merchant-specific calculators that do not map 1:1 to ledger lot dates; the cache is the member-facing schedule of record.
+
 #### Daily Expiry Processing
 
 The system automatically processes currency expiries through a daily automated routine, ensuring consistent and timely removal of expired currency from customer balances.
 
 **Processing Schedule**:
-- Runs automatically every day at 2:00 AM (merchant's local timezone)
+- Render Cron Job `currency-expiry-daily` at **19:00 UTC** (≈02:00 ICT) loops `process_currency_expiry_batch(run_date, cutover_date, 1000)` until `has_more = false`. Same `Rocket-CRM/crm-event-processors` one-shot pattern as `tier-daily-batch`.
+- pg_cron `daily-currency-expiry` remains a temporary bridge (`CALL process_expiry_if_needed()`) and must be disabled after the Render job is verified so both schedulers never run concurrently.
+- Business date is `(timezone('Asia/Bangkok', now()))::date`. Not per-merchant local timezone unless extended later.
+- Cutover date default **2026-08-31**. Eligibility is `expiry_date >= cutover_date AND expiry_date <= run_date`, oldest first. Pre-cutover backlog is excluded.
 - Time chosen to minimize impact on customer transactions
-- Processes all currencies that reached expiry date as of midnight
+- Processes due lots from the cutover date through the business run date, oldest first
 - Completes before business hours to ensure clean daily reporting
 
 **Intelligent Processing**:
@@ -550,63 +635,7 @@ The calculation engine determines how much currency (points and tickets) a custo
 
 ### System Architecture Diagram
 
-```mermaid
-graph TB
-    subgraph "Data Sources (CDC Monitored)"
-        PL[purchase_ledger]
-        RL[referral_ledger]
-        MC[mission_claims]
-    end
-    
-    subgraph "Change Data Capture"
-        PL & RL & MC --> Debezium[Confluent CDC Connector]
-        Debezium --> Kafka[Kafka Topics]
-    end
-    
-    subgraph "Render Consumer - crm-event-processors"
-        Kafka --> Consumer[Currency Consumer]
-        Consumer --> Redis[Redis Dedup Check<br/>per source_type + source_id]
-        Redis --> CALC[calc_currency_for_source RPC]
-        CALC --> Timing[Calculate Award Time]
-        Timing --> Publish[Publish currency/award to Inngest]
-    end
-    
-    subgraph "Durable Execution - Inngest"
-        Publish --> INN[Inngest Cloud]
-        INN --> EF2[inngest-currency-serve<br/>Edge Function]
-        EF2 --> WF1[currency-award workflow]
-        EF2 --> WF2[currency-reversal workflow]
-    end
-    
-    subgraph "Calculation Engine"
-        CALC --> CE2[calc_currency_for_transaction]
-        CE2 --> CE3[get_eligible_earn_factors]
-        CE3 --> MV[Materialized Views]
-    end
-    
-    subgraph "Configuration Cache"
-        Consumer --> CFG[getMerchantCurrencyConfig]
-        CFG --> REDIS2[Upstash Redis<br/>Merchant Config Cache]
-        REDIS2 -.->|cache miss| MM[merchant_master table]
-    end
-    
-    subgraph "Wallet Layer"
-        WF1 --> POST[post_wallet_transaction]
-        WF2 --> POST
-        POST --> WL[wallet_ledger]
-        POST --> UW[user_wallet / user_ticket_balances]
-    end
-    
-    subgraph "Observability"
-        WF1 & WF2 --> LOG[inngest_workflow_log]
-    end
-    
-    subgraph "Cancellation Flow"
-        Consumer -->|Refund detected| CancelEvent[Publish currency/cancelled]
-        CancelEvent --> INN
-        INN -->|cancelOn triggers| WF1
-    end
-```
+
 
 > **Architecture Note (v2.0)**: Currency now uses CDC → Render Consumer → Inngest pattern, matching Tier architecture. No pending table needed - Inngest workflow state IS the pending state.
 
@@ -978,63 +1007,6 @@ Traditional queue-based systems have limitations for complex currency award scen
 
 #### Technology Stack (v2.0 - CDC Architecture)
 
-**Change Data Capture (Confluent CDC)**:
-- Debezium-based PostgreSQL source connector
-- Monitors source tables: `purchase_ledger`, `referral_ledger`, `mission_claims`
-- Publishes changes to Kafka topics with guaranteed ordering and durability
-
-**Render Consumer (`crm-event-processors`)**:
-- Consumes CDC events from Kafka
-- Deduplicates at source level via Redis (per `source_type + source_id`)
-- Calculates currency via `calc_currency_for_source` RPC
-- Determines award timing from merchant configuration
-- Publishes to Inngest for durable execution
-- Handles refund detection and cancellation event publishing
-
-**Inngest (Durable Workflow Execution)**:
-- Orchestrates multi-step workflows with state persistence
-- **Inngest workflow state IS the pending state** - no pending table needed
-- Supports `sleepUntil` for delayed awards based on merchant configuration
-- Provides automatic retries at the step level (not entire workflow)
-- Enables workflow cancellation via `cancelOn` events with precise matching (`source_type + source_id`)
-- Maintains execution history for debugging
-
-**Upstash Redis**:
-- **Deduplication**: 5-minute window per source event in Render consumer
-- **Configuration Cache**: Merchant config with TTL-based refresh
-- Reduces database load for hot paths
-
-#### Unified Source Types
-All currency awards flow through the same pipeline regardless of source:
-
-| Source Type | Trigger | Example |
-|-------------|---------|---------|
-| `purchase` | CDC on `purchase_ledger` | Customer completes checkout |
-| `referral` | CDC on `referral_ledger` | Invitee makes first purchase |
-| `mission` | CDC on `mission_claims` | User completes a task |
-| `campaign` | API call with fixed amount | Bulk award to segment |
-| `manual` | Admin action with fixed amount | Customer service adjustment |
-
-#### Central Calculation Dispatcher
-The `calc_currency_for_source` function routes calculation based on source type:
-
-```sql
-FUNCTION calc_currency_for_source(
-    p_source_type,  -- 'purchase', 'referral', 'mission', 'campaign', 'manual'
-    p_source_id,    -- UUID of source record
-    p_merchant_id,
-    p_user_id,
-    p_metadata      -- For campaign/manual: contains amount, currency_type, component
-)
-RETURNS TABLE(currency_type, component, amount, earn_factor_id, target_entity_id)
-```
-
-**Routing Logic**:
-- `purchase` → Calls `calc_currency_for_transaction()` (earn factor evaluation)
-- `referral` → Queries `referral_invitee_outcomes` for configured rewards
-- `mission` → Queries `mission_outcomes` for mission completion rewards
-- `campaign/manual` → Extracts fixed amount from `p_metadata`
-
 ### Merchant Configuration for Delayed Awards
 
 Merchants can configure when currency is awarded via `merchant_master` columns:
@@ -1045,165 +1017,33 @@ Merchants can configure when currency is awarded via `merchant_master` columns:
 | `currency_award_delay_minutes` | INTEGER | Rolling minutes to delay (0 = no delay) |
 | `currency_award_time` | TIME | Time of day to award (e.g., '08:00:00') |
 | `currency_award_timezone` | TEXT | Timezone for interpretation (e.g., 'Asia/Bangkok') |
+| `default_burn_rate` | NUMERIC | Points→discount burn rate (baht per 1 point). `NULL` = unset. Used when `tier_master.burn_rate` is null or the member has no tier. Read/write via `bff_get_currency_config` / `bff_upsert_currency_config`. |
+
+**Points→discount burn (not earn):** set `default_burn_rate` once for the merchant; optional per-tier overrides live on `tier_master.burn_rate`. Runtime resolution is `fn_resolve_burn_rate` — see `requirements/Tier.md` §Burn Rate and `docs/BURN_RATE_FE_BRIEF.md`.
 
 **Delay Precedence Logic**:
-1. **delay_days > 0** → Calendar mode: Award on `today + delay_days` at `award_time`
-2. **delay_minutes > 0** → Rolling mode: Award `now + delay_minutes` (ignores award_time)
-3. **award_time set only** → Same/next day at that specific time
-4. **Nothing set** → Immediate award
+1. **`currency_award_delay_type = 'rolling_days'` or legacy `'scheduled'` with `delay_days > 0`** → Calendar-day delay. If `currency_award_time` is set, award on `today + delay_days` at that local time in `currency_award_timezone`; if no time is set, preserve rolling `now + delay_days` behavior.
+2. **`currency_award_delay_type = 'rolling_minutes'` with `delay_minutes > 0`** → Rolling-minute delay (`now + delay_minutes`), ignoring award time/timezone.
+3. **`currency_award_delay_type = 'immediate'` or day/minute delay is zero** → Immediate award.
+
+`scheduled` remains accepted as a legacy backend value but should not be exposed as a new admin UI option. Partial config saves through `bff_upsert_currency_config` preserve `currency_award_time` unless the payload explicitly includes the key with a new value or null/empty value.
 
 **Example Configurations**:
-- `delay_days=1, award_time='08:00:00'` → Next day at 8 AM local time
+- `delay_type='rolling_days', delay_days=1, award_time='08:00:00', timezone='Asia/Bangkok'` → Next day at 8 AM Bangkok time
 - `delay_minutes=120` → 2 hours after purchase (rolling)
-- `award_time='21:00:00'` → Today at 9 PM, or tomorrow if already past
+- `delay_type='immediate'` → Award as soon as the earning event is processed
 
 ### Award Process Flow Diagram (CDC + Render Consumer + Inngest)
 
-```mermaid
-sequenceDiagram
-    participant SRC as Data Source<br/>(purchase_ledger, etc.)
-    participant CDC as Confluent CDC<br/>(Debezium)
-    participant KFK as Kafka Topics
-    participant CON as Render Consumer<br/>CurrencyConsumer
-    participant RDS as Redis<br/>Dedup + Config Cache
-    participant CALC as calc_currency_for_source<br/>RPC
-    participant INN as Inngest Cloud
-    participant SRV as inngest-currency-serve<br/>Edge Function
-    participant WAL as post_wallet_transaction
-    participant LOG as inngest_workflow_log
-    
-    SRC->>CDC: Row change captured<br/>(INSERT/UPDATE)
-    CDC->>KFK: Publish Debezium event
-    KFK->>CON: Consume event
-    
-    CON->>RDS: Check dedup<br/>(source_type + source_id)
-    alt Duplicate
-        RDS-->>CON: Already processed
-        Note over CON: Skip silently
-    else New event
-        RDS-->>CON: Proceed
-        CON->>CON: Extract source info<br/>Apply topic-specific filters
-        CON->>CALC: Calculate currency amounts
-        CALC-->>CON: Currency rows to award
-        CON->>RDS: Get merchant config<br/>(award timing)
-        RDS-->>CON: Config (cached)
-        CON->>INN: Publish currency/award event<br/>with all context
-    end
-    
-    INN->>SRV: Invoke currency-award workflow
-    SRV->>LOG: Log workflow started
-    
-    alt Delayed Award
-        Note over SRV: sleepUntil(award_datetime)<br/>Inngest IS the pending state
-        SRV->>SRV: Wake at scheduled time
-    end
-    
-    loop For each currency row
-        SRV->>WAL: Award currency
-        WAL-->>SRV: Success
-    end
-    
-    SRV->>LOG: Log workflow completed
-    SRV-->>INN: Return results
-```
+
 
 > **Key Architecture Change**: Consumer handles calculation and publishes pre-calculated currency rows to Inngest. Inngest workflow simply waits (if delayed) and awards. No pending table - workflow state IS the pending state.
 
 ### Award Process (CDC + Render Consumer + Inngest)
 
 #### Step 1: CDC Captures Change
-- Confluent CDC (Debezium) monitors source tables (`purchase_ledger`, `referral_ledger`, `mission_claims`)
-- Changes published to Kafka topics with guaranteed ordering
 
 #### Step 2: Render Consumer Processes Event
-The `CurrencyConsumer` in `crm-event-processors`:
-- Consumes CDC event from Kafka
-- Parses Debezium message format
-- Extracts source info based on topic (source_type, source_id, user_id, merchant_id)
-- Applies topic-specific filtering (e.g., only completed purchases)
-- Deduplicates via Redis (5-minute window per `source_type + source_id`)
-
-#### Step 3: Calculate Currency (In Consumer)
-Consumer calls `calc_currency_for_source` RPC:
-- Routes to appropriate calculation logic based on source type
-- For purchases: Evaluates earn factors and applies best rate/multipliers
-- Returns array of currency rows to award
-
-#### Step 4: Determine Award Timing
-Consumer fetches merchant configuration and calculates award datetime:
-- `delay_days > 0`: Award on `today + delay_days` at `award_time`
-- `delay_minutes > 0`: Award at `now + delay_minutes`
-- `award_time` only: Today/tomorrow at that specific time
-- Nothing set: Immediate award (now)
-
-#### Step 5: Publish to Inngest
-Consumer publishes `currency/award` event with all context:
-- Pre-calculated currency rows (no recalculation in workflow)
-- Award datetime (workflow just waits if delayed)
-- Source info for `cancelOn` matching
-
-#### Step 6: Inngest Workflow Executes
-The `currency-award` workflow in `inngest-currency-serve`:
-- Logs workflow start to `inngest_workflow_log`
-- If `award_datetime > now`: `sleepUntil(award_datetime)` - **Inngest IS the pending state**
-- Can be cancelled during sleep via `currency/cancelled` event with matching `source_type + source_id`
-
-#### Step 7: Award Each Currency
-For each row from pre-calculated currency_rows:
-- Calls `post_wallet_transaction` RPC
-- Creates ledger entry and updates balance atomically
-
-#### Step 8: Log Completion
-Updates `inngest_workflow_log` with final status and results.
-
-> **No Pending Table**: Inngest workflow state replaces need for a database pending table. Cancellation uses `cancelOn` with event matching, not database queries.
-
-**Duplicate Detection Logic**:
-```sql
--- Unique constraint prevents duplicates (includes currency type)
-UNIQUE(merchant_id, source_type, source_id, currency, component, transaction_type)
-```
-
-**Ledger Entry Structure**:
-```json
-{
-  "user_id": "uuid",
-  "merchant_id": "uuid",
-  "currency": "points|tickets",
-  "target_entity_id": null,  // NULL for points, ticket_type.id for tickets
-  "transaction_type": "earn",
-  "component": "base|bonus|reversal",
-  "amount": 100,
-  "signed_amount": 100,
-  "balance_before": 500,
-  "balance_after": 600,
-  "source_type": "purchase",
-  "source_id": "transaction_uuid",
-  "metadata": {
-    "calculation_details": {...},
-    "applied_factors": [...],
-    "ticket_type_name": "Monthly Raffle"  // For tickets only
-  }
-}
-```
-
-#### Step 4: Update Wallet
-Atomically increases customer's balance based on currency type:
-
-**Balance Storage Architecture**:
-- **Points (Fungible)**: Updates `user_accounts.points_balance` field
-- **Tickets (Non-fungible)**: Updates/creates entry in `user_ticket_balances` table for specific ticket type
-
-**Atomic Update Process**:
-1. Begin transaction
-2. Lock appropriate row (SELECT FOR UPDATE)
-   - Points: Lock `user_accounts` row
-   - Tickets: Lock/create `user_ticket_balances` row for specific `ticket_type_id`
-3. Calculate new balance
-4. Update balance
-5. Create ledger entry with proper `target_entity_id`
-6. Commit or rollback
-
 ### Ticket Type Architecture
 
 The system distinguishes between fungible and non-fungible currencies through careful architectural separation:
@@ -1222,7 +1062,7 @@ graph LR
     end
     
     subgraph "Balance Storage"
-        UA[user_accounts<br/>points_balance field]
+        UA[user_wallet<br/>points_balance field]
         UTB[user_ticket_balances<br/>balance per ticket_type_id]
     end
     
@@ -1241,7 +1081,7 @@ graph LR
 ```
 
 **Key Architectural Decisions**:
-- Points remain in existing `user_accounts.points_balance` (no migration needed)
+- Points are stored in `user_wallet.points_balance`
 - Each ticket type gets separate balance tracking in `user_ticket_balances`
 - All transactions recorded in `wallet_ledger` with proper `target_entity_id`
 - Ticket types can have validity periods and expiration dates
@@ -1275,9 +1115,12 @@ A ticket type can be designated as a **credit type** — meaning redemption of t
 ```
 is_credit = false  →  standard wallet burn
 is_credit = true, credit_platform = 'shopify'
-  →  call storeCreditAccountCredit(customerId, amount × rate, currency)
+  →  (earn path) wallet_ledger INSERT → `trg_enqueue_shopify_store_credit_issue` → edge `shopify-issue-store-credit` (GraphQL store credit account credit; idempotent metadata). Redemption remains a standard wallet burn — not the Shopify credit GraphQL call.
   →  record burn in wallet_ledger as normal
   →  store Shopify transaction ID in redemption metadata
+is_credit = true, credit_platform = 'internal'
+  →  wallet burn only (frontline spend via `bff_store_credit`); no external API
+  →  see `requirements/Store_Credit.md`
 ```
 
 **Merchant init (Shopify onboarding):**
@@ -1331,24 +1174,30 @@ Pre-generates a pool of unique random codes for a ticket type:
 
 **Code Assignment Function: `fn_assign_ticket_codes()`**
 
-Assigns codes from the pool to a user when tickets are earned. Mirrors the `reward_promo_code` assignment pattern:
+Assigns one code from the pool to a user per wallet-ledger unit row. Mirrors the `reward_promo_code` assignment pattern:
 1. Checks pool has enough available codes
-2. Reserves N codes atomically using `FOR UPDATE SKIP LOCKED`
-3. Stamps each code: `assigned_status = true`, `assigned_to_user_id`, `wallet_ledger_id`, `source_id`
-4. Stamps the assigned codes back onto `wallet_ledger.metadata.ticket_codes[]`
-5. Returns the assigned codes
+2. Reserves one code atomically using `FOR UPDATE SKIP LOCKED`
+3. Stamps the code: `assigned_status = true`, `assigned_to_user_id`, `wallet_ledger_id`, `source_id`
+4. Stamps the assigned code back onto `wallet_ledger.metadata.ticket_codes[]` (single-element array per unit row)
+5. Returns the assigned code
 6. If insufficient codes in pool, fails cleanly (no partial assignment)
 
 **Bidirectional Stamping** (same as reward promo codes):
 - `ticket_code` → stamped with user, wallet_ledger_id, source_id
-- `wallet_ledger.metadata` → stamped with `ticket_codes: ["SYN-A7X3B2", ...]`
+- `wallet_ledger.metadata` → stamped with `ticket_codes: ["SYN-A7X3B2"]` on that unit row
 
 This enables lookups from either direction: "which codes does this user have?" and "which earning event generated this code?"
 
-**Assignment Trigger**: Configurable per ticket type. Can be triggered:
-- On purchase completion (normal flow via currency award service)
-- On pending order creation (event booking flow, called explicitly)
-- Manually by admin
+**Wallet ledger unit codes (2026-05-25)**: `chokepoint_post_wallet_transaction` splits every ticket earn/burn into **one ledger row per ticket unit** (`amount = 1`). Each row gets a human-readable `wallet_ledger.code`:
+- Earn: `WT-` + 8 hex chars (e.g. `WT-A3F9B2C1`)
+- Burn: `WTB-` + 8 hex chars (e.g. `WTB-80B36AFD`)
+Generated by `generate_random_wallet_ticket_code()` with per-merchant uniqueness on `(merchant_id, code)`.
+
+**Pooled vs non-pooled behavior**:
+- **Non-pooled** (no rows in `ticket_code` for that ticket type): only the wallet ledger unit code is created.
+- **Pooled** (any rows exist in `ticket_code` for that ticket type): earn requires enough unassigned pool codes; each unit row gets both a wallet ledger code and one pool code via `fn_assign_ticket_codes(..., p_quantity := 1)`.
+
+**Assignment trigger**: Automatic on every ticket earn/burn through `chokepoint_post_wallet_transaction` (purchase awards, manual adjustments, reversals, etc.). Pool pre-generation remains admin-driven via `fn_generate_ticket_codes()`.
 
 **RLS**: Users can see their own assigned codes. Service role has full access for generation and assignment operations.
 
@@ -1357,17 +1206,32 @@ This enables lookups from either direction: "which codes does this user have?" a
 - User lookup: `(assigned_to_user_id, ticket_type_id) WHERE assigned_to_user_id IS NOT NULL`
 - Source lookup: `(source_id) WHERE source_id IS NOT NULL`
 
+### Open API wallet transactions (external)
+
+Partner-facing points and ticket earn/burn and history go through the Open API gateway (`mabioklchbkanhjwgibj` edge `api-wallet`), not admin BFFs.
+
+| Surface | Role |
+|---|---|
+| `POST/GET /api-wallet/transactions` | HTTP validation, API key → `merchant_id`, envelope |
+| `api_post_wallet_transaction` | Merchant-scoped earn/burn; `currency` `points` (default) or `ticket` |
+| `api_get_wallet_transactions` | Merchant-scoped ledger history; default `currency=points` |
+| `api_get_user` | `points_balance` plus additive `ticket_balances[]` |
+| `chokepoint_post_wallet_transaction` | Canonical writer (`source_type=manual`, `component=adjustment`) |
+
+Contract:
+
+- Ledger deltas only (`earn` / `burn`); no absolute balance SET.
+- Points balance: `GET /api-users` → `points_balance` (`user_wallet.points_balance`).
+- Ticket balance: `GET /api-users` → `ticket_balances[]` (`user_ticket_balances` per type). Ticket post requires exactly one of `ticket_type_id` or `ticket_code`. Credit ticket types (`is_credit = true`) are rejected.
+- Client `dedup_key` (1–200) maps to internal unique key `openapi:<merchant_id>:<client_dedup_key>`. Same key+payload (including currency and ticket type) → idempotent replay (`already_processed`); same key different amount/user/type/currency/ticket type → `IDEMPOTENCY_CONFLICT`. Ticket `amount > 1` is one chokepoint unit row per ticket (`dedup_key` suffix `:uN`); the RPC treats that family as one partner post.
+- Partner `metadata` may not use keys beginning with `_`. Stored metadata shape: `{ channel: "openapi", client_dedup_key, partner }`. Clients cannot set `_skip_emit`.
+- Burn insufficient balance → hard fail (`INSUFFICIENT_BALANCE`); pooled ticket earn with too few codes → `INSUFFICIENT_TICKET_POOL`. No partial write. Normal chokepoint outbox / `crm.events.wallet` side effects still run.
+- History filters: optional `from`/`to` (`created_at >= from` and `< to`), `transaction_type`, `currency` (default `points`), ticket type, `limit` 1–100, `offset`. Response never returns the internal prefixed dedup key.
+
+See `docs/openapi/PLATFORM_API_REFERENCE.md` and `docs/openapi/openapi.yaml`.
+
 ### Idempotency Protection
 The system prevents duplicate awards at multiple levels:
-
-**Level 1: Kafka Consumer Offset**
-- Kafka tracks consumer offset per partition
-- Messages not reprocessed after commit (unless reset)
-
-**Level 2: Redis Deduplication (Consumer)**
-- Each source event has unique key: `currency_dedup:{source_type}:{source_id}`
-- 5-minute TTL window
-- Consumer skips if key exists (already processing)
 
 **Level 3: Inngest Event ID**
 - Each Inngest event has unique ID used as workflow run identifier
@@ -1382,21 +1246,7 @@ UNIQUE(merchant_id, source_type, source_id, currency, component, transaction_typ
 - Handles race conditions and retry scenarios
 
 **Idempotency Flow**:
-```mermaid
-graph TD
-    A[CDC Event] --> B{Kafka Offset?}
-    B -->|Already Committed| C[Not Redelivered]
-    B -->|New| D[Consumer Receives]
-    D --> E{Redis Dedup?}
-    E -->|Duplicate| F[Skip Silently]
-    E -->|New| G[Process Event]
-    G --> H[Publish to Inngest]
-    H --> I{DB Constraint?}
-    I -->|Violation| J[Step fails, workflow continues]
-    I -->|OK| K[Award Complete]
-    J --> L[Log to inngest_workflow_log]
-    K --> L
-```
+
 
 ### Workflow Observability
 
@@ -1447,7 +1297,7 @@ The system supports full and partial reversals for refunds through the `currency
 
 **Step 4: Create Reversal Entries**
 - For each currency with sufficient balance
-- Calls `post_wallet_transaction` with `component='reversal'`
+- Calls `chokepoint_post_wallet_transaction` with `component='reversal'`
 - Links reversal to original via metadata
 
 > **Key Architecture**: The `cancelOn` uses precise matching on `source_type + source_id`, ensuring only the specific pending award for that source is cancelled - not all currency events for the user.
@@ -1673,14 +1523,16 @@ END
 graph LR
     A[Cron Trigger] --> B[Check if needed]
     B -->|No expiries| C[Skip - Log only]
-    B -->|Has expiries| D[Process in batches]
-    D --> E[Lock batch of 1000]
-    E --> F[Update expired_amount]
-    F --> G[Update user balances]
-    G --> H{More batches?}
-    H -->|Yes| E
-    H -->|No| I[Complete - Log results]
+    B -->|Has expiries| D[Lock batches of 1000]
+    D --> E[expired_amount += remaining deductible]
+    E --> F[deductible_balance = 0]
+    F --> G{More batches?}
+    G -->|Yes| D
+    G -->|No| H[One expiry burn per wallet / ticket type]
+    H --> I[Complete - Log results]
 ```
+
+`process_currency_expiry_batch` selects unprocessed earn lots in `[cutover_date, run_date]` (`expiry_processed_at IS NULL`, `deductible_balance > 0`), locking at most 1,000 wallet groups per call (`FOR UPDATE SKIP LOCKED`). Groups with `due_amount <= wallet_balance` add the remaining deductible to `expired_amount`, zero `deductible_balance`, then post **one** chokepoint burn per points wallet / ticket type using the lot's original expiry date in the dedup key. Burns use `source_type = 'expiry'` so FIFO allocation does not run again. Groups with `due_amount > wallet_balance` are left unchanged and upserted into `wallet_reconciliation_issue`. Open issues are excluded from later batches so a mismatch cannot loop forever. Pre-cutover overdue lots are not selected — that backfill is a separate migration.
 
 **Performance Optimizations**:
 - Batch size: 1000 records (configurable)
@@ -1768,15 +1620,17 @@ graph LR
 
 **Daily Cron Job**:
 ```sql
--- Runs at 2 AM daily
-SELECT process_expiry_if_needed();
+-- Render: npm run job:currency-expiry-daily  (19:00 UTC)
+-- Temporary pg_cron bridge, retire after Render is verified:
+CALL process_expiry_if_needed();
 ```
 
-This function:
-1. Checks if expiry processing needed via `should_run_expiry_today()`
-2. Processes expiries in batches to avoid long locks
-3. Updates both `wallet_ledger` and user balances atomically
-4. Logs results to `expiry_processing_log` table
+Each bounded RPC:
+1. Picks the oldest due expiry date in `[cutover_date, run_date]`
+2. Locks up to 1,000 wallet groups
+3. Expires valid groups atomically through `chokepoint_post_wallet_transaction`
+4. Records mismatched groups in `wallet_reconciliation_issue` without changing them
+5. Logs results to `expiry_processing_log` and returns `has_more`
 
 **Monitoring Views**:
 - `v_upcoming_expiries`: Shows currency expiring in next 30 days
@@ -1820,7 +1674,7 @@ This function:
    - Workflows cancelled via `currency/cancelled` event with `cancelOn` matching (`source_type + source_id`)
    - Delayed awards survive system restarts
 8. **Processing Guarantees**:
-   - Four-level idempotency: Kafka offset, Redis dedup, Inngest event ID, Database constraint
+   - Idempotency: Inngest event ID + database constraints
    - Exactly-once award processing
    - Atomic wallet updates with row-level locking
    - Complete audit trail in `wallet_ledger` and `inngest_workflow_log`
@@ -1943,7 +1797,7 @@ Note: Despite non-stackable group, both multipliers apply because they affect di
 - Eligible for Parking passes: 1 per 20 THB = 100 passes
 
 **Result**:
-- 40 points earned → Updates `user_accounts.points_balance` (target_entity_id = NULL)
+- 40 points earned → Updates `user_wallet.points_balance` (target_entity_id = NULL)
 - 20 VIP Concert tickets → Creates/updates row in `user_ticket_balances` for ticket_type_id: uuid-concert
 - 100 Parking passes → Creates/updates separate row in `user_ticket_balances` for ticket_type_id: uuid-parking
 - Three separate ledger entries created, each with appropriate `target_entity_id`
@@ -2293,6 +2147,18 @@ POST /api/currency/reverse
 }
 ```
 
+### Staff POS Point-Discount Burn
+
+FE-callable BFF functions:
+- `bff_preview_point_discount_burn(p_user_id, p_points_amount)` calculates available points, **resolved** burn rate (`fn_resolve_burn_rate`: merchant default or tier override), and discount amount without deducting points.
+- `bff_create_point_discount_burn(p_user_id, p_points_amount, p_store_id, p_description, p_metadata)` burns points and returns a POS-facing wallet code (same resolver).
+- `bff_admin_get_point_discount_burn_history(p_user_id, p_store_id, p_minutes)` returns recent point-discount burn rows with use/reversal status.
+- `bff_reverse_point_discount_burn(p_wallet_ledger_id, p_code, p_reason, p_metadata)` returns points through a reversal earn row unless the code is attached to an active purchase.
+
+`BURN_RATE_DISABLED` when neither merchant `default_burn_rate` nor a positive tier override yields an enabled rate.
+
+Permission rules: broad currency admins use `currency` permissions. Frontline admins use the scoped `frontline_burn_points_discount` permission; history accepts `read` or `update`, while preview/create/reverse require `update`.
+
 ### Get Upcoming Expiries
 ```http
 GET /api/currency/expiries/upcoming
@@ -2381,145 +2247,79 @@ GET /api/merchant/{merchant_id}/expiry-config
 
 ## Currency - Complete Transactions to Currency Flow
 
-### 🎯 Core Architecture: Unified Durable Execution
+### Core Architecture: Event Capture + Durable Execution
 
-**Single Path for All Sources**:
-Data Change → CDC → Kafka → Render Consumer → Inngest → Wallet
+**Chokepoint outbox path for database-backed sources**:
+Purchase/referral/mission → chokepoint outbox → OutboxPublisher → Inngest currency routers → `inngest-currency-serve` → wallet
 
-All currency awards (purchase, referral, mission, campaign, manual) flow through the same pipeline, ensuring consistent processing, delays, and observability.
+Purchase, referral, and mission awards publish via the chokepoint outbox and are routed by `inngest-event-router-serve`. Campaign and manual awards may publish directly to Inngest because their award amount is already explicit in the request metadata. All sources converge at `inngest-currency-serve` for durable waiting, cancellation, wallet posting, and workflow logging.
 
 ### Complete System Flow Diagram
 
 ```mermaid
-graph TB
-    subgraph "Event Sources"
-        PUR[Purchase Completed]
-        REF[Referral Processed]
-        MIS[Mission Claimed]
-        CAM[Campaign/Manual]
-    end
-    
-    subgraph "CDC Layer"
-        CDC1[Confluent CDC<br/>Debezium Connector]
-        KFK[Kafka Topics]
-    end
-    
-    subgraph "Durable Execution"
-        INN[Inngest Cloud]
-        SRV[inngest-currency-serve<br/>Edge Function]
-        AWD[currency-award workflow]
-        REV[currency-reversal workflow]
-    end
-    
-    subgraph "Configuration"
-        CFG[get-merchant-config<br/>Edge Function]
-        REDIS[Upstash Redis Cache]
-        MM[merchant_master]
-    end
-    
-    subgraph "Calculation"
-        CALC[calc_currency_for_source]
-        TRANS[calc_currency_for_transaction]
-        GEF[get_eligible_earn_factors]
-        MV[Materialized Views]
-    end
-    
-    subgraph "Wallet Layer"
-        POST[post_wallet_transaction]
-        WL[wallet_ledger]
-        UW[user_wallet]
-        UTB[user_ticket_balances]
-        TIER[trigger_tier_eval_on_wallet]
-    end
-    
-    subgraph "Observability"
-        LOG[inngest_workflow_log]
-    end
-    
-    PUR --> CDC1
-    REF --> CDC1
-    MIS --> CDC1
-    CDC1 --> KFK
-    KFK --> CON[Render Consumer]
-    CON --> INN
-    CAM --> INN
-    INN --> SRV
-    SRV --> AWD & REV
-    
-    AWD --> CFG
-    CFG --> REDIS
-    REDIS -.-> MM
-    
-    AWD --> CALC
-    CALC --> TRANS
-    TRANS --> GEF
-    GEF --> MV
-    
-    AWD --> POST
-    REV --> POST
-    POST --> WL
-    POST --> UW
-    POST --> UTB
-    WL --> TIER
-    
-    AWD & REV --> LOG
+sequenceDiagram
+  participant CP as chokepoint_post_purchase_event
+  participant OB as chokepoint_event_outbox
+  participant Pub as OutboxPublisher
+  participant IN as Inngest
+  participant R as inngest-event-router-serve
+  participant CS as inngest-currency-serve
+  participant W as chokepoint_post_wallet_transaction
+
+  CP->>OB: crm.events.purchase (same txn as ledger)
+  Pub->>IN: crm/purchase.event
+  IN->>R: currency-purchase-router
+  Note over R: calc_currency_for_source,<br/>award_datetime, earn_currency gate
+  R->>IN: currency/award
+  IN->>CS: currency-award workflow
+  Note over CS: optional sleepUntil(award_datetime)
+  CS->>W: post earn rows
+  W->>OB: crm.events.wallet (downstream tier/mission/notification)
 ```
+
+Parallel on the same `crm/purchase.event` (not shown): `tier-purchase-router`, `mission-purchase-router`, `notification-purchase-router`, `amp-purchase-router`, etc. Each is a separate Inngest function on `inngest-event-router-serve`.
 
 ### Step-by-Step Flow
 
-#### Step 1: CDC Captures Data Changes
+#### Step 1: Chokepoint emit (not CDC)
 
-**Purchase Events**:
-- Confluent CDC (Debezium) captures INSERT/UPDATE on `purchase_ledger`
-- Publishes to Kafka topic `crm.public.purchase_ledger`
+Purchase / referral / mission sources call `chokepoint_post_*`, which writes the ledger and inserts one row per emit into `chokepoint_event_outbox` (`crm.events.purchase`, `crm.events.purchase_item`, …). No PostgreSQL trigger on `purchase_ledger` starts currency.
 
-**Referral Events**:
-- Confluent CDC captures INSERT/UPDATE on `referral_ledger`
-- Publishes to Kafka topic `crm.public.referral_ledger`
+#### Step 2: OutboxPublisher → currency routers
 
-**Mission Events**:
-- Confluent CDC captures INSERT/UPDATE on `mission_claims`
-- Publishes to Kafka topic `crm.public.mission_claims`
+**OutboxPublisher** (Render `crm-event-processors`) drains the outbox and posts `crm/purchase.event` (+ `crm/purchase_item.event` when items emit).
 
-#### Step 2: Render Consumer Processes Events
+**`currency-purchase-router` / `currency-purchase-item-router`** (`inngest-event-router-serve`):
 
-**CurrencyConsumer** in `crm-event-processors`:
-- Consumes CDC events from Kafka
-- Parses Debezium message format
-- Extracts source info (source_type, source_id, user_id, merchant_id)
-- Applies topic-specific filtering (e.g., only completed purchases)
-- Deduplicates via Redis (5-minute window per `source_type + source_id`)
-- Calculates currency via `calc_currency_for_source` RPC
-- Determines award timing from merchant config
-- Publishes `currency/award` event to Inngest
+- Gate: `earn_currency=true`, status ∈ `{pending, processing, completed}` (purchase router)
+- Dedup: Inngest idempotency on `<source_id>:<status>`
+- Calculate: `calc_currency_for_source` → `currency_rows[]`
+- Timing: merchant `currency_award_*` → `award_datetime`
+- Emit: `currency/award` to Inngest
 
-#### Step 3: Inngest Workflow Execution
-
-**Workflow**: `currency-award` in `inngest-currency-serve`
+#### Step 3: `inngest-currency-serve` (`currency-award` workflow)
 
 1. **Log Start**:
    - Insert to `inngest_workflow_log` with status='started'
    - Store `inngest_run_id` for cross-reference
 
-2. **Get Merchant Config**:
-   - Call `get-merchant-config` Edge Function
-   - Returns cached config from Redis (5-min TTL)
-   - Falls back to `merchant_master` table on cache miss
+2. **Use Award Input**:
+   - Read `currency_rows` and `award_datetime` from the `currency/award` event
+   - Purchase eligibility is owned by the currency routers, not by `inngest-currency-serve`
 
-3. **Calculate Currency**:
-   - Call `calc_currency_for_source` RPC
-   - Routes to appropriate calculation based on source_type
-   - Returns array of currency rows (currency_type, component, amount, etc.)
+3. **Optional Fallback Calculation**:
+   - If a legacy event does not include `currency_rows`, call `calc_currency_for_source` as a temporary compatibility fallback
+   - New producers must send pre-calculated `currency_rows`
 
 4. **Apply Delay (if configured)**:
-   - Calculate `award_datetime` based on merchant delay settings
+   - Use the consumer-provided `award_datetime`
    - If delay needed: `step.sleepUntil('wait-for-award-time', award_datetime)`
    - Workflow state persisted by Inngest during sleep
    - Can be cancelled via `currency/cancelled` event
 
 5. **Award Each Currency**:
    - For each row from calculation
-   - Call `post_wallet_transaction` RPC
+   - Call `chokepoint_post_wallet_transaction` RPC
    - Each award is a separate Inngest step (individually retriable)
 
 6. **Log Completion**:
@@ -2528,7 +2328,7 @@ graph TB
 
 #### Step 4: Wallet Update
 
-**Function**: `post_wallet_transaction()`
+**Function**: `chokepoint_post_wallet_transaction()`
 
 This is the financial engine that:
 
@@ -2551,6 +2351,7 @@ This is the financial engine that:
    - Records in `wallet_ledger` with full metadata
    - Includes `workflow_run_id` for Inngest traceability
    - Stores balance before/after for audit
+   - **Tickets (unit model)**: one row per ticket unit with `amount = 1`, sequential `balance_before`/`balance_after`, human-readable `code` (`WT-` earn / `WTB-` burn), and optional pool code in `metadata.ticket_codes` when the ticket type has a code pool
 
 5. **Idempotency Protection**:
    - Unique constraint includes `currency` column
@@ -2563,21 +2364,6 @@ This is the financial engine that:
 
 ### Render Consumer (`crm-event-processors`)
 
-#### CurrencyConsumer
-**Purpose**: Consumes CDC events and orchestrates currency awards
-- Subscribes to Kafka topics: `purchase_ledger`, `referral_ledger`, `mission_claims`
-- **Deduplication**: Redis-based, 5-minute window per `source_type + source_id`
-- **Calculation**: Calls `calc_currency_for_source` RPC
-- **Timing**: Fetches merchant config and calculates award datetime
-- **Publishing**: Sends `currency/award` event to Inngest with all context
-
-**Source Extraction by Topic**:
-| Topic | Source Type | User Field | Filters |
-|-------|-------------|------------|---------|
-| `purchase_ledger` | purchase | user_id | status='completed', earn_currency=true |
-| `referral_ledger` | referral | invitee_user_id | reward_status='completed' |
-| `mission_claims` | mission | user_id | status='approved' |
-
 ### Edge Functions
 
 #### inngest-currency-serve
@@ -2587,6 +2373,7 @@ This is the financial engine that:
 - Includes step-level retries (3 attempts per step)
 - `cancelOn` with precise matching (`source_type + source_id`) for aborting pending awards
 - **No pending table**: Inngest workflow state IS the pending state
+- Input comes from Inngest `currency/award` (routers). The workflow awards provided `currency_rows` after `award_datetime`; purchase status filtering is owned by the currency routers, not this worker.
 
 #### get-merchant-config (or cached in consumer)
 **Purpose**: Provides cached merchant configuration
@@ -2611,16 +2398,26 @@ This is the financial engine that:
 
 #### calc_currency_for_transaction
 **Purpose**: Purchase-specific calculation with earn factors
-- Loads purchase from purchase_ledger, validates status = completed and earn_currency = true
-- Calls `calc_currency_core` internally for the actual calculation
-- Then calls `post_wallet_transaction` to award the currency
-- This is the "calculate AND post" function, unlike `calc_currency_core` which is preview-only
+- Loads purchase amount, user, merchant, store, and items from `purchase_ledger` / `purchase_items_ledger`
+- Calls `calc_currency_core` internally for pure calculation
+- Returns calculated rows only; it does not post wallet transactions
+- Purchase status eligibility is enforced by the Inngest currency routers using `earn_factor.allowed_purchase_statuses`, not by this pure calculation function
 
-#### post_wallet_transaction
+#### chokepoint_post_wallet_transaction
 **Purpose**: Atomic wallet update with ledger entry
 - Updates balance with row-level locking
 - Calculates expiry dates inline
 - Creates audit trail in wallet_ledger
+- For a non-expiry burn, allocates matching earn lots via `util.fn_allocate_fifo_burn` **before** the ledger insert: points lots are fungible within `(user, merchant, currency)`; ticket lots are isolated by `target_entity_id`. Insufficient matching lots raise and roll back the whole transaction. `source_type = 'expiry'` skips allocation because expiry already zeroed those lots.
+- Repair-only backdate: metadata `_effective_created_at` is honored only when `source_type = expiry`, `_skip_emit = true`, `_repair_run_id` is present, and the timestamp is not in the future. Normal callers still get `now()`. Wrapper `fn_repair_wallet_expiry_burn` always sets `_skip_emit` and stamps ledger `created_at` to `expiry_date` at 19:00 UTC. `expiry_processed_at` on earn lots stays the actual repair time.
+
+#### fn_allocate_fifo_burn
+**Purpose**: Internal FIFO earn-lot allocator for non-expiry burns
+- Selects `transaction_type = 'earn'`, `deductible_balance > 0`, `expiry_processed_at IS NULL`
+- Order: `expiry_date ASC NULLS LAST, created_at ASC, id ASC`
+- Deducts `LEAST(deductible_balance, remaining)` under `FOR UPDATE`
+- Raises on shortfall — never warns and continues
+- Not a public writer; invoked only from the wallet chokepoint
 
 #### fn_generate_ticket_codes
 **Purpose**: Pre-generate a pool of unique random codes for a ticket type
@@ -2639,16 +2436,6 @@ This is the financial engine that:
 
 #### Confluent Cloud (CDC)
 **Purpose**: Change Data Capture
-- Debezium-based PostgreSQL source connector
-- Captures INSERT/UPDATE operations on source tables
-- Publishes to Kafka topics with guaranteed ordering
-
-#### Kafka
-**Purpose**: Durable event streaming
-- Topics per source table (e.g., `crm.public.purchase_ledger`)
-- Consumer group management for parallel processing
-- Message replay capability for recovery
-
 #### Inngest
 **Purpose**: Durable workflow execution
 - Orchestrates multi-step award workflows
@@ -2676,10 +2463,10 @@ This is the financial engine that:
 ### Why This Architecture Works
 
 #### Single Responsibility:
-1. `CurrencyConsumer` (Render) - Consumes CDC events, calculates currency, publishes to Inngest
+1. OutboxPublisher → Inngest currency routers → `inngest-currency-serve` → `chokepoint_post_wallet_transaction`
 2. `inngest-currency-serve` - ONLY orchestrates workflow, waits if delayed, awards via RPC
 3. `calc_currency_for_source` - ONLY calculates, doesn't award
-4. `post_wallet_transaction` - ONLY updates wallet, doesn't calculate
+4. `chokepoint_post_wallet_transaction` - ONLY updates wallet, doesn't calculate
 
 #### Separation of Concerns:
 - Event Capture (CDC) separate from Event Processing (Consumer)
@@ -2692,7 +2479,7 @@ This is the financial engine that:
 - **No Pending Table**: Inngest workflow state IS the pending state - simpler architecture
 - **Observability**: Every workflow logged with run ID for debugging
 - **Flexibility**: Delayed awards, cancellation via `cancelOn`, retries all supported
-- **Scalability**: Kafka + Consumer handles high throughput
+- **Scalability**: OutboxPublisher + Inngest routers/workers handle throughput
 - **Consistency**: All sources use same CDC → Consumer → Inngest pipeline
 - **Precise Cancellation**: `cancelOn` matches `source_type + source_id` - cancels only the specific award
 
@@ -2829,6 +2616,7 @@ Each merchant has one designated credit `ticket_type` row (`is_credit = true, cr
 │           Platinum [ ___ ] Baht          │
 │                                          │
 │  [ Products exclusion picker ]           │
+│  [ Award on status: completed ▾ ]        │
 └──────────────────────────────────────────┘
 ```
 
@@ -2836,11 +2624,13 @@ Each merchant has one designated credit `ticket_type` row (`is_credit = true, cr
 
 | Config | earn_factor rows created |
 |---|---|
-| Single rate (no tier toggle) | 1 `rate` factor, no conditions |
-| Diff rate per tier (N tiers) | N `rate` factors, each with 1 `earn_conditions_group` → 1 `earn_condition` (entity=`tier`) |
+| Single rate (no tier toggle) | 1 `rate` factor, no conditions, `allowed_purchase_statuses=['completed']` by default |
+| Diff rate per tier (N tiers) | N `rate` factors, each with 1 `earn_conditions_group` → 1 `earn_condition` (entity=`tier`), same status policy copied to each factor |
 | Product exclusions | Adds an `earn_condition` (entity=`product_sku` / `product_category`, `exclude=true`) to each rate factor's conditions group. The eval engine's two-pass approach removes matching items from the eligible set before calculating currency. |
 
 The same rate structure is replicated for store credit if the merchant has enabled it, producing a parallel set of `rate` factors with `target_currency = ticket`.
+
+Purchase status is stored on each created `earn_factor` as `allowed_purchase_statuses`. It must not be stored on `earn_conditions_group`.
 
 ---
 
@@ -2877,6 +2667,7 @@ Each multiplier rule exposes three optional condition pills:
 | Tier | Tier membership gate | `tier` |
 | Product inc | Specific products or collections | `product_sku`, `product_product`, `product_brand`, `product_category` |
 | Time | `window_start` / `window_end` on the `earn_factor` row | — (field on factor, not a condition) |
+| Purchase status | `allowed_purchase_statuses` on the `earn_factor` row | — (field on factor, not a condition) |
 
 **Stackable config** maps to `earn_factor_group.stackable`.
 

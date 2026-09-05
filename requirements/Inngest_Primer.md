@@ -70,7 +70,17 @@ It has three parts:
 | **Trigger** | Which event name (or schedule) starts this code |
 | **Handler** | The actual code that runs, broken into steps |
 
-**Where does this code live?** In your Edge Function file. You write it. You deploy it to Supabase. Inngest Cloud does not have a copy of your code — it only knows the function ID and what triggers it.
+**Where does this code live?** In your Edge Function **serve** endpoint (Edge Function URL). You write handlers. You deploy to Supabase. Inngest Cloud stores the **registry** (mapping of event names → function ids → serve URL) from deploy **sync** — it does not store your source code.
+
+### CRM naming: event vs function vs serve
+
+| Term | What it is | CRM example |
+|---|---|---|
+| **Event** | Named message on Inngest | `crm/purchase.event`, `currency/award` |
+| **Function** | One handler registered with `inngest.createFunction({ id: "…" }, trigger, handler)` | `currency-purchase-router`, `currency-award` |
+| **Serve** | One deployed Edge Function URL hosting many functions | `inngest-event-router-serve`, `inngest-currency-serve` |
+
+At runtime: OutboxPublisher (or a router) sends an **event** → Inngest looks up the **registry** → HTTP-calls the **serve** URL with which **function** id to run.
 
 <details>
 <summary>Technical Details</summary>
@@ -406,6 +416,23 @@ sequenceDiagram
 
 ---
 
+## CRM chokepoint pipeline (how we use Inngest)
+
+```
+chokepoint_event_outbox
+  → OutboxPublisher (Render)     // fast drain; batch 50 = API chunking, not throttling
+  → Inngest event (crm/*.event)
+  → inngest-event-router-serve   // many *-router functions (fan-out)
+  → optional new events (e.g. currency/award)
+  → inngest-currency-serve       // durable sleep + wallet write
+```
+
+**Throttling** is configured on each Inngest **function** (`concurrency`, sometimes `throttle`) — not on the outbox. See `requirements/CRM_Event_Driven_Architecture.md` §Live architecture.
+
+**Notifications:** event-driven routers are adapters; shared delivery is `processNotification` in `inngest-event-router-serve`. **Reminders** (expiry clock scan) call the same engine directly — no outbox. See `requirements/Notification_Service.md` §Notifications vs reminders.
+
+---
+
 ## Example: Currency Award Function
 
 ```typescript
@@ -442,7 +469,7 @@ const currencyAward = inngest.createFunction(
 
     // Step 4: Award the currency
     await step.run("award", async () => {
-      await supabase.rpc("post_wallet_transaction", {
+      await supabase.rpc("chokepoint_post_wallet_transaction", {
         p_user_id: user_id,
         p_amount: amount
       });

@@ -596,6 +596,10 @@ F: calculate_redemption_points(p_user_id uuid, p_reward_id uuid) -> jsonb
 F: calculate_redemption_points_fast(p_user_tier_id uuid, p_user_type user_type, p_user_persona_id uuid, p_user_tag_ids uuid[], p_reward_id uuid, p...) -> jsonb
 F: check_currency_system_status() -> jsonb
 F: chokepoint_post_wallet_transaction(p_user_id uuid, p_currency currency, p_source_type wallet_transaction_source_type, p_component currency_compon...) -> uuid
+F: fn_repair_wallet_expiry_burn(p_user_id uuid, p_merchant_id uuid, p_amount integer, p_expiry_date date, p_repair_run_id text, p_dedup_key text, p_description text) -> uuid
+F: fn_hh_repair_build_manifest(p_merchant_id uuid) -> jsonb
+F: fn_hh_repair_apply_step4_batch(p_run_id uuid, p_limit integer, p_merchant_id uuid) -> jsonb
+F: fn_hh_repair_apply_step6_batch(p_run_id uuid, p_limit integer, p_merchant_id uuid) -> jsonb
 F: clone_earn_factor_group(p_source_group_id uuid, p_new_name text DEFAULT NULL::text) -> uuid
 F: create_complete_earn_factor_setup(p_merchant_id uuid, p_group_config jsonb, p_factors jsonb, p_create_conditions boolean DEFAULT false) -> jsonb
 F: create_simple_earn_factor_group(p_merchant_id uuid, p_name text, p_stackable boolean DEFAULT true, p_window_start timestamp with time zone DEF...) -> uuid
@@ -609,7 +613,7 @@ F: currency_system_health_check() -> TABLE(component text, check_status text,...
 F: debug_reward_points_calculation(p_user_id uuid, p_reward_id uuid) -> TABLE(test_aspect text, test_value text)
 F: enqueue_bulk_wallet_transactions(p_transactions jsonb[]) -> jsonb
 F: enqueue_wallet_transaction(p_user_id uuid, p_currency currency, p_source_type wallet_transaction_source_type, p_component currency_compon...) -> uuid
-F: fn_apply_fifo_burn() -> trigger
+F: util.fn_allocate_fifo_burn(p_user_id uuid, p_merchant_id uuid, p_currency currency, p_target_entity_id uuid, p_amount integer) -> void
 F: fn_assign_ticket_codes(p_merchant_id uuid, p_ticket_type_id uuid, p_user_id uuid, p_quantity integer, p_wallet_ledger_id uuid DEFAULT...) -> jsonb
 F: fn_calculate_activity_currency(p_upload_id uuid, p_field_values jsonb) -> TABLE(currency_type currency, amount num...
 F: fn_generate_ticket_codes(p_merchant_id uuid, p_ticket_type_id uuid, p_quantity integer, p_prefix text DEFAULT ''::text, p_code_length i...) -> jsonb
@@ -653,7 +657,6 @@ X: manual_currency_request_ledger -> set_updated_at_manual_currency_request (BEF
 X: user_wallet -> trg_jorakay_loyalty_webhook (AFTER INSERT)
 X: wallet_ledger -> set_dedup_key_on_wallet (BEFORE INSERT)
 X: wallet_ledger -> trg_enqueue_shopify_store_credit_issue (AFTER INSERT)
-X: wallet_ledger -> trg_fifo_burn_tracking (AFTER INSERT)
 
 ---
 
@@ -1077,6 +1080,7 @@ F: bff_upsert_receipt_ocr_channel_products(p_store_attribute_id uuid, p_products
 F: bff_upsert_receipt_ocr_hints(p_store_attribute_id uuid, p_hints jsonb) -> jsonb
 F: bff_upsert_receipt_ocr_set_rule(p_store_attribute_set_id uuid, p_rules jsonb, p_is_active boolean DEFAULT true) -> jsonb
 F: chokepoint_post_receipt_event(p_event text, p_merchant_id uuid, p_user_id uuid, p_receipt_upload_id uuid, p_reject_reason text DEFAULT NULL:...) -> jsonb
+F: chokepoint_post_referral_event(p_event text, p_merchant_id uuid, p_user_id uuid, p_referral_ledger_id uuid DEFAULT NULL, p_claim_id uuid DEFAULT NULL, p_recipient_role text DEFAULT NULL, p_skip_emit boolean DEFAULT false, p_extras jsonb DEFAULT '{}') -> jsonb
 F: custom_futurepark_receipt_confirm_jobs_set_updated_at() -> trigger
 F: fn_check_receipt_upload_daily_image_limit(p_merchant_id uuid, p_user_id uuid DEFAULT NULL::uuid, p_external_user_ref text DEFAULT NULL::text, p_proposed...) -> jsonb
 F: fn_classify_receipt_crm_sync_error(p_error text) -> jsonb
@@ -1430,6 +1434,28 @@ X: tier_master -> tier_master_invalidate_widget_cache (AFTER DELETE)
 
 ---
 
+## Loyalty cache (progress & expiry)
+
+See `requirements/LOYALTY_PROGRESS_EXPIRY_CACHE.md`.
+
+T: user_points_expiry_cache
+F: fn_loyalty_cache_catchup_chunk(p_merchant_id uuid, p_as_of_date date DEFAULT ..., p_batch_size integer DEFAULT 500) -> jsonb
+F: fn_ops_daily_recon(p_day date DEFAULT NULL) -> jsonb
+F: fn_loyalty_cache_refresh_5m() -> jsonb
+F: fn_loyalty_cache_refresh_users(p_merchant_id uuid, p_user_ids uuid[], p_as_of_date date DEFAULT ...) -> jsonb
+F: fn_loyalty_cache_upsert_points_expiry(p_merchant_id uuid, p_user_ids uuid[], p_as_of_date date DEFAULT ...) -> jsonb
+F: fn_loyalty_cache_upsert_tier_progress(p_merchant_id uuid, p_user_ids uuid[], p_as_of_date date DEFAULT ...) -> jsonb
+F: fn_loyalty_custom_apply_expiry(p_merchant_id uuid, p_as_of_date date, p_batch_size integer DEFAULT 500, p_run_id text DEFAULT NULL) -> jsonb
+F: fn_loyalty_custom_apply_tier(p_merchant_id uuid, p_as_of_date date, p_mode text, p_batch_size integer DEFAULT 500, p_run_id text DEFAULT NULL) -> jsonb
+F: fn_loyalty_expiry_buckets_for_user(p_user_id uuid, p_merchant_id uuid, p_as_of_date date DEFAULT ...) -> TABLE(expiry_date date, amount numeric)
+F: fn_loyalty_expiry_envelope(p_user_id uuid, p_merchant_id uuid, p_as_of_date date DEFAULT ...) -> jsonb
+F: fn_loyalty_is_custom_expiry(p_merchant_id uuid) -> boolean
+F: fn_loyalty_is_custom_tier(p_merchant_id uuid) -> boolean
+F: fn_loyalty_resolve_calculator(p_merchant_id uuid, p_kind text) -> regprocedure
+F: ensure_tier_progress_standard(p_user_id uuid, p_merchant_id uuid) -> void
+
+---
+
 ## Translation
 
 T: translations
@@ -1555,6 +1581,7 @@ T: log_clear_lineuserid
 T: merchant_integration
 T: merchant_languages
 T: merchant_master
+T: merchant_expiry_reminder_settings
 T: merchant_notification_settings
 T: merchant_widget_settings
 T: migration_id_map
@@ -1740,6 +1767,7 @@ F: bff_get_general_config() -> jsonb
 F: bff_get_integration_config(p_integration_key text) -> jsonb
 F: bff_get_lifecycle_action_options() -> jsonb
 F: bff_get_lifecycle_automation(p_workflow_id uuid) -> jsonb
+F: bff_get_expiry_reminder_settings() -> jsonb
 F: bff_get_notification_settings() -> jsonb
 F: bff_get_upload_for_approval(p_upload_id uuid) -> jsonb
 F: bff_get_user_address() -> jsonb
@@ -1784,6 +1812,7 @@ F: bff_upsert_integration_config(p_integration_key text, p_config jsonb) -> json
 F: bff_upsert_intent(p_intent text, p_merchant_id uuid DEFAULT NULL::uuid, p_description text DEFAULT NULL::text, p_example_message...) -> jsonb
 F: bff_upsert_lifecycle_automation(p_config jsonb) -> jsonb
 F: bff_upsert_merchant_languages(p_languages jsonb) -> jsonb
+F: bff_upsert_expiry_reminder_settings(p_run_local_time time, p_timezone text, p_language text DEFAULT 'en') -> jsonb
 F: bff_upsert_notification_settings(p_rows jsonb) -> jsonb
 F: bff_upsert_package_with_items(p_id uuid DEFAULT NULL::uuid, p_name text DEFAULT NULL::text, p_description text DEFAULT NULL::text, p_validit...) -> jsonb
 F: bff_upsert_single_earn_channel(p_data jsonb) -> jsonb
@@ -1857,7 +1886,12 @@ F: fn_execute_action(p_action_type text, p_user_id uuid, p_merchant_id uuid, p_p
 F: fn_execute_amp_action(p_action_type text, p_user_id uuid, p_merchant_id uuid, p_params jsonb DEFAULT '{}'::jsonb, p_workflow_id uuid...) -> jsonb
 F: fn_execute_macro(p_macro_id uuid, p_context_type text, p_context_ref_id uuid DEFAULT NULL::uuid, p_user_id uuid DEFAULT NULL::u...) -> jsonb
 F: fn_expire_package_entitlements() -> jsonb
+F: fn_expiry_reminder_source_event_id(p_merchant_id uuid, p_event_key text, p_sub_event text, p_user_id uuid, p_channel text, p_expiry_date date, p_lead_days integer, p_entitlement_id uuid DEFAULT NULL) -> uuid
 F: fn_extract_notification_template_field_refs(p_template jsonb) -> jsonb
+F: fn_find_points_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_lead_days integer DEFAULT 7, p_channel text DEFAULT 'line', p_after_user_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
+F: fn_find_rewards_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_timezone text DEFAULT 'Asia/Bangkok', p_lead_days integer DEFAULT 3, p_channel text DEFAULT 'line', p_after_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
+F: fn_list_due_expiry_reminder_merchants(p_now timestamptz DEFAULT now(), p_after_merchant_id uuid DEFAULT NULL, p_limit integer DEFAULT 50, p_channel text DEFAULT 'line') -> TABLE
+F: fn_mark_expiry_reminder_ran(p_merchant_id uuid, p_local_date date) -> void
 F: fn_extract_user_profile_language(p_all_data jsonb, p_language text, p_default_language text DEFAULT 'en'::text) -> jsonb
 F: fn_futurepark_get_redemption(p_reward_code text DEFAULT NULL::text, p_external_code text DEFAULT NULL::text) -> json
 F: fn_futurepark_mark_status(p_mode text, p_reward_code text DEFAULT NULL::text, p_external_code text DEFAULT NULL::text, p_ticket_code tex...) -> json
@@ -1887,10 +1921,6 @@ F: fn_jsonb_to_uuid_array(p_json jsonb) -> uuid[]
 F: fn_kickoff_event_registration_import(p_batch_id uuid) -> jsonb
 F: fn_lifecycle_event_shopify_feature_key(p_event text) -> text
 F: fn_merchant_deferred_crm_confirm(p_merchant_id uuid) -> boolean
-F: fn_find_points_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_lead_days integer DEFAULT 7, p_channel text DEFAULT 'line', p_after_user_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
-F: fn_find_rewards_expiring_soon(p_merchant_id uuid, p_as_of_date date, p_timezone text DEFAULT 'Asia/Bangkok', p_lead_days integer DEFAULT 3, p_channel text DEFAULT 'line', p_after_id uuid DEFAULT NULL, p_limit integer DEFAULT 75) -> TABLE
-F: fn_list_due_expiry_reminder_merchants(p_now timestamptz DEFAULT now(), p_after_merchant_id uuid DEFAULT NULL, p_limit integer DEFAULT 50, p_channel text DEFAULT 'line') -> TABLE
-F: fn_mark_expiry_reminder_ran(p_merchant_id uuid, p_local_date date) -> void
 F: fn_merchant_shopify_feature_enabled(p_merchant_id uuid, p_feature_group text, p_feature_key text DEFAULT NULL::text) -> boolean
 F: fn_merge_values_into_config(p_config jsonb, p_default_values jsonb, p_custom_values jsonb) -> jsonb
 F: fn_migration_validate_syngenta() -> jsonb

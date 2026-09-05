@@ -2,6 +2,114 @@
 
 ---
 
+## 2026-06-22 — Points Bonus Delayed ~2.5 min by a Failing Ticket Award (Sibling Head-of-Line Blocking)
+
+**Impact**: On merchants that have both a points award and a misconfigured ticket earn factor, purchase **bonus** points (e.g. a 4× multiplier) appeared ~2.5 minutes after the base points, even with Award Timing set to `immediate`. Reported on `qa-install` (user `krit tan`). Mistaken at first for a timing/multiplier-config bug; the timing fix (v71) was working correctly (`delayed:false`, `award_datetime ≈ started_at`). The delay was Inngest retry backoff on an always-failing sibling step.
+
+**Root cause**: Two layered defects.
+
+1. **Sequential award loop blocked siblings behind a failing step's retries.** `currencyAward` posted each currency row in `await step.run(\`award-${i}\`, …)` inside a sequential `for` loop with function-level `retries: 3`. When one row threw (e.g. `award-1` = ticket base), Inngest retried the whole function with exponential backoff (≈30s→60s→120s) before the outer `try/catch` ever saw the terminal error — so `award-2` (the points bonus) could not start until `award-1` exhausted all retries. The v54 "loop hardening" fixed the *cascade* (siblings eventually drain, run ends `partial_success`) but not the *latency* (siblings still wait out the backoff).
+2. **Structurally-doomed ticket rows were being enqueued.** A ticket earn factor with `target_entity_id = NULL` can never satisfy `chokepoint_post_wallet_transaction` (`RAISE EXCEPTION 'target_entity_id is required for ticket transactions'`, SQLSTATE `P0001`). **11 active ticket earn factors fleet-wide** carry a null `target_entity_id`; each produces a guaranteed-failing `award-i` step on every purchase. `qa-install`'s was `393aa5df-24fd-440c-b418-7ce48f0126a3` (`Basic ticket config`, rate 10:1).
+
+**Fix**:
+
+1. **Data (qa-install)** — deactivated earn factor `393aa5df-…` (`active_status=false`); no tickets were ever awarded from it (it always failed). Refreshed `mv_earn_factors_complete` (98 rows, 18ms) so eligibility reflects it.
+2. **`inngest-currency-serve` v72 — drop doomed rows + parallel resilient awards.** Before enqueuing any step, rows where `currency_type='ticket' AND target_entity_id IS NULL` are filtered out (recorded as `skipped_invalid_config`) so a guaranteed-failing step is never created — this neutralizes all 11 bad factors for the award path fleet-wide. The award loop now runs in **parallel** (`Promise.all` of `step.run`) so a slow/failing sibling never delays the others. Errors are classified by SQLSTATE: **permanent** (business-rule `P0001`, constraint `23xxx`, data `22xxx`, etc.) are recorded as failures **without throwing** (no Inngest retry/backoff); **transient** (`40001`/`40P01`/`08xxx`/`57014`/no SQLSTATE) are re-thrown so Inngest retries that single step independently — preserving ledger-safety retries while removing head-of-line blocking. `currencyReversal` unchanged.
+
+**Edge Functions**:
+
+| Slug | Version | Change |
+|---|---|---|
+| `inngest-currency-serve` | v72 | `currencyAward`: pre-filter ticket rows with null `target_entity_id` (`skipped_invalid_config`); award steps run in parallel via `Promise.all`; permanent vs transient error classification via SQLSTATE (`isPermanentAwardError`); additive metadata (`skipped_count`, `code` on failures). `verify_jwt:false` preserved. No public event-shape change. `currencyReversal` untouched. |
+
+**Deploy notes**:
+
+- Deployed via Supabase MCP `deploy_edge_function` with explicit `verify_jwt: false`.
+- No source mirror under `supabase/functions/` — deployed function is the only copy; next agent should `get_edge_function(function_slug='inngest-currency-serve')`.
+
+**Verification**:
+
+- v72 confirmed ACTIVE via deploy response (version 72, `verify_jwt:false`).
+- `qa-install` bad factor confirmed `active_status=false`; MV refresh succeeded.
+- Recommend live repro: a `qa-install` purchase should now complete in ~5s (was ~2.5 min) with base + bonus points landing together; run metadata should show `skipped_count ≥ 1` and `delayed:false`.
+
+**Open follow-ups (NOT done — out of scope / need owner decision)**:
+
+- **10 other active ticket earn factors fleet-wide still have `target_entity_id = NULL`.** v72 neutralizes their runtime impact (rows skipped), but they are dead config. Recommend each merchant either link a real `ticket_type` (set `target_entity_id`) or deactivate the factor.
+- **No DB-level guard added** to prevent creating/activating a ticket factor without a `target_entity_id` (a partial CHECK constraint was rejected because 11 existing rows violate it). Consider a trigger or fixing the 11 rows then adding `CHECK (target_currency <> 'ticket' OR active_status IS NOT TRUE OR target_entity_id IS NOT NULL)`.
+- **`currencyReversal` retains the sequential per-item loop** with the same head-of-line property; not changed (not the reported issue, lower blast radius). Parallelize similarly if reversal latency becomes a concern.
+
+---
+
+## 2026-06-22 — Currency Awards Ignore "Delayed" Timing Setting (Awarded Immediately)
+
+**Impact**: Merchants configured with `currency_award_delay_type` of `rolling_days`, `rolling_minutes`, or `scheduled` saw purchase points/tickets awarded immediately despite the UI showing the delay was set. QA repro on a Shopify test merchant ("set to 1 day, awarded within seconds") confirmed. Across the last 30 days of `inngest_workflow_log`, zero `currency_award` runs were marked `delayed:true` — including merchants correctly persisted as delayed in `merchant_master`.
+
+**Root cause**: Two layered defects.
+
+1. **`inngest-currency-serve` recomputed `award_datetime` from a stale source and silently defaulted to `now` on any gap.** The function called `get-merchant-config` (a Redis-cached edge function, 30-min TTL, no invalidation) and ran a local `calculateAwardDatetime` that used optional chaining + `|| 0` defaults — so any cache miss, malformed payload, or null field collapsed to `now`. The correct value was already computed by `CurrencyConsumer` (`crm-event-processors`) reading `merchant_master` live and passed in the event payload as `award_datetime`, but the edge function ignored it. Compounding latent bug: `calculateAwardDatetime` used a hardcoded `TIMEZONE_OFFSETS` map (8 zones, no DST) that defaulted to Bangkok offset for unknown zones.
+2. **`bff_upsert_currency_config` COALESCE pattern left stale delay values when switching modes.** Switching `delay_type` back to `immediate` did not zero `currency_award_delay_days` / `_minutes` / `_time`, producing mixed configs (e.g. `Yuanta Demo` had `delay_type='immediate'` with stale `days=7`). Any consumer that gated on numeric zero-checks instead of `delay_type` would treat this incorrectly as delayed.
+
+**Fix**:
+
+1. **`bff_upsert_currency_config` rewritten to treat Award Timing as an atomic unit.** When `currency_award_delay_type` is supplied, fields not meaningful under the new type are zeroed via `CASE`. `NULLIF(..., '')::INTEGER` guards replace bare casts so empty-string payloads cannot throw and silently roll back the UPDATE. Points-expiry fields unchanged. One-time backfill zeroed stale `days`/`minutes`/`time` on merchants already configured as `immediate`.
+2. **`inngest-currency-serve` v71 trusts `event.data.award_datetime` verbatim.** Removed `getMerchantConfig` step, `TIMEZONE_OFFSETS` map, and `calculateAwardDatetime` helper. If `award_datetime` is missing from the payload, the workflow throws loudly → Inngest retries 3× → surfaces as failed in `inngest_workflow_log` (was: silent immediate-award). `currencyReversal` unchanged; loop hardening preserved.
+
+**Migration**: `fix_bff_upsert_currency_config_atomic_timing_20260622` (function rewrite + `merchant_master` backfill in one migration).
+
+**Edge Functions**:
+
+| Slug | Version | Change |
+|---|---|---|
+| `inngest-currency-serve` | v71 | Removed `getMerchantConfig` step + `TIMEZONE_OFFSETS` + `calculateAwardDatetime`. Uses `event.data.award_datetime` verbatim. Throws on missing payload field. `verify_jwt:false` preserved (Inngest webhook signature verification path). No public event-shape change — `award_datetime` was already in the payload from the consumer; the function just stops ignoring it. |
+
+**Deploy notes**:
+
+- Migration applied via Supabase MCP `apply_migration`. Backfill affected at least `Yuanta Demo` (verified clean post-migration: `immediate, 0, 0, null`).
+- Edge function deployed via Supabase MCP `deploy_edge_function` with explicit `verify_jwt: false`.
+- No source-code mirror under `supabase/functions/` — the deployed function is the only copy; next agent should `get_edge_function(function_slug='inngest-currency-serve')` via MCP.
+
+**Verification**:
+
+- Post-migration `merchant_master` query: zero rows match the stale-state pattern (`delay_type='immediate' AND (days>0 OR minutes>0 OR time IS NOT NULL)`).
+- Function signature unchanged: `bff_upsert_currency_config(p_data jsonb) -> jsonb`. Comment documents atomic-timing semantics.
+- Edge function v71 confirmed active via `get_edge_function`: `getMerchantConfig` / `TIMEZONE_OFFSETS` / `calculateAwardDatetime` gone; `currencyAward` uses payload `award_datetime`; throws on missing.
+- Live end-to-end repro on a delayed merchant pending (recommend `Shopify Test Merchant` → set `rolling_minutes=2` → test purchase → confirm `metadata.delayed=true`, `metadata.award_datetime ≈ started_at + 2min`, `wallet_ledger` row visible only after 2-min wait).
+
+**FE contract (loyalty-admin)**: When saving the Award Timing section on `/merchant-currency-settings`, always send all five timing fields together (`currency_award_delay_type`, `currency_award_delay_days`, `currency_award_delay_minutes`, `currency_award_time`, `currency_award_timezone`). The BFF now zeroes fields not meaningful under the chosen `delay_type`, so partial payloads will have their unused fields cleared. Treat `success:false` from this RPC as a hard error and surface `description` to the user.
+
+---
+
+## 2026-05-28 — All Admin-Created Tiers Stuck at Ranking 0 (Upgrades Blocked)
+
+**Impact**: Merchants configuring tiers via loyalty admin saw every tier as `#0`. Members never upgraded even when point thresholds were met.
+
+**Root cause**: `bff_upsert_tier_with_conditions` used `COALESCE((tier_data->>'ranking')::smallint, 0)` on create. The admin FE did not send `ranking`, so every tier was stored at 0. `evaluate_user_tier_status` only considers tiers with `ranking > current`, so no upgrade path existed.
+
+**Fix**:
+1. Create without `ranking` → auto-assign `COALESCE(MAX(ranking), -1) + 1`.
+2. Create/update with explicit `ranking` → insert-at-slot / peer shift logic.
+3. `get_tier_conditions_by_type('new')` → returns suggested next ranking.
+4. One-time repair renumbered merchants where every tier was 0 (ordered by `created_at`).
+
+**Migration**: `tier_ranking_auto_assign_and_insert_shift` (local file `supabase/migrations/20260528180000_tier_ranking_auto_assign_and_insert_shift.sql`)
+
+---
+
+## 2026-05-25 — Front Line "Redeemed by" Shows Admin Lookup Actor (Not Member)
+
+**Impact**: After a member self-redeemed from the client app, the admin Front Line dashboard showed the **admin who searched the code** in "Redeemed by" instead of the member.
+
+**Root cause**: `api_get_redemption` resolved `redeemed_by_name` from `redemption_usage_log` rows with `action IN ('lookup', 'redeem')`. Client self-redemptions did not write a `redeem` log (only admin/frontline paths did), so the latest `lookup` audit row — written when staff searched the code — was used. Member field (`reward_redemptions_ledger.user_id`) was correct; only actor attribution was wrong.
+
+**Fix**:
+1. `api_get_redemption` — `redeemed_by` now reads `action = 'redeem'` only; falls back to ledger member (`user_accounts.fullname`) when no redeem log exists.
+2. `redeem_reward_with_points` — always writes a `redeem` usage log; member app redemptions use `source_type = 'member_app'` and `performed_by = auth.uid()` (or target user id).
+
+**Migrations**: `fix_redeemed_by_frontline_lookup`, `redeem_reward_with_points_always_log_redeem`
+
+---
+
 ## 2026-05-15 — `inngest-currency-serve` Loop Hardening (One Bad Factor No Longer Aborts Siblings)
 
 **Triggered by**: New CRM (`merchant_id 8f67aa08-…`) currency awards stalling in production. Root cause traced to a single misconfigured `earn_factor` row (`b3006117-deb1-448a-914b-6174db8883be` — `earn_factor_type='rate'`, `target_currency='ticket'`, `earn_factor_amount=1000`) that aborted the entire Inngest run via an uncaught throw. Symptom was masked by setting that single factor to `active_status=false`; latent bug remained.

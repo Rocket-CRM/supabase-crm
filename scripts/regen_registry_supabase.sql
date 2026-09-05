@@ -5,6 +5,7 @@
 
 WITH
 domains(prio, name, pattern) AS (VALUES
+  (20, 'Demo seed (Ausiris)', 'custom_ausiris_demo'),
   (15, 'Tier',                  'tier'),
   (15, 'Currency',              '(^|_)(wallet|currency|point|ticket|expiry|earn_factor|burn)'),
   (15, 'Reward',                '(reward|redeem|promo_code|claim_link|admin_push_reward)'),
@@ -19,7 +20,7 @@ domains(prio, name, pattern) AS (VALUES
   (15, 'Store Classification',  '(store_|location_|partner_)'),
   (15, 'Tag & Persona',         '(persona|user_tag|tag_master|tag_assignment|assign_tag|admin_delete_tag|bff_.*tag)'),
   (15, 'Activity & Earning',    '(activity_|earning_)'),
-  (15, 'Purchase Transaction',  '(purchase|transaction_|ledger)'),
+  (15, 'Purchase Transaction',  '(purchase|transaction_|ledger|manual_staff_discount)'),
   (15, 'Chokepoint Outbox',     '(chokepoint_event_outbox|fn_chokepoint_emit_event|v_chokepoint_outbox_health)'),
   (15, 'Event Promotion',       '(event_promo|fn_calc_promo_set_count|fn_evaluate_promo_condition|fn_calc_event_promos|fn_apply_event_promos|bff_.*event_promo)'),
   (15, 'Display Settings',      '(display_settings|display_block|display_link|get_display_|fn_get_display)'),
@@ -129,5 +130,5 @@ header AS (
 )
 SELECT
   (SELECT body FROM header) ||
-  string_agg(body, E'\n---\n\n' ORDER BY CASE WHEN domain = 'Unassigned' THEN 1 ELSE 0 END, domain)
+  string_agg(body, E'\n---\n\n' ORDER BY CASE WHEN domain = 'Unassigned' THEN 1 ELSE 0 END, domain) AS registry
 FROM domain_blocks;

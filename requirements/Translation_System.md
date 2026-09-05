@@ -1,4 +1,7 @@
-# Translation System - Complete Architecture & Implementation Guide
+# Translation System
+
+> **Accuracy note (2026-08-09):** Upstash database IDs in ops sections may drift — verify in Upstash console. UI cache invalidation is via triggers, not `fn_invalidate_ui_translations_cache`.
+
 
 ## Executive Summary
 
@@ -124,6 +127,7 @@ translated_value: 'แก้วกาแฟ'
 | `consent_version` | `consent_versions` | title, preview, content |
 | `communication_topic` | `communication_topics` | topic_name |
 | `tier` | `tier_master` | tier_name |
+| `leaderboard` | `campaign_leaderboard` | page_header, page_description, `column_label:<field>`, personal_quota_label |
 
 ### Translation Pattern
 
@@ -904,8 +908,9 @@ filter_redeemed             ← Section: filter, (implied: button/tab)
 
 **Commands:**
 ```sql
--- Clear UI translations
-SELECT fn_invalidate_ui_translations_cache();
+-- UI translations: cache invalidation is trigger-driven
+-- (ui_translations_cache_invalidation / translations_cache_invalidation).
+-- There is no fn_invalidate_ui_translations_cache().
 
 -- Clear rewards cache
 SELECT fn_invalidate_merchant_rewards_cache('merchant-uuid');

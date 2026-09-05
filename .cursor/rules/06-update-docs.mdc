@@ -7,18 +7,37 @@ alwaysApply: false
 
 After creating or modifying any of the items below, update the corresponding docs IN THE SAME SESSION — never defer.
 
+### Definition of done (behavior-affecting change)
+
+Incomplete until **all** apply:
+
+1. Authoritative `requirements/<Domain>.md` updated (or new doc + `domains/_index.md` Domain Map row + keywords).
+2. When the domain doc uses Concept → Journey → System design, touch the sections that actually changed (do not leave behavior only in a buried appendix).
+3. `REGISTRY_RENDER.md` updated if edge / cron / queue / Render / Inngest public surface changed.
+4. `REGISTRY_SUPABASE.md` regenerated if schema / RPC names changed (`registry-regenerate` skill).
+5. One-line `CHANGELOG.md` append (protocol below).
+
+**Wrong-home ban:** do not document Shopify product behavior in Ecommerce/Marketplace docs (Shopify → `Shopify.md`; Shopee/Lazada/TikTok claim ingest → `Marketplace.md`). FuturePark ops stay in `FuturePark.md`; generic receipt upload in `Receipt_Upload_Earning.md`.
+
 | Change | What to update |
 |---|---|
-| New / changed DB function | Domain doc only (e.g. `requirements/Reward.md`, `CS_Conversations.md`). Do NOT touch `INDEX_FUNCTION.md`. Regenerate `REGISTRY_SUPABASE.md` via the `registry-regenerate` skill so future greps see the new name. |
-| New table or schema change | Domain doc (e.g. `Reward.md`) AND `requirements/domains/<domain>.md` (until that file is merged in Phase 6 of `agent-context-architecture.md`). Regenerate `REGISTRY_SUPABASE.md` via the `registry-regenerate` skill. |
+| New / changed DB function | Domain doc only (e.g. `requirements/Reward.md`, `CS_Conversations.md`). Do NOT touch `INDEX_FUNCTION.md` (removed stub; use registries). Regenerate `REGISTRY_SUPABASE.md` via the `registry-regenerate` skill so future greps see the new name. |
+| New table or schema change | Domain doc (e.g. `Reward.md`) AND `requirements/domains/<domain>.md` (until that file is merged in Phase 6 of `AGENT_CONTEXT_ARCHITECTURE.md`). Regenerate `REGISTRY_SUPABASE.md` via the `registry-regenerate` skill. |
 | New / changed Supabase edge function | Domain doc + `requirements/REGISTRY_RENDER.md` (add/move/delete the `E:` line). |
 | New / changed pg_cron job | Domain doc + `requirements/REGISTRY_RENDER.md` (`C:` line). |
 | New / changed PGMQ queue | Domain doc + `requirements/REGISTRY_RENDER.md` (`Q:` line). |
 | New / changed Render service | Domain doc + `requirements/REGISTRY_RENDER.md` (`R:` line). |
 | New / changed Inngest function or MCP tool | Domain doc + `REGISTRY_RENDER.md` if it has a public surface. |
 | New domain or undocumented tables | Create `requirements/<Domain>.md`, add entry to `requirements/domains/_index.md`. |
+| Open API / partner API | `requirements/Open_API.md` (+ keep `docs/openapi/*` machine contract in sync). |
+| Loyalty-admin BQ analytics | `requirements/Analytics.md` (+ `docs/BQ_PARTITION_AND_CLUSTERING.md` if partition guidance changes). |
+| Marketplace Shopee/Lazada/TikTok | `requirements/Marketplace.md` (not Ecommerce stub; not Shopify.md). |
+| Shopify app / storefront | `requirements/Shopify.md`. |
+| FuturePark / generic receipt OCR | `FuturePark.md` / `Receipt_Upload_Earning.md`. |
+| Earn channel display | `requirements/Earn_Channel.md` (FE companion + Earn_from_Code as siblings). |
+| Check-in | `requirements/Checkin.md` (+ active feature guide `feature-docs/checkin.md` if tester-visible). |
 | CS tables/functions | Use `cs_` prefix, `CS_*.md` docs. |
-| Feature behavior change with an active Feature Guide | Update `requirements/feature-docs/<feature>.md` (only `rewards.md` is currently Active — see `requirements/feature-docs/INDEX.md`). |
+| Feature behavior change with an active Feature Guide | Update `requirements/feature-docs/<feature>.md` (Active: `rewards.md`, `reward-groups.md`, `checkin.md` — see `requirements/feature-docs/INDEX.md`). |
 | **Any of the above (final step)** | **Append a one-line entry to `requirements/CHANGELOG.md` under today's date, linking the domain MD where full detail lives.** |
 
 ### Why both the domain doc AND `REGISTRY_RENDER.md`
@@ -35,6 +54,12 @@ After updating the domain doc(s) and any registries, append one bullet to `requi
 - Format: `**<Domain>** — <one-sentence summary>. See \`requirements/<Doc>.md\` §<Section>.`
 - One bullet per change. Bug fixes that change behavior are in scope; pure refactors and doc-only edits are not.
 - Never duplicate detail in the changelog — the linked MD is the source of truth.
+
+**CHANGELOG append-only protocol (token discipline):**
+
+- **Never `Read` the full `CHANGELOG.md`.** Use `Shell` `tail -n 20 requirements/CHANGELOG.md` to see today's section and the format. CHANGELOG is read 28 times across 22 recent threads — every one of those is a wasted full-file load.
+- **Never `StrReplace` into `CHANGELOG.md`.** Append via `Shell`: `cat >> requirements/CHANGELOG.md <<'EOF' ... EOF` or `printf '%s\n' '- **Domain** — summary. See ...' >> requirements/CHANGELOG.md`.
+- If today's `## YYYY-MM-DD` heading does not exist yet (check via `tail -n 20`), append the heading then the bullet, both in one shell command.
 
 ### About `INDEX_FUNCTION.md` (DEPRECATED — do not read or write)
 
@@ -75,3 +100,10 @@ Only when behavior visible to testers/CS/marketing changes AND the feature has a
 - CS domains: prefix filenames with `CS_`.
 - Keep entries factual — no aspirational descriptions.
 - A task that touched an edge fn / queue / cron / Render service is NOT done until `REGISTRY_RENDER.md` reflects the change.
+
+### Plan File Size Discipline (`.cursor/plans/`)
+
+Plan files in `.cursor/plans/` must stay under **20KB**. When a plan grows past that, the first action of any thread referencing it is to compress (extract status + open decisions to ~5KB) and move the prior version to `.cursor/plans/archive/` (which is in `.cursorignore`).
+
+- Active plans are scratchpads, not source of truth. The source of truth is the relevant `requirements/<Domain>.md`. When a plan describes a finished or partly-finished feature, the durable content should move into the domain doc; the plan file should shrink correspondingly.
+- Requirements docs (`requirements/*.md`) are **exempt** from this size rule — they are authoritative and stay full-size. The fix for large requirement docs is grep-first access (`12-doc-search.mdc`), not file truncation.

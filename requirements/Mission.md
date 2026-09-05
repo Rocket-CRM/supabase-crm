@@ -10,65 +10,52 @@ The mission system enables merchants to define goal-based challenges where users
 
 **Milestone Missions** implement multi-level progressive achievement paths. Users advance through sequential levels (1→2→3), each with distinct targets and rewards. Progress "waterfalls" through levels—overflow from completing one level automatically applies to the next.
 
-## Architecture
+## Architecture (post-Confluent, 2026-07-08)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           Event Sources                                  │
-├─────────────────┬─────────────────┬─────────────────┬───────────────────┤
-│ purchase_ledger │  wallet_ledger  │form_submissions │  referral_ledger  │
-└────────┬────────┴────────┬────────┴────────┬────────┴─────────┬─────────┘
-         │                 │                 │                  │
-         └────────────────┬┴─────────────────┴──────────────────┘
-                          │
+┌──────────────────────────────────────────────────────────┐
+│                     Event Sources                         │
+├───────────────────────────┬──────────────────────────────┤
+│ purchase_ledger (+items)  │        wallet_ledger         │
+└─────────────┬─────────────┴──────────────┬───────────────┘
+              │ chokepoint_post_purchase_… │ chokepoint wallet emit
+              ▼                            ▼
+      ┌──────────────────────────────────────────┐
+      │ chokepoint_event_outbox                  │
+      │ (crm.events.purchase / purchase_item /   │
+      │  wallet)                                 │
+      └───────────────────┬──────────────────────┘
+                          │ OutboxPublisher (crm-event-processors)
                           ▼
-                 ┌────────────────┐
-                 │  Debezium CDC  │
-                 │  (Supabase)    │
-                 └───────┬────────┘
-                         │
-                         ▼
-                 ┌────────────────┐
-                 │  Kafka Topics  │
-                 │  (Upstash)     │
-                 └───────┬────────┘
-                         │
-                         ▼
-                 ┌────────────────┐
-                 │MissionConsumer │◄── Redis Pre-filter Cache
-                 │(crm-event-     │    (active missions lookup)
-                 │ processors)    │
-                 └───────┬────────┘
-                         │
-                         ▼
-                 ┌────────────────┐
-                 │ Inngest Cloud  │
-                 │ mission/evaluate│
-                 └───────┬────────┘
-                         │
-                         ▼
-                 ┌────────────────┐
-                 │inngest-mission │
-                 │   -serve       │
-                 │ (Edge Function)│
-                 └───────┬────────┘
-                         │
-                         ▼
-         ┌───────────────┴───────────────┐
-         │     PostgreSQL Functions      │
-         ├───────────────────────────────┤
-         │fn_evaluate_mission_conditions │
-         │fn_update_mission_progress     │
-         │fn_process_mission_outcomes    │
-         └───────────────┬───────────────┘
-                         │
-                         ▼
-                 ┌────────────────┐
-                 │mission_progress│
-                 │(condition_     │
-                 │ progress JSONB)│
-                 └────────────────┘
+      ┌──────────────────────────────────────────┐
+      │ inngest-event-router-serve (Edge Fn)     │
+      │ mission-purchase-router                  │
+      │ mission-purchase-item-router             │
+      │ mission-wallet-router                    │
+      └───────────────────┬──────────────────────┘
+                          │ mission/evaluate (per active mission)
+                          ▼
+      ┌──────────────────────────────────────────┐
+      │ inngest-mission-serve (Edge Fn)          │
+      │ mission-evaluate workflow                │
+      └───────────────────┬──────────────────────┘
+                          ▼
+      ┌──────────────────────────────────────────┐
+      │ fn_evaluate_mission_conditions           │
+      │ fn_update_mission_progress               │
+      │ fn_process_mission_outcomes              │
+      └───────────────────┬──────────────────────┘
+                          ▼
+      ┌──────────────────────────────────────────┐
+      │ mission_progress (condition_progress     │
+      │ JSONB) + mission_log_completion          │
+      └──────────────────────────────────────────┘
 ```
+
+Removed 2026-07-08 (dead/duplicate paths): `trg_mission_eval_queue_wallet` →
+`mission_evaluation_queue` (no consumer since Inngest migration; queue truncated) and
+`trg_mission_eval_realtime_wallet` (double-evaluated manual missions already covered by the
+Inngest wallet router). The Inngest path is the single evaluation owner.
 
 ## Per-Condition JSONB Progress Tracking
 
@@ -144,32 +131,38 @@ One JSONB field (`condition_progress`) stores progress for both mission types. T
 
 ## Event Flow
 
-### 1. CDC Capture
+### 1. Chokepoint emit (CDC/Kafka decommissioned 2026-06-04 / 2026-07-07)
 
-Debezium captures changes from source tables and streams to Kafka:
+`chokepoint_post_purchase_event` and the wallet chokepoint write flat JSON payloads to
+`chokepoint_event_outbox`; the OutboxPublisher (crm-event-processors, Inngest mode)
+publishes them as Inngest events (`crm.events.purchase` → `crm/purchase.event`, etc.).
 
-| Source Table | Kafka Topic | Condition Type |
-|--------------|-------------|----------------|
-| `purchase_ledger` | `crm_cdc.public.purchase_ledger` | `purchase` |
-| `wallet_ledger` | `crm_cdc.public.wallet_ledger` | `points_earned`, `tickets_earned` |
-| `form_submissions` | `crm_cdc.public.form_submissions` | `form_submission` |
-| `referral_ledger` | `crm_cdc.public.referral_ledger` | `referral_signup`, `referral_purchase` |
+| Topic | Payload fields used by missions | Condition Type |
+|-------|--------------------------------|----------------|
+| `crm.events.purchase` | `purchase_id`, `user_id`, `status`, `final_amount`, `total_amount`, `seller_id`, `store_id`, `store_code` | `purchase` (unscoped conditions) |
+| `crm.events.purchase_item` | `item_id`, `purchase_id`, `user_id`, `item_status`, `sku_id`, `product_id`, `category_id`, `brand_id`, `amount` (line_total), `transaction_amount`, `seller_id` | `purchase` (SKU/product/category/brand-scoped conditions) |
+| `crm.events.wallet` | `wallet_ledger_id`, `user_id`, `currency`, `amount`, `transaction_type`, `target_entity_id` | `points_earned`, `tickets_earned` |
 
-### 2. MissionConsumer Processing
+Item payload enrichment (sku/product/category/brand/line amount) added 2026-07-08; the
+`product_id`/`category_id`/`brand_id` are resolved via `product_sku_master` → `product_master`
+at emit time.
 
-The consumer service (`crm-event-processors`) receives CDC messages and:
+### 2. Router processing (`inngest-event-router-serve`)
 
-1. **Parses Debezium message** - Extracts `after` payload with row data
-2. **Decodes decimal values** - Debezium encodes DECIMAL/NUMERIC as base64; consumer decodes them
-3. **Checks Redis cache** - Fast lookup: does this merchant have active missions for this condition type?
-4. **Publishes to Inngest** - Sends `mission/evaluate` event with user, merchant, event data
+Three mission routers replace the legacy MissionConsumer:
 
-```typescript
-// Debezium decimal decoding example
-// Input: "JxA=" (base64-encoded 100.00)
-// Output: 100.00
-const amount = decodeDebeziumDecimal(after.final_amount, 2);
-```
+1. **`mission-purchase-router`** — fires on `status='completed'` only. Forwards
+   `amount` (= `final_amount ?? total_amount`), `seller_id`, `store_id`, `store_code`
+   in `event_data` (amount forwarding restored 2026-07-08 — its omission in the initial
+   Confluent→Inngest port silently zeroed all purchase-sum progress).
+2. **`mission-purchase-item-router`** — fires on `item_status='completed'` only (added
+   2026-07-08). Feeds SKU/product/category/brand-scoped purchase conditions with line-level
+   `amount`. Idempotency `item_id:item_status`.
+3. **`mission-wallet-router`** — fires on `transaction_type='earn'`; condition type
+   `points_earned` (currency=points) or `tickets_earned` (others).
+
+Each router gates on `fn_has_active_missions` + `fn_get_active_missions_by_condition_type`
+(replaces the legacy Redis mission cache) and emits one `mission/evaluate` per active mission.
 
 ### 3. Inngest Workflow: mission/evaluate
 
@@ -226,9 +219,44 @@ Evaluates event against mission conditions and returns increments:
 
 The function checks:
 - Does event_type match condition_type?
+- **Header/item scoping (2026-07-08):** purchase conditions with `sku_ids` / `product_ids` /
+  `category_ids` / `brand_ids` match ONLY `p_event_type='purchase_item'`; unscoped purchase
+  conditions match ONLY `p_event_type='purchase'`. Header and item events therefore never
+  double-count the same condition.
 - Do product/category/brand filters match?
-- Are amount thresholds satisfied?
-- Does store location match attribute set?
+- Are amount thresholds satisfied? (`min/max_transaction_amount` compares the transaction
+  total — item events carry it as `transaction_amount`; `sum` increments use the event
+  `amount`, which is the line amount on item events)
+- Does store location match attribute set? Resolve the store in this order, then
+  call `get_store_attribute_sets`: event `store_id` as `store_master.id` (UUID),
+  else event `store_code`, else `store_master.store_code = event.store_id`
+  (POS / legacy text code). Front Line receipts persist `purchase_ledger.store_id`
+  as a UUID.
+- For `points_earned` only: non-empty `earn_source_type` must match wallet
+  `source_type`. Empty / NULL matches all earn sources except `mission` (mission-sourced
+  earns still need an explicit `mission` allow).
+- For `tickets_earned`: `NULL` / empty `ticket_type_id` matches every ticket type;
+  non-empty = wallet `target_entity_id` is in that UUID array. Mission-outcome ticket
+  earns **do** count (`source_type='mission'`). Recursion is capped by progress/claim
+  loop limits, not by dropping mission-source wallet events. `earn_source_type` is
+  ignored for this condition type.
+
+**`fn_check_progress_limits` / `fn_check_claim_limits`**
+
+- Progress limits (`mission_limit_progress`) cap **completions written** in the
+  merchant-TZ calendar window of `time_unit × time_value` (lookback of
+  `time_value` calendar days/weeks/months/years including today). `time_value=2`
+  on `day` covers today and yesterday and does **not** reopen at the next
+  midnight. `fn_update_mission_progress` asks
+  `fn_check_progress_limits` for remaining quota and caps loops at that number.
+  Spend that would complete a loop after the cap is **discarded** — current-loop
+  progress is not left at target. A new window counts only new eligible spend;
+  leftover from a capped window must not become completions. Count is
+  `mission_log_completion` rows, not progress events.
+- Claim limits (`mission_limit_claim`) cap **reward payouts** only, via
+  `fn_check_claim_limits` inside `fn_process_mission_outcomes_batch` (member claim,
+  Front Line claim, auto-claim). They use the same `time_unit × time_value`
+  merchant-TZ window. They must not cap progress writes.
 
 **`fn_update_mission_progress`**
 
@@ -266,37 +294,34 @@ Distributes rewards when milestones/conditions complete:
 - Creates `redemption_pool` entries for physical rewards
 - Logs to `mission_log_completion` and `mission_log_outcome_distribution`
 
-## Redis Cache Layer
+## Active-Mission Pre-filter (Redis cache retired)
 
-The consumer maintains a Redis cache for fast pre-filtering:
-
-**Key Pattern:** `missions:active:{merchant_id}:{condition_type}`
-**Value:** Set of active mission IDs
-
-**Population:**
-```sql
-SELECT DISTINCT m.id
-FROM mission m
-JOIN mission_conditions mc ON mc.mission_id = m.id
-WHERE m.merchant_id = $1 
-  AND mc.condition_type = $2
-  AND m.is_active = true
-  AND (m.start_date IS NULL OR m.start_date <= NOW())
-  AND (m.end_date IS NULL OR m.end_date >= NOW());
-```
-
-**Invalidation:** Cache refreshes on service restart or when materialized view `mv_mission_conditions_expanded` is refreshed.
+The legacy Redis cache (`missions:active:{merchant_id}:{condition_type}`) died with the
+MissionConsumer. Routers now call the same DB RPCs the cache was built from, per event:
+`fn_has_active_missions(p_merchant_id, p_condition_type)` (cheap boolean gate) then
+`fn_get_active_missions_by_condition_type()` filtered to the merchant.
 
 ## Condition Types
 
-| Type | Source Table | Event Trigger | Filters Available |
-|------|--------------|---------------|-------------------|
-| `purchase` | `purchase_ledger` | status='completed' | products, SKUs, categories, brands, stores, amounts |
-| `points_earned` | `wallet_ledger` | transaction_type='earn', currency='points' | earn_source_type |
-| `tickets_earned` | `wallet_ledger` | transaction_type='earn', currency='ticket' | ticket_type_id |
-| `form_submission` | `form_submissions` | status='completed' | form_id |
-| `referral_signup` | `referral_ledger` | signed_up_at IS NOT NULL | — |
-| `referral_purchase` | `referral_ledger` | first_purchase_at IS NOT NULL | — |
+| Type | Source | Event Trigger | Filters Available |
+|------|--------|---------------|-------------------|
+| `purchase` | `crm.events.purchase` (unscoped) / `crm.events.purchase_item` (SKU/product/category/brand-scoped) | status / item_status ='completed' | products, SKUs, categories, brands, stores, amounts |
+| `points_earned` | `crm.events.wallet` | transaction_type='earn', currency='points' | earn_source_type |
+| `tickets_earned` | `crm.events.wallet` | transaction_type='earn', currency≠'points' | ticket_type_id |
+| `form_submission` | **DEAD** — no chokepoint source since CDC decommission | — | form_id |
+| `referral_signup` | **DEAD** — no chokepoint source since CDC decommission | — | — |
+| `referral_purchase` | **DEAD** — no chokepoint source since CDC decommission | — | — |
+
+`bff_upsert_mission` rejects the three dead condition types (`UNSUPPORTED_CONDITION_TYPE`,
+2026-07-08) until chokepoint emits exist at their write sites.
+
+Admin Mission Settings shows **Earn source** only for `points_earned`. The writer persists
+`conditions[].earn_source_type` (`text[]`; empty / omitted / JSON null → SQL `NULL` = all
+sources). A leftover `earn_source` key is still accepted. Purchase and tickets-earned
+payloads must not send a wallet source filter.
+
+ASSERT: a `tickets_earned` condition counts mission-outcome ticket earns; the type
+filter matches wallet `target_entity_id`.
 
 ### Measurement Types
 
@@ -357,15 +382,17 @@ Binary events (forms, referrals) always use count logic.
 | Setting | Options | Behavior |
 |---------|---------|----------|
 | `progress_activation_type` | `auto` / `manual` | Auto: tracks all users. Manual: requires accept_mission call |
-| `claim_type` | `auto` / `manual` | Auto: rewards immediately. Manual: user must claim |
+| `claim_type` | `auto` / `manual` | Auto: rewards immediately and writes `frontline_mission_claim_log` so Front Line Claim Mission History matches issued outcomes. Manual: user / staff must claim |
 
 ### Reset Frequency
 
 | Setting | Behavior |
 |---------|----------|
 | `NULL` | Progress accumulates indefinitely |
-| `daily` | Resets at midnight |
+| `daily` | Resets at merchant-local midnight |
 | `monthly` | Resets on 1st of month |
+
+Period reset (`fn_batch_reset_due_missions`, pg_cron every 15 min) zeroes in-period progress **and** `unclaimed_completions`. Claimed rewards (`lifetime_*`) stay. `NULL` `reset_mode` means `global`.
 
 **Note:** Milestone missions cannot have reset frequency (constraint enforced).
 
@@ -375,6 +402,8 @@ Binary events (forms, referrals) always use count logic.
 |------|----------|
 | `global` | All users reset at same calendar time |
 | `user_specific` | Each user resets relative to their `period_started_at` |
+
+Default when `reset_mode` is null: `global`.
 
 ## Examples
 
@@ -424,6 +453,27 @@ Binary events (forms, referrals) always use count logic.
 
 ## BFF Functions (Frontend API)
 
+### bff_upsert_mission
+
+Admin create/update for mission definition + children (conditions, outcomes, limits).
+
+**Endpoint:** `POST /rest/v1/rpc/bff_upsert_mission`
+
+**Eligibility fields** (`eligible_persona_ids`, `eligible_persona_group_ids`):
+
+- Parsed via `fn_jsonb_uuid_array`. Null, empty array `[]`, or any non-array JSON (including `""` from FE “All personas”) → stored as `NULL` = all members.
+- Only a JSON array of UUID strings is persisted. Merchant ownership is validated in `fn_validate_mission_upsert` when the array is non-empty.
+
+**`earn_source_type`:** read from `conditions[].earn_source_type` (jsonb array or scalar
+string) into `mission_conditions.earn_source_type`. Empty array → NULL. GET
+(`bff_get_mission_details_conditions_limits`) returns the same key.
+
+### admin_delete_mission
+
+Hard-delete of a mission definition. Returns `MISSION_HAS_CLAIM_HISTORY` when
+`frontline_mission_claim_log` rows exist for that mission. Claim logs stay (RESTRICT) —
+do not CASCADE. Deactivate (`is_active = false`) to take a claimed mission off the floor.
+
 ### bff_get_user_missions
 
 Returns list of missions for a user with progress summary.
@@ -435,6 +485,14 @@ Returns list of missions for a user with progress summary.
 |-----------|------|---------|-------------|
 | `p_user_id` | uuid | `auth.uid()` | Target user (admin override) |
 | `p_include_inactive` | boolean | false | Include inactive missions |
+
+Admin override (`p_user_id` set, e.g. Frontline Claim Mission) requires an active `admin_users` row for the current merchant (`auth_user_id = auth.uid()`, `merchant_id` match, `active_status = true`). Do not use the removed `admin_users.role` text column.
+
+Each mission row includes `claim_exclusivity_group` (trimmed text, null when blank). Front Line Group view buckets by this string so booth staff see exclusive siblings together. No Group Mission master.
+
+List `outcomes[]` include `entity_name` for tickets (`ticket_type.name`) and rewards (`reward_master.name`), plus existing `reward_name` / `reward_image`. Front Line Claim Mission uses `entity_name` so the modal can show `QA ticket : 1` instead of raw `tickets : 1`.
+
+`fn_process_mission_outcomes_batch` pays a set of completions in one transaction: each distinct outcome is dispatched once with `amount × completion count`. Non-promo rewards therefore get one `reward_redemptions_ledger` row (`qty = grant`). Promo-code rewards still split per `requirements/Reward.md#Multi-Quantity Redemption`. Member `bff_claim_mission` / auto-claim use the same batch.
 
 ### bff_get_mission_detail
 
@@ -448,6 +506,8 @@ Returns comprehensive mission details including conditions, outcomes, and progre
 | `p_mission_id` | uuid | required | Mission to retrieve |
 | `p_user_id` | uuid | `auth.uid()` | Target user (admin override) |
 
+`end_date` stops join/progress. `claim_end_date` (else `end_date`) is the claim window. After `end_date`, list `is_visible` is true only when `can_claim`. Detail still returns the payload when `reason_codes` includes `after_end` (claim window still open) so Claim is not a fake “Mission not found.” Unclaimed is `mission_log_completion.outcomes_distributed IS DISTINCT FROM true` — same as list count and `bff_claim_mission`.
+
 ### bff_claim_mission
 
 Claims mission outcomes for user.
@@ -460,6 +520,7 @@ Claims mission outcomes for user.
 | `p_mission_id` | uuid | required | Mission to claim |
 | `p_user_id` | uuid | `auth.uid()` | Target user (admin override) |
 | `p_milestone_level` | integer | null | Specific milestone to claim (milestone missions only) |
+| `p_quantity` | integer | `1` | Completions to pay this call. Passed as `p_max_claims` to `fn_process_mission_outcomes_batch`. Default 1 — not all remaining. Auto-claim still uses `fn_process_mission_outcomes` (uncapped). Front Line stays on `bff_frontline_claim_mission`. |
 
 ### button_action Field
 
@@ -498,19 +559,52 @@ const isDisabled = buttonAction === 'claimed';
 
 ## Operational Notes
 
-### Cache Refresh
+### Condition evaluation (direct tables)
 
-When creating new missions, the Redis cache must be refreshed for the consumer to pick them up:
+`fn_evaluate_mission_conditions` reads `mission` + `mission_conditions` directly (indexed).
+The former `mv_mission_conditions_expanded` and its refresh crons were removed 2026-08-09
+(S0.5). Admin writes still go through live `bff_upsert_mission(p_data jsonb)` — the 2026-07-08
+change only removed the inline MV refresh, not the upsert function.
 
-1. Restart `crm-event-processors` service, OR
-2. Cache auto-refreshes on next scheduled interval
+### Mission completed shared event (E2)
 
-### Materialized View
+`AFTER INSERT` on `mission_log_completion` → `trigger_emit_mission_completed_event` →
+`fn_chokepoint_emit_event('crm.events.mission', …)` with `event=completed` and identity
+`completion_id`. This is for cross-module consumers (notifications/AMP/analytics). It must
+**not** drive mission outcome distribution (`fn_distribute_mission_completion` /
+`fn_dispatch_outcome` remain authoritative). Opt out of emits in a transaction with
+`SELECT set_config('mission.skip_emit','true',true)`. OutboxPublisher must include `mission`
+in `OUTBOX_PUBLISH_TOPICS` (added 2026-08-09).
 
-After mission/condition changes:
-```sql
-REFRESH MATERIALIZED VIEW mv_mission_conditions_expanded;
-```
+### Legacy retirement (E3)
+
+Dropped dead `mission_evaluation_queue` + batch/queue/realtime functions (Inngest owns eval).
+`mission_log_outcome_distribution` table replaced by a compatibility **view** over
+`outcome_distribution_log` (`source_type=mission`, success only). Canonical writes stay on
+the shared log. `fn_process_mission_outcomes_for_milestone` removed; milestone claim uses
+`fn_distribute_mission_completion` directly.
+
+### Loop missions (`allow_progress_loop`)
+
+On completion of a loop mission, `fn_update_mission_progress` calls
+`fn_reset_condition_progress(p_user_id, p_mission_id)` BEFORE incrementing the completion
+counters (the reset zeroes `current_progress`/`period_completions`). Fixed 2026-07-08 —
+previously it called the function with a jsonb argument that doesn't match any signature,
+crashing (and rolling back) every loop-mission completion.
+
+`max_loops_per_transaction` NULL means unlimited loops from one event (still bounded by
+receipt amount and progress limits). Admin Completion frequency **Multiple** saves NULL;
+**Limited** requires an integer > 0. `COALESCE(max_loops, raw_completions)` in the
+progress function is the unlimited path.
+
+**Once** (`allow_progress_loop = false`) caps `lifetime_completions` at 1. Parked-at-target
+fills do not cash another Ready-to-claim. Limited leftover zeroing stays on limit rows only.
+
+### Admin claim-on-behalf
+
+`bff_claim_mission(p_mission_id, p_user_id, …)` with an explicit `p_user_id` requires the
+caller to be an active `admin_users` row for the merchant (`active_status = true`). Fixed
+2026-07-08 — previously it checked non-existent `role` / `is_active` columns and always failed.
 
 ### Monitoring
 
@@ -523,8 +617,9 @@ Check Supabase logs for:
 - PostgreSQL function errors
 - Edge Function execution
 
-### Debezium Decimal Handling
+### Reward dropdown for Mission Outcomes
 
-CDC encodes PostgreSQL `DECIMAL/NUMERIC` as base64 byte arrays:
-- `"JxA="` = 100.00 (base64 → bytes → integer 10000 → divide by 100)
-- Consumer's `decodeDebeziumDecimal()` handles this automatically
+`bff_list_rewards_for_mission_outcomes` returns rewards with `visibility IN ('user',
+'campaign')`, campaign-first. If the admin Outcomes dropdown shows only `user` rewards,
+verify (a) the merchant actually has active `campaign` rewards and (b) the FE calls this
+RPC rather than `bff_list_rewards` or a client-side visibility filter.

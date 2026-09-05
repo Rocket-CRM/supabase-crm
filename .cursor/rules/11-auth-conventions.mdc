@@ -52,92 +52,21 @@ IF NOT check_admin_permission('manage_rewards') THEN
 END IF;
 ```
 
-### Admin Session Flow
-
-1. Admin signs in via Supabase Auth (email/password or SSO)
-2. `custom_access_token_hook` enriches JWT with `merchant_id`, role, permissions
-3. FE sends JWT in Authorization header + `x-merchant-id` in custom header
-4. BFF function calls `get_current_merchant_id()` → resolves merchant
-5. All queries filter by this merchant_id
-
 ## 2. End-User Auth (user-facing functions)
 
-**Who:** End-users (loyalty members, customers).
-**How:** Supabase Auth JWT or custom session tokens.
+**Who:** End-users (loyalty members, customers). **How:** Supabase Auth JWT or custom session tokens.
 
-### User Identity
-
-- `auth.uid()` → Supabase auth user UUID
-- `get_current_user_id()` / `current_user_id()` → user UUID from auth context
-- `get_header_user_id()` → user UUID from custom header (for service-to-service calls)
-- `user_accounts` table is the primary user record (links `auth_user_id` → `merchant_id`)
-
-### User Session Management
-
-```
-user_sessions        → extended sessions (LINE login, custom auth)
-refresh_tokens       → token refresh tracking
-```
-
-- `create_extended_session()` — creates long-lived session
-- `validate_session()` / `check_user_session_valid()` — validates session token
-- `refresh_session()` — refreshes expired session
-
-### User Auth Methods
-
-Configured per merchant in `merchant_master.auth_methods` (text[]):
-- `line` — LINE Login (most common in Thailand)
-- `email` — Email/password
-- `tel` — Phone/OTP
-- `shopify` — Shopify customer auth
-
-OTP flow: `otp_requests` table, validated by `fn_validate_otp()`
+Key functions: `auth.uid()`, `get_current_user_id()`, `get_header_user_id()`. Primary table: `user_accounts` (links `auth_user_id` → `merchant_id`). Sessions: `user_sessions`, `validate_session()`, `refresh_session()`. Auth methods per merchant in `merchant_master.auth_methods`: line, email, tel, shopify.
 
 ## 3. API Auth (external integrations)
 
-**Who:** External systems, webhooks, server-to-server calls.
-**How:** API key in header, merchant_id passed explicitly.
+**Who:** External systems, webhooks. **How:** API key in header, `p_merchant_id` passed explicitly.
 
-### API Key System
-
-```
-merchant_api_keys    → stores hashed API keys per merchant
-```
-
-- `validate_api_key(p_api_key)` — validates and returns merchant_id
-- `bff_create_merchant_api_key()` — admin creates new key
-- `bff_revoke_merchant_api_key()` — admin revokes key
-- `admin_generate_api_key()` — generates the key
-
-### API Function Pattern
-
-API functions (`api_*`) receive `p_merchant_id` explicitly — the API gateway validates the key and passes the merchant:
-
-```sql
-CREATE OR REPLACE FUNCTION public.api_get_user(
-    p_merchant_id uuid,
-    p_user_id uuid DEFAULT NULL,
-    p_email text DEFAULT NULL,
-    p_tel text DEFAULT NULL
-)
-RETURNS jsonb
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $function$
-...
-```
-
-**Key difference from BFF:** `api_*` takes `p_merchant_id` as a parameter. `bff_*` derives it from `get_current_merchant_id()`.
+`api_*` functions take `p_merchant_id` as a parameter (key validated upstream by `validate_api_key()`). This is the key difference from BFF which derives merchant from JWT.
 
 ## 4. Superadmin Auth
 
-**Who:** Platform operators managing multiple merchants.
-**How:** Hardcoded check or special role.
-
-`superadmin_*` functions — operate across merchants. Used for:
-- Creating new merchants (`superadmin_create_merchant`)
-- Managing admin users across merchants
-- Platform-level configuration
+`superadmin_*` functions operate across merchants (create merchants, manage admins, platform config).
 
 ## Auth Decision Matrix
 
@@ -158,3 +87,4 @@ AS $function$
 - **All queries**: MUST filter by merchant_id (enforced by RLS as safety net)
 - **Sensitive operations**: Add `check_admin_permission()` check
 - **User data access**: Always verify user belongs to the merchant
+- **Anon role policies**: Must check `get_current_merchant_id() IS NOT NULL` to prevent unauthenticated access

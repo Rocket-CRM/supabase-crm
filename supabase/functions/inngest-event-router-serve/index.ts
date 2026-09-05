@@ -13,7 +13,7 @@
  *   (v6, 2026-07-08: purchase router forwards amount/seller_id; new purchase-item router
  *   feeds SKU/product/category/brand-scoped purchase conditions)
  * - outcome-purchase-router / outcome-wallet-router           -> amp_outcome_attribution
- * - notification-{purchase,purchase-item,wallet,tier,user,redemption,receipt}-router -> LINE push
+ * - notification-{purchase,purchase-item,wallet,tier,user,redemption,receipt,referral}-router -> LINE/Email
  * - amp-{purchase,purchase-item,wallet,tier,user}-router      -> amp-dispatch-realtime-event
  *   (v3, 2026-07-08: amp-user-router batched + throttled per merchant for signup bursts;
  *   trigger matching cached per merchant by fn_get_active_triggers_cached, 600s)
@@ -55,6 +55,7 @@ import {
   notificationUserRouter,
   notificationRedemptionRouter,
   notificationReceiptRouter,
+  notificationReferralRouter,
 } from "./lib/notification-router.ts";
 import {
   ampPurchaseRouter,
@@ -83,6 +84,7 @@ const handler = serve({
     notificationUserRouter,
     notificationRedemptionRouter,
     notificationReceiptRouter,
+    notificationReferralRouter,
     ampPurchaseRouter,
     ampPurchaseItemRouter,
     ampWalletRouter,
