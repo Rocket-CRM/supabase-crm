@@ -775,6 +775,46 @@ Existing columns (`upgrade_progress_percent`, `maintain_progress`, deadlines, et
 
 ---
 
+### Entry Rewards
+
+Per-tier welcome package on the tier config page (`/tier-conditions-settings/[id]`). Not display perks, and not Earn rules → Lifecycle automations.
+
+| Surface | Use |
+|---------|-----|
+| **Tier config → Entry rewards** | Default package when a member **upgrades into** that tier |
+| **Tier Perks** | Display-only (icon / header / description). No grant. |
+| **Lifecycle → Tier upgraded** (`to_tier_id` optional) | Extra cross-cutting rules under Earn rules |
+
+Do **not** auto-create lifecycle workflows from entry rewards. If both are configured for the same upgrade, both can grant — pick one primary pattern per tier.
+
+#### Config
+
+Tables (merchant-scoped, RLS):
+
+- `tier_entry_rewards` — lines on a tier: `points` (`points_amount`, optional `description`) or `reward` (`reward_id`, `quantity` default 1)
+- `tier_entry_reward_grants` — idempotency + redeemed count. Unique `(merchant_id, tier_id, user_id, tier_entry_reward_id)` → **once per member per line, forever** (downgrade + re-upgrade does not re-grant). Failed attempts are retried on a later upgrade.
+
+Admin:
+
+- `bff_get_tier_entry_rewards(p_tier_id)` — config + `redeemed_count` + pushable reward catalog (excludes `visibility = user_only`)
+- `bff_upsert_tier_entry_rewards(p_tier_id, p_rewards)` — replace list atomically. Validates tier ownership, `points_amount > 0`, reward active / same merchant / not user-only.
+
+Saved independently on the tier page (same pattern as Perks). New tiers: configure after first save (`tier_id` required). Shown on standalone and Shopify embedded; Shopify only changes the add-reward type picker (`ChooseRewardTypeModal`: fixed amount, percentage, free shipping, free product, plus points). Gift card / store credit are out of scope.
+
+#### Grant hook
+
+`apply_tier_change` (after a successful, non-skipped **`upgrade`**) calls `fn_grant_tier_entry_rewards`. Covers immediate upgrades (`process_tier_event`) and delayed upgrades (`tier_apply_due_pending_upgrades`). **Does not grant** on `assign_entry` (free-entry placement) or `manual` / `downgrade`.
+
+Each active line:
+
+1. Insert grant row (`ON CONFLICT` skip unless previous status was `failed`)
+2. `fn_dispatch_outcome` — points via wallet chokepoint (`source_type = tier_entry_reward`, dedup `tier_entry:{tier_id}:{user_id}:{line_id}`); rewards via `redeem_reward_with_points(..., p_mode := 'direct')` (no points deducted)
+3. Line failure is logged on the grant row and **does not block** the tier change
+
+Member-facing Ways to Earn for entry rewards is out of scope for v1.
+
+---
+
 ## Technical Implementation
 
 ### Architectural Overview
