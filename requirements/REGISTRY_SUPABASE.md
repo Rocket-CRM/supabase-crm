@@ -563,6 +563,7 @@ F: api_get_wallet_transactions(p_merchant_id uuid, p_user_id uuid DEFAULT NULL::
 F: api_post_wallet_transaction(p_merchant_id uuid, p_transaction_type text, p_amount integer, p_dedup_key text, p_user_id uuid DEFAULT NULL::...) -> jsonb
 F: bff_admin_adjust_currency(p_user_id uuid, p_currency currency, p_transaction_type currency_transaction_type, p_amount integer, p_reason ...) -> jsonb
 F: bff_admin_get_member_wallet_history(p_user_id uuid, p_filter text DEFAULT 'all'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) -> TABLE(id uuid, created_at timestamp with...
+F: bff_admin_get_member_wallet_lots(p_user_id uuid, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) -> TABLE(id uuid, earned_at timestamptz, amount integer, expiry_date date, deductible_balance numeric, redeemed_amount numeric, redeemed_at timestamptz, expired_amount integer, expired_at timestamptz, source_type text, description text, lot_status text, total_count bigint)
 F: bff_admin_get_point_discount_burn_history(p_user_id uuid, p_store_id uuid DEFAULT NULL::uuid, p_minutes integer DEFAULT 60) -> jsonb
 F: bff_create_point_discount_burn(p_user_id uuid, p_points_amount integer, p_store_id uuid DEFAULT NULL::uuid, p_description text DEFAULT NULL::...) -> jsonb
 F: bff_get_basic_currency_config(p_target_currency text, p_target_entity_id uuid DEFAULT NULL::uuid) -> jsonb
