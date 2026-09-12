@@ -663,6 +663,20 @@ T: custom_webhook_events
 
 ---
 
+## Outbound Integrations
+
+T: integration_delivery_log
+T: integration_outbox_cursor
+T: integration_sync_jobs
+F: bff_integration_klaviyo_disconnect(p_language text DEFAULT 'en'::text) -> jsonb
+F: bff_integration_klaviyo_get_connection(p_language text DEFAULT 'en'::text) -> jsonb
+F: bff_integration_klaviyo_start_sync_all(p_language text DEFAULT 'en'::text) -> jsonb
+F: fn_integration_lock_credential(p_credential_id uuid) -> merchant_credentials
+F: fn_integration_resolve_member_snapshot(p_merchant_id uuid, p_user_id uuid) -> jsonb
+F: fn_integration_webhook_url_is_public(p_url text) -> boolean
+
+---
+
 ## Customer Import
 
 T: bulk_import_batches
@@ -901,6 +915,8 @@ F: update_merchant_credentials_updated_at() -> trigger
 F: upsert_marketplace_order(p_order jsonb) -> jsonb
 X: merchant_credentials -> trg_invalidate_amp_creds_cache (AFTER DELETE)
 X: merchant_credentials -> trg_invalidate_earn_channels_cache_on_credentials_source (AFTER DELETE)
+X: merchant_credentials -> trigger_integration_webhook_credential (BEFORE INSERT)
+X: merchant_credentials -> trigger_integration_webhook_credential (BEFORE UPDATE)
 X: merchant_credentials -> update_merchant_credentials_updated_at (BEFORE UPDATE)
 
 ---

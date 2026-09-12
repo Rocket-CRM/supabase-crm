@@ -28,6 +28,7 @@ domains(prio, name, pattern) AS (VALUES
   (15, 'Admin Panel',           '(admin_user|admin_role|admin_menu|admin_analytics|superadmin|platform_admin|loyalty_setup_mastery)'),
   (15, 'BigCommerce Storefront API', 'bigcommerce'),
   (15, 'Custom Webhooks',         'custom_webhook'),
+  (20, 'Outbound Integrations',   '(integration_delivery_log|integration_outbox_cursor|integration_sync_jobs|fn_integration_|bff_integration_|trigger_integration_webhook)'),
   (20, 'Marketplace',             '(marketplace_|merchant_credentials|get_shop_credentials|get_merchant_marketplace)'),
   (15, 'AMP Workflows',         '(workflow|amp_agent|amp_analysis|amp_audience|audience|amp_tracked_link|amp_engagement|fn_amp_|bff_amp_|fn_evaluate_amp)'),
   (15, 'Receipt / OCR',         '(receipt|ocr_)'),
