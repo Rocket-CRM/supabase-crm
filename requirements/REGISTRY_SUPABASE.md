@@ -563,7 +563,8 @@ F: api_get_wallet_transactions(p_merchant_id uuid, p_user_id uuid DEFAULT NULL::
 F: api_post_wallet_transaction(p_merchant_id uuid, p_transaction_type text, p_amount integer, p_dedup_key text, p_user_id uuid DEFAULT NULL::...) -> jsonb
 F: bff_admin_adjust_currency(p_user_id uuid, p_currency currency, p_transaction_type currency_transaction_type, p_amount integer, p_reason ...) -> jsonb
 F: bff_admin_get_member_wallet_history(p_user_id uuid, p_filter text DEFAULT 'all'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) -> TABLE(id uuid, created_at timestamp with...
-F: bff_admin_get_member_wallet_lots(p_user_id uuid, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) -> TABLE(id uuid, earned_at timestamptz, amount integer, expiry_date date, deductible_balance numeric, redeemed_amount numeric, redeemed_at timestamptz, expired_amount integer, expired_at timestamptz, source_type text, description text, lot_status text, total_count bigint)
+F: bff_admin_get_member_wallet_lot_reconciliation(p_user_id uuid) -> jsonb
+F: bff_admin_get_member_wallet_lots(p_user_id uuid, p_limit integer DEFAULT 100, p_offset integer DEFAULT 0) -> TABLE(id uuid, earned_at timestamptz, amount integer, expiry_date date, deductible_balance numeric, redeemed_amount numeric, redeemed_at timestamptz, redeemed_wallet_burn_id uuid, redeemed_wallet_source_type text, redeemed_wallet_description text, redemption_ledger_id uuid, redemption_code text, expired_amount integer, expired_at timestamptz, expired_wallet_burn_id uuid, expired_wallet_description text, source_type text, description text, lot_status text, total_count bigint)
 F: bff_admin_get_point_discount_burn_history(p_user_id uuid, p_store_id uuid DEFAULT NULL::uuid, p_minutes integer DEFAULT 60) -> jsonb
 F: bff_create_point_discount_burn(p_user_id uuid, p_points_amount integer, p_store_id uuid DEFAULT NULL::uuid, p_description text DEFAULT NULL::...) -> jsonb
 F: bff_get_basic_currency_config(p_target_currency text, p_target_entity_id uuid DEFAULT NULL::uuid) -> jsonb
@@ -1126,7 +1127,6 @@ X: receipt_ocr_set_rule -> trigger_receipt_ocr_set_rule_updated_at (BEFORE UPDAT
 
 T: referral_ledger
 T: referral_outcomes
-T: referral_reward_save_requests
 F: bff_get_referral_settings() -> jsonb
 F: bff_list_referral_ledger(p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_inviter_user_id uuid DEFAULT NULL::uuid, p_invitee_u...) -> jsonb
 F: bff_upsert_referral_settings(p_config jsonb) -> jsonb
@@ -1185,10 +1185,8 @@ F: bff_admin_list_reward_claim_links(p_reward_id uuid DEFAULT NULL::uuid, p_is_a
 F: bff_admin_push_reward(p_user_id uuid, p_reward_id uuid, p_quantity integer DEFAULT 1, p_notes text DEFAULT NULL::text, p_store_id uu...) -> jsonb
 F: bff_admin_set_reward_claim_link_active(p_link_id uuid, p_is_active boolean) -> jsonb
 F: bff_admin_upsert_reward_claim_link(p_link_id uuid DEFAULT NULL::uuid, p_reward_id uuid DEFAULT NULL::uuid, p_name text DEFAULT NULL::text, p_note...) -> jsonb
-F: bff_attach_campaign_reward(p_slot jsonb, p_reward_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_claim_reward_via_link(p_token text, p_selected_variants jsonb DEFAULT NULL::jsonb) -> jsonb
 F: bff_delete_reward_group(p_group_id uuid) -> jsonb
-F: bff_detach_campaign_reward(p_slot jsonb, p_reward_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_get_reward_claim_preview(p_token text) -> jsonb
 F: bff_get_reward_details(p_mode text DEFAULT 'edit'::text, p_reward_id uuid DEFAULT NULL::uuid) -> jsonb
 F: bff_get_reward_group_details(p_group_id uuid DEFAULT NULL::uuid, p_mode text DEFAULT 'new'::text) -> jsonb
@@ -1197,7 +1195,6 @@ F: bff_get_reward_store_stock(p_reward_id uuid) -> jsonb
 F: bff_list_reward_groups() -> jsonb
 F: bff_list_rewards() -> jsonb
 F: bff_list_rewards_for_mission_outcomes() -> jsonb
-F: bff_upsert_campaign_reward_atomic(p_reward jsonb, p_slot jsonb, p_request_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_reward(p_config jsonb) -> jsonb
 F: bff_upsert_reward_group_with_limits(p_group_id uuid DEFAULT NULL::uuid, p_group_code text DEFAULT NULL::text, p_name text DEFAULT NULL::text, p_de...) -> jsonb
 F: bff_upsert_reward_group_with_limits(p_group_id uuid DEFAULT NULL::uuid, p_group_code text DEFAULT NULL::text, p_name text DEFAULT NULL::text, p_de...) -> jsonb
@@ -1210,8 +1207,6 @@ F: bulk_upload_promo_codes_chunked(p_codes text[], p_source_id uuid, p_merchant_
 F: bulk_upload_promo_codes_validated(p_codes text[], p_source_id uuid, p_merchant_id uuid, p_lot_code text DEFAULT NULL::text, p_reward_id uuid DEF...) -> jsonb
 F: check_reward_eligibility_enhanced(p_user_id uuid, p_reward_id uuid) -> boolean
 F: cleanup_old_promo_code_imports() -> void
-F: fn_campaign_reward_slot_attach(p_slot jsonb, p_reward_id uuid) -> jsonb
-F: fn_campaign_reward_slot_detach(p_slot jsonb, p_reward_id uuid) -> jsonb
 F: fn_check_reward_group_limits(p_user_id uuid, p_reward_id uuid, p_quantity integer, p_merchant_id uuid) -> jsonb
 F: fn_check_reward_store_stock_on_use(p_redemption_id uuid, p_store_id uuid DEFAULT NULL::uuid) -> jsonb
 F: fn_get_reward_store_stock(p_reward_id uuid, p_merchant_id uuid DEFAULT NULL::uuid) -> jsonb
@@ -1220,7 +1215,6 @@ F: fn_invalidate_merchant_rewards_cache(p_merchant_id uuid) -> void
 F: fn_redeem_member_message(p_key text, p_language text DEFAULT 'en'::text, p_params text[] DEFAULT NULL::text[]) -> text
 F: fn_resolve_reward_variant_selection(p_variant_config jsonb, p_selected jsonb, p_enforce boolean DEFAULT true) -> jsonb
 F: fn_reward_claim_link_url(p_merchant_id uuid, p_token text) -> text
-F: fn_reward_references(p_reward_id uuid) -> jsonb
 F: get_my_reward_prices() -> jsonb
 F: get_promo_code_summary() -> TABLE(id uuid, reward_name text, merchan...
 F: get_promo_code_summary_by_merchant(p_merchant_id uuid) -> TABLE(promo_batch_name text, reward_id u...
@@ -1404,26 +1398,21 @@ T: stg_mongo_tier_txns
 T: stg_mongo_tiers
 T: tier_conditions
 T: tier_evaluation_tracking
-T: tier_entry_reward_grants
-T: tier_entry_rewards
 T: tier_master
 T: tier_pending_upgrades
 T: tier_program_config
 T: tier_progress
 F: admin_delete_tier(p_tier_id uuid) -> jsonb
 F: apply_tier_change(p_user_id uuid, p_merchant_id uuid, p_to_tier_id uuid, p_change_type text DEFAULT 'upgrade'::text, p_pending_i...) -> jsonb
-F: bff_get_tier_entry_rewards(p_tier_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_get_tier_history(p_filter text DEFAULT NULL::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) -> TABLE(id uuid, title text, description t...
 F: bff_get_tier_program_config(p_user_type user_type DEFAULT NULL::user_type) -> jsonb
 F: bff_upsert_tier_display(p_tier_id uuid, p_display jsonb) -> jsonb
-F: bff_upsert_tier_entry_rewards(p_tier_id uuid, p_rewards jsonb, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_tier_program_config(p_config jsonb) -> jsonb
 F: bff_upsert_tier_with_conditions(tier_data jsonb) -> jsonb
 F: calculate_tier_metric_value(p_user_id uuid, p_merchant_id uuid, p_metric metric, p_user_type user_type, p_window_start date, p_window_end ...) -> numeric
 F: chokepoint_post_tier_change(p_user_id uuid, p_merchant_id uuid, p_from_tier_id uuid, p_to_tier_id uuid, p_change_type tier_change_type, p_...) -> uuid
 F: ensure_tier_progress(p_user_id uuid, p_merchant_id uuid) -> void
 F: evaluate_user_tier_status(p_user_id uuid, p_merchant_id uuid, p_evaluation_date date DEFAULT CURRENT_DATE) -> jsonb
-F: fn_grant_tier_entry_rewards(p_user_id uuid, p_merchant_id uuid, p_to_tier_id uuid) -> void
 F: fn_tier_conditions_enforce_unique_upgrade_amount() -> trigger
 F: fn_tier_ladder_for_user(p_user_id uuid, p_merchant_id uuid) -> TABLE(tier_id uuid, upgrade_amount numer...
 F: fn_tier_window(p_merchant_id uuid, p_user_type user_type, p_evaluation_date date DEFAULT CURRENT_DATE) -> TABLE(window_start date, window_end date...
