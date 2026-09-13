@@ -1,6 +1,4 @@
--- Customer 360 wallet lots: resolve wallet burn + redemption ledger links for tooltips.
-
-DROP FUNCTION IF EXISTS public.bff_admin_get_member_wallet_lots(uuid, integer, integer);
+-- Customer 360 point lots: show most recently earned lots first.
 
 CREATE OR REPLACE FUNCTION public.bff_admin_get_member_wallet_lots(
   p_user_id uuid,
@@ -165,6 +163,3 @@ BEGIN
   OFFSET v_offset;
 END;
 $function$;
-
-GRANT EXECUTE ON FUNCTION public.bff_admin_get_member_wallet_lots(uuid, integer, integer) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.bff_admin_get_member_wallet_lots(uuid, integer, integer) TO service_role;
