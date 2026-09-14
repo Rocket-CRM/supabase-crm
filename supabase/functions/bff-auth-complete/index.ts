@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-import { create, getNumericDate, verify } from 'https://deno.land/x/djwt@v2.8/mod.ts';
+import { verify } from 'https://deno.land/x/djwt@v2.8/mod.ts';
+import { ACCESS_TOKEN_EXPIRY, issueMemberSession } from '../_shared/member-session.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,7 +9,6 @@ const corsHeaders = {
 };
 
 const JWT_SECRET = Deno.env.get('SUPABASE_JWT_SECRET') || Deno.env.get('JWT_SECRET');
-const ACCESS_TOKEN_EXPIRY = 30 * 24 * 60 * 60;
 const REFRESH_TOKEN_EXPIRY = 30 * 24 * 60 * 60;
 
 interface AuthInput {
@@ -464,12 +464,17 @@ serve(async (req) => {
 
     userAccount = await backfillAuthUserIdIfMissing(supabase, userAccount);
 
-    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(JWT_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    const accessTokenJwt = await create(
-      { alg: 'HS256', typ: 'JWT' },
-      { sub: userAccount.id, merchant_id, user_id: userAccount.id, phone: userAccount.tel, line_id: userAccount.line_id, email: userAccount.email, role: 'authenticated', aud: 'authenticated', iss: 'supabase', exp: getNumericDate(ACCESS_TOKEN_EXPIRY) },
-      key
-    );
+    const sessionChannel = hasShopifyEmail ? 'shopify' : hasLine ? 'line' : 'tel';
+    const { access_token: accessTokenJwt } = await issueMemberSession({
+      userAccount: {
+        id: userAccount.id,
+        tel: userAccount.tel,
+        line_id: userAccount.line_id,
+        email: userAccount.email,
+      },
+      merchantId: merchant_id,
+      channel: sessionChannel,
+    });
     const userSupabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
       global: { headers: { Authorization: `Bearer ${accessTokenJwt}` } }
     });

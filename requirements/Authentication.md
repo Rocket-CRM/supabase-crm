@@ -234,28 +234,16 @@ Works with Supabase RPC, RLS, and external services
 
 ### JWT Generation (Custom Claims)
 
-**Generated in bff-auth-complete using Supabase's project JWT secret:**
+**Shared issuer:** `supabase/functions/_shared/member-session.ts` exports `issueMemberSession`. `bff-auth-complete`, `shopify-proxy`, and `shopify-extension-api` all call it after channel verification. Member identity is always `user_accounts.id` in `sub` / `user_id`; Supabase Auth users are **admin-only**, not members.
+
+**Generated using Supabase's project JWT secret (`SUPABASE_JWT_SECRET`):**
 
 ```typescript
-// Uses Supabase's HMAC-SHA256 project secret
-const JWT_SECRET = Deno.env.get('SUPABASE_JWT_SECRET') || Deno.env.get('JWT_SECRET');
-
-// Creates JWT with custom claims
-const jwt = await create(
-  { alg: 'HS256', typ: 'JWT' },
-  {
-    sub: user_id,
-    merchant_id: merchant_id,
-    user_id: user_id,
-    phone: user.tel,
-    line_id: user.line_id,
-    role: 'authenticated',
-    aud: 'authenticated',
-    iss: 'supabase',
-    exp: getNumericDate(24 * 60 * 60)  // 24 hours
-  },
-  key  // Signed with Supabase's secret
-);
+const { access_token, expires_in } = await issueMemberSession({
+  userAccount: { id, tel, line_id, email },
+  merchantId: merchant_id,
+  channel: 'line' | 'tel' | 'shopify', // logging only
+});
 ```
 
 **JWT Structure:**
@@ -276,8 +264,8 @@ const jwt = await create(
 **Key Points:**
 - Algorithm: HS256 (HMAC-SHA256)
 - Signed with Supabase's project JWT secret
-- Expiry: 24 hours
-- Custom claims: merchant_id, user_id, phone, line_id
+- Expiry: 30 days (member access token from `issueMemberSession`)
+- Custom claims: merchant_id, user_id, phone, line_id, email, channel (non-authoritative)
 
 ---
 

@@ -204,7 +204,7 @@ A unified authentication system that supports LINE OAuth and phone OTP, with mer
 5. Handle conflicts (LINE and tel belong to different users)
 6. Create new user if not found
 7. Link missing auth methods to existing user
-8. Generate JWT with merchant context
+8. Generate member session JWT via shared `issueMemberSession` (`supabase/functions/_shared/member-session.ts`) with merchant context
 9. **Early return optimization:** if required auth method is still missing (`verify_line` / `verify_tel`), return immediately (still includes `access_token` + `refresh_token`) and **skip** profile template evaluation
 10. Check profile completion using `bff_get_user_profile_template` (only when auth methods are satisfied); returned field lists are **persona-filtered** for the session JWT—see §5
 11. Determine `next_step` based on profile completion
