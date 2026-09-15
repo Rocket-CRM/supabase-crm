@@ -19,13 +19,15 @@ export async function issueMemberSession(params: {
   userAccount: UserAccountForSession;
   merchantId: string;
   channel: MemberSessionChannel;
+  /** Required for Shopify storefront burn / metafield writes (e.g. points-to-discount). */
+  shopifyCustomerId?: string | null;
 }): Promise<{ access_token: string; expires_in: number }> {
   const jwtSecret = getMemberJwtSecret();
   if (!jwtSecret) {
     throw new Error('JWT secret not configured');
   }
 
-  const { userAccount, merchantId, channel } = params;
+  const { userAccount, merchantId, channel, shopifyCustomerId } = params;
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(jwtSecret),
@@ -48,6 +50,9 @@ export async function issueMemberSession(params: {
       iss: 'supabase',
       exp: getNumericDate(ACCESS_TOKEN_EXPIRY),
       channel,
+      ...(channel === 'shopify' && shopifyCustomerId
+        ? { shopify_customer_id: String(shopifyCustomerId) }
+        : {}),
     },
     key,
   );

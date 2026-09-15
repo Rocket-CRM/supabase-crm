@@ -9,6 +9,7 @@ Deno.test('issueMemberSession emits CRM member claims', async () => {
   try {
     const userId = '5ce979af-1fce-4d44-8e65-2a0a08219098';
     const merchantId = '09b45463-3812-42fb-9c7f-9d43b6fd3eb9';
+    const shopifyCustomerId = '7123456789012';
     const { access_token, expires_in } = await issueMemberSession({
       userAccount: {
         id: userId,
@@ -18,6 +19,7 @@ Deno.test('issueMemberSession emits CRM member claims', async () => {
       },
       merchantId,
       channel: 'shopify',
+      shopifyCustomerId,
     });
 
     assertEquals(expires_in, 30 * 24 * 60 * 60);
@@ -41,6 +43,7 @@ Deno.test('issueMemberSession emits CRM member claims', async () => {
     assertEquals(payload.aud, 'authenticated');
     assertEquals(payload.iss, 'supabase');
     assertEquals(payload.channel, 'shopify');
+    assertEquals(payload.shopify_customer_id, shopifyCustomerId);
   } finally {
     if (prior === undefined) Deno.env.delete('SUPABASE_JWT_SECRET');
     else Deno.env.set('SUPABASE_JWT_SECRET', prior);
