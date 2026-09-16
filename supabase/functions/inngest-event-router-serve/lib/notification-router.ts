@@ -3,7 +3,7 @@
  *
  * Pipeline per event: map (event -> event_key/sub_event/source_event_id) ->
  * fn_resolve_notification_for_event RPC (single roundtrip; skip verdict or full render
- * inputs) -> enrich -> render (Flex or Email) -> LINE push or messaging-service Email -> log.
+ * inputs) -> enrich -> render flex template -> push to LINE -> log to notification_log.
  *
  * SHARED CONTRACT — read before editing `processNotification` / `enrich`:
  * The canonical implementation is Node:
@@ -36,12 +36,6 @@ import { getSupabase } from "./supabase.ts";
 import { pushLineFlex } from "./notification-line.ts";
 import { renderFlexFromTemplate, defaultAltText } from "./notification-flex.ts";
 import { buildNotificationDetailUrl } from "./notification-detail-url.ts";
-import {
-  EmailTemplateJson,
-  fetchNotificationAppearance,
-  renderNotificationEmail,
-  sendNotificationEmail,
-} from "./notification-email.ts";
 import { isTruthy } from "./types.ts";
 import type { ChokepointEvent } from "./types.ts";
 
@@ -66,6 +60,7 @@ const REDEMPTION_SUB_EVENTS_DROP = new Set([
   "unmarked_used",
   "entitlement_use_reversed",
   "entitlement_total_adjusted",
+  "issue_requested",
 ]);
 
 export interface ResolvedMapping {
@@ -80,24 +75,12 @@ export interface ResolvedMapping {
 
 const DEFAULT_CHANNEL = "line";
 
-const EMAIL_ENRICH_FIELDS = [
-  "reward_name",
-  "tier_name",
-  "transaction_number",
-  "status",
-  "final_amount",
-  "total_amount",
-];
-
 interface NotificationResolveResult {
   should_send: boolean;
   skip_reason?: string;
-  channel?: string;
   line_id?: string;
-  email?: string;
   channel_access_token?: string;
   flex_template?: Record<string, unknown>;
-  email_template?: Record<string, unknown>;
   selected_fields?: string[];
   error?: string;
 }
@@ -109,7 +92,6 @@ interface NotificationLogInput {
   sub_event: string;
   source_topic: string;
   source_event_id: string;
-  channel?: string;
   line_user_id: string | null;
   status: "sent" | "failed" | "skipped";
   skip_reason?: string | null;
@@ -128,7 +110,6 @@ async function recordNotificationLog(input: NotificationLogInput): Promise<void>
       sub_event: input.sub_event,
       source_topic: input.source_topic,
       source_event_id: input.source_event_id,
-      channel: input.channel || "line",
       line_user_id: input.line_user_id,
       status: input.status,
       skip_reason: input.skip_reason ?? null,
@@ -136,7 +117,7 @@ async function recordNotificationLog(input: NotificationLogInput): Promise<void>
       line_message_response: input.line_message_response ?? null,
       last_error: input.last_error ?? null,
     },
-    { onConflict: "merchant_id,event_key,sub_event,source_event_id,channel", ignoreDuplicates: true },
+    { onConflict: "merchant_id,event_key,sub_event,source_event_id", ignoreDuplicates: true },
   );
   if (error) {
     // Never block the pipeline on log writes — the unique constraint is the
@@ -322,7 +303,6 @@ export async function processNotification(
 ): Promise<{ outcome: string; reason?: string }> {
   const merchantId = mapping.payload.merchant_id!;
   const userId = (mapping.payload.user_id as string) || null;
-  const channel = mapping.channel ?? DEFAULT_CHANNEL;
 
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("fn_resolve_notification_for_event", {
@@ -331,7 +311,7 @@ export async function processNotification(
     p_sub_event: mapping.subEvent,
     p_user_id: userId,
     p_source_event_id: mapping.sourceEventId,
-    p_channel: channel,
+    p_channel: mapping.channel ?? DEFAULT_CHANNEL,
   });
   if (error) {
     // Throw so the step retries — the ALREADY_SENT backstop makes re-resolution safe.
@@ -350,7 +330,6 @@ export async function processNotification(
         sub_event: mapping.subEvent,
         source_topic: mapping.sourceTopic,
         source_event_id: mapping.sourceEventId,
-        channel,
         line_user_id: null,
         status: "skipped",
         skip_reason: reason,
@@ -360,10 +339,6 @@ export async function processNotification(
       });
     }
     return { outcome: "skipped", reason };
-  }
-
-  if (channel === "email") {
-    return processEmailNotification(mapping, merchantId, userId, verdict);
   }
 
   const template = verdict.flex_template;
@@ -379,7 +354,6 @@ export async function processNotification(
       sub_event: mapping.subEvent,
       source_topic: mapping.sourceTopic,
       source_event_id: mapping.sourceEventId,
-      channel,
       line_user_id: lineId ?? null,
       status: "failed",
       skip_reason: "INVALID_RESOLVER_OUTPUT",
@@ -408,7 +382,6 @@ export async function processNotification(
       sub_event: mapping.subEvent,
       source_topic: mapping.sourceTopic,
       source_event_id: mapping.sourceEventId,
-      channel,
       line_user_id: lineId,
       status: "skipped",
       skip_reason: "EMPTY_RENDER",
@@ -438,7 +411,6 @@ export async function processNotification(
       sub_event: mapping.subEvent,
       source_topic: mapping.sourceTopic,
       source_event_id: mapping.sourceEventId,
-      channel,
       line_user_id: lineId,
       status: "sent",
       flex_payload: rendered,
@@ -456,7 +428,6 @@ export async function processNotification(
       sub_event: mapping.subEvent,
       source_topic: mapping.sourceTopic,
       source_event_id: mapping.sourceEventId,
-      channel,
       line_user_id: lineId,
       status: "failed",
       skip_reason: "USER_BLOCKED",
@@ -475,7 +446,6 @@ export async function processNotification(
     sub_event: mapping.subEvent,
     source_topic: mapping.sourceTopic,
     source_event_id: mapping.sourceEventId,
-    channel,
     line_user_id: lineId,
     status: "failed",
     skip_reason: failureReason,
@@ -486,120 +456,14 @@ export async function processNotification(
   return { outcome: "failed", reason: failureReason };
 }
 
-async function processEmailNotification(
-  mapping: ResolvedMapping,
-  merchantId: string,
-  userId: string | null,
-  verdict: NotificationResolveResult,
-): Promise<{ outcome: string; reason?: string }> {
-  const template = verdict.email_template as EmailTemplateJson | undefined;
-  const toEmail = verdict.email;
-
-  if (!template || !toEmail) {
-    await recordNotificationLog({
-      merchant_id: merchantId,
-      user_id: userId,
-      event_key: mapping.eventKey,
-      sub_event: mapping.subEvent,
-      source_topic: mapping.sourceTopic,
-      source_event_id: mapping.sourceEventId,
-      channel: "email",
-      line_user_id: null,
-      status: "failed",
-      skip_reason: "INVALID_RESOLVER_OUTPUT",
-      last_error: "Resolver returned should_send=true but missing email/email_template",
-    });
-    return { outcome: "failed", reason: "INVALID_RESOLVER_OUTPUT" };
-  }
-
-  const selectedFields = [
-    ...new Set([...(verdict.selected_fields || []), ...EMAIL_ENRICH_FIELDS, ...SYSTEM_RENDER_FIELDS]),
-  ];
-  const enrichments = await enrich(merchantId, mapping, selectedFields);
-  const lookup = {
-    ...(mapping.payload as unknown as Record<string, unknown>),
-    ...enrichments,
-  };
-  const appearance = await fetchNotificationAppearance(merchantId);
-  const rendered = renderNotificationEmail({ template, lookup, appearance });
-
-  if (!rendered) {
-    await recordNotificationLog({
-      merchant_id: merchantId,
-      user_id: userId,
-      event_key: mapping.eventKey,
-      sub_event: mapping.subEvent,
-      source_topic: mapping.sourceTopic,
-      source_event_id: mapping.sourceEventId,
-      channel: "email",
-      line_user_id: null,
-      status: "skipped",
-      skip_reason: "EMPTY_RENDER",
-    });
-    return { outcome: "skipped", reason: "EMPTY_RENDER" };
-  }
-
-  const result = await sendNotificationEmail({
-    merchantId,
-    userId,
-    toEmail,
-    rendered,
-    appearance,
-    sourceEventId: mapping.sourceEventId,
-  });
-
-  if (result.status === "sent") {
-    await recordNotificationLog({
-      merchant_id: merchantId,
-      user_id: userId,
-      event_key: mapping.eventKey,
-      sub_event: mapping.subEvent,
-      source_topic: mapping.sourceTopic,
-      source_event_id: mapping.sourceEventId,
-      channel: "email",
-      line_user_id: null,
-      status: "sent",
-      flex_payload: { subject: rendered.subject, html: rendered.html },
-      line_message_response: result.responseBody,
-    });
-    return { outcome: "sent" };
-  }
-
-  await recordNotificationLog({
-    merchant_id: merchantId,
-    user_id: userId,
-    event_key: mapping.eventKey,
-    sub_event: mapping.subEvent,
-    source_topic: mapping.sourceTopic,
-    source_event_id: mapping.sourceEventId,
-    channel: "email",
-    line_user_id: null,
-    status: "failed",
-    skip_reason: "EMAIL_SEND_FAILED",
-    flex_payload: { subject: rendered.subject },
-    line_message_response: result.responseBody,
-    last_error: result.error ?? null,
-  });
-  return { outcome: "failed", reason: "EMAIL_SEND_FAILED" };
-}
-
 // deno-lint-ignore no-explicit-any
 async function runMapped(step: any, mapping: ResolvedMapping | null) {
   if (!mapping) return { routed: false, reason: "no_notification_mapping" };
   if (!mapping.payload.merchant_id) return { routed: false, reason: "missing_merchant_id" };
-  const line = (await step.run("deliver-line", () =>
-    processNotification({ ...mapping, channel: "line" }),
+  const result = (await step.run("resolve-render-push-log", () =>
+    processNotification(mapping),
   )) as { outcome: string; reason?: string };
-  const email = (await step.run("deliver-email", () =>
-    processNotification({ ...mapping, channel: "email" }),
-  )) as { outcome: string; reason?: string };
-  return {
-    routed: true,
-    eventKey: mapping.eventKey,
-    subEvent: mapping.subEvent,
-    line,
-    email,
-  };
+  return { routed: true, eventKey: mapping.eventKey, subEvent: mapping.subEvent, ...result };
 }
 
 const NOTIFICATION_CONCURRENCY = [{ limit: 5 }];
@@ -827,48 +691,5 @@ export const notificationReceiptRouter = inngest.createFunction(
       sourceTopic: "crm.events.receipt",
       payload: evt,
     });
-  },
-);
-
-function mapReferralNotification(evt: ChokepointEvent): ResolvedMapping | null {
-  const domainEvent = evt.event;
-  const role = typeof evt.recipient_role === "string" ? evt.recipient_role : "";
-  let sub: string | null = null;
-  if (domainEvent === "settled" && role === "referrer") sub = "completed";
-  else if (domainEvent === "settled" && role === "friend") sub = "friend_rewarded";
-  else if (domainEvent === "claimed" && role === "friend") sub = "friend_rewarded";
-  if (!sub) return null;
-
-  const sourceEventId =
-    domainEvent === "claimed"
-      ? (evt.claim_id as string | undefined)
-      : (evt.referral_ledger_id as string | undefined);
-  if (!sourceEventId) return null;
-
-  return {
-    eventKey: "referral",
-    subEvent: sub,
-    sourceEventId,
-    sourceTopic: "crm.events.referral",
-    payload: evt,
-  };
-}
-
-export const notificationReferralRouter = inngest.createFunction(
-  {
-    id: "notification-referral-router",
-    retries: 3,
-    concurrency: NOTIFICATION_CONCURRENCY,
-    idempotency:
-      'event.data.event + ":" + event.data.recipient_role + ":" + event.data.referral_ledger_id + ":" + event.data.claim_id + ":" + event.data.user_id',
-  },
-  { event: "crm/referral.event" },
-  async ({ event, step }) => {
-    const evt = event.data as ChokepointEvent;
-    const mapping = mapReferralNotification(evt);
-    if (!mapping) {
-      return { routed: false, reason: "no_notification_mapping", event: evt.event };
-    }
-    return await runMapped(step, mapping);
   },
 );

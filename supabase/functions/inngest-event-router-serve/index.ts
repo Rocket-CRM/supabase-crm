@@ -13,7 +13,7 @@
  *   (v6, 2026-07-08: purchase router forwards amount/seller_id; new purchase-item router
  *   feeds SKU/product/category/brand-scoped purchase conditions)
  * - outcome-purchase-router / outcome-wallet-router           -> amp_outcome_attribution
- * - notification-{purchase,purchase-item,wallet,tier,user,redemption,receipt,referral}-router -> LINE/Email
+ * - notification-{purchase,purchase-item,wallet,tier,user,redemption,receipt}-router -> LINE push
  * - amp-{purchase,purchase-item,wallet,tier,user}-router      -> amp-dispatch-realtime-event
  *   (v3, 2026-07-08: amp-user-router batched + throttled per merchant for signup bursts;
  *   trigger matching cached per merchant by fn_get_active_triggers_cached, 600s)
@@ -55,7 +55,6 @@ import {
   notificationUserRouter,
   notificationRedemptionRouter,
   notificationReceiptRouter,
-  notificationReferralRouter,
 } from "./lib/notification-router.ts";
 import {
   ampPurchaseRouter,
@@ -64,6 +63,7 @@ import {
   ampTierRouter,
   ampUserRouter,
 } from "./lib/amp-router.ts";
+import { shopifyRedemptionIssueRouter } from "./lib/shopify-redemption-router.ts";
 
 const handler = serve({
   client: inngest,
@@ -84,12 +84,12 @@ const handler = serve({
     notificationUserRouter,
     notificationRedemptionRouter,
     notificationReceiptRouter,
-    notificationReferralRouter,
     ampPurchaseRouter,
     ampPurchaseItemRouter,
     ampWalletRouter,
     ampTierRouter,
     ampUserRouter,
+    shopifyRedemptionIssueRouter,
   ],
   signingKey: Deno.env.get("INNGEST_SIGNING_KEY"),
   servePath: "/functions/v1/inngest-event-router-serve",
