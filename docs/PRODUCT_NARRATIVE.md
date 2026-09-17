@@ -742,9 +742,11 @@ Optional per ticket type. Used for raffles, lucky draws, and event campaigns. Pr
 
 ### Forms
 
+<!-- feature_key: loyalty.forms.profile_fields; loyalty.forms.custom_fields; loyalty.forms.signup_form (umbrella — Survey forms has its own section below) -->
+
 **Overview**
 
-Forms control what data the platform collects from members — during signup, on the profile page, and through standalone surveys. Two field systems work in parallel: **default profile fields** (standard data like name, email, phone, and address) stored directly on `user_accounts` and `user_address`, and **custom fields** (merchant-defined questions like "preferred outlet" or "interests") stored through `form_templates`, `form_fields`, `form_submissions`, and `form_responses`. A special published `USER_PROFILE` form surfaces custom fields inside the profile flow; any other published template behaves as a survey. The core lens is **template → render → validate → store**, with the same frontend shape supporting "new" and "edit" modes — edit mode overlays previously-saved values for default fields, custom fields, and PDPA consent.
+Forms control what data the platform collects from members — during signup, on the profile page, and through standalone surveys. Two field systems work in parallel: **default profile fields** (standard data like name, email, phone, and address) stored directly on `user_accounts` and `user_address`, and **custom fields** (merchant-defined questions like "preferred outlet" or "interests") stored through `form_templates`, `form_fields`, `form_submissions`, and `form_responses`. A special published `USER_PROFILE` form surfaces custom fields inside the profile flow; any other published template behaves as a survey (see **Survey forms** below for the sellable survey capability, including optional header banners). The core lens is **template → render → validate → store**, with the same frontend shape supporting "new" and "edit" modes — edit mode overlays previously-saved values for default fields, custom fields, and PDPA consent.
 
 **Purpose**
 
@@ -900,6 +902,40 @@ Survey reward workflows are stored as **hidden system AMP workflows** — they e
 - `USER_PROFILE` is the only template that bypasses submission limits; other templates always check limits before storing.
 - Per-user limits depend on user identity at submission time — a member who submits anonymously and then signs in cannot retroactively claim the reward against the earlier submission.
 - Conditional logic operates between fields within a single template; cross-template conditions are not supported.
+
+---
+
+### Survey forms
+
+<!-- feature_key: loyalty.forms.surveys -->
+
+**What it enables**
+
+Standalone surveys let the brand ask members questions outside signup and profile — feedback, preferences, or enrichment — and optionally thank them with points or tickets when they finish.
+
+**How it works**
+
+1. Admin builds a form template (not `USER_PROFILE`), adds field groups and questions, and publishes it.
+2. Admin may set an optional **header banner image**; leaving it blank hides the member-facing header.
+3. Admin may attach submission limits and optional completion rewards (points or tickets) via the form reward workflow helpers.
+4. Members open the survey, answer, and submit; identified members can receive a configured reward; anonymous submissions store answers but skip wallet awards.
+
+**What differentiates it**
+
+Surveys reuse the same form builder as profile custom fields, but every published non-`USER_PROFILE` template is a distinct survey members can take — with its own banner, limits, and reward rules.
+
+**Key controls**
+
+| Control | What the brand chooses |
+|---|---|
+| Questions & conditions | Field types, required flags, show/hide logic between fields |
+| Header banner | Image URL on the template, or blank to hide the header |
+| Limits | Per-user or total submission caps (not applied to `USER_PROFILE`) |
+| Completion reward | On/off, points vs tickets, amount, once vs every completion |
+
+**Example**
+
+A beauty brand publishes a “skin concerns” survey with a campaign banner at the top. Members who complete it once earn 50 points; the banner is omitted on a shorter follow-up survey so the form opens straight to questions.
 
 ---
 
