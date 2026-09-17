@@ -12,7 +12,7 @@ Shared retrieval for Cursor agents and downstream tools over **canonical require
 |------|--------|
 | Source | `/requirements/**/*.md` (search + get_section). Also `docs/PRODUCT_NARRATIVE.md` for **get_section only** |
 | Excluded | `REGISTRY_*`, `CHANGELOG.md`, `INDEX_FUNCTION.md`, `INDEX_DOMAIN.md`, `archive/**`, tiny pointer stubs |
-| Chunking | Prefer `SECTION:` headings; else `##` / `###`; split ~4000 chars |
+| Chunking | Prefer `SECTION:` headings (`heading_path` = `SECTION: X`); else `##` / `###` (`heading_path` = `H2 > H3` path in heading mode); split ~4000 chars. `_TEMPLATE.md` excluded. |
 | Table | `public.doc_knowledge_chunks` |
 
 ## MCP tools

@@ -18,7 +18,7 @@ Use `user-crm-knowledge` / `crm-knowledge` for product, feature, CS, proposal, f
 | Tool | When |
 |------|------|
 | `search_docs` | **Default.** Hybrid full-text + semantic search over requirement chunks. |
-| `get_section` | Expand a known `path` + optional heading (`SECTION: …` or `##` title); neighbors on by default. Sales explain/journey: path `docs/PRODUCT_NARRATIVE.md`. |
+| `get_section` | Expand a known `path` + optional heading (`SECTION: …`, `##` title, or `H2 > H3`); neighbors on by default. Sales explain/journey: path `docs/PRODUCT_NARRATIVE.md`. |
 | `get_my_context` | Auth + short usage guidance. |
 
 ## Retrieval order

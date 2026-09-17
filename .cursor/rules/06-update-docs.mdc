@@ -18,8 +18,18 @@ After creating or modifying any of the items below, update the corresponding doc
 | New / changed Inngest function or MCP tool | Domain doc + `REGISTRY_RENDER.md` if it has a public surface. |
 | New domain or undocumented tables | Create `requirements/<Domain>.md`, add entry to `requirements/domains/_index.md`. |
 | CS tables/functions | Use `cs_` prefix, `CS_*.md` docs. |
-| Feature behavior change with an active Feature Guide | Update `requirements/feature-docs/<feature>.md` (only `rewards.md` is currently Active — see `requirements/feature-docs/INDEX.md`). |
 | **Any of the above (final step)** | **Append a one-line entry to `requirements/CHANGELOG.md` under today's date, linking the domain MD where full detail lives.** |
+
+Which section of the domain doc:
+
+| You changed… | Touch in `requirements/<Domain>.md` |
+|---|---|
+| a noun, concept, rename, or shipped-status | Concept |
+| a rule, limit, state, edge case | Rules |
+| what admin/member does or sees, or a setting | Journeys |
+| a table, function, flow, service, cache | System (+ registries as today) |
+| any of the above only on Shopify (or another surface) | `### <Surface>` under that section |
+| a domain with no doc | copy `requirements/_TEMPLATE.md` + `_index.md` row |
 
 ### Why both the domain doc AND `REGISTRY_RENDER.md`
 
@@ -61,13 +71,9 @@ If no domain doc exists for the tables you're touching: create `requirements/<Do
 
 Index files, requirement docs, and registries become input tokens in future threads. Write the minimum that carries full meaning:
 - Per-domain index row: keywords + file path. Nothing else.
-- Domain docs: schema + business rules + function signatures. No narrative filler.
+- Domain docs: follow the spine in `13-requirements-writing.mdc`; no narrative filler.
 - Registry entries: one line per item. No prose.
 - Never add "comprehensive," "robust," or any modifier that doesn't add information.
-
-### Feature Guide Updates
-
-Only when behavior visible to testers/CS/marketing changes AND the feature has an Active guide (currently only `rewards.md`). Skip for refactors, perf optimizations, bugfixes restoring documented behavior. Do NOT update archived drafts under `requirements/archive/feature-docs-draft/`. For writing rules, see `13-feature-guide-writing.mdc`.
 
 ### Rules
 
