@@ -173,6 +173,7 @@ E: inngest-marketplace-serve (public)
 C: marketplace-batch-checker — `* * * * *` → POST to edge fn marketplace-batch-checker
 C: marketplace-token-refresh — `59 * * * *` → POST to edge fn marketplace-token-refresh
 C: shopify-token-refresh — `*/30 * * * *` → POST to edge fn shopify-token-refresh
+C: ops-daily-recon-refresh — `22 0 * * *` → `SELECT public.fn_ops_daily_recon_refresh()` (prior BKK day → `_ops_daily_recon_cache`; automations read via `fn_ops_daily_recon_get`)
 
 ---
 
