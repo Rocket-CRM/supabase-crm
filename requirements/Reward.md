@@ -38,9 +38,13 @@ A **reward** is a merchant-defined benefit (voucher, product, experience) with d
 
 **Burn** — Points deducted from the member wallet on successful claim (see Currency).
 
+**Redemption quote** — Server-computed preview before confirm: max selectable quantity, limit/available copy, and `blocking_reason` when redeem is not allowed (member catalog stepper and Front Line redeem modal share `fn_reward_redemption_quote`).
+
+**Member self-use** — Per-reward `allow_member_mark_used` (default true). When false, `api_mark_redemption_used` rejects member JWT; staff mark-used paths unchanged.
+
 ### Reward groups
 
-**Reward group** — Named bundle of rewards sharing limit rows. A reward may belong to multiple groups via group membership on the reward.
+**Reward group** — Named bundle of rewards sharing limit rows. A reward may belong to multiple groups via **`reward_group_member`** (ordered gallery / group-tab sequence per group).
 
 **Max distinct reward** — Per-user cap on how many **different reward types** in the group may be claimed in a window (`metric = distinct_reward`). Re-redeeming a type already chosen does not consume another distinct slot.
 
@@ -90,8 +94,9 @@ Rocket may layer a **partner catalog** on top of platform rewards: digital e-vou
 
 | Page | Owning repo | BFF / RPC |
 | --- | --- | --- |
-| Reward list | loyalty-admin | `api_get_rewards_full_cached`, `bff_list_rewards`, `admin_delete_reward`, `bff_set_reward_active` |
+| Reward list | loyalty-admin | `api_get_rewards_full_cached`, `bff_list_rewards` (incl. redeemed/used qty), `admin_delete_reward`, `bff_set_reward_active` |
 | Reward settings (create/edit) | loyalty-admin | `bff_get_reward_details`, `bff_upsert_reward_with_conditions_and_limits`; slot attach: `bff_attach_campaign_reward`, `bff_detach_campaign_reward`, `bff_upsert_campaign_reward_atomic` |
+| Reward settings → Redemptions | loyalty-admin | `bff_admin_list_reward_redemptions`, `bff_admin_start_reward_redemption_export` → Inngest `admin-user-export-csv` (`import_type=reward_redemptions_export`); job on **Imports** |
 | Marketplace settings | loyalty-admin | Channel OAuth / order claims (see Marketplace setup) |
 | Reward group list / form | loyalty-admin | `bff_list_reward_groups`, `bff_get_reward_group_details`, `bff_upsert_reward_group_with_limits`, `bff_delete_reward_group` |
 | Frontline push / claim QR | loyalty-admin | `bff_admin_push_reward`, `bff_admin_upsert_reward_claim_link`, `bff_admin_list_reward_claim_links`, `bff_admin_set_reward_claim_link_active` |
@@ -107,7 +112,8 @@ Rocket may layer a **partner catalog** on top of platform rewards: digital e-vou
 | Ecommerce toggle, platforms, Shopify discount type + bind | `online_store[]`, `shopify_discount_type` / label, `external_id_shopify` (DiscountCodeNode) via `shopify-upsert-reward-discount` on save when Shopify marketplace is on |
 | Campaign slot context (`from`, referral/tier/lifecycle params) | Forces `campaign` visibility; post-save attach to parent slot |
 | Pin / featured | Sort order and “special reward” placement |
-| Group membership on reward | Which group limits apply |
+| Allow members to mark as used | Gates member `api_mark_redemption_used`; forced on for Shopify merchants in admin UI |
+| Group membership on reward | Which group limits apply; drag-order in group settings writes `reward_group_member.display_order` |
 | Group limits (metric, count, scope, time unit) | Max distinct vs group quantity vs per-reward quota |
 
 1. Open **Reward list** → **Add reward** or edit a row — or land from **Referral settings**, **Tier conditions** (entry rewards), or **Lifecycle automations** with a campaign slot in the URL (`campaign-slot.ts`).
@@ -125,13 +131,13 @@ Common pitfalls: require points match with no rows; promo on with empty pool; wi
 | Page / surface | Owning repo | BFF / RPC |
 | --- | --- | --- |
 | Rewards catalog | loyalty-user | `api_get_rewards_full_cached` |
-| Reward detail / redeem | loyalty-user | Cached catalog + redeem API (queued) |
+| Reward detail / redeem | loyalty-user | Cached catalog + `bff_user_get_reward_redemption_quote` + redeem API (queued) |
 | Redemption slip / history | loyalty-user | Realtime ledger + `bff_get_reward_history` |
 | Claim link landing | loyalty-user | `bff_get_reward_claim_preview`, `bff_claim_reward_via_link` |
-| Mark used | loyalty-user / API | `api_mark_redemption_used` |
+| Mark used | loyalty-user / API | `api_mark_redemption_used` (honours `allow_member_mark_used`) |
 
 1. Open catalog — featured rewards first; filter by category; cards show points and availability; group badges show chosen/locked from group usage API.
-2. Open detail — eligibility chips, points, window, redeem CTA disabled with reason when ineligible.
+2. Open detail — eligibility chips, points, window, limit/available from quote; redeem stepper max qty from quote; CTA disabled with reason when ineligible.
 3. Shipping rewards: confirm or save address, then confirm redeem.
 4. Redeem → immediate ack → spinner; success via Realtime ledger insert (slip / use now); failure via broadcast; timeout toast if neither within ~15s.
 5. Slip shows code, barcode, QR; flash rewards show countdown when relative minutes expiry applies.
@@ -156,7 +162,8 @@ Member **browse catalog** on the native app is unchanged. When `online_store` in
 
 | Artifact | Role |
 | --- | --- |
-| `reward_master` | Catalog row: visibility, windows, eligibility, fallback, fulfillment, stock flags, group ids, `online_store[]`, `external_id_shopify`, `shopify_discount_type`, `shopify_discount_label` |
+| `reward_master` | Catalog row: visibility, windows, eligibility, fallback, fulfillment, stock flags, `allow_member_mark_used`, `online_store[]`, `external_id_shopify`, `shopify_discount_type`, `shopify_discount_label` |
+| `reward_group_member` | Junction: reward ↔ group with `display_order` (gallery / group tab order) |
 | `reward_points_conditions` | Dynamic pricing rows |
 | `reward_category` | Catalog grouping |
 | `reward_promo_code` / staging | Code pool and bulk import |
@@ -176,7 +183,9 @@ Member **browse catalog** on the native app is unchanged. When `online_store` in
 | `redeem_reward_with_points` | Core sync redeem orchestration (consumer-invoked) |
 | `fn_check_reward_group_limits` | Distinct and group quantity checks |
 | `bff_get_reward_details` / `bff_upsert_reward_with_conditions_and_limits` | Admin load/save with conditions and limits |
-| `bff_list_rewards`, `admin_delete_reward`, `bff_set_reward_active` | Admin list lifecycle |
+| `bff_list_rewards`, `admin_delete_reward`, `bff_set_reward_active` | Admin list lifecycle (list includes live redeemed/used qty) |
+| `fn_reward_redemption_quote`, `bff_user_get_reward_redemption_quote`, `bff_get_reward_redemption_quote` | Pre-redeem quote (member + Front Line) |
+| `bff_admin_list_reward_redemptions`, `bff_admin_start_reward_redemption_export`, `process_reward_redemption_export_chunk` | Per-reward redemption tab + async CSV export |
 | `bff_*_reward_group_*` | Group CRUD |
 | `bff_admin_push_reward`, `bff_*_claim_link*`, `bff_claim_reward_via_link` | Push and link claim |
 | `bff_get_reward_history` | Member history |

@@ -1,3 +1,9 @@
+## 2026-09-18
+
+- **Reward (enhancement CR1–CR6)** — Shared redemption quote (`fn_reward_redemption_quote`, member/admin BFFs); canonical `reward_group_member` gallery order; `reward_master.allow_member_mark_used`; mission claim-limit scope copy on claim; admin reward list redeemed/used totals, per-reward **Redemptions** tab + async CSV (`reward_redemptions_export` via `admin-user-export-csv`). See `requirements/Reward.md` §Journeys / §System.
+
+- **Product catalog weekly manual run** — `loyalty.persona.entitlements` status `ga` → `planned` with `Shelved_Demo_Features.md` source refs; bulk `last_verified_at` refresh for active catalog rows (`weekly_catalog_run_2026_09_18_manual`). Narrative: planned callouts on Packages and Persona Entitlements. Commercial `FEATURES_SUMMARY` EN/TH persona entitlements line tagged planned.
+
 ## 2026-09-17
 
 - **CRM Knowledge daily sync** — `requirements/` committed to git; `scripts/daily-requirements-publish-and-reconcile.sh` (21:00 local launchd) commit/push docs then `doc-knowledge-reconcile.mjs`. Env: `~/.config/rocket/supabase-crm.env`. See `scripts/README-doc-knowledge.md`.

@@ -4,6 +4,7 @@
 
 ### `reward_master`
 - Primary reward configuration.
+- `allow_member_mark_used` (boolean, default true): when false, member JWT cannot call `api_mark_redemption_used`.
 - Existing stock fields: `stock_control`, `stock_total`.
 - `stock_control = true` enables stock validation.
 - Existing global stock behavior remains unchanged for rewards without store stock rows.
@@ -15,6 +16,11 @@
 - `stock_total` must be `>= 0`.
 - No `active_status`, `used`, `reserved`, or `redeemed` counters. Used quantity is derived from `reward_redemptions_ledger`.
 - RLS: `merchant_id = get_current_merchant_id()`.
+
+### `reward_group_member`
+- Canonical membership and gallery order: `merchant_id`, `reward_group_id`, `reward_id`, `display_order`.
+- Unique `(reward_group_id, reward_id)` and deferred unique on `(reward_group_id, display_order)`.
+- Backfilled from legacy `reward_master.reward_group_ids` on migration; new admin saves sync via `fn_sync_reward_group_members_for_reward`.
 
 ### `reward_redemptions_ledger`
 - Source of truth for reward redemption and claim/use events.
