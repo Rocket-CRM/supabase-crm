@@ -1,3 +1,7 @@
+## 2026-09-19
+
+- **Mission** — Claim-limit binding documented: `fn_mission_claim_quota` + `bff_get_mission_detail` / `bff_claim_mission` expose `claim_limit_scope` / max / time unit; member exhausted copy differs mission-wide (`total`, `store`, `user_store`) vs per-member `user`. See `requirements/Mission.md` §Rules / §Member journey.
+
 ## 2026-09-18
 
 - **Reward (enhancement CR1–CR6)** — Shared redemption quote (`fn_reward_redemption_quote`, member/admin BFFs); canonical `reward_group_member` gallery order; `reward_master.allow_member_mark_used`; mission claim-limit scope copy on claim; admin reward list redeemed/used totals, per-reward **Redemptions** tab + async CSV (`reward_redemptions_export` via `admin-user-export-csv`). See `requirements/Reward.md` §Journeys / §System.

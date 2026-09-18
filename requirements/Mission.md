@@ -43,6 +43,8 @@ Outcomes always flow through the same **central outcome dispatcher** used by che
 - **User perspective** on the mission (`customer` vs `seller`) determines whether purchase/seller fields bind to the buyer or seller on evaluation.
 - **Progress reset:** when frequency is set, `fn_batch_reset_global_missions` (global mode, Render crons) or `fn_batch_reset_due_missions` (user-specific / due rows) clears period progress; milestone missions reject reset frequency at validation. **Carry over progress** and **allow progress loop** control whether partial progress survives reset and how many completions per transaction/period are allowed (`max_loops_per_transaction` caps burst loops).
 - **Exclusivity:** if another mission in the same progress group already holds progress, new progress is blocked; claim exclusivity blocks claim until the group frees — UI may show `exclusivity_locked` on `button_action`.
+- **Claim limit binding:** a mission may define multiple claim-cap rows. The engine picks one **binding** row (tightest remaining headroom; when headroom ties, per-member `user` scope wins over mission-wide scopes). Member detail and failed claims expose that row’s scope, cap, and time unit so the app can show the correct exhausted copy.
+- **Claim limit copy (member):** mission-wide scopes (`total`, `store`, `user_store`) use “campaign / total” exhausted wording; per-member `user` scope uses “your limit this period” wording. Partial batch claims that would exceed the binding cap return `claim_limit_exceeded` with the same binding fields.
 - **`button_action` priority (list/detail):** `claim_outcome` when unclaimed > 0 and manual claim; else `join_mission` when manual activation and not accepted; else `claimed` when fully done and claimed; else `view_progress` when a progress row exists; else `view_details`. Clients must also respect `can_accept`, `can_claim`, and exclusivity flags from access state (join/claim disabled when false).
 - **Deletion:** missions with front-line claim history cannot be deleted (FK guard); deactivate instead.
 
@@ -98,8 +100,9 @@ Entitlement: admin nav typically requires `campaign` + `campaign.mission` featur
 2. Tap a card → **detail drawer** with conditions, milestone levels, outcomes, and completion history.
 3. If manual activation and join allowed → **Join** calls `accept_mission`; errors show access messages from RPC.
 4. Progress updates after backend evaluation (not synchronous on the tap); refresh or realtime product choice reloads state.
-5. If manual claim and `can_claim` → **Claim** calls `bff_claim_mission` (milestone level resolved from lowest unclaimed level); shipping may be required for physical reward outcomes.
+5. If manual claim and `can_claim` → **Claim** calls `bff_claim_mission` (milestone level resolved from lowest unclaimed level); shipping may be required for physical reward outcomes. Detail load includes binding claim-limit fields (`claim_limit_scope`, `claim_limit_max`, `claim_limit_time_unit`, `claimable_now`) from `fn_mission_claim_quota`.
 6. Locked exclusivity or expired claim window → primary CTA disabled with locked/expired copy.
+7. Claim blocked by caps → toast title/body reflect mission-wide vs per-member binding scope (see Rules — claim limit copy).
 
 | Error (typical) | Cause |
 | --- | --- |
@@ -107,7 +110,7 @@ Entitlement: admin nav typically requires `campaign` + `campaign.mission` featur
 | Must join first | Manual activation without `accepted_at` |
 | Nothing to claim | No unclaimed completions |
 | Exclusivity locked | Another mission in group holds progress/claim |
-| Claim limit | `mission_limit_claim` exhausted |
+| Claim limit (`claim_limit_exceeded`) | Binding `mission_limit_claim` row exhausted or requested qty over `claimable_now`; response includes binding scope/cap/period for member copy |
 
 ## System
 
@@ -132,7 +135,8 @@ Legacy `current_progress` on `mission_progress` remains for compatibility; autho
 | --- | --- |
 | `bff_upsert_mission` / `fn_validate_mission_upsert` | Admin save with child replace |
 | `bff_get_mission_details_conditions_limits` | Admin edit template |
-| `bff_get_user_missions` / `bff_get_mission_detail` | Member list and detail + access + `button_action` |
+| `bff_get_user_missions` / `bff_get_mission_detail` | Member list and detail + access + `button_action`; detail `progress` includes binding claim-limit fields from `fn_mission_claim_quota` |
+| `fn_mission_claim_quota` | Resolves binding claim cap + `claimable_now` for detail and claim-limit errors |
 | `accept_mission` | Manual join |
 | `bff_claim_mission` / `bff_frontline_claim_mission` | Manual claim (member vs staff) |
 | `fn_mission_access_state` | Central visibility/join/claim gating |
