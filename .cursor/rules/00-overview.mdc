@@ -21,7 +21,17 @@ Both modules share this Supabase project. Requirement docs are in `/requirements
 
 **MANDATORY on every user task** — including "build", "fix", "add", "create", "update", and "analyze". No tool calls, no proposals, no code until Steps 1–3 are complete.
 
-**FIRST TOOL CALLS must be:** reading the relevant section of `requirements/INDEX_DOMAIN.md` + querying Supabase MCP for existing schema/functions. Do NOT read plan docs, spec files, or open editor files first.
+**FIRST TOOL CALLS must be:** grep `requirements/domains/_index.md` for domain routing (or use Step 1 tables when the domain is obvious) + querying Supabase MCP for existing schema/functions. Do NOT read plan docs, spec files, or open editor files first.
+
+`requirements/INDEX_DOMAIN.md` is a **deprecated stub** — do not use it for lookup. Use `requirements/domains/_index.md` (grep only; never full-read).
+
+### Weekly product catalog automation (exception)
+
+When the task is **weekly product catalog + narrative** maintenance per `workflows/product-feature-catalog/AUTOMATION_PROMPT.md` and `REFERENCE.md`:
+
+- **Skip** Context Lookup Steps 1–2 (no domain index routing).
+- **Start** with those workflow files, then MCP on `internal_product_*` and CRM Knowledge — not ad-hoc domain docs.
+- **First MCP actions:** `execute_sql` (`SELECT 1` on project `wkevmsedchftztoolkmi`) and CRM Knowledge `search_docs` (limit 1). If either tool is missing or errors, **stop** with the error — do not infer catalog state from git alone.
 
 ### Step 3 (MCP check) is ALWAYS required
 
@@ -71,11 +81,11 @@ Match keywords from the user's message to a domain:
 | CS Channels | `CS_Channels.md` | `cs_channels`, `cs_platform_identities` |
 | CS Customers | `CS_Customers.md` | `cs_customers`, `cs_customer_memory` |
 
-If you can't match keywords, read the keyword cross-reference section in `requirements/INDEX_DOMAIN.md`.
+If you can't match keywords, **grep** `requirements/domains/_index.md` for the term → authoritative `requirements/<Domain>.md`. NEVER full-read `_index.md`.
 
-### Step 2 — Read the domain index entry
+### Step 2 — Domain pointer + authoritative doc slice
 
-Read ONLY the relevant domain section from `requirements/INDEX_DOMAIN.md` using offset + limit. NEVER read the full file.
+Grep `requirements/domains/_index.md` only when Step 1 did not resolve the domain. Open the authoritative `requirements/<Domain>.md` with offset + limit for tables, functions, and rules — never full-read large domain docs.
 
 Extract: key business rules, function names + types, table names.
 
@@ -98,7 +108,7 @@ Present: relevant tables, functions, business rules, proposed approach. WAIT for
 
 **Show your work.** Before each tool call, state which step you're on:
 - "**Step 1 — Domain:** CS Procedures (AOP)"
-- "**Step 2 — INDEX_DOMAIN.md:** Reading CS Procedures section..."
+- "**Step 2 — domains/_index.md → CS_Procedures.md:** Reading scoped section..."
 - "**Step 3 — MCP:** Checking cs_procedures table and existing functions..."
 
 This is not optional formatting — it prevents silently skipping steps.
@@ -108,7 +118,7 @@ This is not optional formatting — it prevents silently skipping steps.
 When a task spans multiple domains (e.g., "audit all CS functions", "review the entire rewards + missions flow"):
 
 - **Step 1:** List all domains in scope explicitly.
-- **Step 2:** Batch-read relevant INDEX_DOMAIN.md sections (one read per section, parallel is fine).
+- **Step 2:** Grep `_index.md` and batch-read relevant slices of authoritative `requirements/<Domain>.md` files (parallel is fine).
 - **Step 3:** Run MCP discovery queries across the scope (e.g., `proname LIKE 'cs_%'` for all CS functions, `table_name LIKE 'cs_%'` for all CS tables). Per-table column checks come when you drill into specific items — not at discovery stage.
 - **Steps 4–5:** Continue as normal.
 
@@ -117,7 +127,7 @@ When a task spans multiple domains (e.g., "audit all CS functions", "review the 
 - Using the user's open/recent editor files as your starting context
 - Skipping MCP schema verification because a doc "probably has" the info
 - Treating "build" or "create" as implicit approval to skip Steps 1–5
-- Reading full requirement docs when INDEX_DOMAIN.md + MCP would suffice
+- Reading full requirement docs when `_index.md` grep + MCP would suffice
 
 ## Workflow
 

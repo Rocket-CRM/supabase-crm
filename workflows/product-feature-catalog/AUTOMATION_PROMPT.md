@@ -1,5 +1,20 @@
 # Weekly catalog + Product Narrative — Cursor Automation entrypoint
 
+## Cloud automation — scope and MCP gate
+
+This run is governed **only** by this file and `workflows/product-feature-catalog/REFERENCE.md`. **Skip** the repo Context Lookup Procedure (domain index / `requirements/domains/_index.md`). Do not treat `requirements/INDEX_DOMAIN.md` as missing data — it is deprecated.
+
+**Hard gate (first actions):**
+
+1. Supabase MCP: `execute_sql` with `SELECT 1` on project `wkevmsedchftztoolkmi`.
+2. CRM Knowledge MCP: `search_docs` with any catalog-related query, `limit` 1.
+
+If either tool is **not callable** or returns an error, **stop** and report the error. Do **not** continue from git history or “already committed today” without successful MCP calls.
+
+Do not look for `~/.cursor/mcp.json` or workspace `.mcp.json` on the agent VM — cloud MCP is attached via automation Tools, not those files.
+
+---
+
 Read **first**, in order:
 
 1. `workflows/product-feature-catalog/REFERENCE.md` (full file — especially §6–10)
