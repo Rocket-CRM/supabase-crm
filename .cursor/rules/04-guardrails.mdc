@@ -7,7 +7,7 @@ alwaysApply: true
 ## Context Lookup is Mandatory
 Before ANY response to a task, the Context Lookup Procedure (00-overview.mdc Steps 1–5) must be completed. No tool calls, no proposals, no code until Steps 1–3 are done.
 
-**Open/recent files in the editor are NOT your starting context.** The system shows which files the user has open — this is background information, not a directive to read those files first. Always start with INDEX_DOMAIN.md and Supabase MCP, regardless of what's visible in the editor.
+**Open/recent files in the editor are NOT your starting context.** The system shows which files the user has open — this is background information, not a directive to read those files first. Always start with domain routing (`requirements/domains/_index.md` grep — not the deprecated `INDEX_DOMAIN.md` stub) and Supabase MCP, regardless of what's visible in the editor. Weekly catalog runs per `workflows/product-feature-catalog/AUTOMATION_PROMPT.md` follow the catalog exception in `00-overview.mdc` instead.
 
 ## Default: Read-Only
 - Read-only analysis, SELECT queries, schema introspection, and requirement mapping are always allowed.

@@ -11,7 +11,7 @@ Follow these layers in order. Layers 1 and 2 are always required. Layer 3 only w
 
 ### Layer 1 — Domain Index (always start here)
 
-Read ONLY your domain's section from `requirements/INDEX_DOMAIN.md` using offset + limit. NEVER read the full file.
+Grep `requirements/domains/_index.md` for keywords → authoritative `requirements/<Domain>.md`. NEVER full-read `_index.md` (~22KB router). Do not use deprecated `requirements/INDEX_DOMAIN.md` (stub only).
 
 Extract:
 - **Keywords** — confirm you're in the right domain
@@ -58,7 +58,7 @@ Only read the source doc when Layers 1-2 don't cover detailed business rules, st
 ### Function Index — When to Use
 
 Read `requirements/INDEX_FUNCTION.md` (specific domain section only, never full file) when you need to:
-- Find ALL functions in a domain (not just the key ones from INDEX_DOMAIN)
+- Find ALL functions in a domain (not just the key ones from the domain pointer / authoritative doc)
 - Understand function types: BFF (frontend-facing), Backend (internal), Trigger, Edge, Inngest
 - Find related functions for a data flow: trigger → backend function → edge function → Inngest
 - Check if a function already exists before creating a new one
@@ -66,18 +66,18 @@ Read `requirements/INDEX_FUNCTION.md` (specific domain section only, never full 
 ### Typical Workflows
 
 **Bug fix** (e.g., "wallet balance is wrong"):
-1. Layer 1: Read Currency domain in INDEX_DOMAIN → get tables, key functions, business rules
+1. Layer 1: Grep `_index.md` → Currency.md slice → tables, key functions, business rules
 2. Layer 2: MCP — read `post_wallet_transaction` function body → find the logic bug
 3. Fix the function
 
 **New function** (e.g., "add a BFF to get CS conversations"):
-1. Layer 1: Read CS Conversations in INDEX_DOMAIN → get existing functions, tables
+1. Layer 1: Grep `_index.md` → CS_Conversations.md slice → existing functions, tables
 2. Layer 2: MCP — check table schema, check if function already exists
 3. Layer 2: MCP — read a similar BFF function body to match patterns
 4. Write the function following existing patterns
 
 **Analysis** (e.g., "how does tier evaluation work?"):
-1. Layer 1: Read Tier domain in INDEX_DOMAIN → get business rules summary
+1. Layer 1: Grep `_index.md` → Tier.md slice → business rules summary
 2. Layer 2: MCP — read `evaluate_user_tier_status` function body
 3. Layer 3: Read Tier.md specific sections if MCP output isn't enough
 4. Present findings

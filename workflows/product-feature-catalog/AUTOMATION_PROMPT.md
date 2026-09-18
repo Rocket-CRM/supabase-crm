@@ -1,5 +1,20 @@
 # Weekly catalog + Product Narrative — Cursor Automation entrypoint
 
+## Cloud automation — scope and MCP gate
+
+This run is governed **only** by this file and `workflows/product-feature-catalog/REFERENCE.md`. **Skip** the repo Context Lookup Procedure (domain index / `requirements/domains/_index.md`). Do not treat `requirements/INDEX_DOMAIN.md` as missing data — it is deprecated.
+
+**Hard gate (first actions):**
+
+1. Supabase MCP: `execute_sql` with `SELECT 1` on project `wkevmsedchftztoolkmi`.
+2. CRM Knowledge MCP: `search_docs` with any catalog-related query, `limit` 1.
+
+If either tool is **not callable** or returns an error, **stop** and report the error. Do **not** continue from git history or “already committed today” without successful MCP calls.
+
+Do not look for `~/.cursor/mcp.json` or workspace `.mcp.json` on the agent VM — cloud MCP is attached via automation Tools, not those files.
+
+---
+
 Read **first**, in order:
 
 1. `workflows/product-feature-catalog/REFERENCE.md` (full file — especially §6–10)
@@ -29,9 +44,19 @@ Stop and leave prior state for that row when narrative contradicts catalog, requ
 
 List `feature_key`s and what changed (nature, group, active, name/summary). Point maintainers to `rocket-agent-plugins/plugins/rocket-sales/commercial/` per `commercial/REFERENCE.md` §7. Prices stay blank; do not touch `sales-run/`.
 
-## Git
+## Git (publish to `main`)
 
-Commit narrative (and only catalog-related doc fixes if required) on a branch; open a PR or leave changes for human review per automation settings. Do not commit secrets.
+After the run summary, **push directly to `origin/main`** — no PR, no feature branch.
+
+1. Checkout `main` and pull latest.
+2. Stage **only** paths this run touched, typically:
+   - `docs/PRODUCT_NARRATIVE.md`
+   - `requirements/CHANGELOG.md` (one-line run note if catalog/narrative changed)
+   - `workflows/product-feature-catalog/**` (only if runbook edits)
+3. Commit: `chore(catalog): weekly catalog + narrative <YYYY-MM-DD>` (or `chore(catalog): no narrative diff <date>` if DB-only verify).
+4. `git push origin main`
+
+Do **not** commit secrets, `sales-run/`, unrelated workspace files, or commercial Canonical Views in this repo.
 
 ## Run summary (required)
 
