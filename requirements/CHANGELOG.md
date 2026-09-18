@@ -1,6 +1,6 @@
 ## 2026-09-18
 
-- **Product catalog weekly manual run** — `loyalty.persona.entitlements` status `ga` → `planned` with `Shelved_Demo_Features.md` source refs; bulk `last_verified_at` refresh for active catalog rows (`weekly_catalog_run_2026_09_18_manual`). Narrative: planned callouts on Packages and Persona Entitlements. Commercial `FEATURES_SUMMARY` EN/TH persona entitlements line tagged planned.
+- **Product catalog weekly run** — `loyalty.persona.entitlements` status `ga` → `planned` with `Shelved_Demo_Features.md` source refs; refreshed `last_verified_at` for 95 active rows under run `041ab095-b315-4d17-ae77-d9eb9719eec0`; migrated the affected Packages and Persona Entitlements narrative sections to the five-block template. Commercial Canonical Views were not edited in this repo.
 
 ## 2026-09-17
 

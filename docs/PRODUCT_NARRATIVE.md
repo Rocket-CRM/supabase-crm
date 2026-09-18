@@ -959,102 +959,31 @@ Loyalty platforms have to demonstrate that a member knowingly opted in before an
 
 <!-- feature_key: (no catalog row — shelved demo; align when loyalty.package.* lands) -->
 
-**Overview**
+**What it enables**
 
-**(planned)** Demo-built, not sold as GA loyalty product — see `requirements/Shelved_Demo_Features.md` (Package row). Capabilities below describe what exists for demos, not a launched SKU.
+**Planned — demo-built, not launched as a GA product.** Packages let a merchant combine several rewards into one multi-use entitlement that a member can draw down over time. A package can mix items everyone receives with optional items the member chooses.
 
-Packages are merchant-defined bundles of rewards granted to a specific user as a multi-use, balance-tracked entitlement set. A package template lists one or more rewards with a per-reward quantity, where each item is either **mandatory** (auto-materialized when the package is assigned) or **elective** (the member picks within a group-and-cap constraint). When the package is assigned, the system materializes one ledger row per mandatory reward; each row tracks total grant, used count, and expiry. Members consume entitlements one use at a time at the point of service via `api_use_entitlement`. Packages exist alongside single rewards: a single reward is a one-shot coupon, while a package entitlement is a balance that draws down over time and expires by date.
+**How it works**
 
-**Purpose**
+1. The merchant defines the package items, quantities, availability, and expiry.
+2. The merchant or an integrated flow assigns the package to one or more members.
+3. Required items become usable balances immediately; the member selects optional items within the configured limits.
+4. Each use reduces the relevant balance until it is exhausted, cancelled, or expired.
 
-Packages fit business models where the value lies in a *bundle*, not a one-shot coupon. Healthcare visit packs ("5 OPD visits + 2 lab tests + 1 wellness check"), corporate welcome bundles, subscription-style perks, and tiered persona benefits all benefit from a single assignable unit that the member sees as one package on their profile but can draw down individually. The mandatory / elective split lets merchants combine "everyone gets X" with "pick 2 of these 5" so one template covers both fixed-and-flexible programs.
+**What differentiates it**
 
-**User Journey**
+Packages hold several repeat-use entitlements under one member-facing bundle instead of issuing unrelated one-use coupons. The required-plus-optional model supports both fixed benefits and controlled member choice while preserving where each assignment came from.
 
-*Admin journey*
+**Key controls**
 
-1. **Build the catalog.** From the Packages list, admin lands on a list returned by `bff_admin_get_package_list`. Drill into a package via `bff_admin_get_package_detail`. Create / edit through one upsert — `bff_upsert_package_with_items` — which takes the package fields and the full item list; items absent from the call are deleted (update-by-ID pattern).
-2. **Assign to users.** Single or batch through `bff_admin_assign_package` — payload is `{package_id, source_type, assignments:[{user_id, effective_from, effective_to}]}`. The function loops, creates one `package_assignment` row per user, and immediately calls `fn_create_package_entitlements` to materialize mandatory items into the redemption ledger.
-3. **Inspect a user's packages.** `bff_admin_get_user_packages(p_user_id)` returns each assignment with nested entitlements (per-reward `qty`, `used_qty`, `remaining`, `use_expire_date`, `used_status`).
-4. **Adjust an entitlement.** `bff_admin_adjust_entitlement(p_redemption_id, p_qty_change, p_reason)` raises or lowers a single ledger row's total `qty`. Cannot reduce below `used_qty`. Logged to `redemption_usage_log`.
+- Required items, optional groups, per-item quantities, and optional-pick limits.
+- Rolling validity from assignment, a fixed calendar expiry, an assignment end date, or no expiry.
+- Active status for new API assignments; existing assignments remain separate balances.
+- Package-level cancellation is not available today, and admin assignment does not consistently enforce inactive status.
 
-*Member journey*
+**Example**
 
-1. **My Packages.** Member calls `get_user_packages(p_status, p_language)` (auth.uid()-scoped) — returns assignments with localized package metadata and nested entitlements per reward.
-2. **Pick electives.** When a package has elective items, the member sees the available pool and picks within `elective_max_picks` per `elective_group`. Submit calls `select_elective_items(p_assignment_id, p_selected_reward_ids)` — validates ownership, enforces caps, idempotent on re-pick.
-3. **Use an entitlement.** At point of service, the redemption code is scanned. The integration calls `api_use_entitlement(p_redemption_id, p_user_id, p_store_id, p_external_ref, p_merchant_id)` which validates ownership, decrements `remaining` atomically, and returns the new balance.
-
-*Edge cases*
-
-- **Standard redemption guard** — `api_mark_redemption_used` rejects multi-use entitlements with *"Multi-use entitlements must be consumed via api_use_entitlement"*. POS / scanner integrations must branch on `source_type`.
-- **Inactive packages** — `api_assign_package` rejects packages where `active_status = false`; `bff_admin_assign_package` does not enforce this and will assign even inactive packages.
-- **No assignment-level cancellation** — admins zero remaining qty per row or set `cancelled = true` on individual ledger rows.
-- Member errors surface as `"Entitlement expired"`, `"Insufficient remaining uses"`, `"Entitlement cancelled"`, or `"Not a multi-use entitlement"`.
-
-**Configurations & Rules**
-
-*Package template — fields on `package_master`*
-
-| Field | Purpose |
-|---|---|
-| `name`, `description`, `image` | Display content |
-| `price`, `points_price` | Cost if the package is purchasable |
-| `validity_days` | Rolling expiry — entitlements expire `effective_from + N days` |
-| `validity_date` | Fixed calendar expiry for all entitlements |
-| `active_status` | Master switch — `api_assign_package` blocks inactive |
-| `items` (via `package_items`) | The reward list with per-reward `qty`, mandatory / elective flag, `elective_group`, `elective_max_picks` |
-
-*Item types*
-
-| Type | Behavior at assignment |
-|---|---|
-| Mandatory | Auto-materialized into the ledger by `fn_create_package_entitlements` |
-| Elective | Stays dormant until the member calls `select_elective_items` to pick within `elective_group` and `elective_max_picks` |
-
-*Validity precedence at materialization* (set by `fn_create_package_entitlements`)
-
-| Order | Setting | Resulting expiry |
-|---|---|---|
-| 1 | `package_master.validity_days` set | `assignment.effective_from + N days` (rolling) |
-| 2 | else `package_master.validity_date` set | That fixed date |
-| 3 | else `assignment.effective_to` set | `effective_to` |
-| 4 | else | No expiry |
-
-*Source taxonomy — `package_assignment.source_type` is free text*
-
-| Value | Trigger |
-|---|---|
-| `admin` | Admin batch assignment |
-| `api` | Public API call |
-| `persona_assignment` | Persona Entitlements auto-grant |
-| `purchase` | Purchase-triggered grant |
-| `mission` | Mission completion |
-| `tier_upgrade` | Tier transition |
-| `campaign` | Campaign action |
-| `his_event` | External healthcare information system event |
-
-Ledger rows additionally encode `source_type='package_assignment'` and carry `package_assignment_id` for back-tracing.
-
-*Quantity math*
-
-| Concept | Field | Behavior |
-|---|---|---|
-| Total grant | `qty` | Set at materialization, adjustable via `bff_admin_adjust_entitlement` (cannot drop below `used_qty`) |
-| Consumed | `used_qty` | Incremented on each `api_use_entitlement` call (default decrement = 1) |
-| Remaining | derived `qty - used_qty` | Returned to FE |
-| Fully consumed | `used_status` | Flips `true` when `used_qty = qty` |
-
-*Operating rules*
-
-- **Multi-use vs single-use redemption is separated**. `api_use_entitlement` for packages, `api_mark_redemption_used` for standard rewards — POS code must branch.
-- **Source attribution is preserved** through the assignment lifetime for audit / reporting.
-- **Item upsert is update-by-ID** — omitting an item from the payload deletes it from the package.
-
-*Limitations*
-
-- No admin endpoint to cancel a whole assignment in one call.
-- `bff_admin_assign_package` does not check `active_status`; only `api_assign_package` does.
-- Failed per-user assignments in a batch increment a `failed_count` but do not return per-user error reasons.
+A healthcare package can grant five clinic visits and two lab tests to every eligible member, then let each member choose one of three wellness services.
 
 ---
 
@@ -1062,80 +991,31 @@ Ledger rows additionally encode `source_type='package_assignment'` and carry `pa
 
 <!-- feature_key: loyalty.persona.entitlements -->
 
-**Overview**
+**What it enables**
 
-**(planned)** Demo-built, not sold as GA — see `requirements/Shelved_Demo_Features.md` (Persona entitlements row). Catalog status is `planned`; narrative below describes demo/backend behavior.
+**Planned — demo-built, not launched as a GA product.** Persona Entitlements lets a merchant define what every member in a persona should receive: a package, a quantity of a reward, or a standing benefit such as a category discount or service access.
 
-Persona Entitlements is a catalog layer that says "every user holding this persona automatically receives X." The `X` can be a package, a direct reward grant, or a standing benefit (period-based privilege like a 10% pharmacy discount). The same table powers B2B contract programs (Corporate, Insurance, VIP, Partner) and any policy where a persona class entitles members to a fixed set of perks. One persona can map to many entitlement rows; one row carries an `entitlement_type` discriminator (`package` / `reward` / `benefit`) plus the type-specific payload.
+**How it works**
 
-**Purpose**
+1. The merchant defines the contract or persona and attaches its entitlement rules.
+2. After a member receives that persona, an operational or import flow must invoke the grant step; this is not wired automatically today.
+3. Packages and reward quantities become member balances. Standing benefits appear when the member or an integration checks eligibility.
+4. Standing benefits stop appearing when the persona or contract is no longer valid; previously granted package and reward balances remain until cancelled.
 
-Without Persona Entitlements, merchants would have to manually grant the same five packages and three standing benefits to every employee of an enrolled corporate account. The catalog flips that — once a user is given the persona, `fn_auto_assign_on_persona` walks the active entitlement rows and grants each one through the appropriate channel. It's the unified config layer behind contract-style B2B programs in healthcare and corporate verticals.
+**What differentiates it**
 
-**User Journey**
+One persona can drive three kinds of value without manually granting each member separately. When several standing benefits cover the same category, the system returns the highest-value benefit rather than stacking them.
 
-*Admin journey*
+**Key controls**
 
-1. **Configure a contract.** A contract is metadata stored on `persona_group_master` — `contract_type`, `company_name`, `contact_person`, `contact_email`, `contract_start`, `contract_end`, `contract_status`, `contract_metadata`. Admins manage the whole graph (group + child personas + entitlement rows) in one upsert via `bff_upsert_contract_with_levels(p_group_id, ..., p_levels)`.
-2. **Browse contracts.** `bff_admin_get_contract_list(p_status, p_type)` for the list, `bff_admin_get_contract_detail(p_group_id)` for the level + entitlement tree.
-3. **Ad-hoc benefits** (not tied to a persona) — insert through `bff_admin_assign_benefit(p_benefits)` for self-managed `user_benefit` rows.
-4. **Inspect a user's benefits** — `bff_admin_get_user_benefits(p_user_id)` shows the full set with source attribution (persona / tier / marketing / admin / campaign).
-5. **Cancel a benefit** — `bff_admin_cancel_benefit(p_benefit_id, p_reason)`.
+- Entitlement type: package, reward quantity, or standing benefit.
+- Contract dates and status, persona status, and an active switch for new grants.
+- Benefit category and value, with highest-value-per-category precedence.
+- Automatic persona-change wiring, duplicate protection, and automatic revocation of prior balances are not available today.
 
-*Member journey*
+**Example**
 
-1. **See standing benefits** — `get_user_benefits()` returns the effective benefit set with category, benefit type, value, and source. Persona-sourced benefits validate at every read; if the contract expired or the persona was removed, they silently drop out.
-2. **See persona-granted packages** — flow through the standard package pipeline. Members see them in `get_user_packages()` with `source_type='persona_assignment'`.
-3. **Use persona-granted reward entitlements** — `entitlement_type='reward'` grants land directly in the redemption ledger and consume through the same `api_use_entitlement` endpoint.
-4. **Eligibility check at point of service** — external integrations call `api_get_eligibility(p_user_identifier, p_identifier_type, ...)` for the resolved benefit set.
-
-*Edge cases*
-
-- Members never see benefit picker UI — benefits are not selectable.
-- No expiry countdown for persona-sourced benefits — their validity is the contract's validity, not stored on the user row.
-- Persona change does **not** automatically revoke prior package assignments or reward grants — they stay live in the ledger.
-
-**Configurations & Rules**
-
-*Three entitlement types — distinct grant paths*
-
-| `entitlement_type` | Payload fields | What happens at auto-assign |
-|---|---|---|
-| `package` | `package_id` | Creates `package_assignment` (source_type=`persona_assignment`) → `fn_create_package_entitlements` materializes mandatory items |
-| `reward` | `reward_id`, `qty` | Inserts a `reward_redemptions_ledger` row directly with source_type=`persona_entitlement`. Skips package indirection for simple cases ("5 parking passes") |
-| `benefit` | `category`, `benefit_type`, `value` | Inserts a `user_benefit` row with source_type=`persona`, source_id=persona_id, copying the three fields |
-
-*Two validity modes for benefits* (`fn_evaluate_user_benefits`)
-
-| Source | Validity derivation |
-|---|---|
-| Persona-sourced | Computed at read time by joining `user_accounts → persona_master → persona_group_master`. Excluded if persona is inactive, contract is non-active, or `contract_end` is past |
-| Self-managed (`tier` / `marketing` / `admin` / `campaign`) | Own `valid_from` / `valid_to` dates on the `user_benefit` row |
-
-*Precedence — highest-value-per-category, not stackable*
-
-`fn_resolve_benefit_precedence` reduces multiple benefits in the same `category` to the single best `value` via `DISTINCT ON (category) ORDER BY category, value DESC`. So a user with a 10% pharmacy discount from persona and a 15% pharmacy discount from a marketing benefit sees 15%, not 25%.
-
-*Asymmetric revocation behaviour*
-
-| What happens when persona changes / contract expires | Behaviour |
-|---|---|
-| Standing benefits | Stop appearing automatically (read-time validation) |
-| Package assignments | Remain live in the ledger — must be explicitly cancelled per row |
-| Direct reward grants | Remain live in the ledger — must be explicitly cancelled per row |
-
-*Operating rules*
-
-- **Active flag is the kill switch for new grants.** `fn_auto_assign_on_persona` skips rows with `active_status = false`. Disabling does not affect already-granted records.
-- **Auto-assign is not idempotent.** Calling `fn_auto_assign_on_persona(user_id, persona_id)` twice creates duplicates — caller is responsible for de-dup.
-- **No automatic trigger on persona change.** Roster importers, admin tools, and any flow that mutates `user_accounts.persona_id` must call `fn_auto_assign_on_persona` themselves.
-- **Eligibility API is precedence-reduced** — `api_get_eligibility` returns one row per category at the highest value.
-
-*Limitations*
-
-- No automated revocation pipeline; ledger rows from prior personas must be cancelled manually.
-- Benefits are read-time-only; there's no scheduled validity expiry job because validity is reconstructed on every read.
-- Member-facing benefit selection is not supported — entitlements are automatic.
+A Corporate persona can give each employee a healthcare package, five parking passes, and a 10% pharmacy benefit. If another valid program grants a 15% pharmacy benefit, the member receives 15%, not 25%.
 
 ---
 
