@@ -1,1039 +1,218 @@
-# Signup/Login System Design
+# Signup / Login
 
-## System Architecture
+Member authentication (LINE, phone OTP, optional Shopify email linkage) and persona-aware profile completion before the member home. Standalone loyalty-user runs the full auth + profile loop; Shopify storefront uses server-trusted customer identity on panel open (no LINE/OTP inside the widget).
 
-### Core Concept
-A unified authentication system that supports LINE OAuth and phone OTP, with merchant-configurable authentication methods and dynamic profile completion checks.
+Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widget, app proxy, customer account extensions)
 
----
+## Concept
 
-## Authentication Methods Configuration
+**Auth methods** — Merchant-wide list on `merchant_master.auth_methods`: `line`, `tel`, and optionally `shopify_email` (hybrid / headless paths that still use `bff-auth-complete`). The member app loads enabled methods via `bff_get_auth_config`.
 
-**Location:** `merchant_master.auth_methods` column (TEXT[])
+**Identity proof** — LINE OAuth (`auth-line` edge) exchanges a code for `line_user_id` only; phone flow uses `auth-send-otp` plus `fn_validate_otp`. Neither edge creates a user or mints a session by itself.
 
-**Possible values:**
-- `["line"]` - LINE login only
-- `["tel"]` - Phone OTP only  
-- `["line", "tel"]` - Both required
+**Session hub** — `bff-auth-complete` finds or creates `user_accounts`, links missing auth methods, evaluates profile completeness, returns `next_step`, and issues the **member JWT** via shared `issueMemberSession` (same issuer as Shopify proxy/extension — see `Authentication.md`).
 
-**Frontend retrieval:** Call `bff_get_auth_config(merchant_code)`
+**`next_step`** — API-level screen router from `bff-auth-complete`: verification steps (`verify_line`, `verify_tel`, `verify_shopify`) vs profile steps (`complete_profile_new`, `complete_profile_existing`) vs `complete` (home).
 
----
+**Profile template** — `bff_get_user_profile_template` builds default fields, custom form fields (`USER_PROFILE` template), persona picker metadata, PDPA shells, and communication topics; persona-scoped fields filter server-side per member JWT.
 
-## Function Inventory
+**Profile completion flag** — `user_accounts.is_signup_form_complete` means the member has submitted the signup profile at least once; dynamic required-field checks can still force `complete_profile_existing` when merchants add new required fields.
 
-### 1. `bff_get_auth_config(p_merchant_code)`
-**Purpose:** Get merchant's authentication method configuration
-
-**Input:**
-```json
-{
-  "merchant_code": "newcrm"
-}
-```
-
-**Output:**
-```json
-{
-  "auth_methods": ["line", "tel"]
-}
-```
-
-**Frontend usage:** Determine which auth UI to show (LINE button, phone input, or both)
-
----
-
-### 2. `auth-line` (Edge Function)
-**Purpose:** Exchange LINE OAuth code for LINE user profile (does NOT create user or issue JWT)
-
-**Input:**
-```json
-{
-  "code": "LINE_AUTH_CODE",
-  "merchant_code": "newcrm", 
-  "redirect_uri": "https://..."
-}
-```
-
-**Output:**
-```json
-{
-  "success": true,
-  "line_user_id": "U46fa97...",
-  "display_name": "John Doe",
-  "picture_url": "https://..."
-}
-```
-
-**Frontend usage:** After LINE login callback, exchange code for profile data, then pass to `bff-auth-complete`
-
-**Security:** Public endpoint (`verify_jwt: false`), only requires anon key
-
----
-
-### 3. `auth-send-otp` (Edge Function)
-**Purpose:** Generate OTP and send SMS via 8x8
-
-**Input:**
-```json
-{
-  "phone": "0966564526",
-  "merchant_code": "newcrm"
-}
-```
-
-**Output:**
-```json
-{
-  "success": true,
-  "session_id": "uuid-uuid",
-  "expires_in": 600,
-  "message": "OTP sent to +66966564526"
-}
-```
-
-**Phone normalization:**
-- `0966564526` → `+66966564526`
-- `+660966564526` → `+66966564526` (removes extra 0)
-- `66966564526` → `+66966564526` (adds +)
-
-**Frontend usage:** User enters phone → call this → store `session_id` → show OTP input
-
-**OTP settings:**
-- Length: 6 digits
-- Expiry: 10 minutes
-- Max attempts: 3
-
----
-
-### 4. `bff-auth-complete` (Edge Function) - **THE CENTRAL HUB**
-**Purpose:** Unified authentication - finds/creates users, links auth methods, checks profile completion, issues JWTs
-
-**Input scenarios:**
-
-**A. LINE only:**
-```json
-{
-  "merchant_code": "newcrm",
-  "line_user_id": "U46fa97..."
-}
-```
-
-**B. Tel only:**
-```json
-{
-  "merchant_code": "newcrm",
-  "tel": "+66966564526",
-  "otp_code": "123456",
-  "session_id": "uuid"
-}
-```
-
-**C. Both (LINE first, then tel):**
-```json
-{
-  "merchant_code": "newcrm",
-  "line_user_id": "U46fa97...",
-  "tel": "+66966564526",
-  "otp_code": "123456",
-  "session_id": "uuid"
-}
-```
-
-**D. Link method to existing session:**
-```json
-{
-  "merchant_code": "newcrm",
-  "access_token": "eyJ...",
-  "tel": "+66966564526",
-  "otp_code": "123456",
-  "session_id": "uuid"
-}
-```
-
-**Output:**
-
-**Intermediate response (needs more verification):**
-```json
-{
-  "success": true,
-  "next_step": "verify_tel",
-  "message": "Phone verification required"
-}
-```
-
-**Full response (user created/found, JWT issued):**
-```json
-{
-  "success": true,
-  "next_step": "complete_profile_new",
-  "user_account": {
-    "id": "uuid",
-    "tel": "+66966564526",
-    "line_id": "U46fa97...",
-    "fullname": null,
-    "email": null
-  },
-  "access_token": "eyJ...",
-  "refresh_token": "uuid-uuid",
-  "expires_in": 86400,
-  "is_new_user": true,
-  "is_signup_form_complete": false,
-  "missing": {
-    "tel": false,
-    "line": false,
-    "consent": true,
-    "profile": true,
-    "address": false
-  },
-  "missing_data": {
-    "persona": { ... },
-    "pdpa": [ ... ],
-    "default_fields_config": [ ... ],
-    "custom_fields_config": [ ... ],
-    "selected_section": null
-  }
-}
-```
-
-**Logic flow:**
-1. Get merchant config and auth_methods
-2. Normalize tel format
-3. Validate credentials (OTP if tel provided)
-4. Find existing user (by LINE or tel or access_token)
-5. Handle conflicts (LINE and tel belong to different users)
-6. Create new user if not found
-7. Link missing auth methods to existing user
-8. Generate member session JWT via shared `issueMemberSession` (`supabase/functions/_shared/member-session.ts`) with merchant context
-9. **Early return optimization:** if required auth method is still missing (`verify_line` / `verify_tel`), return immediately (still includes `access_token` + `refresh_token`) and **skip** profile template evaluation
-10. Check profile completion using `bff_get_user_profile_template` (only when auth methods are satisfied); returned field lists are **persona-filtered** for the session JWT—see §5
-11. Determine `next_step` based on profile completion
-12. Build `missing_data` payload (full form or missing-only)
-13. Generate refresh token
-14. If `next_step === "complete"`, also merge `get_user_summary()` output into `user_account` (flat)
-15. Return comprehensive response
-
----
-
-### 5. `bff_get_user_profile_template(p_mode, p_language, p_merchant_code, p_event_code)`
-**Purpose:** Build the user profile form schema (default fields, custom form fields, persona picker structure, PDPA/consent shell, channels/topics items) with translations, then return only the slices appropriate for the **current JWT** and **persona**.
-
-**Where it is used (not only edit profile):**
-- **Signup / post-login profile completion:** After `bff-auth-complete` has issued a session and all required auth methods are satisfied, that flow evaluates profile completion and may call this RPC (or equivalent server-side logic) so `missing_data` reflects the same template the client should render—see step 10 in `bff-auth-complete` above.
-- **Edit profile (standalone screen):** The app may call this RPC directly with `p_mode = 'edit'` and the user’s bearer token so the form is pre-filled from `user_accounts` / `user_address` / `form_responses` / consents / channel flags.
-
-**Input (Postgres parameter order):**
-| Parameter | Default | Role |
-|-----------|---------|------|
-| `p_mode` | `'new'` | `'new'` = empty values (plus optional event pre-fill); `'edit'` = overlay stored user data for fields still present after filtering |
-| `p_language` | `'en'` | Resolved UI language (with fallback to merchant default) |
-| `p_merchant_code` | `null` | If set, resolves merchant via config cache; if `null`, uses session merchant context (`get_current_merchant_id()`) |
-| `p_event_code` | `null` | Optional Syngenta-style event: pre-fills address admin IDs on matching default fields when `p_mode = 'new'` |
-
-**Persona and field visibility (server-side, JWT-driven):**
-- The function reads **`auth.uid()`** and loads **`user_accounts.persona_id`** for that auth user and **current merchant**.
-- Each default field (`user_field_config`) and custom field (`form_fields`) carries **`persona_ids`** in the JSON.
-  - **Universal field:** `persona_ids` is missing, JSON `null`, or an **empty** array → returned for every caller (subject to other flags such as `visible_to_user`).
-  - **Persona-scoped field:** non-empty `persona_ids` → returned only if the user’s `persona_id` is in that list.
-  - **User has no `persona_id`:** only universal fields are returned; persona-scoped fields are omitted.
-- **Field groups:** If, after filtering, a group has **no** remaining fields, that **entire group is omitted** from `default_fields_config` and `custom_fields_config`.
-- **Persona metadata:** The response still includes the full **`persona`** object (groups, personas, `persona_attain`, etc.) so the client can render persona selection; filtering applies to **fields**, not to hiding the persona catalog unless the product layer does so.
-
-**Caching vs filtering:**
-- Redis stores the **full** merchant template (all languages) under `merchant:{merchant_id}:user_profile_template:all_languages` for **5 minutes**.
-- After cache hit or miss, the pipeline runs **`fn_extract_user_profile_language`**, then **persona field filtering**, then event pre-fill (`new` only), then **`edit`** overlays. So **persona filtering is not baked into the cache**; it depends on the caller’s JWT on every request.
-
-**Output (shape; keys vary by merchant):**
-```json
-{
-  "persona": {
-    "merchant_config": { "persona_attain": "pre-form" },
-    "selected_persona_id": null,
-    "persona_groups": [ ... ]
-  },
-  "default_fields_config": [ ... ],
-  "custom_fields_config": [ ... ],
-  "pdpa": [ ... ],
-  "selected_section": null,
-  "mode": "new",
-  "event_code": null,
-  "cache_hit": true,
-  "language": "th",
-  "default_language": "en",
-  "timestamp": "2025-12-08T00:00:00Z"
-}
-```
-
-**Mode behavior:**
-- `'new'`: Field `value` entries are empty unless event pre-fill applies; PDPA/channel/topic acceptance flags start unset/false as defined by the function.
-- `'edit'`: Overlays the caller’s data from DB for fields that remain **after** persona filtering (same auth user / merchant).
-
-**Important for clients:**
-- Call with the **end-user’s JWT** (not only a service role with no `auth.uid()`), otherwise persona cannot be resolved and **only universal fields** are returned.
-- **`phone` / `line_id`:** Still governed by merchant field config and product rules (often treated as auth-managed rather than free-text profile fields).
-
-**Related RPC:** `bff_save_user_profile` accepts the filled payload; ensure saves validate required fields in line with what this template exposed for that user’s persona.
-
----
-
-### 6. `bff_save_user_profile(p_data)`
-**Purpose:** Save user profile form (upserts across multiple tables)
-
-**Input:** The entire payload from `bff_get_user_profile_template` with user-filled `value` fields
-
-**Tables updated:**
-- `user_accounts` - default fields, persona, channels, **sets `is_signup_form_complete = true`**
-- `user_address` - address fields
-- `form_submissions` + `form_responses` - custom fields
-- `user_consent_ledger` - PDPA consents
-- `user_communication_preferences` - topics
-
-**Output:**
-```json
-{
-  "success": true,
-  "user_id": "uuid",
-  "is_new_user": false,
-  "is_signup_form_complete": true
-}
-```
-
-**Authentication:** Uses `auth.uid()` from bearer token
-
----
-
-## `next_step` Values (API-level routing)
-
-Returned by `bff-auth-complete` to tell frontend what to show:
-
-| Value | Meaning | `access_token`? | Frontend action |
-|-------|---------|-----------------|-----------------|
-| `verify_line` | Need LINE login | No | Show LINE login button |
-| `verify_tel` | Need phone OTP | No | Show phone input + OTP form |
-| `complete_profile_new` | New user, fill form | Yes | Show registration form ("ยินดีต้อนรับ!") |
-| `complete_profile_existing` | Existing user, fill form | Yes | Show profile form ("ยินดีต้อนรับกลับ!") |
-| `complete` | All done | Yes | Navigate to home page |
-
-### `missing_data` content logic:
-
-| `next_step` | `is_signup_form_complete` | `missing_data` contains |
-|-------------|---------------------------|-------------------------|
-| `complete_profile_new` | `false` | **Full form** (persona, pdpa, all fields) |
-| `complete_profile_existing` | `false` | **Full form** (never filled before) |
-| `complete_profile_existing` | `true` | **Missing only** (required fields not filled) |
-| `complete` | `true` | `null` |
-
----
-
-## `form_step` (Frontend state for form navigation)
-
-**Location:** Frontend variable (e.g., `variables['f214fed7-7ce4-43f6-888f-251cb10b4191']`)
-
-**Values:** `"persona"` | `"default_field"` | `"custom_field"` | `"pdpa"`
-
-**Purpose:** Track which section of the multi-step form user is currently viewing
-
-**Sequence:** persona → default_field → custom_field → pdpa
-
-**Relationship to `next_step`:**
-- `next_step` = API instruction (what major screen to show)
-- `form_step` = Frontend state (which form section within the profile form)
-
----
-
-## Frontend JavaScript Functions
-
-### 1. Next Button Click - Navigate to next form section
-```javascript
-const data = variables['45691153-f0a5-42fa-ac9a-5729a9853be2'];
-const currentStep = variables['f214fed7-7ce4-43f6-888f-251cb10b4191'];
-
-// Returns: { upsert: boolean, nextStep: string|null }
-// If upsert=true → call bff_save_user_profile
-// If nextStep=string → form_step updated automatically
-```
-
-### 2. Back Button Click - Navigate to previous form section
-```javascript
-// Returns: { isFirst: boolean, prevStep: string|null }
-// If isFirst=true → hide back button
-// prevStep updates form_step automatically
-```
-
-### 3. Next Button Visibility - Show/hide based on required fields filled
-```javascript
-// Checks:
-// - persona: selected_persona_id has value
-// - default_field: all is_required fields have value
-// - custom_field: all is_required fields have value
-// - pdpa: all is_mandatory items have isAccepted=true
-// Returns: true (show) | false (hide)
-```
-
-### 4. Back Button Visibility - Show if not first step
-```javascript
-// Checks if there's a previous section with items
-// Returns: true (show) | false (hide)
-```
-
-### 5. Validation Message Visibility - Show if required fields missing
-```javascript
-// Inverted logic from next button visibility
-// Returns: true (show error) | false (hide)
-```
-
-### 6. PDPA Handler - Manage consent UI state
-```javascript
-// Parameters: type, action, section_id, option_id
-// Actions:
-//   - 'expand': Toggle section expansion
-//   - 'accept': Toggle acceptance (notice, text_content, checkbox_options)
-//   - 'accept_all': Toggle all sections and options
-// Types:
-//   - 'notice': No checkbox, just info
-//   - 'text_content': Single checkbox
-//   - 'checkbox_options': Master checkbox + individual options
-```
-
-### 7. Field Value Updater - Update field values with 5s debounce
-```javascript
-// Parameters: object_type, field_key, group_id, value
-// Updates: persona, default_fields_config, custom_fields_config
-// Debounce: 5 seconds per field to reduce DB calls
-```
-
----
-
-## Scenario Matrix
-
-### Scenario 1: New user, LINE+TEL method
-
-**Step 1:** User clicks LINE login button
-- FE calls `auth-line` with code
-- Gets `{ line_user_id, display_name }`
-
-**Step 2:** User calls `bff-auth-complete` with `line_user_id` only
-- No user found by LINE
-- Response: `{ next_step: "verify_tel" }`
-
-**Step 3:** User enters phone, FE calls `auth-send-otp`
-- Gets `{ session_id }`
-- User enters OTP
-
-**Step 4:** User calls `bff-auth-complete` with `line_user_id`, `tel`, `otp_code`, `session_id`
-- No user found by LINE or tel
-- New user created with both LINE and tel
-- Response: `{ next_step: "complete_profile_new", access_token, missing_data: {full form} }`
-
-**Step 5:** User fills form sections (persona → default → custom → pdpa)
-- Form navigation managed by `form_step` variable
-- Next button validates required fields per section
-
-**Step 6:** User completes last section, FE calls `bff_save_user_profile`
-- `is_signup_form_complete` set to `true`
-- Response: `{ success: true }`
-
-**Step 7:** Navigate to home
-
----
-
-### Scenario 2: Existing user (tel-only), method changed to LINE+TEL
-
-**Initial state:**
-- User account has `tel`, no `line_id`
-- `is_signup_form_complete = true`
-- Merchant changes `auth_methods` from `["tel"]` to `["line", "tel"]`
-
-**Step 1:** User calls `bff-auth-complete` with `tel`, `otp_code`, `session_id`
-- Finds existing user by tel
-- Detects missing LINE (required by auth_methods)
-- Response: `{ next_step: "verify_line", access_token }`
-
-**Step 2:** User clicks LINE login, FE calls `auth-line`
-- Gets `{ line_user_id }`
-
-**Step 3:** User calls `bff-auth-complete` with `line_user_id` and `access_token`
-- Validates access_token, finds existing user
-- Links LINE to existing account
-- Checks profile completion (already complete)
-- Response: `{ next_step: "complete", access_token }`
-
-**Step 4:** Navigate to home
-
----
-
-### Scenario 3: Existing user with complete profile
-
-**Step 1:** User authenticates (LINE or tel or both depending on auth_methods)
-- `bff-auth-complete` finds existing user
-- All required auth methods present
-- `is_signup_form_complete = true`
-- No missing required fields
-
-**Response:**
-```json
-{
-  "success": true,
-  "next_step": "complete",
-  "access_token": "...",
-  "is_signup_form_complete": true,
-  "missing": {
-    "tel": false,
-    "line": false,
-    "consent": false,
-    "profile": false,
-    "address": false
-  },
-  "missing_data": null
-}
-```
-
-**Frontend:** Navigate directly to home, skip form
-
----
-
-### Scenario 4: Existing user, filled form before but has new required fields
-
-**Initial state:**
-- User previously completed signup form
-- Merchant adds new required fields to template
-
-**Step 1:** User authenticates
-- `bff-auth-complete` finds existing user
-- `is_signup_form_complete = true`
-- But new required fields added to template (detected by checking empty values)
-
-**Response:**
-```json
-{
-  "success": true,
-  "next_step": "complete_profile_existing",
-  "access_token": "...",
-  "is_signup_form_complete": true,
-  "missing_data": {
-    "pdpa": [ /* only missing mandatory consents */ ],
-    "default_fields_config": [
-      {
-        "id": "default-fields-group",
-        "fields": [ /* only missing required fields */ ]
-      }
-    ],
-    "custom_fields_config": [ /* only groups with missing required fields */ ]
-  }
-}
-```
-
-**Frontend:** Show form with only missing required fields, allow user to complete
-
----
-
-### Scenario 5: Existing user (LINE-only), never filled form, method changed to LINE+TEL
-
-**Initial state:**
-- User account has `line_id`, no `tel`
-- `is_signup_form_complete = false`
-- Merchant changes to `["line", "tel"]`
-
-**Step 1:** User calls `bff-auth-complete` with `line_user_id`
-- Finds existing user by LINE
-- Detects missing tel
-- Response: `{ next_step: "verify_tel", access_token }`
-
-**Step 2:** User enters phone + OTP, calls `bff-auth-complete` with `access_token`, `tel`, `otp_code`, `session_id`
-- Links tel to existing account
-- Checks profile: `is_signup_form_complete = false`
-- Response: `{ next_step: "complete_profile_existing", missing_data: {full form} }`
-
-**Step 3:** User fills form, calls `bff_save_user_profile`
-
-**Step 4:** Navigate to home
-
----
-
-## Key Design Decisions
-
-### Phone Number Normalization
-All tel formats normalized to `+66XXXXXXXXX`:
-- Implemented in: `auth-send-otp`, `bff-auth-complete`
-- Ensures consistent lookups across `user_accounts`, `otp_requests`
-
-### Custom Authentication (Not Supabase Auth)
-- Uses custom JWT generation in `bff-auth-complete`
-- `auth_user_id` = `user_id` (self-referencing)
-- No foreign key to `auth.users`
-- JWT claims include: `merchant_id`, `user_id`, `phone`, `line_id`
-
-### Profile Completion Logic
-- `is_signup_form_complete` flag: Has user ever submitted the form?
-- Dynamic validation: Checks required fields in `user_field_config` and `form_fields`
-- Full form vs. missing-only: Based on `is_signup_form_complete` status
-
-### Caching Strategy
-- **Cached (5 min TTL):** Form templates, translations, persona groups, consent versions
-- **Never cached:** User data (values, selections, consent status)
-- **Cache key:** `merchant:{merchant_id}:user_profile_template:all_languages`
-- **Cache invalidation:** Auto-expire (5 min) or manual via `fn_invalidate_user_profile_template_cache(merchant_id)`
-
-### Deactivated Default Fields
-- `phone` - managed via auth flow, not shown in signup form
-- `line_id` - managed via auth flow, not shown in signup form
-
----
-
-## Frontend Implementation Guide
-
-### Initial Page Load
-```javascript
-// 1. Get auth config
-const config = await bff_get_auth_config({ merchant_code: "newcrm" });
-// config.auth_methods → ["line", "tel"]
-
-// 2. Show appropriate auth UI based on config
-if (config.auth_methods.includes('line')) {
-  // Show LINE login button
-}
-if (config.auth_methods.includes('tel')) {
-  // Show phone input
-}
-```
-
-### LINE Login Flow
-```javascript
-// 1. User clicks LINE button → redirect to LINE OAuth
-// 2. Callback with code
-const lineProfile = await auth_line({ code, merchant_code, redirect_uri });
-// lineProfile.line_user_id
-
-// 3. Call auth complete
-const result = await bff_auth_complete({
-  merchant_code: "newcrm",
-  line_user_id: lineProfile.line_user_id
-});
-
-// 4. Handle next_step
-handleNextStep(result);
-```
-
-### Phone Login Flow
-```javascript
-// 1. User enters phone
-const otpResult = await auth_send_otp({ phone, merchant_code });
-// otpResult.session_id
-
-// 2. User enters OTP
-const result = await bff_auth_complete({
-  merchant_code: "newcrm",
-  tel: phone,
-  otp_code: otp,
-  session_id: otpResult.session_id
-});
-
-// 3. Handle next_step
-handleNextStep(result);
-```
-
-### Handling `next_step`
-```javascript
-function handleNextStep(result) {
-  // Store credentials if provided
-  if (result.access_token) {
-    localStorage.setItem('access_token', result.access_token);
-    localStorage.setItem('refresh_token', result.refresh_token);
-  }
-
-  switch (result.next_step) {
-    case 'verify_line':
-      // Show LINE login button
-      // Store access_token if provided (for linking)
-      navigateTo('/auth/line');
-      break;
-      
-    case 'verify_tel':
-      // Show phone input + OTP form
-      // Store access_token if provided (for linking)
-      navigateTo('/auth/phone');
-      break;
-      
-    case 'complete_profile_new':
-      // Bind result.missing_data to form variable
-      variables['45691153-f0a5-42fa-ac9a-5729a9853be2'] = result.missing_data;
-      // Show form with "ยินดีต้อนรับ!" header
-      // Initialize form_step to first section with items
-      navigateTo('/profile/complete');
-      break;
-      
-    case 'complete_profile_existing':
-      // Bind result.missing_data to form variable
-      variables['45691153-f0a5-42fa-ac9a-5729a9853be2'] = result.missing_data;
-      // Show form with "ยินดีต้อนรับกลับ!" header
-      // If is_signup_form_complete=false → show full form
-      // If is_signup_form_complete=true → show only missing fields
-      navigateTo('/profile/complete');
-      break;
-      
-    case 'complete':
-      // All authentication and profile complete
-      navigateTo('/home');
-      break;
-  }
-}
-```
-
-### Form Navigation - Next Button
-```javascript
-// On next button click
-const result = await nextButtonWorkflow();
-// Returns: { upsert: boolean, nextStep: string|null }
-
-if (result.upsert) {
-  // Last step completed
-  const formData = variables['45691153-f0a5-42fa-ac9a-5729a9853be2'];
-  await bff_save_user_profile(formData);
-  // Navigate to home
-  navigateTo('/home');
-} else {
-  // form_step automatically updated to result.nextStep
-  // UI automatically shows next section
-}
-```
-
-### Form Navigation - Back Button
-```javascript
-// On back button click
-const result = await backButtonWorkflow();
-// Returns: { isFirst: boolean, prevStep: string|null }
-
-// form_step automatically updated to prevStep
-// UI automatically shows previous section
-```
-
-### Form Validation - Next Button Visibility
-```javascript
-// Bind to next button v-if
-const canProceed = checkRequiredFieldsFilled();
-// Returns true/false based on form_step and required fields
-
-// Also check if not in auth verification flow
-const nextStep = variables['b198191a-68f1-412e-906c-59b90022ebbd'];
-const showButton = canProceed && nextStep !== 'verify_line' && nextStep !== 'verify_tel';
-```
-
-### Form Validation - Error Message Visibility
-```javascript
-// Bind to error message v-if
-const showError = checkInvalidFields();
-// Inverted logic from canProceed
-// Returns true when required fields missing
-```
-
----
-
-## Database Schema Summary
-
-### Core Tables
-
-**user_accounts**
-- Primary user table
-- Columns: `id`, `merchant_id`, `tel`, `line_id`, `email`, `fullname`, `persona_id`, `channel_*`, `is_signup_form_complete`
-- Auth methods stored here: `tel`, `line_id`
-- `auth_user_id` = `id` (self-referencing for custom auth)
-
-**user_address**
-- 1:1 relationship with user_accounts
-- Columns: `user_id`, `addressline_1`, `city`, `district`, `subdistrict`, `postcode`, `country_code`
-- UNIQUE constraint on `user_id` for UPSERT
-
-**form_submissions + form_responses**
-- Stores custom field responses
-- `form_submissions`: One per user per form template
-- `form_responses`: One per field per submission
-- Supports `text_value`, `array_value` (jsonb[]), `object_value`
-
-**user_consent_ledger**
-- Audit log of consent actions
-- Columns: `user_id`, `consent_version_id`, `action` (accepted/withdrawn)
-- Append-only ledger
-
-**user_communication_preferences**
-- Topic subscriptions
-- Columns: `user_id`, `topic_id`, `opted_in`
-- UPSERT on conflict
-
-**otp_requests**
-- OTP validation records
-- Columns: `phone`, `otp_code`, `session_id`, `attempts`, `verified`, `expires_at`
-- TTL: 10 minutes
-
-**refresh_tokens**
-- JWT refresh tokens
-- Columns: `user_id`, `token`, `expires_at`
-- TTL: 30 days
-
-### Configuration Tables
-
-**merchant_master**
-- `auth_methods` TEXT[] - Authentication method configuration
-
-**user_field_config**
-- Default field definitions
-- `active_status = false` for `phone`, `line_id` (managed via auth)
-
-**form_templates + form_fields + form_field_groups**
-- Custom field definitions
-- Template code `'USER_PROFILE'` used for signup form
-
-**consent_versions**
-- PDPA form definitions
-- `interaction_type`: `'notice'` | `'optional'` | `'required'`
-
-**communication_topics**
-- Topic subscription options
-
----
-
-## Security Patterns
-
-### Row Level Security (RLS)
-All user data filtered by `get_current_merchant_id()` extracted from:
-1. Custom header `x-merchant-id`
-2. JWT claim `merchant_id`
-
-### Function Security
-- All BFF functions: `SECURITY DEFINER`
-- Permissions granted to `authenticated` role
-- Public endpoints: `auth-line` (`verify_jwt: false`)
-- Other edge functions: `verify_jwt: true`
-
-### JWT Structure
-```json
-{
-  "sub": "user_id",
-  "merchant_id": "uuid",
-  "user_id": "uuid",
-  "phone": "+66966564526",
-  "line_id": "U46fa97...",
-  "role": "authenticated",
-  "aud": "authenticated",
-  "iss": "supabase",
-  "exp": 1234567890
-}
-```
-
-**Expiry:**
-- Access token: 24 hours
-- Refresh token: 30 days
-
----
-
-## Error Handling
-
-### Common errors from `bff-auth-complete`:
-
-| Error | Reason |
-|-------|--------|
-| `"merchant_code is required"` | Missing merchant_code parameter |
-| `"Invalid merchant_code"` | merchant_code not in MERCHANT_REGISTRY |
-| `"Incomplete phone verification parameters"` | Missing tel, otp_code, or session_id (must provide all 3) |
-| `"Invalid or expired OTP"` | OTP validation failed or max attempts exceeded |
-| `"Credentials belong to different accounts"` | LINE and tel registered to different users |
-| `"Failed to create account"` | Database error during user creation |
-
-### Error handling strategy:
-- Display error message to user
-- Log details for debugging
-- For auth errors: Return to auth screen
-- For profile errors: Allow retry
-
----
-
-## Data Flow Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         FRONTEND                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. Get Auth Config                                             │
-│     └─> bff_get_auth_config(merchant_code)                      │
-│                                                                 │
-│  2a. LINE Flow                                                  │
-│      └─> LINE OAuth → auth-line(code) → line_user_id           │
-│                                                                 │
-│  2b. Phone Flow                                                 │
-│      └─> auth-send-otp(phone) → session_id                      │
-│      └─> User enters OTP                                        │
-│                                                                 │
-│  3. Complete Auth                                               │
-│     └─> bff-auth-complete(credentials) → next_step, access_token│
-│                                                                 │
-│  4. Profile Form (if next_step = complete_profile_*)            │
-│     └─> missing_data → form variable                            │
-│     └─> form_step navigation (persona → default → custom → pdpa)│
-│     └─> bff_save_user_profile(form_data)                        │
-│                                                                 │
-│  5. Home (if next_step = complete)                              │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                        EDGE FUNCTIONS                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  auth-line (Deno)                                               │
-│  └─> LINE OAuth code exchange                                   │
-│  └─> Returns LINE profile                                       │
-│                                                                 │
-│  auth-send-otp (Deno)                                           │
-│  └─> Generate OTP                                               │
-│  └─> Store in otp_requests                                      │
-│  └─> Send SMS via send-sms-8x8                                  │
-│                                                                 │
-│  bff-auth-complete (Deno) ⭐ CENTRAL HUB                        │
-│  └─> Find/create user                                           │
-│  └─> Validate OTP                                               │
-│  └─> Link auth methods                                          │
-│  └─> Generate JWT                                               │
-│  └─> Call bff_get_user_profile_template                         │
-│  └─> Determine next_step                                        │
-│  └─> Build missing_data payload                                 │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                   POSTGRES FUNCTIONS                            │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  bff_get_auth_config(merchant_code)                             │
-│  └─> Returns auth_methods from merchant_master                  │
-│                                                                 │
-│  bff_get_user_profile_template(mode, language, merchant, event) │
-│  └─> Redis: full merchant template (5 min), then per-request:     │
-│  └─> Extract language → filter fields by JWT persona → optional   │
-│      event pre-fill (new) → overlay user values (edit)            │
-│                                                                 │
-│  bff_save_user_profile(form_data)                               │
-│  └─> UPSERT user_accounts                                       │
-│  └─> UPSERT user_address                                        │
-│  └─> UPSERT form_submissions + form_responses                   │
-│  └─> INSERT user_consent_ledger                                 │
-│  └─> UPSERT user_communication_preferences                      │
-│  └─> Set is_signup_form_complete = true                         │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                        DATABASE                                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  merchant_master → auth_methods config                          │
-│  user_accounts → identities, profile, is_signup_form_complete   │
-│  user_address → addresses                                       │
-│  form_* → custom fields                                         │
-│  consent_versions → PDPA forms                                  │
-│  user_consent_ledger → consent audit log                        │
-│  communication_topics → topic options                           │
-│  user_communication_preferences → subscriptions                 │
-│  otp_requests → OTP validation                                  │
-│  refresh_tokens → JWT refresh                                   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                      REDIS CACHE                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  Key: merchant:{id}:user_profile_template:all_languages         │
-│  TTL: 5 minutes                                                 │
-│  Value: Form templates + all translations                       │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Variable Reference for Frontend
-
-### WeWeb Global Variables
-
-**Form data variable** (e.g., `variables['45691153-f0a5-42fa-ac9a-5729a9853be2']`)
-- Stores the entire form structure from `missing_data`
-- Updated by field value updater with debounce
-- Passed to `bff_save_user_profile` when form complete
-
-**Form step variable** (e.g., `variables['f214fed7-7ce4-43f6-888f-251cb10b4191']`)
-- Current form section: `"persona"` | `"default_field"` | `"custom_field"` | `"pdpa"`
-- Updated by next/back button workflows
-- Used for conditional rendering and validation
-
-**Next step variable** (e.g., `variables['b198191a-68f1-412e-906c-59b90022ebbd']`)
-- Stores `next_step` value from `bff-auth-complete`
-- Used for page routing and conditional UI
-
----
-
-## Common Frontend Formulas
-
-### Check if in auth verification flow
-```javascript
-!variables['b198191a-68f1-412e-906c-59b90022ebbd'] || 
-contains(
-  createArray("verify_line", "verify_tel", null, ""), 
-  variables['b198191a-68f1-412e-906c-59b90022ebbd']
-)
-```
-
-### Get field value by field_key
-```javascript
-// Example: Get city value
-variables['45691153-f0a5-42fa-ac9a-5729a9853be2']
-  ?.default_fields_config
-  ?.flatMap(g => g.fields)
-  ?.find(f => f.field_key === 'city')
-  ?.value
-```
-
-### Combine workflow results
-```javascript
-{
-  ...context.workflow['workflow-1-id'].result, 
-  ...context.workflow['workflow-2-id'].result
-}
-```
-
----
-
-This system provides a **flexible, secure, and merchant-configurable authentication flow** with dynamic profile completion and seamless auth method linking.
+**`form_step`** — Client-only section index within the profile form (`persona` → `default_field` → `custom_field` → `pdpa`); orthogonal to `next_step`.
 
+**Validated signup codes** — Optional `external_code` rows on `user_field_config` with pools in `signup_codes` / claims in `signup_code_claims`; validated at field entry (`bff_validate_signup_code`) and consumed on save (`fn_consume_signup_code`).
 
+**Shopify storefront identity** — Parallel path: HMAC app proxy or customer-account session token → find-or-create member → `issueMemberSession`. Theme Liquid customer id is never trusted for minting.
+
+## Rules
 
+- Auth method configuration is merchant-wide; the member UI must not offer disabled methods. Shopify embedded admin hides standalone auth settings (`GLOBAL_SETTINGS_SECTIONS.auth` off on Shopify surface).
+- `bff-auth-complete` is the only hub that mints member sessions for LINE / OTP / `shopify_email` completion flows on loyalty-user.
+- Phone numbers are normalized to E.164 (`+66…`) in `auth-send-otp` and `bff-auth-complete` before lookup or insert.
+- If LINE and phone in one request resolve to **different** existing users → `409` with credentials conflict; no merge.
+- OTP: 6 digits, 10-minute expiry, max 3 validation attempts per `session_id` (`fn_validate_otp` / `otp_requests`). OTP is never returned in API responses.
+- **`verify_*` steps:** When a required auth method is still missing, hub returns `next_step` of `verify_line`, `verify_tel`, or `verify_shopify`, **with** `access_token` + `refresh_token`, `profile_check_skipped: true`, and `missing_data: null` — client stores the session and collects the missing proof, then calls hub again (optionally with `access_token` to link).
+- **`next_step` → profile payload:**
 
+| `next_step` | When | `missing_data` |
+| --- | --- | --- |
+| `complete_profile_new` | New `user_accounts` row after auth satisfied | Full template (persona, PDPA, all visible fields) |
+| `complete_profile_existing` | Existing user, `is_signup_form_complete = false` | Full template |
+| `complete_profile_existing` | Existing user, flag true but required consent/fields empty | Missing slices only |
+| `complete` | Auth satisfied and profile/consent complete | `null` |
+
+- Persona on template: universal fields (empty/null `persona_ids`) always shown; non-empty `persona_ids` require matching `user_accounts.persona_id` (or `p_selected_persona_id` during persona step). Empty persona on user → persona-scoped fields omitted until persona chosen.
+- Default fields `phone` and `line_id` stay auth-managed (`active_status` false in config); not collected as free-text on the profile form.
+- `bff_save_user_profile` upserts profile tables and sets `is_signup_form_complete` on success; must use member bearer JWT.
+- **Signup codes:** Pool policy (single-use vs shareable cap), optional store binding, and persona scope enforced on validate/consume; see registry `Signup Code Validation` and `CHANGELOG` store-binding notes.
+- **Shopify storefront:** Theme `customer.id` / email never mint sessions — only HMAC-verified app proxy fields or extension session tokens.
+- **Shopify storefront:** At most **one** app-proxy auth call per rewards **panel open**; launcher and product points block stay identity-free.
+- **Shopify storefront:** `customers/create` may link CRM early; member home in the widget still requires successful proxy (or extension) auth on panel open.
+- **Shopify storefront:** Logout or proxy reporting no/different Shopify customer must clear stale Rocket session.
+
+### Shopify
+
+- Widget panel: Join → Shopify login URL → return → signed proxy → member home (no LINE/OTP in panel).
+- Customer account UI extensions: `shopify-extension-api` + session token (sandbox cannot call app proxy).
+- Landing CTAs may open widget, login, or custom URL; member overlay on landing uses cached public page RPC + member state overlay — not a substitute for widget proxy auth.
+
+## Journeys
+
+### Admin journey
+
+| Page | Owning repo | BFF / RPC |
+| --- | --- | --- |
+| Global settings | loyalty-admin | `bff_get_general_config`, `bff_upsert_general_config` |
+| Profile form settings | loyalty-admin | `bff_admin_get_user_profile_config`, `bff_admin_upsert_user_profile_config` |
+| Signup codes (per external_code field) | loyalty-admin | `bff_list_signup_codes`, `bff_upload_signup_codes`, `bff_delete_signup_codes`, … |
+
+| Setting | Effect on member signup/login |
+| --- | --- |
+| `auth_methods` | Which proof channels appear and which `verify_*` steps hub enforces |
+| `attain_persona` | When persona is chosen relative to profile (`pre-form` vs post-form — persona metadata in template) |
+| Default field cards | Visibility, required, persona scope, id_card mode / uniqueness |
+| Validated code fields | External code pools, policies, store binding, manage codes upload |
+| Custom field groups | `USER_PROFILE` form sections and conditional fields |
+
+1. **Global settings** → set allowed authentication methods (standalone merchants; hidden on Shopify embedded).
+2. **Profile form settings** → configure default fields, validated code pools, custom groups; save via upsert (merge `config` jsonb keys — do not wipe id_card / external_code config).
+3. Optional: per validated-code field → **Manage codes** → upload/list/delete codes.
+4. Persona catalog and attain timing remain under **Tier / Persona** admin when personas gate fields or signup order.
+
+### Member journey
+
+| Page / surface | Owning repo | BFF / RPC |
+| --- | --- | --- |
+| Login / signup entry | loyalty-user | `bff_get_auth_config`, `auth-line`, `auth-send-otp` |
+| Auth completion | loyalty-user | `bff-auth-complete` |
+| Profile completion | loyalty-user | `bff_get_user_profile_template`, `bff_save_user_profile` |
+| Edit profile (later) | loyalty-user | Same template RPC with `p_mode = 'edit'` |
+
+1. Load auth config → render LINE button and/or phone + OTP per merchant methods.
+2. Complete LINE OAuth (`auth-line`) and/or OTP send + verify inputs.
+3. Call `bff-auth-complete` with merchant code and proof payload (and `access_token` when linking a second method).
+4. Branch on `next_step`:
+   - `verify_line` / `verify_tel` / `verify_shopify` → collect missing proof (session already issued when linking).
+   - `complete_profile_*` → bind `missing_data`, walk `form_step` sections, validate required fields per section.
+   - `complete` → navigate to member home (`get_user_summary` merged into `user_account` on hub response).
+5. On final profile section → `bff_save_user_profile` → home.
+6. Optional: enter validated external code during profile → `bff_validate_signup_code` before save; consumption on save.
+7. Optional: after `complete`, apply referral member code per `Referral.md` (signup referral path).
 
+| Error / state | Typical cause |
+| --- | --- |
+| Credentials belong to different accounts | LINE and phone match two users |
+| OTP invalid / expired | Wrong code or exhausted attempts |
+| Profile save validation | Required field, PDPA, or signup code policy |
+| `ID_DOCUMENT_*` | id_card mode / uniqueness from admin config |
+
+### Shopify
+
+| Surface | Identity | Member sees |
+| --- | --- | --- |
+| Storefront widget (panel open) | App proxy HMAC + `logged_in_customer_id` | Member home when Shopify customer exists |
+| Storefront widget (guest) | — | Join → Shopify login → return → proxy → home |
+| Customer account extensions | Session token → `shopify-extension-api` | Hub / balance / wishlist (no proxy from extension sandbox) |
+| Product page block | None | Earn estimate from widget settings cache only |
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+**Outside the loyalty-user signup screens:** Shopper creates a Shopify account on theme/checkout → `customers/create` webhook links CRM → opens rewards panel → signed proxy → member home without Join.
+
+| Moment | Proxy call? | Behaviour |
+| --- | --- | --- |
+| Page load / launcher | No | Launcher label only |
+| Panel opens, cached Rocket session | Yes (parallel) | Optimistic UI; reconcile on proxy response |
+| Panel opens, no session | Yes | Auto-login or Join |
+| Proxy: no customer while cached | — | Clear session → Join |
+| Proxy: different customer id | — | Clear and re-auth |
+
+Landing page guest/member CTAs and hub redeem flows are documented under `Display_Settings.md` and reference MD Part 2; identity gateways summarized in **System › Shopify**.
+
+## System
+
+### Data model
+
+| Table | Role |
+| --- | --- |
+| `merchant_master` | `auth_methods` TEXT[] |
+| `user_accounts` | Member row: `tel`, `line_id`, `email`, `persona_id`, `is_signup_form_complete`, `external_user_id` (`shopify:…` when linked), acquisition fields |
+| `user_address` | 1:1 address upsert on profile save |
+| `user_field_config` | Default signup fields + `external_code` definitions |
+| `form_templates` / `form_fields` / `form_field_groups` | Custom profile template (`USER_PROFILE`) |
+| `form_submissions` / `form_responses` | Custom field answers |
+| `user_consent_ledger` | PDPA accept/withdraw audit |
+| `user_communication_preferences` | Topic opt-ins |
+| `consent_versions` | PDPA definitions (`notice` / `optional` / `required`) |
+| `otp_requests` | OTP sessions (phone, code hash, attempts, expiry) |
+| `refresh_tokens` | Member refresh tokens (~30-day TTL) |
+| `signup_codes` / `signup_code_claims` | Validated code pools and consumption |
+| `shopify_session` / webhook tables | Shopify install context (platform — see `Shopify.md`) |
+
+User creation and profile column updates on the member path go through `chokepoint_post_user_event` (`create` / `update`) from `bff-auth-complete` and related writers.
+
+### Functions
+
+| Name | Role |
+| --- | --- |
+| `bff_get_auth_config` | Returns enabled `auth_methods` for merchant code |
+| `auth-line` | LINE code → profile ids (public edge) |
+| `auth-send-otp` | Normalize phone, create OTP session, SMS via 8x8 (edge; registry notes JWT gate — see gaps) |
+| `bff-auth-complete` | Hub: match/create user, link methods, profile check, `next_step`, JWT + refresh |
+| `bff_get_user_profile_template` | Template + persona filter; params include `p_mode`, `p_language`, `p_merchant_code`, `p_event_code`, `p_selected_persona_id`, `p_audience` |
+| `bff_save_user_profile` | Persist profile; sets `is_signup_form_complete` |
+| `fn_check_profile_complete` | Server-side completeness helper |
+| `mark_signup_form_complete` | Legacy/direct flag set (prefer save path) |
+| `fn_validate_otp` | OTP verification |
+| `fn_invalidate_user_profile_template_cache` | Bust Redis template cache (~5 min TTL per merchant) |
+| `bff_validate_signup_code` / `fn_consume_signup_code` | External code validate/consume |
+| `shopify_find_or_create_member` | Shopify customer → member row + acquisition |
+| `shopify-proxy` | App proxy HMAC + session mint |
+| `shopify-extension-api` | Session-token routes for account UI |
+| `shopify_webhook_create_customer` | Early link on Shopify account creation |
+
+Admin: `bff_admin_get_user_profile_config`, `bff_admin_upsert_user_profile_config`, signup code BFFs listed in registry.
+
+### Flows
+
+**Standalone member (LINE + tel configured):**
+
+1. `auth-line` → `bff-auth-complete` with `line_user_id` only → `verify_tel` if user missing phone.
+2. `auth-send-otp` → hub with line + tel + OTP → create user if needed → `complete_profile_new` with full `missing_data`.
+3. Section navigation (client `form_step`) → `bff_save_user_profile` → `complete` on subsequent hub calls.
+
+**Linking auth method on existing user:** Hub with first method issues JWT; `verify_*` for second method; second hub call with `access_token` links column without duplicate users.
+
+**Profile re-entry:** Merchant adds required field → hub returns `complete_profile_existing` with missing-only `missing_data` when `is_signup_form_complete` is true.
+
+**Shopify widget panel open:** `shopify-proxy` verifies proxy signature → `shopify_find_or_create_member` → `issueMemberSession` → widget APIs with member JWT. Webhook may have created row earlier; proxy still required for session.
+
+**Template cache:** Redis key `merchant:{id}:user_profile_template:all_languages`; persona filtering applied after cache read using member JWT context.
+
+### External services
+
+- LINE Login OAuth (authorization code exchange in `auth-line`).
+- 8x8 SMS for OTP delivery from `auth-send-otp`.
+
+### Known gaps
+
+- `auth-send-otp` deploy metadata may show `verify_jwt: true` while member flows treat it as anon-key callable — align deploy config with product intent.
+- Per-phone OTP **request** rate limiting not documented as shipped (see `docs/CRITICAL_BUG_FIXES.md`).
+- `verify_shopify` / `shopify_email` auth method is for hybrid loyalty-user flows, not the Shopify theme widget path (widget uses proxy identity only).
+
+### Shopify
+
+| Surface | Auth | Gateway |
+| --- | --- | --- |
+| UI extensions | Shopify session token | `shopify-extension-api` |
+| Theme / widget panel | HMAC app proxy + `logged_in_customer_id` | `shopify-proxy` |
+| Product block | None | `api_get_widget_settings_cached` |
+
+Member JWT is minted **only** server-side after verified Shopify customer context (proxy or extension). Cross-ref `Authentication.md` (member session issuer) and `Shopify.md` (OAuth, webhooks, extension packaging). Reference MD Part 2 §2.4–2.5 for hub/landing/widget shopper detail.
+
+## Related
+
+- **Authentication.md** — Member vs admin JWT, `issueMemberSession`, refresh tokens, RLS merchant context.
+- **Forms.md** — Field types, `USER_PROFILE` template ownership, conditional fields.
+- **Referral.md** — Signup referral apply after member exists (`fn_process_referral_signup`).
+- **Tag_and_Persona.md** — Persona assignment and field visibility.
+- **Shopify.md** — Platform OAuth, billing, webhook receiver, extension layout.
+- **Display_Settings.md** — Landing/hub/widget content (identity-free product block vs panel).

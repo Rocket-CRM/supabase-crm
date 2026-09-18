@@ -1,914 +1,176 @@
-# Authentication System - Complete Guide
+# Authentication
 
-**Version:** 1.0  
-**Last Updated:** December 2025  
-**Project:** Supabase CRM
+How the platform proves **who** is calling: merchant staff (admin JWT), loyalty members (member session JWT), and external systems (merchant API keys). All member and admin bearer tokens are Supabase-compatible HS256 JWTs signed with the project **Legacy JWT secret**; API keys are hashed server-side and never sent as JWTs.
 
-## Overview
+Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify, Supabase Edge (auth + proxy), Open API gateway consumers
 
-The CRM uses a **dual authentication system**:
-1. **End-User Authentication** - Custom auth with LINE + Phone OTP
-2. **Admin Authentication** - Supabase Auth (standard email/password)
+## Concept
 
-Both systems generate **Supabase-compatible JWTs** that work with RPC functions, PostgREST, and Row Level Security.
+The CRM runs **three parallel credential models**. They must not be mixed on the same call path (for example, a member JWT does not satisfy admin BFF permission checks, and an API key is not a substitute for a member session on user-facing RPCs).
 
----
+**Admin credential** — Supabase Auth user in `auth.users`, linked to `admin_users` for merchant, role, and permissions. Daily sign-in is email/password (standalone portal) or Shopify App Bridge session token exchange (`auth-shopify-admin` embedded). Postgres resolves merchant context via `get_current_merchant_id()`; JWT may carry `merchant_id` and permission claims from `custom_access_token_hook`.
 
-## Critical JWT Secret Requirement
+**Member session** — Long-lived **access JWT** minted only on the server by shared `issueMemberSession` (30-day `exp`). Issued after LINE/OTP/profile hub (`bff-auth-complete` on loyalty-user), after verified Shopify customer context (`shopify-proxy` / `shopify-extension-api`), or refreshed via `auth-refresh` + `refresh_tokens`. Claims identify `user_accounts` and `merchant_id`; `channel` records how the session was minted (`line`, `tel`, `shopify`). Shopify sessions may include `shopify_customer_id` for burn/metafield paths.
 
-### The Golden Rule
+**API key** — Opaque secret per merchant in `merchant_api_keys` (stored hashed). Validated by `validate_api_key`; gateway or edge passes resolved `merchant_id` into `api_*` functions as explicit `p_merchant_id`. Used for server-to-server Open API and integration callers—not for browser member apps.
 
-**Custom JWT Secret MUST Equal Supabase's Legacy JWT Secret**
+**JWT secret contract** — Every custom signer (`issueMemberSession`, legacy edge paths) must use the same secret Supabase PostgREST/RPC uses (**Legacy JWT secret** in project settings). Mismatch surfaces as `PGRST301` or signature errors on RPC.
 
-```
-Edge Function (bff-auth-complete):
-  Signs JWTs with: SUPABASE_JWT_SECRET (Supabase's project secret)
-        ↓
-Supabase RPC/PostgREST:
-  Validates JWTs with: Same project secret ✅
-        ↓
-External Services (crm-api):
-  Validates JWTs with: Same project secret ✅
-```
+**Superadmin** — Platform operators use `superadmin_*` RPCs across merchants; separate from merchant admin JWT (see `11-auth-conventions`).
 
-**All three must use the SAME secret** or validation fails.
+Signup screens, `next_step`, and profile completion live in **Signup_Login.md**; this doc owns credential shape, minting gateways, and validation rules.
 
-### Where to Find the Secret
+## Rules
 
-**Supabase Dashboard → Settings → API → JWT Settings:**
+- **Admin BFFs** (`bff_*`, `bff_admin_*`) MUST resolve merchant via `get_current_merchant_id()` (header chain → JWT claims → `admin_users` / `user_accounts` fallback). They MUST NOT accept `p_merchant_id` from the client as authority.
+- **Member user RPCs** expect `Authorization: Bearer <member JWT>` (or session validation helpers). Identity is `user_id` / `sub` claim tied to `user_accounts`.
+- **Open API** (`api_*`) expects upstream API-key validation and explicit `p_merchant_id`; key validation is `validate_api_key(p_api_key)` → merchant id + metadata.
+- Member access JWTs are HS256, `aud: authenticated`, `iss: supabase`, **`exp` ≈ 30 days** from mint (`ACCESS_TOKEN_EXPIRY` in `issueMemberSession`). Refresh tokens in `refresh_tokens` also use a **30-day** TTL when issued from `bff-auth-complete`.
+- Admin Supabase Auth access tokens follow Supabase session defaults (~1 hour); refresh via Supabase client. Embedded Shopify admin uses `auth-shopify-admin` to exchange App Bridge token for admin session—not member `issueMemberSession`.
+- **OTP** — Plaintext OTP is never returned in API responses; max **3** attempts per `session_id` (`fn_validate_otp` / `otp_requests`). Wrong guesses increment attempts (see `CRITICAL_BUG_FIXES` auth hardening).
+- **Bot auth (beta / internal)** — When project env `BOT_SECRET` is set, `bff-auth-complete` accepts matching `bot_secret` and skips OTP proof; issues the same member JWT family as a real user. When unset, `bot_secret` → 403. Never expose `BOT_SECRET` in frontends.
+- **RLS / merchant scope** — Policies and helpers use `get_current_merchant_id()` from JWT `merchant_id` and/or `x-merchant-id` / `x-merchant-code` headers where applicable.
+- **Shopify storefront** — Theme Liquid `customer.id` / email is **never** sufficient to mint a member JWT. Minting requires HMAC-verified app proxy query params with `logged_in_customer_id`, or a verified Shopify **session token** on `shopify-extension-api`.
+- **Shopify proxy auth** — Paths ending in `/auth/signup` or `/auth/login` return 401 if `logged_in_customer_id` is absent; 403 if HMAC invalid; 404 if shop unknown.
 
-**Look for:** "Legacy JWT secret (still used)"
+### Shopify
 
-**This is the master secret** - all services must use this.
+- Member JWT on storefront is always server-minted after Shopify customer fetch + `findOrCreateMember`; client stores `token` from proxy JSON only.
+- UI extension sandbox cannot call app proxy; extensions use session token → `shopify-extension-api` → same `issueMemberSession` primitive.
+- Referral purchase **claim** and **page** on storefront use the same `shopify-proxy` HMAC gate (not member JWT for anonymous claim UI); see **Referral.md**.
 
-**Configure it as:**
-- Edge Functions: Let `SUPABASE_JWT_SECRET` use it naturally (no custom override)
-- External services: Set `JWT_SECRET=<supabase-legacy-jwt-secret>`
+## Journeys
 
-### What Happens If Mismatched
+### Admin journey
 
-**If Edge Function uses custom secret:**
-```
-bff-auth-complete signs with: Custom secret
-Supabase validates with: Project secret
-→ MISMATCH → PGRST301 error ("No suitable key or wrong key type")
-→ All Supabase RPC calls fail ❌
-```
+| Page | Owning repo | BFF / RPC / Edge |
+| --- | --- | --- |
+| Login (standalone) | loyalty-admin | Supabase Auth `signInWithPassword` |
+| Login (Shopify embedded) | loyalty-admin | `auth-shopify-admin` (App Bridge session token) |
+| API keys (Open API) | loyalty-admin | `bff_list_merchant_api_keys`, `bff_create_merchant_api_key`, `bff_revoke_merchant_api_key` |
 
-**If external service uses wrong secret:**
-```
-JWT signed with: Supabase secret
-External service verifies with: Different secret
-→ "Invalid signature" error ❌
-```
+| Setting / action | Effect on credentials |
+| --- | --- |
+| Admin user invite / role | `admin_users` + `admin_roles` / `admin_role_permissions`; JWT enriched on login via hook |
+| Active merchant switch (multi-merchant admin) | `admin_set_active_merchant` → `app_metadata.active_merchant_id` in JWT |
+| Create API key | New row in `merchant_api_keys`; plaintext shown once at creation |
+| Revoke API key | Key invalid immediately for `validate_api_key` |
 
----
+1. **Standalone** — Admin signs in with email/password → Supabase session JWT → admin BFF calls with `Authorization` + optional `x-merchant-id`.
+2. **Shopify embedded** — App Bridge provides session token → `auth-shopify-admin` → Supabase-compatible admin session for iframe portal.
+3. **API keys** — Operator creates/lists/revokes keys for integration partners; partners call Open API with key header (gateway validates before `api_*`).
 
-## End-User Authentication
+### Member journey
 
-### Architecture
+| Surface | Owning repo | Mint path |
+| --- | --- | --- |
+| LINE / phone signup | loyalty-user | `auth-line`, `auth-send-otp` → `bff-auth-complete` → `issueMemberSession` |
+| Session refresh | loyalty-user | `auth-refresh` + `refresh_tokens` / `refresh_session` |
+| Shopify widget panel | rewarding-shopify | Signed `shopify-proxy` `/auth/login` or `/auth/signup` |
+| Customer account extensions | rewarding-shopify | `shopify-extension-api` (session token) |
 
-**Custom authentication system using Edge Functions:**
+1. Load merchant auth methods (`bff_get_auth_config`) on standalone apps.
+2. Prove identity (LINE code, OTP, or Shopify customer per surface).
+3. Receive `access_token` (+ `refresh_token` on hub paths), store client-side.
+4. Send `Authorization: Bearer` on member BFF/RPC and edge calls until expiry; refresh or re-auth per surface rules.
+5. Profile and `next_step` routing — **Signup_Login.md**.
 
-```
-LINE OAuth + Phone OTP
-        ↓
-Edge Functions (auth-line, auth-send-otp, bff-auth-complete)
-        ↓
-Custom JWT (signed with Supabase's secret)
-        ↓
-Works with Supabase RPC, RLS, and external services
-```
+### Shopify
 
-### Authentication Methods Configuration
+| Moment | Gateway | Member credential |
+| --- | --- | --- |
+| Widget panel open (logged-in Shopify customer) | `shopify-proxy` HMAC + `logged_in_customer_id` | `issueMemberSession` `channel: shopify` |
+| Widget Join flow | Shopify login URL → return → proxy auth paths | Same |
+| Hub / balance / wishlist (account UI) | `shopify-extension-api` | Session token verified in-handler → mint member JWT server-side only |
+| Referral claim page POST | `shopify-proxy` `/referral/claim` | Claim RPCs; not the widget JWT path |
+| Product points block | None | Anonymous widget settings cache only |
 
-**Merchant-configurable via `merchant_master.auth_methods`:**
+App proxy is registered in `rewarding-shopify` `shopify.app.toml` → Supabase `shopify-proxy`. Proxy also serves landing storefront paths and referral page HTML/API per **Display_Settings.md** / reference MD Part 2.
 
-| Configuration | Meaning |
-|--------------|---------|
-| `["line"]` | LINE login only |
-| `["tel"]` | Phone OTP only |
-| `["line", "tel"]` | Both LINE and Phone required |
+## System
 
-**Frontend retrieves via:** `bff_get_auth_config(merchant_code)`
+### Data model
 
-### Edge Functions
-
-#### 1. auth-line
-
-**Purpose:** Exchange LINE OAuth code for LINE profile (does NOT create user or issue JWT)
-
-**Endpoint:** `/functions/v1/auth-line`
-
-**JWT Required:** ❌ No (`verify_jwt: false`)
-
-**Input:**
-```json
-{
-  "code": "LINE_AUTH_CODE",
-  "merchant_code": "newcrm",
-  "redirect_uri": "https://..."
-}
-```
-
-**Output:**
-```json
-{
-  "success": true,
-  "line_user_id": "U46fa97...",
-  "display_name": "John Doe",
-  "picture_url": "https://..."
-}
-```
-
----
-
-#### 2. auth-send-otp
-
-**Purpose:** Generate OTP and send SMS
-
-**Endpoint:** `/functions/v1/auth-send-otp`
-
-**JWT Required:** ❌ No
-
-**Input:**
-```json
-{
-  "phone": "0966564526",
-  "merchant_code": "newcrm"
-}
-```
-
-**Output:**
-```json
-{
-  "success": true,
-  "session_id": "uuid",
-  "expires_in": 600,
-  "message": "OTP sent to +66966564526"
-}
-```
-
-**Phone Normalization:**
-- `0966564526` → `+66966564526`
-- `+660966564526` → `+66966564526` (removes extra 0)
-
----
-
-#### 3. bff-auth-complete (⭐ Central Hub)
-
-**Purpose:** Unified authentication - finds/creates users, validates credentials, generates JWTs
-
-**Endpoint:** `/functions/v1/bff-auth-complete`
-
-**JWT Required:** ✅ Yes (for linking methods to existing session)
-
-**Input Scenarios:**
-
-**A. LINE only:**
-```json
-{
-  "merchant_code": "newcrm",
-  "line_user_id": "U46fa97..."
-}
-```
-
-**B. Phone only:**
-```json
-{
-  "merchant_code": "newcrm",
-  "tel": "+66966564526",
-  "otp_code": "123456",
-  "session_id": "uuid"
-}
-```
-
-**C. Both (LINE + Phone):**
-```json
-{
-  "merchant_code": "newcrm",
-  "line_user_id": "U46fa97...",
-  "tel": "+66966564526",
-  "otp_code": "123456",
-  "session_id": "uuid"
-}
-```
-
-**D. Link method to existing session:**
-```json
-{
-  "merchant_code": "newcrm",
-  "access_token": "eyJ...",
-  "tel": "+66966564526",
-  "otp_code": "123456",
-  "session_id": "uuid"
-}
-```
-
-**Output:**
-```json
-{
-  "success": true,
-  "next_step": "complete_profile_new|complete_profile_existing|complete|verify_line|verify_tel",
-  "user": {
-    "id": "uuid",
-    "tel": "+66966564526",
-    "line_id": "U46fa97...",
-    "fullname": null
-  },
-  "access_token": "eyJ...",
-  "refresh_token": "uuid",
-  "expires_in": 86400,
-  "is_new_user": true,
-  "is_signup_form_complete": false,
-  "missing": {
-    "tel": false,
-    "line": false,
-    "consent": true,
-    "profile": true,
-    "address": false
-  },
-  "missing_data": { ... }
-}
-```
-
-### JWT Generation (Custom Claims)
-
-**Shared issuer:** `supabase/functions/_shared/member-session.ts` exports `issueMemberSession`. `bff-auth-complete`, `shopify-proxy`, and `shopify-extension-api` all call it after channel verification. Member identity is always `user_accounts.id` in `sub` / `user_id`; Supabase Auth users are **admin-only**, not members.
-
-**Generated using Supabase's project JWT secret (`SUPABASE_JWT_SECRET`):**
-
-```typescript
-const { access_token, expires_in } = await issueMemberSession({
-  userAccount: { id, tel, line_id, email },
-  merchantId: merchant_id,
-  channel: 'line' | 'tel' | 'shopify', // logging only
-});
-```
-
-**JWT Structure:**
-```json
-{
-  "sub": "5ce979af-1fce-4d44-8e65-2a0a08219098",
-  "merchant_id": "09b45463-3812-42fb-9c7f-9d43b6fd3eb9",
-  "user_id": "5ce979af-1fce-4d44-8e65-2a0a08219098",
-  "phone": "+66966564526",
-  "line_id": "U46fa97098b91e50011b8b556c5690e3bb",
-  "role": "authenticated",
-  "aud": "authenticated",
-  "iss": "supabase",
-  "exp": 1767005339
-}
-```
-
-**Key Points:**
-- Algorithm: HS256 (HMAC-SHA256)
-- Signed with Supabase's project JWT secret
-- Expiry: 30 days (member access token from `issueMemberSession`)
-- Custom claims: merchant_id, user_id, phone, line_id, email, channel (non-authoritative)
-
----
-
-## Admin Authentication
-
-### Uses Supabase Auth (Standard)
-
-**Login Flow:**
-```
-Admin enters email + password
-        ↓
-Supabase Auth validates
-        ↓
-Returns Supabase Auth JWT
-        ↓
-Works with all Supabase features
-```
-
-**JWT Structure (Supabase Auth):**
-```json
-{
-  "sub": "admin-user-id",
-  "email": "admin@example.com",
-  "role": "authenticated",
-  "aud": "authenticated",
-  "iss": "https://wkevmsedchftztoolkmi.supabase.co/auth/v1",
-  "exp": 1234567890
-}
-```
-
-**Differences from end-user JWTs:**
-- `iss`: Full Supabase Auth URL (not just "supabase")
-- No custom claims (merchant_id, phone, line_id)
-- User exists in `auth.users` table (not just `user_accounts`)
-
----
-
-## JWT Validation Across Services
-
-### Supabase Services (Built-in)
-
-**RPC Functions, PostgREST, Realtime:**
-
-**Validates using:** Supabase's project JWT secret (automatically)
-
-**Accepts:**
-- ✅ Custom JWTs from bff-auth-complete (if signed with project secret)
-- ✅ Supabase Auth JWTs (always signed with project secret)
-
-**Configuration:** None needed - uses project secret automatically
-
----
-
-### External Services (Custom - e.g., crm-api)
-
-**Must validate JWTs manually:**
-
-**Using jsonwebtoken package:**
-```typescript
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET;  // Supabase's project secret
-
-// Validate JWT
-const decoded = jwt.verify(token, JWT_SECRET, {
-  algorithms: ['HS256']  // Match the algorithm used to sign
-});
-
-// Extract user info
-const userId = decoded.user_id || decoded.sub;
-const merchantId = decoded.merchant_id;
-```
-
-**Environment Variable:**
-```
-JWT_SECRET=<supabase-legacy-jwt-secret>
-```
-
-**Must be the SAME as Supabase's project secret!**
-
----
-
-## Security Model
-
-### Row Level Security (RLS)
-
-**All user data filtered by merchant context:**
-
-```sql
--- RLS Policy Example
-CREATE POLICY "Users see own merchant data"
-ON user_accounts
-FOR ALL
-USING (
-  merchant_id = get_current_merchant_id()
-);
-```
-
-**merchant_id extracted from:**
-1. JWT claim: `merchant_id`
-2. Or custom header: `x-merchant-id`
-
-**Function:** `get_current_merchant_id()` reads from auth context
-
----
-
-### Token Expiry
-
-| Token Type | Expiry |
-|------------|--------|
-| End-user access token | 24 hours |
-| End-user refresh token | 30 days |
-| Admin access token | Supabase default (~1 hour) |
-
-**Refresh Flow:**
-```
-Access token expires (24 hours)
-        ↓
-Client sends refresh_token
-        ↓
-Edge Function validates refresh token
-        ↓
-Issues new access_token (24 hours)
-        ↓
-Client stores new token
-```
-
----
-
-## Authentication Flow Comparison
-
-### End-User (Custom)
-
-```
-1. User opens app
-2. Call bff_get_auth_config(merchant_code)
-3. Show LINE button and/or Phone input based on config
-4. User authenticates (LINE OAuth, Phone OTP, or both)
-5. Call bff-auth-complete with credentials
-6. Receive custom JWT + refresh token
-7. Store tokens in localStorage
-8. Use access_token for all API calls
-```
-
-**Token Usage:**
-```javascript
-// All API calls
-headers: {
-  'Authorization': `Bearer ${access_token}`
-}
-```
-
----
-
-### Admin (Supabase Auth)
-
-```
-1. Admin enters email + password
-2. Call supabase.auth.signInWithPassword()
-3. Receive Supabase Auth JWT
-4. Store in Supabase client (automatic)
-5. Use for admin dashboard calls
-```
-
-**Token Usage:**
-```javascript
-// Automatic - Supabase client handles it
-const { data } = await supabase.from('table').select();
-```
-
----
-
-## Best Practices
-
-### JWT Secret Management
-
-**DO:**
-- ✅ Use Supabase's Legacy JWT Secret for all custom JWTs
-- ✅ Never set custom `JWT_SECRET` in Edge Functions (let it use `SUPABASE_JWT_SECRET`)
-- ✅ Copy the same secret to external services (crm-api, etc.)
-- ✅ Rotate via Supabase Dashboard (handles grace period)
-- ✅ Keep secret in environment variables (never hardcode)
-
-**DON'T:**
-- ❌ Use different secrets for signing vs validation
-- ❌ Set custom JWT_SECRET in Edge Functions (breaks Supabase RPC)
-- ❌ Expose secret in frontend code
-- ❌ Share secret publicly
-- ❌ Use weak/short secrets
-
----
-
-### Token Storage
-
-**End-User (Frontend):**
-```javascript
-// Store in localStorage (or secure cookie)
-localStorage.setItem('access_token', accessToken);
-localStorage.setItem('refresh_token', refreshToken);
-
-// Include in all API calls
-headers: {
-  'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-}
-```
-
-**Backend Services:**
-```javascript
-// Configure as environment variable
-JWT_SECRET=<supabase-legacy-jwt-secret>
-
-// Verify on each request
-const decoded = jwt.verify(token, process.env.JWT_SECRET);
-```
-
----
-
-### Token Validation
-
-**For Supabase RPC/PostgREST:**
-- Automatic - Supabase validates using project secret
-- Just send Authorization header
-
-**For Custom Backend Services:**
-```typescript
-import jwt from 'jsonwebtoken';
-
-function validateToken(authHeader: string) {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error('Missing Authorization header');
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
-      algorithms: ['HS256']  // Custom JWTs use HS256
-    });
-    
-    return {
-      userId: decoded.user_id || decoded.sub,
-      merchantId: decoded.merchant_id,
-    };
-  } catch (error) {
-    throw new Error('Invalid or expired token');
-  }
-}
-```
-
----
-
-## End-User Authentication Details
-
-### Supported Methods
-
-**1. LINE OAuth**
-- Official LINE Login integration
-- Returns: LINE user ID, display name, profile picture
-- Provider: LINE Platform
-- Edge Function: `auth-line`
-
-**2. Phone OTP**
-- SMS-based one-time password
-- 6-digit code, 10-minute expiry
-- Provider: 8x8 SMS service
-- Edge Functions: `auth-send-otp`
-
-**3. Combined (LINE + Phone)**
-- Merchant requires both methods
-- User must complete both to authenticate
-- Links both identities to single account
-
-### Database Schema
-
-**Primary Table:** `user_accounts`
-
-```sql
-CREATE TABLE user_accounts (
-    id UUID PRIMARY KEY,
-    merchant_id UUID NOT NULL,
-    
-    -- Auth identities
-    tel TEXT,                    -- Normalized phone: +66XXXXXXXXX
-    line_id TEXT,                -- LINE user ID
-    auth_user_id UUID,           -- Self-referencing (id) for custom auth
-    
-    -- Profile
-    fullname TEXT,
-    email TEXT,
-    persona_id UUID,
-    
-    -- Status
-    is_signup_form_complete BOOLEAN DEFAULT false,
-    
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-**Supporting Tables:**
-- `otp_requests` - OTP validation records (10-min TTL)
-- `refresh_tokens` - JWT refresh tokens (30-day TTL)
-- `user_address` - Address data
-- `form_submissions` + `form_responses` - Custom field data
-- `user_consent_ledger` - PDPA consent audit log
-
-### Authentication States
-
-**`next_step` values from bff-auth-complete:**
-
-| Value | Meaning | Has JWT? | Frontend Action |
-|-------|---------|----------|-----------------|
-| `verify_line` | Need LINE login | No | Show LINE button |
-| `verify_tel` | Need phone OTP | No | Show phone + OTP form |
-| `complete_profile_new` | New user, fill form | Yes | Show registration form |
-| `complete_profile_existing` | Has account, fill missing fields | Yes | Show profile form |
-| `complete` | All done | Yes | Navigate to home |
-
----
-
-## Bot / Automated Testing Authentication
-
-### Purpose
-
-Allows bots and automated test runners to authenticate as end-users **without OTP or LINE OAuth**. Once the bot obtains a JWT, it can call all other APIs identically to a real user.
-
-### How It Works
-
-`bff-auth-complete` accepts an optional `bot_secret` field. When provided and valid:
-1. OTP validation is **completely skipped**
-2. The phone number (`tel`) is treated as verified
-3. A real JWT is issued — identical to what a normal user would receive
-4. The rest of the flow (user lookup/create, profile check, etc.) runs normally
-
-### Configuration
-
-**Environment Variable:** `BOT_SECRET` on the Supabase project
-
-- If `BOT_SECRET` is **not set**, the feature is disabled. Any request with `bot_secret` returns 403.
-- If `BOT_SECRET` is set, only requests with a matching `bot_secret` value bypass OTP.
-
-### Bot Authentication Flow
-
-```
-Bot → POST bff-auth-complete
-      {
-        "merchant_code": "newcrm",
-        "tel": "+66966564526",
-        "bot_secret": "<BOT_SECRET value>"
-      }
-      (Authorization: Bearer <supabase-anon-key>)
-      
-    ← JWT + refresh_token (same as normal user)
-
-Bot → Use JWT for all subsequent API calls
-      (wallet-api, claim-codes, receipts, RPC, etc.)
-```
-
-**No need to call `auth-send-otp`** — the bot skips directly to `bff-auth-complete`.
-
-### Input (Bot Mode)
-
-```json
-{
-  "merchant_code": "newcrm",
-  "tel": "+66966564526",
-  "bot_secret": "<secret>"
-}
-```
-
-Optionally include `line_user_id` if the merchant requires LINE auth.
-
-### Error Responses
-
-| Scenario | Status | Error |
-|----------|--------|-------|
-| `BOT_SECRET` env var not set | 403 | `Bot authentication is not configured on this project` |
-| `bot_secret` value doesn't match | 403 | `Invalid bot_secret` |
-
-### Security
-
-- `bot_secret` is compared using constant-time comparison (prevents timing attacks)
-- The feature is completely dormant when `BOT_SECRET` env var is absent
-- All bot authentications are logged: `[BOT_AUTH] Bot authentication bypass for merchant=... tel=... line=...`
-- `BOT_SECRET` should be a strong random string (32+ characters)
-- **Never expose `BOT_SECRET` in frontend code or public repositories**
-
-### Scope
-
-`bot_secret` is currently used only in `bff-auth-complete` (OTP bypass). The same env var can be reused by other edge functions in the future for bot-specific behavior (rate limit bypass, test mode flags, etc.).
-
----
-
-## Admin Authentication Details
-
-### Supabase Auth (Standard)
-
-**Login:**
-```typescript
-const { data, error } = await supabase.auth.signInWithPassword({
-  email: 'admin@example.com',
-  password: 'password'
-});
-
-const session = data.session;
-// JWT automatically managed by Supabase client
-```
-
-**Users stored in:**
-- `auth.users` table (Supabase Auth table)
-- May also have record in `user_accounts` for profile data
-
-**JWT Claims (Standard Supabase):**
-```json
-{
-  "sub": "uuid",
-  "email": "admin@example.com",
-  "role": "authenticated",
-  "aud": "authenticated",
-  "iss": "https://wkevmsedchftztoolkmi.supabase.co/auth/v1",
-  "exp": 1234567890
-}
-```
-
-**No custom claims** - standard Supabase Auth format
-
----
-
-## JWT Secret Configuration
-
-### Supabase Edge Functions
-
-**bff-auth-complete secret resolution:**
-
-```typescript
-const JWT_SECRET = Deno.env.get('SUPABASE_JWT_SECRET') || Deno.env.get('JWT_SECRET');
-```
-
-**Priority:**
-1. `SUPABASE_JWT_SECRET` - Supabase's project secret (preferred)
-2. `JWT_SECRET` - Custom fallback
-
-**Recommendation:** Don't set custom `JWT_SECRET` - let it use `SUPABASE_JWT_SECRET` automatically.
-
----
-
-### External Services (Render, etc.)
-
-**Environment Variable:**
-```bash
-JWT_SECRET=<supabase-legacy-jwt-secret>
-```
-
-**Where to find:**
-- Supabase Dashboard → Settings → API → "Legacy JWT secret"
-- Must be the HS256 shared secret (not ECC)
-
-**Validation Code:**
-```typescript
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
-jwt.verify(token, JWT_SECRET, {
-  algorithms: ['HS256']
-});
-```
-
----
-
-## Security Considerations
-
-### JWT Secret Must Match
-
-**All services validating JWTs must use the SAME secret:**
-
-| Service | Uses Secret For | Environment Variable |
-|---------|----------------|---------------------|
-| bff-auth-complete | Signing JWTs | `SUPABASE_JWT_SECRET` (auto) |
-| Supabase RPC/PostgREST | Validating JWTs | Project secret (built-in) |
-| crm-api | Validating JWTs | `JWT_SECRET` (manual) |
-| crm-event-processors | Validating JWTs | `SUPABASE_SERVICE_ROLE_KEY` (RPC calls) |
-
-**If any mismatch:**
-- Signature validation fails
-- "Invalid token" or "PGRST301" errors
-- API calls fail
-
----
-
-### Key Rotation Impact
-
-**When you rotate Supabase's JWT secret:**
-
-**What happens:**
-1. New secret becomes active
-2. Old secret moves to "Previously used keys"
-3. **Both secrets remain valid** (grace period)
-4. Existing tokens continue to work (Supabase validates with old secret)
-5. New tokens signed with new secret
-
-**What you must do:**
-1. Update `JWT_SECRET` in ALL external services (crm-api, etc.)
-2. Wait for grace period to end (all old tokens expire)
-3. Or force users to login again (invalidates old tokens)
-
-**DON'T:**
-- ❌ Set custom JWT_SECRET in Edge Functions (breaks Supabase validation)
-- ❌ Rotate without updating external services
-- ❌ Use different secrets for signing vs validation
-
----
-
-## Troubleshooting
-
-### Error: "Invalid or expired token" (401)
-
-**From crm-api or external service:**
-
-**Cause:** JWT secret mismatch
-
-**Fix:**
-1. Check JWT_SECRET in service environment
-2. Verify it matches Supabase's current Legacy JWT Secret
-3. Redeploy service
-4. Get fresh token (login again)
-5. Test with new token
-
----
-
-### Error: "No suitable key or wrong key type" (PGRST301)
-
-**From Supabase RPC/PostgREST:**
-
-**Cause:** JWT signed with secret Supabase doesn't know about
-
-**Fix:**
-1. Check Edge Function environment
-2. Remove custom JWT_SECRET override
-3. Let it use SUPABASE_JWT_SECRET (project secret)
-4. Redeploy Edge Function
-5. Login again to get new token
-
----
-
-### Error: Token works with Supabase but not external service
-
-**Cause:** External service has wrong JWT_SECRET
-
-**Fix:**
-1. Get current Legacy JWT Secret from Supabase Dashboard
-2. Update external service environment variable
-3. Redeploy external service
-4. Test again
-
----
-
-### Error: Token works with external service but not Supabase
-
-**Cause:** Token signed with custom secret, not Supabase's
-
-**Fix:**
-1. Remove custom JWT_SECRET from Edge Function
-2. Let it use Supabase's project secret
-3. Login again
-4. New tokens will work with both
-
----
-
-## Configuration Checklist
-
-### Supabase Project
-
-- [ ] Legacy JWT Secret (HS256) is current key
-- [ ] No custom JWT_SECRET override in Edge Functions
-- [ ] Edge Functions use `SUPABASE_JWT_SECRET` naturally
-
-### Edge Functions
-
-- [ ] bff-auth-complete: No custom JWT_SECRET set
-- [ ] auth-line: `verify_jwt: false`
-- [ ] auth-send-otp: `verify_jwt: false`
-
-### External Services
-
-- [ ] crm-api: `JWT_SECRET` = Supabase Legacy JWT Secret
-- [ ] crm-event-processors: Uses Supabase client (no JWT validation needed)
-
-### Testing
-
-- [ ] End-user can login via LINE + Phone
-- [ ] Receive valid JWT from bff-auth-complete
-- [ ] JWT works with Supabase RPC calls
-- [ ] JWT works with external services (crm-api)
-- [ ] No PGRST301 errors
-- [ ] No "Invalid signature" errors
-
----
-
-## Summary
-
-**Authentication Architecture:**
-- End-users: Custom (LINE + Phone OTP) → Custom JWTs (Supabase-compatible)
-- Admins: Supabase Auth (email/password) → Standard Supabase JWTs
-
-**Critical Requirement:**
-- ALL JWTs must be signed with Supabase's Legacy JWT Secret (HS256)
-- This includes custom JWTs from Edge Functions
-- No custom secrets - use Supabase's project secret
-
-**Validation:**
-- Supabase: Automatic (uses project secret)
-- External services: Manual (jwt.verify with same secret)
-
-**Best Practice:**
-- Don't set custom JWT_SECRET in Edge Functions
-- Copy Supabase's Legacy JWT Secret to external services
-- Both signing and validation use the SAME secret
-- Test thoroughly after any secret rotation
-
----
-
-*Document Version: 1.0*  
-*System: Supabase CRM - Dual Authentication with Supabase-Compatible JWTs*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+| Table | Role |
+| --- | --- |
+| `admin_users` | Links `auth_user_id` → `merchant_id`, role |
+| `admin_roles` / `admin_role_permissions` | Permission strings for `check_admin_permission` |
+| `user_accounts` | Member record; `tel`, `line_id`, `email`, `auth_user_id`, `external_user_id` (`shopify:…`) |
+| `user_sessions` | Extended session records (legacy/custom paths) |
+| `refresh_tokens` | Opaque refresh tokens for member `auth-refresh` |
+| `otp_requests` | OTP sessions (expiry, attempts) |
+| `auth_temp_storage` | Short-lived auth handoff payloads |
+| `merchant_api_keys` | Hashed API keys + hint + expiry metadata |
+| `merchant_master` | `auth_methods` TEXT[] for enabled member proof channels |
+| `shopify_session` / `shopify_auth_nonces` | Shopify admin OAuth / install handoff (platform — **Shopify.md**) |
+
+### Functions
+
+| Name | Role |
+| --- | --- |
+| `get_current_merchant_id()` | Admin/user merchant resolution for BFF and RLS |
+| `custom_access_token_hook` | Enriches admin Supabase JWT (merchant, role, permissions) |
+| `check_admin_permission` / `is_current_user_admin` | Admin authorization |
+| `validate_api_key` | API key → merchant context |
+| `bff_get_auth_config` | Public auth method list per merchant code |
+| `fn_validate_otp` | OTP verify with attempt limits |
+| `validate_session` / `check_user_session_valid` / `create_extended_session` | Session token helpers |
+| `refresh_session` | DB-side refresh helper (paired with edge refresh) |
+| `sync_admin_profile_to_auth` / `sync_admin_users_to_auth` | Admin profile ↔ Supabase Auth |
+
+### Flows
+
+**Member mint (standalone)** — Client → `bff-auth-complete` → upsert/link `user_accounts` → `issueMemberSession({ channel: line|tel|shopify })` → insert `refresh_tokens` when applicable → JSON with `access_token`, `expires_in`.
+
+**Member mint (Shopify proxy)** — Shopify theme/widget → signed GET/POST to `shopify-proxy` → verify HMAC → resolve shop → `fetchShopifyCustomer` → `findOrCreateMember` → `mintShopifyMemberSessionToken` (wraps `issueMemberSession` with `shopify_customer_id`) → `{ token }` JSON.
+
+**Member mint (extensions)** — Extension `sessionToken.get()` → `shopify-extension-api` verifies JWT (`aud`, `exp`, `dest`) → resolve merchant + member → `issueMemberSession` for downstream CRM RPCs inside handler (`verify_jwt = false` on edge; auth inside).
+
+**Admin** — Supabase Auth login → optional hook claims → BFF with `get_current_merchant_id()`. Embedded: `auth-shopify-admin` bridges Shopify staff identity to admin session.
+
+**API** — Client presents API key → gateway calls `validate_api_key` → `api_*` with `p_merchant_id`.
+
+**JWT validation** — PostgREST/RPC: project JWT secret. External services (e.g. Render `crm-api`): same Legacy secret, HS256, read `user_id` / `merchant_id` claims.
+
+### External services
+
+| Edge (Render registry) | Role |
+| --- | --- |
+| `auth-line` | LINE code → profile ids (no JWT) |
+| `auth-send-otp` | SMS OTP send |
+| `bff-auth-complete` | Member hub + `issueMemberSession` |
+| `auth-refresh` | Refresh member access token |
+| `auth-logout` | Invalidate member session |
+| `auth-register` / `auth-login` / `auth-supabase-only` | Legacy/auxiliary auth paths |
+| `auth-shopify-admin` | Embedded admin token exchange |
+| `auth-shopify-verify` | Shopify install/verify helpers |
+| `shopify-proxy` | Storefront HMAC gateway (auth, landing, referral claim) |
+| `shopify-extension-api` | Customer account UI backend |
+| `auth-hook-admin-sync` | Admin auth webhook sync |
+| `auth-line-login` | **Tombstone** — 410 Gone (retired 2026-05-14) |
+
+### Known gaps
+
+- **`auth-refresh` vs `bff-auth-complete` expiry** — Documented inconsistency: refresh path may issue shorter-lived access tokens than initial `issueMemberSession` (see `docs/CRITICAL_BUG_FIXES.md`); treat as open until aligned.
+- **`user_sessions` vs `refresh_tokens`** — Both exist; loyalty-user primary path is JWT + `refresh_tokens` from hub; extended session RPCs remain for older clients.
+- **Headless `/store` wishlist** — Supabase JWT path noted in **Shopify.md**; not app proxy.
+
+### Shopify
+
+| Component | Responsibility |
+| --- | --- |
+| `issueMemberSession` (`_shared/member-session.ts`) | Single member JWT issuer for hub, proxy, extensions |
+| `shopify-proxy` | HMAC verification, `/auth/signup`, `/auth/login`, `/referral/page`, `/referral/claim`, landing storefront paths |
+| `shopify-extension-api` | Session-token auth, hub/balance/wishlist/redeem routes (representative list in reference MD Part 2 §2.5) |
+| `rewarding-shopify` | App proxy URL config; widget calls proxy—not Liquid customer for auth |
+
+Reference narrative (identity gateways, extension route table): `requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md` Part 2 §2.4–2.5. Storefront signup/login **screens** and `next_step`: **Signup_Login.md**.
+
+## Related
+
+- **Signup_Login.md** — Member proof methods, `next_step`, profile template, Shopify widget journey detail.
+- **Shopify.md** — Merchant OAuth, webhooks, billing, embedded admin shell, app proxy registration.
+- **Open_API.md** — API key usage contracts and `api_*` surface.
+- **Referral.md** — Purchase claim via `shopify-proxy` (identity separate from member JWT).
+- **Display_Settings.md** — Identity-free product block vs panel auth.
+- **`.cursor/rules/11-auth-conventions.mdc`** — Implementation patterns for new BFF/API functions.

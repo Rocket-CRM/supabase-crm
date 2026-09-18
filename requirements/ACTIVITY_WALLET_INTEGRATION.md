@@ -1,4 +1,31 @@
-# Activity → Wallet Integration: Complete Source & Component Tracking
+# Activity Wallet Integration
+
+How **activity approval** posts to `wallet_ledger` via synchronous `post_wallet_transaction` (same audit shape as other earn paths, no CDC).
+
+Owner surfaces: `bff_approve_activity_upload` (loyalty-admin)
+
+## Concept
+
+**Direct award** — Admin approval calls `post_wallet_transaction` in the same transaction as status `approved`.
+
+**Source tracking** — `source_type = activity`, `source_id = activity_upload_ledger.id`, rich `metadata` for matrix match.
+
+**Component** — Typically `base` for earned activity points/tickets.
+
+## Rules
+
+- Identical audit fields to async chokepoint paths for reporting; activity path is sync by design.
+- Multiple currencies per approval allowed (matrix can emit points + tickets).
+- Failure to post wallet rolls back approval status.
+
+## Related
+
+- **Activity_Based_Earning.md** — Product spine and matrix rules.
+- **Currency.md** — `post_wallet_transaction` / chokepoint comparison.
+
+---
+
+# Activity Wallet Integration — technical reference
 
 ## The Question: Does Direct Call Support Proper Data?
 

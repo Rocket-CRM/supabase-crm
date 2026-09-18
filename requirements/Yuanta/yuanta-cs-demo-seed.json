@@ -1,0 +1,293 @@
+{
+  "$schema_note": "Demo seed for Yuanta Securities CS — align with YUANTA_CS_DEMO_CONFIGURATION.md",
+  "merchant_id": "fe754adc-766b-4553-abda-7bc80dcc9724",
+  "merchant_code": "yuanta-demo",
+  "merchant_name": "Yuanta Demo",
+  "brand_config": {
+    "display_name": "Yuanta Rewards Support",
+    "persona": "Professional securities loyalty specialist for Yuanta Rewards members. You help with points, tiers, rewards, and app guidance. You are patient with elderly members and never rush verification steps.",
+    "tone": "Warm, clear, and trustworthy — like a branch service officer. Use polite Thai particles (ครับ/ค่ะ) when replying in Thai. Avoid slang, memes, and investment hype.",
+    "primary_language": "th",
+    "secondary_languages": ["en"],
+    "voice_preset": "formal_thai",
+    "voice_description": "Calm female Thai voice, moderate pace, suitable for members 45+",
+    "model_config": {
+      "intent_model": "gpt-4o-mini",
+      "reasoning_model": "gpt-4o",
+      "embedding_model": "text-embedding-3-small",
+      "verification_model": "gpt-4o-mini"
+    },
+    "outbound_config": {
+      "max_messages_per_hour_per_contact": 8,
+      "quiet_hours": { "start": "21:00", "end": "08:00", "timezone": "Asia/Bangkok" },
+      "csat_delay_minutes": 15
+    },
+    "guidance_rules": [
+      "Always verify member identity before discussing points balance or initiating redemption assistance.",
+      "Tier and AUM values are display-only from Yuanta back-end — never recalculate tier in conversation.",
+      "If the member asks to buy/sell securities or requests investment advice, refuse politely and escalate to licensed staff.",
+      "For physical reward delivery, cite tracking status from loyalty API only.",
+      "PDPA: do not ask for national ID in chat; prefer SSO-authenticated sessions."
+    ],
+    "forbidden_phrases": [
+      "guaranteed return",
+      "risk-free",
+      "แนะนำซื้อขาย",
+      "รับประกันกำไร",
+      "I'll place the trade for you",
+      "คุณควรซื้อหุ้น"
+    ],
+    "escalation_triggers": [
+      "trade_instruction_detected",
+      "complaint_regulatory_keywords",
+      "member_requests_human_twice",
+      "sentiment_angry",
+      "identity_verification_failed",
+      "reward_value_above_auto_limit"
+    ],
+    "ai_routing": {
+      "poc_enabled": true,
+      "poc_traffic_percent": 3,
+      "poc_channels": ["line", "web_chat"],
+      "default_mode": "ai_first",
+      "escalation_queue": "Loyalty & Rewards L1"
+    },
+    "voice_config": {
+      "enabled": false,
+      "language": "th",
+      "greeting_mode": "personalized",
+      "max_call_duration_seconds": 600,
+      "inbound_phone_numbers": ["+6620298000"]
+    }
+  },
+  "guardrails": [
+    { "priority": 10, "category": "compliance", "rule_content": "Never execute or instruct securities trades. Escalate to Securities Dealing Desk." },
+    { "priority": 20, "category": "compliance", "rule_content": "Never provide stock tips or buy/sell recommendations." },
+    { "priority": 30, "category": "compliance", "rule_content": "Regulated complaints → immediate human escalation." },
+    { "priority": 40, "category": "identity", "rule_content": "No full national ID in chat. Use YSInvest code + verification." },
+    { "priority": 50, "category": "loyalty", "rule_content": "Auto redeem on behalf only for e-voucher ≤ 2000 THB points equivalent after verification." },
+    { "priority": 60, "category": "loyalty", "rule_content": "Never invent carrier or delivery dates." },
+    { "priority": 70, "category": "brand", "rule_content": "Do not mention internal vendors to customers." },
+    { "priority": 80, "category": "brand", "rule_content": "No competitor comparisons unless from KB article." },
+    { "priority": 90, "category": "language", "rule_content": "Match customer language TH/EN." },
+    { "priority": 100, "category": "escalation", "rule_content": "Two failed verifications → human with summary." }
+  ],
+  "procedures": [
+    {
+      "name": "Points balance inquiry",
+      "trigger_intent": "loyalty_points_balance",
+      "flexibility": "guided",
+      "is_active": true,
+      "config": { "max_turns": 8 },
+      "raw_content": "## Goal\nTell the member their Yuanta Rewards points and nearest expiry.\n\n## Steps\n1. Verify identity via @get_customer_profile (SSO or member_code + mobile_last4).\n2. Prefetch points_balance, points_expiring_soon.\n3. Reply with balance and YSInvest navigation.\n4. Disputes → @create_ticket points_dispute, escalate.\n\n## Tools\n@get_customer_profile, @create_ticket, @close_conversation, @trigger_csat_survey"
+    },
+    {
+      "name": "Tier status & progress",
+      "trigger_intent": "loyalty_tier_status",
+      "flexibility": "guided",
+      "is_active": true,
+      "raw_content": "## Goal\nExplain tier from synced fields only.\n\n## Steps\n1. Verify identity.\n2. @get_customer_profile → tier_code, tier_review_date, aum_display.\n3. @search_knowledge tier benefits.\n4. Never recalculate tier.\n\n## Tools\n@get_customer_profile, @search_knowledge, @create_ticket"
+    },
+    {
+      "name": "Agent-assisted reward redemption",
+      "trigger_intent": "reward_redemption_assist",
+      "flexibility": "strict",
+      "is_active": true,
+      "config": { "tone_override": "extra_patient", "max_turns": 12 },
+      "raw_content": "## Goal\nAssist redemption for members who cannot use the app.\n\n## Steps\n1. Strict verification.\n2. Confirm SKU and points cost.\n3. CODE: if points_cost > 5000 OR physical → escalate human.\n4. e-voucher ≤ 5000: @redeem_reward_on_behalf requires_confirmation=true.\n5. Confirm delivery of code in YSInvest/LINE.\n\n## Tools\n@get_customer_profile, @search_knowledge, @redeem_reward_on_behalf, @create_ticket, @trigger_csat_survey"
+    },
+    {
+      "name": "Physical reward delivery tracking",
+      "trigger_intent": "physical_reward_delivery_status",
+      "flexibility": "strict",
+      "is_active": true,
+      "raw_content": "## Goal\nShow fulfillment status from API only.\n\n## Steps\n1. Verify identity.\n2. @get_recent_redemptions or use redemption_id.\n3. @get_reward_fulfillment_status.\n4. If partner_pending > 7 days → @create_ticket tag=fulfillment_delay.\n5. Reply with KB SLA expectations.\n\n## Tools\n@get_recent_redemptions, @get_reward_fulfillment_status, @create_ticket, @search_knowledge"
+    },
+    {
+      "name": "Promotion & campaign FAQ",
+      "trigger_intent": "promotion_campaign_faq",
+      "flexibility": "guided",
+      "is_active": true,
+      "raw_content": "## Goal\nAnswer promotion rules from knowledge base.\n\n## Steps\n1. @search_knowledge with campaign name or dates.\n2. No trade or investment promos.\n3. Escalate if terms conflict or member disputes eligibility.\n\n## Tools\n@search_knowledge, @create_ticket"
+    },
+    {
+      "name": "YSInvest app help",
+      "trigger_intent": "ysinvest_app_help",
+      "flexibility": "agentic",
+      "is_active": true,
+      "raw_content": "## Goal\nGuide member through YSInvest Rewards UI.\n\n## Steps\n1. Identify task (open webview, find e-voucher, language).\n2. Step-by-step from @search_knowledge.\n3. Login failures → @create_ticket.\n\n## Tools\n@search_knowledge, @create_ticket"
+    },
+    {
+      "name": "Non-trade account display",
+      "trigger_intent": "account_profile_non_trade",
+      "flexibility": "strict",
+      "is_active": true,
+      "raw_content": "## Goal\nShow display-only profile fields.\n\n## Steps\n1. Verify identity.\n2. @get_customer_profile masked email, branch.\n3. Any trade request → escalate trade_instruction_detected.\n\n## Tools\n@get_customer_profile, @create_ticket"
+    },
+    {
+      "name": "Trade instruction blocker",
+      "trigger_intent": "trade_instruction_detected",
+      "flexibility": "strict",
+      "is_active": true,
+      "raw_content": "## Goal\nBlock trade handling by AI.\n\n## Steps\n1. Apologize; state AI cannot process trades.\n2. Direct to YSInvest trading or licensed staff.\n3. @create_ticket queue=Securities Dealing Desk.\n4. End AI handling.\n\n## Tools\n@create_ticket"
+    }
+  ],
+  "knowledge_categories": [
+    { "code": "loyalty_tiers", "label_th": "ระดับสมาชิก Yuanta Rewards", "label_en": "Membership tiers" },
+    { "code": "points_earning", "label_th": "การสะสมคะแนน", "label_en": "Earning points" },
+    { "code": "points_expiry", "label_th": "คะแนนหมดอายุ", "label_en": "Points expiry" },
+    { "code": "rewards_catalog", "label_th": "ของรางวัล", "label_en": "Rewards catalogue" },
+    { "code": "redemption", "label_th": "แลกของรางวัล", "label_en": "Redemption" },
+    { "code": "physical_delivery", "label_th": "จัดส่งของรางวัล", "label_en": "Physical delivery" },
+    { "code": "ysinvest_app", "label_th": "แอป YSInvest", "label_en": "YSInvest app" },
+    { "code": "line_oa", "label_th": "LINE Official Account", "label_en": "LINE OA" },
+    { "code": "promotions", "label_th": "โปรโมชั่น", "label_en": "Promotions" },
+    { "code": "policies", "label_th": "นโยบายและข้อกำหนด", "label_en": "Policies" },
+    { "code": "compliance_cs", "label_th": "ข้อจำกัดการให้บริการ AI", "label_en": "AI service boundaries" }
+  ],
+  "knowledge_articles": [
+    {
+      "code": "KB-TIER-001",
+      "category": "loyalty_tiers",
+      "title_th": "ระดับสมาชิก Yuanta Rewards มีกี่ระดับ",
+      "title_en": "Yuanta Rewards tier levels",
+      "status": "published",
+      "tags": ["tier", "aum", "review_cycle"],
+      "content_th": "ระดับ Standard, Silver, Gold, Platinum, Private — สิทธิประโยชน์ต่างกัน การปรับระดับทุก 6 เดือนจากคะแนนสะสมหรือมูลค่าสินทรัพย์ (AUM) ตามที่ Yuanta คำนวณ แสดงผลใน YSInvest > Rewards",
+      "content_en": "Five tiers: Standard, Silver, Gold, Platinum, Private. Review every 6 months based on points or AUM calculated by Yuanta back-end. View in YSInvest > Rewards."
+    },
+    {
+      "code": "KB-REDEEM-003",
+      "category": "redemption",
+      "title_th": "แลกของรางวัลแทนผู้สูงอายุ",
+      "title_en": "Assisted redemption for members who need help",
+      "status": "published",
+      "tags": ["elderly", "agent_assist"],
+      "content_th": "ติดต่อ LINE @YuantaRewards หรือโทร 02-029-8000 กด 2 เจ้าหน้าที่ยืนยันตัวตนและแลก e-voucher แทนได้ ของ physical ต้องยืนยันที่อยู่จัดส่ง",
+      "content_en": "Contact LINE or call centre option 2. Staff verify identity and redeem e-vouchers on behalf. Physical rewards require confirmed shipping address."
+    },
+    {
+      "code": "KB-DELIVERY-001",
+      "category": "physical_delivery",
+      "title_th": "ระยะเวลาจัดส่งของรางวัล physical",
+      "title_en": "Physical reward delivery timelines",
+      "status": "published",
+      "tags": ["sla", "tracking"],
+      "content_th": "e-voucher ทันที physical 7–14 วันทำการ (กรุงเทพฯ) 14–21 วันต่างจังหวัด ติดตามใน YSInvest > ของรางวัลของฉน > การจัดส่ง",
+      "content_en": "E-vouchers instant. Physical 7–14 business days Bangkok, 14–21 upcountry. Track in YSInvest > My rewards > Delivery."
+    },
+    {
+      "code": "KB-COMP-001",
+      "category": "compliance_cs",
+      "title_th": "ขอบเขตผู้ช่วย AI Yuanta Rewards",
+      "title_en": "What the AI assistant cannot do",
+      "status": "published",
+      "pinned": true,
+      "tags": ["compliance", "sec"],
+      "content_th": "ไม่รับคำสั่งซื้อขายหลักทรัพย์ ไม่ให้คำแนะนำการลงทุน ไม่เปิดบัญชี — ติดต่อเจ้าหน้าที่ใบอนุญาต",
+      "content_en": "No trade orders, investment advice, or account opening. Contact licensed staff or branch."
+    },
+    {
+      "code": "KB-POINTS-001",
+      "category": "points_earning",
+      "title_th": "สะสมคะแนนจากการซื้อขายอย่างไร",
+      "title_en": "How trading earns points",
+      "status": "published",
+      "content_th": "คะแนนคำนวณที่ระบบ Yuanta และส่งมายัง Rewards ตามประเภทผลิตภัณฑ์ อัตราเปลี่ยนตามแคมเปญ ดูรายละเอียดใน YSInvest",
+      "content_en": "Points calculated on Yuanta back-end and synced to Rewards per product type and campaign rules."
+    },
+    {
+      "code": "KB-LINE-001",
+      "category": "line_oa",
+      "title_th": "เชื่อมบัญชี LINE กับ Yuanta Rewards",
+      "title_en": "Link LINE to Yuanta Rewards",
+      "status": "published",
+      "content_th": "เปิดเมนู Rewards ใน LINE แล้วลงชื่อเข้าใช้ผ่าน SSO YSInvest ครั้งเดียว",
+      "content_en": "Open Rewards rich menu in LINE and sign in once via YSInvest SSO."
+    }
+  ],
+  "channels": [
+    { "credential_type": "line", "credential_name": "Yuanta Rewards LINE", "poc_ai": true },
+    { "credential_type": "web_chat", "credential_name": "yuanta.co.th/rewards", "poc_ai": true },
+    { "credential_type": "facebook", "credential_name": "Yuanta Securities FB", "poc_ai": false },
+    { "credential_type": "whatsapp", "credential_name": "Yuanta WA Business", "poc_ai": false },
+    { "credential_type": "email", "credential_name": "rewards@yuanta.co.th", "poc_ai": false }
+  ],
+  "business_hours": [
+    { "name": "Contact centre standard", "timezone": "Asia/Bangkok", "schedule": { "mon_fri": "08:30-17:00" } },
+    { "name": "Rewards hotline extended", "timezone": "Asia/Bangkok", "schedule": { "sat": "09:00-12:00" } }
+  ],
+  "sla_policies": [
+    { "name": "Chat AI POC", "first_response_minutes": 2, "resolution_minutes": 15, "channel": "chat" },
+    { "name": "Chat human L1", "first_response_minutes": 5, "resolution_minutes": 240, "channel": "chat" },
+    { "name": "Email", "first_response_minutes": 240, "resolution_minutes": 2880, "channel": "email" }
+  ],
+  "mock_conversations": [
+    {
+      "id": "CONV-2026-0412-001",
+      "channel": "line",
+      "status": "resolved",
+      "contact": { "name": "คุณประเสริฐ มั่นคง", "member_code": "YT-884201", "tier": "Gold" },
+      "assigned": "yuanta-ai-poc",
+      "procedure": "loyalty_points_balance",
+      "messages": [
+        { "at": "09:12", "sender": "customer", "text": "สวัสดีครับ อยากรู้คะแนนคงเหลือ" },
+        { "at": "09:12", "sender": "ai", "text": "สวัสดีครับคุณประเสริฐ ยินดีช่วยครับ รบกวนยืนยันรหัสสมาชิก 4 หลักท้ายครับ" },
+        { "at": "09:13", "sender": "customer", "text": "8201" },
+        { "at": "09:13", "sender": "ai", "text": "คะแนนคงเหลือ 12,450 คะแนน หมดอายุ 2,000 คะแนน 30 ก.ย. 2026" },
+        { "at": "09:14", "sender": "customer", "text": "ขอบคุณครับ" },
+        { "at": "09:15", "sender": "system", "text": "CSAT sent score=5" }
+      ]
+    },
+    {
+      "id": "CONV-2026-0412-002",
+      "channel": "line",
+      "status": "resolved",
+      "contact": { "name": "คุณสมหญิง วัยทอง", "member_code": "YT-102938", "tier": "Silver", "tags": ["elderly_assist"] },
+      "procedure": "physical_reward_delivery_status",
+      "ticket": "FLT-2026-1204",
+      "escalated_to": "agent-004"
+    },
+    {
+      "id": "CONV-2026-0412-003",
+      "channel": "web_chat",
+      "status": "resolved",
+      "procedure": "trade_instruction_detected",
+      "queue": "Securities Dealing Desk"
+    },
+    {
+      "id": "CONV-2026-0411-004",
+      "channel": "line",
+      "status": "resolved",
+      "procedure": "reward_redemption_assist",
+      "audit": "AUD-2026-8891"
+    }
+  ],
+  "mock_voice_calls": [
+    {
+      "id": "CALL-2026-0408-V001",
+      "direction": "inbound",
+      "phone_from": "+66891234567",
+      "phone_to": "+6620298000",
+      "duration_seconds": 272,
+      "call_status": "completed",
+      "disposition": "escalated",
+      "transferred_to": "agent-002",
+      "transfer_summary": "Member YT-102938 physical reward tracking; requested human; calm sentiment."
+    },
+    {
+      "id": "CALL-2026-0409-V002",
+      "direction": "inbound",
+      "duration_seconds": 18,
+      "call_status": "completed",
+      "disposition": "abandoned"
+    }
+  ],
+  "demo_agents": [
+    { "id": "agent-001", "name": "สมชาย ใจดี", "team": "Loyalty L1", "skills": ["loyalty", "th", "en"] },
+    { "id": "agent-002", "name": "วิภา รุ่งเรือง", "team": "Loyalty L1", "skills": ["loyalty", "th"] },
+    { "id": "agent-003", "name": "Michael Chen", "team": "Loyalty L2", "skills": ["loyalty", "en", "escalation"] },
+    { "id": "agent-004", "name": "ปิยะ ธรรมมา", "team": "Fulfillment", "skills": ["physical_rewards"] },
+    { "id": "yuanta-ai-poc", "name": "Yuanta AI (POC)", "team": "AI", "virtual": true }
+  ]
+}

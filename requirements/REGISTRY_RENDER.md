@@ -116,6 +116,7 @@ E: amp-batch-dispatch (public)
 E: amp-dispatch-realtime-event (public)
 E: amp-dispatch-workflow-batch (public)
 E: amp-export-node-users (public)
+E: analytics-query (public, `verify_jwt: false`) — Admin JWT validated in-function; named loyalty reports → BigQuery `rocket-prod-analytics.serving_loyalty`. Source: `supabase/functions/analytics-query/`. See `Analytics.md`.
 E: dispatch-workflow-trigger (public)
 E: inngest-amp-serve (public)
 C: amp_run_due_scheduled_workflows — `* * * * *` → `fn_amp_run_due_scheduled_workflows()`
@@ -182,7 +183,7 @@ E: embed-jobs (jwt)
 E: embed-knowledge (public)
 E: embed-text (jwt)
 Q: internal_knowledge_embedding_jobs
-C: process-internal-knowledge-embeddings — `10 seconds` → `util.process_embeddings()`
+C: process-internal-knowledge-embeddings — `10 seconds` → `util.process_embeddings()` (**inactive**; daily drain via `doc_knowledge_drain_embeddings` + `scripts/drain-doc-knowledge-embeddings.mjs` after reconcile)
 
 ---
 
