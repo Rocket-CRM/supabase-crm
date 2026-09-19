@@ -191,7 +191,9 @@ Registry: grep `REGISTRY_SUPABASE.md` / `REGISTRY_RENDER.md` for `shopify_*` and
 | `orders/*` | Marketplace upsert + claim + loyalty discount consume + reward code mark-used |
 | `refunds/create` | `api_cancel_purchase` best_effort |
 
-**Shopify order status → canonical** — `pending`/`authorized`/`partially_paid` → pending; `paid`/`fulfilled`/`partially_refunded` → completed; `refunded` → refunded; `voided`/`cancelled` → cancelled.
+**Shopify mkp `order_status` ladder** — `paid` → `fulfilled` → `delivered` → `completed` (member confirm); unpaid paths `pending`/`authorized`/`partially_paid`. Webhook `deriveOrderStatus` + monotonic `upsert_marketplace_order`. **Points threshold** — `merchant_master.marketplace_claim_from_status.shopify` (default `paid`); claimable via `get_claimable_statuses` includes `paid`…`completed`. Member confirm sets `completed` + `bff_shopify_member_order_received` → auto-claim when threshold is `completed`.
+
+**Shopify order status → canonical (`map_marketplace_status`)** — unpaid-like → `pending`; `paid`/`fulfilled`/`delivered`/`completed`/`partially_refunded` → `completed`; `refunded` → refunded; `voided`/`cancelled` → cancelled.
 
 **Billing sync** — Welcome / `shopify-sync-plan` / hourly reconcile → `shopify_sync_merchant_plan`. Partner `activeSubscription` authoritative when configured. Plan picker: `https://admin.shopify.com/store/{store_handle}/charges/rocket-loyalty-crm/pricing_plans` (`NEXT_PUBLIC_SHOPIFY_APP_HANDLE`).
 
