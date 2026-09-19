@@ -5,6 +5,7 @@
 ## 2026-09-18
 
 - **Product catalog weekly run** — `loyalty.persona.entitlements` status `ga` → `planned` with `Shelved_Demo_Features.md` source refs; refreshed `last_verified_at` for 95 active rows under run `041ab095-b315-4d17-ae77-d9eb9719eec0`; migrated the affected Packages and Persona Entitlements narrative sections to the five-block template. Commercial Canonical Views were not edited in this repo.
+- **Ops monitoring** — Daily recon no longer runs via MCP: `fn_ops_daily_recon_refresh` + pg_cron `ops-daily-recon-refresh` populate `_ops_daily_recon_cache`; automations use `fn_ops_daily_recon_get`. Indexes on `wallet_ledger` (points) and `purchase_ledger` (unprocessed earn). See `docs/OPS_DAILY_RECON.md`.
 
 ## 2026-09-17
 
