@@ -1,3 +1,7 @@
+## 2026-09-19
+
+- **Shopify / Marketplace** — `order_ledger_mkp.delivered_at`; `fn_shopify_complete_order_for_loyalty` + member `bff_shopify_member_order_received`; optional `marketplace_auto_complete_after_days.shopify` when claim threshold is `completed`; Edge `shopify-mkp-auto-complete` + `fn_shopify_auto_complete_delivered_orders`; hourly pg_cron. Default Shopify claim threshold remains **paid**.
+
 ## 2026-09-18
 
 - **Product catalog weekly run** — `loyalty.persona.entitlements` status `ga` → `planned` with `Shelved_Demo_Features.md` source refs; refreshed `last_verified_at` for 95 active rows under run `041ab095-b315-4d17-ae77-d9eb9719eec0`; migrated the affected Packages and Persona Entitlements narrative sections to the five-block template. Commercial Canonical Views were not edited in this repo.
