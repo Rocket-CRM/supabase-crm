@@ -12,7 +12,7 @@ Shared retrieval for Cursor agents and downstream tools over **canonical require
 |------|--------|
 | Source | `/requirements/**/*.md` (search + get_section). Also `docs/PRODUCT_NARRATIVE.md` for **get_section only** |
 | Excluded | `REGISTRY_*`, `CHANGELOG.md`, `INDEX_FUNCTION.md`, `INDEX_DOMAIN.md`, `archive/**`, tiny pointer stubs |
-| Chunking | Prefer `SECTION:` headings; else `##` / `###`; split ~4000 chars |
+| Chunking | Prefer `SECTION:` headings (`heading_path` = `SECTION: X`); else `##` / `###` (`heading_path` = `H2 > H3` path in heading mode); split ~4000 chars. `_TEMPLATE.md` excluded. |
 | Table | `public.doc_knowledge_chunks` |
 
 ## MCP tools
@@ -22,8 +22,10 @@ Hosted at `https://crm-knowledge.onrender.com/mcp` (repo `Rocket-CRM/crm-knowled
 - `get_my_context`
 - `search_docs` — hybrid FTS (`doc_knowledge_search_fts`) + semantic (`doc_knowledge_search_semantic`) merged with RRF. **Default corpus is `requirements/` only** (null `path_prefix`). Narrative is not in this pile.
 - `get_section` — `doc_knowledge_get_section`. Use path `docs/PRODUCT_NARRATIVE.md` + a heading for sales journey/explain. Also works on requirement paths.
+- `eng_bugs_fetch` — POST Rocket Deck `/api/eng/agent` (server-side token). Scope `eng_bugs:read`.
+- `eng_bugs_patch` — PATCH Rocket Deck `/api/eng/agent`. Scope `eng_bugs:write`.
 
-Auth: `fn_validate_mcp_access_token`; scope `knowledge:read`.
+Auth: `fn_validate_mcp_access_token`. Scopes: `knowledge:read` (doc tools), `eng_bugs:read` / `eng_bugs:write` (Rocket Deck proxy: `eng_bugs_fetch`, `eng_bugs_patch`). Deck credentials live only on the Render service env.
 
 ## Embeddings
 
