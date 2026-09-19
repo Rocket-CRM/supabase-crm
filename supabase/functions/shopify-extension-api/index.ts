@@ -284,6 +284,67 @@ async function handleOrderPoints(
   return envelopeOk(data?.data ?? data);
 }
 
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function signHeadlessCheckoutCompletionToken(
+  merchantCode: string,
+  orderId: string,
+  secret: string,
+): Promise<string> {
+  const payload = {
+    mc: merchantCode,
+    oid: orderId,
+    exp: Date.now() + 15 * 60 * 1000,
+  };
+  const encoded = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = base64UrlEncode(
+    new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(encoded))),
+  );
+  return `${encoded}.${signature}`;
+}
+
+async function handleHeadlessStoreReturn(url: URL, merchant: any) {
+  const orderId = url.searchParams.get("order_id");
+  const appOrigin = url.searchParams.get("app_origin")?.trim().replace(/\/$/, "");
+  if (!orderId) {
+    return envelopeError("VALIDATION_ERROR", 400, "order_id required");
+  }
+  if (!appOrigin || !/^https:\/\//.test(appOrigin)) {
+    return envelopeError("VALIDATION_ERROR", 400, "app_origin must be https");
+  }
+  const merchantCode = merchant?.merchant_code;
+  if (!merchantCode) {
+    return envelopeError("NOT_FOUND", 404, "Merchant code missing");
+  }
+  const secret = Deno.env.get("SHOPIFY_CHECKOUT_COMPLETION_SECRET");
+  if (!secret) {
+    return envelopeError(
+      "NOT_CONFIGURED",
+      503,
+      "SHOPIFY_CHECKOUT_COMPLETION_SECRET is not configured",
+    );
+  }
+  const token = await signHeadlessCheckoutCompletionToken(
+    merchantCode,
+    orderId,
+    secret,
+  );
+  return envelopeOk({
+    url: `${appOrigin}/store/checkout/complete?token=${encodeURIComponent(token)}`,
+  });
+}
+
 async function handleActivity(url: URL, session: MemberSession) {
   const kind = url.searchParams.get("kind") || "points";
   if (!["points", "tier", "referral"].includes(kind)) {
@@ -543,6 +604,8 @@ serve(async (req) => {
     }
     if (req.method === "GET" && path === "/order-points")
       return await handleOrderPoints(url, session, merchant, supabase);
+    if (req.method === "GET" && path === "/headless-store-return")
+      return await handleHeadlessStoreReturn(url, merchant);
     if (req.method === "GET" && path === "/hub/activity") {
       if (!session) return envelopeError("UNAUTHENTICATED", 401);
       return await handleActivity(url, session);

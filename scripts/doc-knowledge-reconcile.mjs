@@ -3,7 +3,7 @@
  * Reconcile requirements markdown + docs/PRODUCT_NARRATIVE.md
  * → public.doc_knowledge_chunks (hash-skip).
  * search_docs defaults to requirements/ only; narrative is get_section-only.
- * Intended for daily CI cron + manual runs.
+ * Intended for daily local launchd job + manual runs.
  *
  * Env:
  *   SUPABASE_URL
@@ -175,7 +175,7 @@ async function walkMarkdownFiles(dir, base = dir) {
   for (const ent of entries) {
     const full = path.join(dir, ent.name);
     if (ent.isDirectory()) {
-      if (ent.name === "archive" || ent.name === "node_modules") continue; // archive/ is not indexed
+      if (ent.name === "archive" || ent.name === "reference" || ent.name === "node_modules") continue; // not indexed (archive + requirements/reference writer copies)
       out.push(...(await walkMarkdownFiles(full, base)));
       continue;
     }

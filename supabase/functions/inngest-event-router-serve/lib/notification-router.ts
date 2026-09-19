@@ -60,6 +60,7 @@ const REDEMPTION_SUB_EVENTS_DROP = new Set([
   "unmarked_used",
   "entitlement_use_reversed",
   "entitlement_total_adjusted",
+  "issue_requested",
 ]);
 
 export interface ResolvedMapping {

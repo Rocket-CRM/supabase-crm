@@ -152,7 +152,7 @@ Compose both for Rocket proposals, decks, and feature guides that mention platfo
 | Catalog names / summaries | `core-writing` → `SALES_FEATURE_COPY_PRINCIPLES.md` | CRM Knowledge; live catalog |
 | Pricing sheet / features summary | Open `rocket-sales` pack → `commercial/COPY_PRINCIPLES.md` | Live catalog (required); Product Narrative optional color |
 | Thai / JP / TW copy | `core-writing` → genre → `translation` → market context doc | Thai: `THAILAND_CONTEXT.md` for vocabulary. Proposals: prefer `TRANSLATION_PRINCIPLES.md` over web tone |
-| CRM feature guide | `core-writing` → `feature-guide-writing` | CRM `get_feature_context` for the feature |
+| CRM requirement doc | `core-writing` → `.cursor/rules/13-requirements-writing.mdc` | CRM Knowledge `search_docs` / `get_section` |
 | Web content | `core-writing` → `web-page-copy` (routing) → one part slug | See part map below |
 
 **Web routing:** call `writing_get_playbook_context(web-page-copy)` for "Which part to use", then exactly one of `web-landing-copy`, `web-article-copy`, `web-seo-strategy`, or `web-internal-linking`. Do not load all four parts at once.

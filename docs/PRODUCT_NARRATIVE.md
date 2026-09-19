@@ -957,7 +957,11 @@ Loyalty platforms have to demonstrate that a member knowingly opted in before an
 
 ### Packages
 
+<!-- feature_key: (no catalog row — shelved demo; align when loyalty.package.* lands) -->
+
 **Overview**
+
+**(planned)** Demo-built, not sold as GA loyalty product — see `requirements/Shelved_Demo_Features.md` (Package row). Capabilities below describe what exists for demos, not a launched SKU.
 
 Packages are merchant-defined bundles of rewards granted to a specific user as a multi-use, balance-tracked entitlement set. A package template lists one or more rewards with a per-reward quantity, where each item is either **mandatory** (auto-materialized when the package is assigned) or **elective** (the member picks within a group-and-cap constraint). When the package is assigned, the system materializes one ledger row per mandatory reward; each row tracks total grant, used count, and expiry. Members consume entitlements one use at a time at the point of service via `api_use_entitlement`. Packages exist alongside single rewards: a single reward is a one-shot coupon, while a package entitlement is a balance that draws down over time and expires by date.
 
@@ -1056,7 +1060,11 @@ Ledger rows additionally encode `source_type='package_assignment'` and carry `pa
 
 ### Persona Entitlements
 
+<!-- feature_key: loyalty.persona.entitlements -->
+
 **Overview**
+
+**(planned)** Demo-built, not sold as GA — see `requirements/Shelved_Demo_Features.md` (Persona entitlements row). Catalog status is `planned`; narrative below describes demo/backend behavior.
 
 Persona Entitlements is a catalog layer that says "every user holding this persona automatically receives X." The `X` can be a package, a direct reward grant, or a standing benefit (period-based privilege like a 10% pharmacy discount). The same table powers B2B contract programs (Corporate, Insurance, VIP, Partner) and any policy where a persona class entitles members to a fixed set of perks. One persona can map to many entitlement rows; one row carries an `entitlement_type` discriminator (`package` / `reward` / `benefit`) plus the type-specific payload.
 

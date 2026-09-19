@@ -1,5 +1,7 @@
 ## 2026-09-19
 
+- **Shopify / Marketplace** — `order_ledger_mkp.delivered_at`; `fn_shopify_complete_order_for_loyalty` + member `bff_shopify_member_order_received`; optional `marketplace_auto_complete_after_days.shopify` when claim threshold is `completed`; Edge `shopify-mkp-auto-complete` + `fn_shopify_auto_complete_delivered_orders`. Default Shopify claim threshold remains **paid**. Storefront History Order confirm calls `member-received` (metafield + claim). See `requirements/Shopify.md`.
+
 - **Mission** — Claim-limit binding documented: `fn_mission_claim_quota` + `bff_get_mission_detail` / `bff_claim_mission` expose `claim_limit_scope` / max / time unit; member exhausted copy differs mission-wide (`total`, `store`, `user_store`) vs per-member `user`. See `requirements/Mission.md` §Rules / §Member journey.
 
 ## 2026-09-18
