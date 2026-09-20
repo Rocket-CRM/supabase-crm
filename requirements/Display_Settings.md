@@ -38,7 +38,8 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 - Enrichment failure on a single block returns raw `config` plus `enrichment_error`; sibling blocks still render.
 - **Shopify landing** — Publish transitions `merchant_shopify_landing_page_settings.publish_status` to `published`; storefront reads composed payload via app proxy + theme extension. Entitlement **`display.shopify_landing_page`** (Essential+) required; customer-account surfaces and wishlist are on all plans including Free.
 - **Shopify brand scheme** — Optional button hex `#1C1C1C` is stored as `null` (Derived). Landing section `surface.swatch` is `background | dark_surface | primary | custom` (`primary` uses `tokens.primary`; legacy `brand`/`extra` normalize to `primary` on read). `merchant_display_settings.primary_color` is synced from `tokens.primary` on every scheme save; upsert invalidates landing and widget caches. Landing enrichment does not attach `style_tokens`; cached/admin landing payloads expose top-level `brand_scheme` (merged raw) and slim `theme` (`section_padding_px`, import meta only).
-- **On-site colour ladder (Shopify widget + landing bundle)** — One derivation module in `rewarding-shopify` widget-builder: level-0 background = scheme token verbatim; level-1 cards/rows = one tint step; text = readable scheme text on each surface; muted = body at alpha; links = readable primary; widget header solid/gradient colours derive from `tokens.primary` and `tokens.background` (gradient angle is the only free widget header knob). Landing section Custom text = two roles: `heading_hex` (titles) and `text_hex` (body); Auto leaves both null. Storefront CSS must not introduce colour literals outside CSS variables (linted at widget-builder build).
+- **On-site colour ladder (Shopify widget + landing bundle)** — One derivation module in `rewarding-shopify` widget-builder: level-0 background = scheme token verbatim; level-1 cards/rows = one tint step; text = readable scheme text on each surface; muted = body at alpha; links = readable primary; widget header solid/gradient colours derive from `tokens.primary` and `tokens.background` (gradient angle is the only free widget header knob). Landing section Custom text = two roles: `heading_hex` (titles, incl. hero headline, step titles, FAQ questions) and `text_hex` (body); Auto leaves both null; both validated hex-or-null. Storefront CSS must not introduce colour literals outside CSS variables (linted at widget-builder build).
+- **Shopify landing CTAs** — Routing is fixed per section + audience in the storefront bundle, not merchant-configurable: guest → log in / sign up on every section; member → the widget drawer page for that section's feature (hero → my rewards, how-it-works / ways-to-earn → earn channels, ways-to-spend → redeem, VIP → tier status; referrals member shows copy-link, FAQ has no button). Section CTA config holds only `show`, `text`, `button_style` (`link_type` / `page` / `url` / `url_param` stripped on save); page config has no `cta_defaults`. Hero `background.tint` renders only when `background.image_url` is set.
 - **Shopify hub / banners** — View models are composed server-side (`fn_compose_shopify_hub`, widget settings cache). Checkout **points estimate** is not shipped (extension directory excluded from production app manifest).
 
 ## Journeys
@@ -117,7 +118,7 @@ Shopper-facing touchpoints (packaging in **rewarding-shopify**; gateways in Edge
 
 **Shopper flow (summary)**
 
-1. **Landing** — Public `api_get_shopify_landing_page_cached` (cache key `:v2:`); payload includes `brand_scheme` + slim `theme`; sections enriched without `style_tokens`; member overlay when logged in; CTAs open widget, login, or custom URL.
+1. **Landing** — Public `api_get_shopify_landing_page_cached` (cache key `:v2:`); payload includes `brand_scheme` + slim `theme`; sections enriched without `style_tokens`; member overlay when logged in; section CTAs route by section + audience (guest → login, member → that section's drawer page).
 2. **Loyalty Hub** — Session token → `shopify-extension-api` `/hub`; redeem POST `/hub/redeem` with status poll; referrals and spend tiles from composer.
 3. **Points on product** — Anonymous `api_get_widget_settings_cached('shopify', shop)`; earn estimate from `resolved.earn_rate`.
 4. **Points balance banner** — Extension `GET /balance` (member JWT); `{points}` / `{points_name}` in merchant message.
@@ -302,7 +303,7 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 | --- | --- |
 | Brand scheme v2, points name, symbol | `merchant_display_settings` (`shopify_brand_scheme`, `primary_color`) |
 | Hub hero / redeem modal / product fallback images | `merchant_widget_settings` (`shopify_hub`) |
-| Landing theme, SEO, CTA defaults | `merchant_shopify_landing_page_settings` |
+| Landing layout, SEO | `merchant_shopify_landing_page_settings` |
 | Landing section order/content | `display_settings` where `page = shopify_loyalty_landing` |
 | Widget panel chrome | `merchant_widget_settings` (`shopify`) |
 

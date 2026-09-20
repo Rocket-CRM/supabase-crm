@@ -1,5 +1,6 @@
 ## 2026-09-20
 
+- **Display Settings (Shopify landing CTAs)** — Section button routing fixed per section + audience in storefront (guest → login, member → section's drawer page); section CTA keeps `show`/`text`/`button_style` only, page `cta_defaults` removed; validator accepts `surface.swatch = primary` and validates `heading_hex`; hero tint only with a background image. Migration `20260920190000_shopify_landing_cta_fixed_routing.sql`. See `requirements/Display_Settings.md` §Rules.
 - **Display Settings (Shopify landing swatch)** — Section `surface.swatch` uses `primary` (not `brand`); legacy `brand`/`extra` normalize on read; brand-scheme upsert invalidates widget cache as well as landing. Migration `20260920100900_shopify_landing_swatch_primary.sql`.
 - **Display Settings (Shopify brand scheme v2.1)** — `tokens.brand` renamed `tokens.primary` (Horizon role); merge accepts legacy `brand`; upsert syncs `primary_color` and busts landing + widget caches. Migration `20260920071500_shopify_brand_scheme_v2_1_primary_token.sql`.
 - **Display Settings (Shopify brand scheme v2)** — Raw merged scheme only in SQL; storefront owns derived colours. Migration `20260920040307_shopify_brand_scheme_v2.sql`. See `requirements/Display_Settings.md`.
