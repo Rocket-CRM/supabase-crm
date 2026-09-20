@@ -1,3 +1,9 @@
+## 2026-09-20
+
+- **Display Settings (Shopify landing swatch)** — Section `surface.swatch` uses `primary` (not `brand`); legacy `brand`/`extra` normalize on read; brand-scheme upsert invalidates widget cache as well as landing. Migration `20260920100900_shopify_landing_swatch_primary.sql`.
+- **Display Settings (Shopify brand scheme v2.1)** — `tokens.brand` renamed `tokens.primary` (Horizon role); merge accepts legacy `brand`; upsert syncs `primary_color` and busts landing + widget caches. Migration `20260920071500_shopify_brand_scheme_v2_1_primary_token.sql`.
+- **Display Settings (Shopify brand scheme v2)** — Raw merged scheme only in SQL; storefront owns derived colours. Migration `20260920040307_shopify_brand_scheme_v2.sql`. See `requirements/Display_Settings.md`.
+
 ## 2026-09-19
 
 - **Shopify / Marketplace** — `order_ledger_mkp.delivered_at`; `fn_shopify_complete_order_for_loyalty` + member `bff_shopify_member_order_received`; optional `marketplace_auto_complete_after_days.shopify` when claim threshold is `completed`; Edge `shopify-mkp-auto-complete` + `fn_shopify_auto_complete_delivered_orders`; hourly pg_cron. Default Shopify claim threshold remains **paid**.
