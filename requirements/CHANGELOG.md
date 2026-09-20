@@ -1,3 +1,7 @@
+## 2026-09-20
+
+- **Display Settings (Shopify brand scheme v2)** — Scheme stored as eight chosen fields on `merchant_display_settings`; SQL merge/validate only; dropped SQL colour resolvers; landing/widget cached payloads expose `brand_scheme` and slim landing `theme`; admin brand RPCs return `{ scheme, updated_at }`. Storefront bundle owns all derived colours. Migration `20260920040307_shopify_brand_scheme_v2.sql`. See `requirements/Display_Settings.md` §Concept / §Rules / §System.
+
 ## 2026-09-19
 
 - **Mission** — Claim-limit binding documented: `fn_mission_claim_quota` + `bff_get_mission_detail` / `bff_claim_mission` expose `claim_limit_scope` / max / time unit; member exhausted copy differs mission-wide (`total`, `store`, `user_store`) vs per-member `user`. See `requirements/Mission.md` §Rules / §Member journey.

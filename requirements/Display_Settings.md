@@ -18,6 +18,8 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 
 **Merchant display settings** — Points unit label and symbol used across widgets and read-only in the landing CMS (`merchant_display_settings`).
 
+**Shopify brand scheme (v2)** — Stored on `merchant_display_settings.shopify_brand_scheme` (`_schema_version: 2.0.0`): four required tokens (`brand`, `background`, `dark_surface`, `text`), optional primary/secondary button colours, and `radius_px`. SQL merge/validate persists **chosen** colours only; derived colours (section mode, muted/body/heading/link, borders, shadows, button fill/hover, hero card contrast) are computed in the **rewarding-shopify** bundle at render. Admin edits the raw scheme; previews iframe the same bundle.
+
 **Widget settings** — Per–`widget_type` JSON (theme, header, earn-channel chrome). `shopify` drives the storefront panel; `shopify_hub` holds Loyalty Hub hero / redeem modal / product fallback images.
 
 **Shopify touchpoint** — A merchant-facing surface (landing page, Loyalty Hub, points on product, order banners, wishlist, widget drawer). Each touchpoint has Rocket admin (configure + install walkthrough) and Shopify packaging (theme app extension vs customer-account UI extension). See Journeys › Shopify.
@@ -35,6 +37,7 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 - Cache TTL ~5 minutes for member-app display blocks; any write to placements or display translations invalidates all cache keys for that merchant.
 - Enrichment failure on a single block returns raw `config` plus `enrichment_error`; sibling blocks still render.
 - **Shopify landing** — Publish transitions `merchant_shopify_landing_page_settings.publish_status` to `published`; storefront reads composed payload via app proxy + theme extension. Entitlement **`display.shopify_landing_page`** (Essential+) required; customer-account surfaces and wishlist are on all plans including Free.
+- **Shopify brand scheme** — Optional button hex `#1C1C1C` is stored as `null` (Derived). Landing section `surface.swatch` is `background | dark_surface | brand | custom` (no `extra`). Landing enrichment does not attach `style_tokens`; cached/admin landing payloads expose top-level `brand_scheme` (merged raw) and slim `theme` (`section_padding_px`, import meta only).
 - **Shopify hub / banners** — View models are composed server-side (`fn_compose_shopify_hub`, widget settings cache). Checkout **points estimate** is not shipped (extension directory excluded from production app manifest).
 
 ## Journeys
@@ -60,6 +63,7 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 | Member app homepage / pages | loyalty-admin | `admin_get_display_blocks`, batch create/update/delete |
 | Block picker metadata | loyalty-admin | `get_display_settings_menu()` |
 | Points label (global) | loyalty-admin | `admin_upsert_merchant_points_display` → `merchant_display_settings` |
+| Shopify brand colours | loyalty-admin | `admin_get_shopify_brand_scheme` / `admin_upsert_shopify_brand_scheme` → `{ scheme, updated_at }` |
 | Online store display | loyalty-admin | Same block pipeline, `page` for headless `/store` |
 | Shopify widget panel | loyalty-admin | `admin_get_widget_settings` / `admin_upsert_widget_settings` (`shopify`) |
 | Shopify Loyalty Hub images | loyalty-admin | `admin_get_widget_settings` / `admin_upsert_widget_settings` (`shopify_hub`) |
@@ -76,7 +80,7 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 **Shopify merchant admin**
 
 1. Open **On-site content** (`/on-site-content`, Shopify embedded only) — touchpoint hub with landing status, widget panel link, and embedded-content setup cards.
-2. **Landing** — Overview at `/on-site-content/landing-page` (publish state, URL hint); **Edit** opens full-screen CMS at `/display-settings/shopify-landing-page` (sections, palette, SEO, publish).
+2. **Landing** — Overview at `/on-site-content/landing-page` (publish state, URL hint); **Edit** opens full-screen CMS at `/display-settings/shopify-landing-page` (sections, brand scheme modal, SEO, publish).
 3. **Widget panel** — `/display-settings/shopify-widget` (theme, header, points tab, earn-channel tab).
 4. **Loyalty Hub images** — `/display-settings/shopify-loyalty-hub` (image slots for hub composer).
 5. Each embedded touchpoint (**Loyalty Hub**, **points balance**, **points after purchase**, **wishlist**, **points on product**) — `/on-site-content/<surface>` setup page with preview + numbered steps; primary CTA opens Shopify checkout/theme editor (published checkout profile + app id via `editor-deep-links.ts`).
@@ -111,7 +115,7 @@ Shopper-facing touchpoints (packaging in **rewarding-shopify**; gateways in Edge
 
 **Shopper flow (summary)**
 
-1. **Landing** — Public `api_get_shopify_landing_page_cached`; sections enriched; member overlay when logged in; CTAs open widget, login, or custom URL.
+1. **Landing** — Public `api_get_shopify_landing_page_cached` (cache key `:v2:`); payload includes `brand_scheme` + slim `theme`; sections enriched without `style_tokens`; member overlay when logged in; CTAs open widget, login, or custom URL.
 2. **Loyalty Hub** — Session token → `shopify-extension-api` `/hub`; redeem POST `/hub/redeem` with status poll; referrals and spend tiles from composer.
 3. **Points on product** — Anonymous `api_get_widget_settings_cached('shopify', shop)`; earn estimate from `resolved.earn_rate`.
 4. **Points balance banner** — Extension `GET /balance` (member JWT); `{points}` / `{points_name}` in merchant message.
@@ -128,9 +132,9 @@ Extension collections: `loyalty-account` → hub, balance, wishlist; `loyalty-ch
 | --- | --- |
 | `display_block_template` | Global catalogue of block shapes (`block_type`, `block_style`, default `config`) |
 | `display_settings` | Per-merchant placements: `page`, `order`, `active_status`, `persona_ids`, `config` |
-| `merchant_display_settings` | Points unit label, symbol type/icon/image, legacy app chrome fields |
+| `merchant_display_settings` | Points unit label, symbol type/icon/image, `shopify_brand_scheme` (v2), `primary_color` (synced from scheme brand) |
 | `merchant_widget_settings` | Per `widget_type` (`shopify`, `shopify_hub`, …) JSON config + `active_status` |
-| `merchant_shopify_landing_page_settings` | Landing theme palette v2, SEO, CTA defaults, `publish_status` |
+| `merchant_shopify_landing_page_settings` | Landing page SEO, CTA defaults, `publish_status`; per-merchant `config.theme` holds padding + import flags (not colour palette) |
 | `widget_config_template` | Default shapes for widget types (validation / merge) |
 
 **`display_block_template`** — `block_type` enum includes member blocks (`banner`, `profile_card`, `tier_progress`, …) and Shopify landing section types (`shopify_landing_hero`, `shopify_landing_how_it_works`, `shopify_landing_ways_to_earn`, `shopify_landing_ways_to_spend`, `shopify_landing_referrals`, `shopify_landing_vip`, `shopify_landing_faq`). `block_style` is free text (e.g. `style_1`, `grid`, `carousel`).
@@ -202,9 +206,12 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 | Function | Role |
 | --- | --- |
 | `admin_get_widget_settings` / `admin_upsert_widget_settings` / `admin_reset_widget_settings` | Widget JSON per `widget_type` |
-| `bff_get_widget_settings` / `api_get_widget_settings_cached` | Member/storefront reads |
+| `bff_get_widget_settings` / `api_get_widget_settings_cached` | Member/storefront reads; widget cache key `:v2:`; payload includes `brand_scheme` (raw merged) |
 | `admin_upsert_merchant_points_display` | Points label + symbol on `merchant_display_settings` |
-| `fn_resolve_widget_merchant_display` | Merged points display for widgets |
+| `admin_get_shopify_brand_scheme` / `admin_upsert_shopify_brand_scheme` | Read/write v2 scheme; response `{ scheme, updated_at }` only |
+| `fn_shopify_brand_scheme_default` / `fn_shopify_brand_scheme_merge` / `fn_validate_shopify_brand_scheme` | v2 shape, merge (incl. v1 `heading` → `text`), validation |
+| `fn_shopify_landing_page_theme_layout` | Slim landing `theme` JSON (padding + import meta) |
+| `fn_resolve_widget_merchant_display` | Points/tiers/earn + raw merged `scheme` (no `scheme_resolved`) |
 
 **Shopify landing**
 
@@ -214,7 +221,7 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 | `admin_publish_shopify_landing_page` / `admin_unpublish_shopify_landing_page` | Publish state |
 | `admin_batch_update_shopify_landing_sections` | Section rows on `display_settings` |
 | `admin_enrich_shopify_landing_preview_sections` | Admin preview enrichment |
-| `api_get_shopify_landing_page_cached` | Storefront cached payload |
+| `api_get_shopify_landing_page_cached` | Storefront cached payload (`brand_scheme`, slim `theme`, `theme_resolved` points/primary only) |
 | `fn_enrich_shopify_landing_sections` / `fn_overlay_shopify_landing_member_state` | Program tiles + member overlay |
 | `fn_invalidate_shopify_landing_page_cache` | Landing cache bust |
 
@@ -291,7 +298,7 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 
 | Concern | Store |
 | --- | --- |
-| Brand color, points name, symbol | `merchant_display_settings` |
+| Brand scheme v2, points name, symbol | `merchant_display_settings` (`shopify_brand_scheme`, `primary_color`) |
 | Hub hero / redeem modal / product fallback images | `merchant_widget_settings` (`shopify_hub`) |
 | Landing theme, SEO, CTA defaults | `merchant_shopify_landing_page_settings` |
 | Landing section order/content | `display_settings` where `page = shopify_loyalty_landing` |
