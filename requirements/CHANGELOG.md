@@ -1,5 +1,6 @@
 ## 2026-09-20
 
+- **Display Settings (Shopify brand scheme v2.1)** — `tokens.brand` renamed `tokens.primary` to match Shopify Horizon's colour-scheme role; theme import is now a literal field copy (`primary` ← scheme `primary`, Dawn/palette fallback to primary button fill) with no colour heuristics; import picker leads with the primary swatch; onboarding brand step shows Primary (editable) + Background / Text / Primary button (read-only) and "Text on primary". Merge accepts legacy `brand`; `primary_color` synced from `tokens.primary`. Migration `20260920071500_shopify_brand_scheme_v2_1_primary_token.sql`; storefront bundle reads `primary ?? brand`. See `requirements/Display_Settings.md` §Concept / §Rules / §Journeys / §System.
 - **Display Settings (Shopify brand scheme v2)** — Scheme stored as eight chosen fields on `merchant_display_settings`; SQL merge/validate only; dropped SQL colour resolvers; landing/widget cached payloads expose `brand_scheme` and slim landing `theme`; admin brand RPCs return `{ scheme, updated_at }`. Storefront bundle owns all derived colours. Migration `20260920040307_shopify_brand_scheme_v2.sql`. See `requirements/Display_Settings.md` §Concept / §Rules / §System.
 
 ## 2026-09-19
