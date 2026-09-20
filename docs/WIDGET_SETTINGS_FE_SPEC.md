@@ -60,17 +60,16 @@ Rule: render only when `ok === true`. Otherwise show fallback UI.
 
 | Field | Values | Use |
 |---|---|---|
-| `theme.mode` | `light` \| `dark` | Top-level color scheme for widget surfaces. |
+| `theme.mode` | `light` \| `dark` | **Deprecated.** Storefront derives light/dark from `brand_scheme.tokens.background` contrast. |
 
 ### `config.header.background`
 
 | Field | Values | Use |
 |---|---|---|
 | `background.type` | `solid` \| `gradient` \| `image` | Picks which sub-block below to render. Ignore the others. |
-| `background.solid.color` | `#RRGGBB` (6-digit hex) | Background color when `type=solid`. |
-| `background.gradient.from` | `#RRGGBB` | Gradient start color when `type=gradient`. |
-| `background.gradient.to` | `#RRGGBB` | Gradient end color. |
-| `background.gradient.angle` | number (degrees, e.g. `135`) | CSS `linear-gradient` angle. |
+| `background.solid.color` | `null` | **Deprecated.** Storefront uses `brand_scheme.tokens.primary` when `type=solid`. |
+| `background.gradient.from` / `to` | — | **Removed in v1.1.0.** Storefront derives `primary → mix(primary, background, 0.35)`. |
+| `background.gradient.angle` | number (degrees, e.g. `135`) | CSS `linear-gradient` angle — merchant-configurable. |
 | `background.image.items` | array, 1–10 items when `type=image` | Carousel slides. Each item: `{ id, url, alt, order, size_kb? }`. Sort by `order` ascending before rendering. |
 | `background.image.carousel.autoplay` | bool | Auto-advance the carousel. |
 | `background.image.carousel.transition` | `fade` \| `slide` | Slide animation style. |
