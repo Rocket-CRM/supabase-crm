@@ -112,7 +112,7 @@ Representative RPC `code` values for i18n: `REFERRAL_INACTIVE`, `INVALID_INVITE_
 1. Open **Referral settings** (`/referral-settings`). Standalone: tabs **Signup** \| **Purchase** \| **History** (`?tab=signup|purchase|history`). Shopify embedded: **Purchase** \| **History** only.
 2. Enable the conversion type(s) you need; configure outcomes per tab.
 3. For **Reward** outcome types, use **campaign slot** navigation to reward settings (`from=referral`, `referral_kind=signup|purchase`, `referral_party=referrer|friend`), with `sessionStorage` mirror `rocket.campaign-slot` for App Bridge URL changes. Save attaches via `bff_attach_campaign_reward`; changing reward runs `bff_detach_campaign_reward` (unlink only, not catalog delete). Shared machinery with tier entry and lifecycle workflow outcomes (`campaign-slot.ts`).
-4. On Shopify purchase, configure **friend offer** and referrer purchase outcomes; atomic save keeps `referral_program` and `shopify_mother_discount_id` aligned (`bff_upsert_referral_reward_atomic`; reward editor may call **`shopify-upsert-reward-discount`** before attach).
+4. On Shopify purchase, configure **friend offer** and referrer purchase outcomes; atomic save keeps `referral_program` and `shopify_mother_discount_id` aligned (`bff_upsert_referral_reward_atomic`; reward editor may call **`shopify-upsert-reward-discount`** before attach). The friend slot may also **attach an existing Shopify campaign reward**; `fn_campaign_reward_slot_attach` copies that reward’s Shopify discount into `shopify_mother_discount_id` for claim minting.
 5. Monitor **History** for settled, blocked, and clawed-back rows.
 
 **Shopify embedded section gating** — Page is visible on both surfaces; blocks are filtered by `REFERRAL_SECTIONS`:
