@@ -602,7 +602,10 @@ F: bff_get_currency_config() -> jsonb
 F: bff_get_currency_history(p_filter text DEFAULT 'points'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0) -> TABLE(id uuid, title text, description t...
 F: bff_get_earn_factor_details(p_earn_factor_id uuid) -> jsonb
 F: bff_get_earn_factor_group_details(p_mode text DEFAULT 'edit'::text, p_earn_factor_group_id uuid DEFAULT NULL::uuid) -> jsonb
+F: bff_get_earn_rule_rates_details() -> jsonb
 F: bff_get_earn_factors_by_group(p_earn_factor_group_id uuid) -> jsonb
+F: bff_list_uncovered_stores(p_query text DEFAULT NULL::text, p_limit integer DEFAULT 10, p_offset integer DEFAULT 0) -> jsonb
+F: bff_search_earn_rule_entities(p_kind text, p_query text DEFAULT NULL::text, p_ids uuid[] DEFAULT NULL::uuid[], p_attribute_ids uuid[] DEFAULT NULL::uuid[], p_include_inactive boolean DEFAULT false, p_limit integer DEFAULT 20) -> TABLE(id uuid, code text, label text, sublabel text, active boolean, meta jsonb)
 F: bff_get_expiry_reminder_settings() -> jsonb
 F: bff_get_points_expiry_schedule() -> jsonb
 F: bff_list_ticket_types() -> jsonb
