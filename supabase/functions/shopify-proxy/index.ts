@@ -16,6 +16,31 @@ import { LANDING_STOREFRONT_LIQUID } from './_shared/landing-storefront-liquid.t
 
 const EXISTING_CUSTOMER_LOOKUP_MS = 2500;
 
+async function fetchShopifyLandingPageCached(
+  merchantCode: string | null,
+  locale: string,
+): Promise<{ payload: Record<string, unknown> | null; error: string | null }> {
+  const base = Deno.env.get('LOYALTY_CACHE_API_URL');
+  if (!base || !merchantCode) {
+    return { payload: null, error: 'LOYALTY_CACHE_API_URL or merchant_code missing' };
+  }
+  const qs = new URLSearchParams({ merchant_code: merchantCode, language: locale });
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  const cacheKey = Deno.env.get('LOYALTY_CACHE_API_KEY');
+  if (cacheKey) headers['x-cache-api-key'] = cacheKey;
+  const res = await fetch(`${base.replace(/\/$/, '')}/v1/shopify-landing?${qs}`, { headers });
+  if (!res.ok) {
+    const text = await res.text();
+    return { payload: null, error: text || res.statusText };
+  }
+  const body = await res.json().catch(() => ({}));
+  const payload = (body && typeof body === 'object' && 'data' in body ? body.data : body) as Record<
+    string,
+    unknown
+  >;
+  return { payload, error: null };
+}
+
 async function verifyShopifyHMAC(params: Record<string, string>, signature: string, secret: string): Promise<boolean> {
   try {
     const { signature: _, hmac, ...queryParams } = params;
@@ -84,13 +109,10 @@ async function handleLanding(
   const url = new URL(req.url);
   const locale = url.searchParams.get('locale') || url.searchParams.get('language') || 'en';
 
-  const { data: payload, error } = await supabase.rpc('api_get_shopify_landing_page_cached', {
-    p_merchant_code: merchantCode,
-    p_language: locale,
-  });
+  const { payload, error } = await fetchShopifyLandingPageCached(merchantCode, locale);
   if (error) {
-    console.error('[shopify-proxy] landing rpc', error);
-    return jsonResponse({ ok: false, error: error.message }, 500);
+    console.error('[shopify-proxy] landing cache api', error);
+    return jsonResponse({ ok: false, error }, 500);
   }
   if (!payload?.ok) {
     const status = payload?.published === false ? 404 : 400;
@@ -156,12 +178,9 @@ async function handleLandingStorefront(
   const url = new URL(req.url);
   const locale = url.searchParams.get('locale') || url.searchParams.get('language') || 'en';
 
-  const { data: payload, error } = await supabase.rpc('api_get_shopify_landing_page_cached', {
-    p_merchant_code: merchantCode,
-    p_language: locale,
-  });
+  const { payload, error } = await fetchShopifyLandingPageCached(merchantCode, locale);
   if (error) {
-    console.error('[shopify-proxy] landing storefront rpc', error);
+    console.error('[shopify-proxy] landing storefront cache api', error);
     return new Response('Rewards page is temporarily unavailable.', {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
