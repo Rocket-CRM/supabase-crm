@@ -1304,12 +1304,14 @@ F: bff_get_reward_details(p_mode text DEFAULT 'edit'::text, p_reward_id uuid DEF
 F: bff_get_reward_group_details(p_group_id uuid DEFAULT NULL::uuid, p_mode text DEFAULT 'new'::text) -> jsonb
 F: bff_get_reward_history(p_filter text DEFAULT NULL::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_language text DEFA...) -> TABLE(id uuid, title text, description t...
 F: bff_get_reward_redemption_quote(p_user_id uuid, p_reward_id uuid) -> jsonb
+F: bff_get_reward_redemption_stats(p_reward_id uuid) -> jsonb
 F: bff_get_reward_store_stock(p_reward_id uuid) -> jsonb
 F: bff_get_tier_entry_rewards(p_tier_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_list_reward_categories() -> jsonb
 F: bff_list_reward_groups() -> jsonb
 F: bff_list_rewards(p_include_inactive boolean DEFAULT false) -> jsonb
 F: bff_list_rewards_for_mission_outcomes(p_language text DEFAULT 'en'::text) -> jsonb
+F: bff_list_rewards_paged(p_query text DEFAULT NULL::text, p_kind text DEFAULT 'all'::text, p_status text DEFAULT 'all'::text, p_categor...) -> jsonb
 F: bff_set_reward_active(p_reward_id uuid, p_active_status boolean, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_set_reward_featured(p_reward_id uuid, p_is_featured boolean, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_campaign_reward_atomic(p_reward jsonb, p_slot jsonb, p_request_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
@@ -1340,6 +1342,7 @@ F: fn_grant_tier_entry_rewards(p_user_id uuid, p_merchant_id uuid, p_to_tier_id 
 F: fn_invalidate_merchant_rewards_cache(p_merchant_id uuid) -> void
 F: fn_redeem_member_message(p_key text, p_language text DEFAULT 'en'::text, p_params text[] DEFAULT NULL::text[]) -> text
 F: fn_resolve_reward_variant_selection(p_variant_config jsonb, p_selected jsonb, p_enforce boolean DEFAULT true) -> jsonb
+F: fn_reward_admin_list_base(p_merchant_id uuid, p_query text, p_kind text, p_status text, p_category_ids uuid[], p_visibility text[], p_id...) -> SETOF reward_master
 F: fn_reward_admin_ledger_reportable(p_success boolean, p_cancelled boolean, p_redeemed_status boolean, p_package_assignment_id uuid, p_source_type...) -> boolean
 F: fn_reward_blocks_admin_issue(p_visibility reward_visibility, p_source_type text) -> boolean
 F: fn_reward_claim_link_url(p_merchant_id uuid, p_token text) -> text

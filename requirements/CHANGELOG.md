@@ -1,5 +1,7 @@
 ## 2026-09-22
 
+- **Reward (admin list perf)** — Reward list is server-paginated via `bff_list_rewards_paged` (+ `fn_reward_admin_list_base`, trigram index on `reward_master.name`); redeemed/used counts leave the list and become header pills on Reward settings via `bff_get_reward_redemption_stats`; all admin reward pickers (group add, content-library button target, Front Line push, campaign/referral/lifecycle) use debounced server search instead of a full-catalog fetch. Referral settings loads the ledger only on the History tab. Migration `20260922210000_reward_list_paged_and_redemption_stats.sql` (live). See `requirements/Reward.md` §Journeys / §System.
+- **Event Promotion (perf)** — `bff_list_event_promos` computes `applicable_events_count` set-wise (2.6s → 0.16s for Syngenta); indexes `idx_event_promo_merchant`, `idx_event_promo_rule_promo`. Output unchanged. Migration `20260922220000_event_promos_list_perf.sql` (live).
 - **Earn Rules (admin)** — Read-only BFFs `bff_get_earn_rule_rates_details`, `bff_search_earn_rule_entities`, `bff_list_uncovered_stores` plus SQL store-coverage helpers and trigram search indexes. Migration `20260922120100_earn_rules_lazy_load.sql` (live). FE: loyalty-admin `ProjectDocs/FE_docs/EarnRules.md`.
 
 ## 2026-09-20

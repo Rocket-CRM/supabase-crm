@@ -94,8 +94,9 @@ Rocket may layer a **partner catalog** on top of platform rewards: digital e-vou
 
 | Page | Owning repo | BFF / RPC |
 | --- | --- | --- |
-| Reward list | loyalty-admin | `api_get_rewards_full_cached`, `bff_list_rewards` (incl. redeemed/used qty), `admin_delete_reward`, `bff_set_reward_active` |
-| Reward settings (create/edit) | loyalty-admin | `bff_get_reward_details`, `bff_upsert_reward_with_conditions_and_limits`; slot attach: `bff_attach_campaign_reward`, `bff_detach_campaign_reward`, `bff_upsert_campaign_reward_atomic` |
+| Reward list | loyalty-admin | `bff_list_rewards_paged` (server page 25, URL-driven tab / status / category / name search, pinned first; `summary` carries active-count + quota for the banner), `admin_delete_reward`, `bff_set_reward_active`. Redeemed/used counts are no longer list columns |
+| Reward settings (create/edit) | loyalty-admin | `bff_get_reward_details`, `bff_upsert_reward_with_conditions_and_limits`; header pills `bff_get_reward_redemption_stats` (redeemed / used / not used, lazy); slot attach: `bff_attach_campaign_reward`, `bff_detach_campaign_reward`, `bff_upsert_campaign_reward_atomic` |
+| Reward pickers (group add modal, content-library button target, Front Line push, campaign/referral/lifecycle pickers) | loyalty-admin | `bff_list_rewards_paged` via `useRewardSearch` / `RewardSearchCombo` — debounced trigram search, page 30, load-more; no full-catalog fetch |
 | Reward settings → Redemptions | loyalty-admin | `bff_admin_list_reward_redemptions`, `bff_admin_start_reward_redemption_export` → Inngest `admin-user-export-csv` (`import_type=reward_redemptions_export`); job on **Imports** |
 | Marketplace settings | loyalty-admin | Channel OAuth / order claims (see Marketplace setup) |
 | Reward group list / form | loyalty-admin | `bff_list_reward_groups`, `bff_get_reward_group_details`, `bff_upsert_reward_group_with_limits`, `bff_delete_reward_group` |
@@ -130,7 +131,7 @@ Common pitfalls: require points match with no rows; promo on with empty pool; wi
 
 | Page / surface | Owning repo | BFF / RPC |
 | --- | --- | --- |
-| Rewards catalog | loyalty-user | `api_get_rewards_full_cached` |
+| Rewards catalog | loyalty-user | `api_get_rewards_full_cached` — SSR via Render `GET /v1/rewards/catalog` when `LOYALTY_CACHE_READS_VIA=render` ([`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md)) |
 | Reward detail / redeem | loyalty-user | Cached catalog + `bff_user_get_reward_redemption_quote` + redeem API (queued) |
 | Redemption slip / history | loyalty-user | Realtime ledger + `bff_get_reward_history` |
 | Claim link landing | loyalty-user | `bff_get_reward_claim_preview`, `bff_claim_reward_via_link` |
@@ -183,7 +184,9 @@ Member **browse catalog** on the native app is unchanged. When `online_store` in
 | `redeem_reward_with_points` | Core sync redeem orchestration (consumer-invoked) |
 | `fn_check_reward_group_limits` | Distinct and group quantity checks |
 | `bff_get_reward_details` / `bff_upsert_reward_with_conditions_and_limits` | Admin load/save with conditions and limits |
-| `bff_list_rewards`, `admin_delete_reward`, `bff_set_reward_active` | Admin list lifecycle (list includes live redeemed/used qty) |
+| `bff_list_rewards_paged` (+ `fn_reward_admin_list_base`) | Admin list / picker page: kind (catalog / campaign / all), status, category, `p_query` trigram on `reward_master.name` (`idx_reward_master_name_trgm`), `p_with_summary` counts; no ledger join |
+| `bff_get_reward_redemption_stats` | Per-reward redeemed / used / not-used from `reward_redemptions_ledger` (detail header, lazy) |
+| `bff_list_rewards`, `admin_delete_reward`, `bff_set_reward_active` | Legacy full list (still live, no admin callers); list lifecycle |
 | `fn_reward_redemption_quote`, `bff_user_get_reward_redemption_quote`, `bff_get_reward_redemption_quote` | Pre-redeem quote (member + Front Line) |
 | `bff_admin_list_reward_redemptions`, `bff_admin_start_reward_redemption_export`, `process_reward_redemption_export_chunk` | Per-reward redemption tab + async CSV export |
 | `bff_*_reward_group_*` | Group CRUD |
