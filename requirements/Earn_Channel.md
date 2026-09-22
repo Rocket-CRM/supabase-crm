@@ -139,7 +139,7 @@ Registry columns verified live include: `channel_code`, `default_method_type`, `
 | `bff_approve_receipt_upload`, `bff_get_upload_receipt_config`, `bff_set_upload_receipt_config` | Receipt upload approval and merchant-level entry modes (earn channel adjacent) |
 | Translation pipeline | `get_entity_type_config`, `get_translation_entities`, `get_translation_form_data`, `save_entity_translations`, `get_translation_cache_keys_to_invalidate` for `earn_channel` |
 
-**Member `channels[]` keys (contract):** `id`, `channel_code`, `channel_type`, `earn_method`, copy/asset fields, `display_order`, button flatteners, `marketplace_platforms`, how-to fields. Removed from contract: `channel_subtype`, `icon_url`.
+**Member `channels[]` keys (contract):** `id`, `channel_code`, `channel_type`, `earn_method`, copy/asset fields, `display_order`, button flatteners, `marketplace_platforms`, how-to fields. Removed from contract: `channel_subtype`. Optional `icon_url` on `earn_channel` (merchant override, falls back to `earn_channel_registry.default_icon_url`) feeds landing earn tiles, hub earn list, and widget earn list when set.
 
 **Admin `channels[]` metadata:** `override_id`, `registry_id`, `source`, `source_status`, `source_ref`, `is_computed_default`, `can_hide`, `can_delete`, `can_reset`, capability flags (`can_customize_*`).
 
