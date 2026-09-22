@@ -1,3 +1,7 @@
+## 2026-09-22
+
+- **Earn Rules (admin)** — Read-only BFFs `bff_get_earn_rule_rates_details`, `bff_search_earn_rule_entities`, `bff_list_uncovered_stores` plus SQL store-coverage helpers and trigram search indexes. Migration `20260922120100_earn_rules_lazy_load.sql` (live). FE: loyalty-admin `ProjectDocs/FE_docs/EarnRules.md`.
+
 ## 2026-09-20
 
 - **Display Settings (Shopify brand scheme v2.1)** — `tokens.brand` renamed `tokens.primary` to match Shopify Horizon's colour-scheme role; theme import is now a literal field copy (`primary` ← scheme `primary`, Dawn/palette fallback to primary button fill) with no colour heuristics; import picker leads with the primary swatch; onboarding brand step shows Primary (editable) + Background / Text / Primary button (read-only) and "Text on primary". Merge accepts legacy `brand`; `primary_color` synced from `tokens.primary`. Migration `20260920071500_shopify_brand_scheme_v2_1_primary_token.sql`; storefront bundle reads `primary ?? brand`. See `requirements/Display_Settings.md` §Concept / §Rules / §Journeys / §System.
