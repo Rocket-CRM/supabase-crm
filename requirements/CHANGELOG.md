@@ -1,3 +1,8 @@
+## 2026-09-22 — Earn rules lazy-load (EARNRULE-0030)
+
+- Migration `20260922120100_earn_rules_lazy_load.sql`: paginated BFF reads for advanced earn rates and uncovered stores.
+- Migration `20260922180000_earn_rules_uncovered_perf.sql`: faster covered-store resolution for uncovered list.
+
 ## 2026-09-23
 
 - **Display Settings (Shopify landing side image Fill)** — Hero "Fill" is now a full-bleed split (image full section height, width from its aspect ratio clamped 35–60%, crop only beyond the clamp); Referrals gains the same Side image fit setting via shared `FillSplit`. Config key `side_image_object_fit` on section JSON, no migration. rewarding-shopify landing bundle + loyalty-admin landing section form. See `requirements/Display_Settings.md` §Shopify landing (Side image fit).
