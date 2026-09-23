@@ -1,3 +1,7 @@
+## 2026-09-23
+
+- **Display Settings (Shopify widget cache)** — Widget settings are cached only in loyalty-cache-api (Redis scope `widget`): new plain `api_get_widget_settings`; dropped `api_get_widget_settings_cached`, `fn_invalidate_widget_settings_cache` and the four legacy widget invalidator triggers; `bff_get_widget_settings` no longer caches; added `widget` purge triggers on `tier_conditions`, `earn_conditions`, `earn_factor_group`. `/v1/widget-settings` is public (per-IP limit, `no-store`) and accepts shop-domain merchant codes; storefront bundles rebuilt to call it. Migrations `20260923040000_widget_settings_plain_read.sql`, `20260923041000_widget_settings_drop_sql_cache.sql` (live). See `requirements/Display_Settings.md` §System.
+
 ## 2026-09-22
 
 - **Reward (admin list perf)** — Reward list is server-paginated via `bff_list_rewards_paged` (+ `fn_reward_admin_list_base`, trigram index on `reward_master.name`); redeemed/used counts leave the list and become header pills on Reward settings via `bff_get_reward_redemption_stats`; all admin reward pickers (group add, content-library button target, Front Line push, campaign/referral/lifecycle) use debounced server search instead of a full-catalog fetch. Referral settings loads the ledger only on the History tab. Migration `20260922210000_reward_list_paged_and_redemption_stats.sql` (live). See `requirements/Reward.md` §Journeys / §System.

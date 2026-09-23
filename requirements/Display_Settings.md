@@ -121,7 +121,7 @@ Shopper-facing touchpoints (packaging in **rewarding-shopify**; gateways in Edge
 
 1. **Landing** — Public `api_get_shopify_landing_page_cached` (cache key `:v2:`); payload includes `brand_scheme` + slim `theme`; sections enriched without `style_tokens`; member overlay when logged in; section CTAs route by section + audience (guest → login, member → that section's drawer page).
 2. **Loyalty Hub** — Session token → `shopify-extension-api` `/hub`; redeem POST `/hub/redeem` with status poll; referrals and spend tiles from composer.
-3. **Points on product** — Anonymous `api_get_widget_settings_cached('shopify', shop)`; earn estimate from `resolved.earn_rate`.
+3. **Points on product** — Anonymous loyalty-cache-api `GET /v1/widget-settings?merchant_code={shop}&widget_type=shopify`; earn estimate from `resolved.earn_rate`.
 4. **Points balance banner** — Extension `GET /balance` (member JWT); `{points}` / `{points_name}` in merchant message.
 5. **Points after purchase** — `GET /order-points?order_id=`; guest-safe `{ status: 'guest' }`.
 6. **Wishlist** — Theme/proxy HMAC path vs account UI `GET/POST /wishlist` (no app proxy from UI extension sandbox). Headless `/store/wishlist` uses Supabase JWT — see **System › Shopify** below (`wishlist_item`, `bff_user_*` / `fn_shopify_wishlist_*`).
@@ -210,7 +210,7 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 | Function | Role |
 | --- | --- |
 | `admin_get_widget_settings` / `admin_upsert_widget_settings` / `admin_reset_widget_settings` | Widget JSON per `widget_type` |
-| `bff_get_widget_settings` / `api_get_widget_settings_cached` | Member/storefront reads; widget cache key `:v2:`; payload includes `brand_scheme` (raw merged) |
+| `bff_get_widget_settings` / `api_get_widget_settings` | Plain reads (no SQL-side cache); payload includes `brand_scheme` (raw merged). Storefront reads go through loyalty-cache-api `GET /v1/widget-settings` (public, per-IP rate limit, `no-store`), which caches in Redis scope `widget`; `trg_cache_purge_*` on `merchant_widget_settings`, `merchant_display_settings`, `widget_config_template`, `tier_master`, `tier_conditions`, `earn_factor`, `earn_factor_group`, `earn_conditions` purge it |
 | `admin_upsert_merchant_points_display` | Points label + symbol on `merchant_display_settings` |
 | `admin_get_shopify_brand_scheme` / `admin_upsert_shopify_brand_scheme` | Read/write v2.1 scheme; response `{ scheme, updated_at }` only; upsert syncs `primary_color` from `tokens.primary` |
 | `fn_shopify_brand_scheme_default` / `fn_shopify_brand_scheme_merge` / `fn_validate_shopify_brand_scheme` | v2.1 shape (`tokens.primary`), merge (incl. v1 `heading` → `text`, v2.0 `brand` → `primary`), validation |
@@ -309,7 +309,7 @@ Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secon
 
 | Touchpoint | Config source | Colour behaviour |
 | --- | --- | --- |
-| **Widget panel** | `api_get_widget_settings_cached` → `brand_scheme` + `resolved.primary_color` | Fixed chrome: gray page (`#F5F5F6`), white cards, fixed body/muted text (Figma widget homepage). **Scheme:** launcher, hero solid/gradient (`tokens.primary`, gradient toward white), links, accents, progress fill, primary/secondary buttons from stored `buttons.*`; header hex not in widget JSON (v1.1.0). Earn-channel views use the same token bundle. |
+| **Widget panel** | `/v1/widget-settings` (`api_get_widget_settings`) → `brand_scheme` + `resolved.primary_color` | Fixed chrome: gray page (`#F5F5F6`), white cards, fixed body/muted text (Figma widget homepage). **Scheme:** launcher, hero solid/gradient (`tokens.primary`, gradient toward white), links, accents, progress fill, primary/secondary buttons from stored `buttons.*`; header hex not in widget JSON (v1.1.0). Earn-channel views use the same token bundle. |
 | **Landing page (global)** | `api_get_shopify_landing_page_cached` → top-level `brand_scheme`, slim `theme` (`section_padding_px`, import meta) | Page shell does not override tokens; enrichment does **not** attach per-section `style_tokens`. |
 | **Landing sections** | `display_settings` rows (`page = shopify_loyalty_landing`) | Per-section overrides below; `resolveSectionTokens` in `widget-builder` merges section config + `brand_scheme`. |
 | **Loyalty Hub / account UI extensions** | Hub composer + `shopify_hub` image slots | Programme cards use CRM layout; merchant images only in widget settings — not landing section colours. |
@@ -336,7 +336,7 @@ Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secon
 | --- | --- | --- |
 | UI extensions | Shopify session token | `shopify-extension-api` |
 | Theme / app proxy | HMAC + customer id + cookies | `shopify-proxy` |
-| Product points block | None | `api_get_widget_settings_cached` |
+| Product points block | None | `/v1/widget-settings` (`api_get_widget_settings`) |
 
 **`shopify-extension-api` routes (representative)**
 
