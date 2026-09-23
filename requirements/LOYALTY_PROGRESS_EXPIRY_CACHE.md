@@ -4,6 +4,8 @@
 
 **Shipped:** September 2026 on project `wkevmsedchftztoolkmi`.
 
+**Not this doc:** HTTP member-app shell caching (`loyalty-cache-api` on Render, Vercel `LOYALTY_CACHE_READS_VIA`) — see [`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md). Cron names `loyalty-cache-*` here are DB precompute only.
+
 ---
 
 ## Architecture

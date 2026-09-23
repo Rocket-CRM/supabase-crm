@@ -71,7 +71,7 @@ Example (send gate): email enabled + “Promotions” topic opted in → promoti
 | --- | --- | --- |
 | Auth drawer → profile form → PDPA step | loyalty-user | Template from hub `missing_data`; save `bff_save_user_profile` |
 | Profile → Consent Management | loyalty-user | `bff_get_consent_form_template` (`edit`), save `bff_save_user_profile` |
-| Public consent read (Shopify chrome) | loyalty-user | `api_get_consent_documents_cached` (merchant code, no session) |
+| Public consent read (Shopify chrome) | loyalty-user | `api_get_consent_documents_cached` (merchant code, no session) — or Render `GET /v1/consent/documents` when `LOYALTY_CACHE_READS_VIA=render` ([`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md)) |
 
 1. After auth, if hub returns `complete_profile_*`, member reaches profile steps; **PDPA** step shows notices (read-only), required/optional checkboxes, channel toggles, and topic toggles from embedded template data (same shape as `bff_get_consent_form_template`).
 2. Submit blocked if any **required** consent in the form is unchecked; error copy lists missing titles.

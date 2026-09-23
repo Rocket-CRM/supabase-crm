@@ -85,6 +85,7 @@ Owner surfaces: loyalty-admin, loyalty-user, Shopify (storefront widget, loyalty
 | Page / surface | Owning repo | BFF / RPC |
 | --- | --- | --- |
 | Tier card / progress | loyalty-user | `get_user_tier_progress` |
+| Tier program page (RSC) | loyalty-user | `get_tier_display_config` via Render `GET /v1/tier-display` when `LOYALTY_CACHE_READS_VIA=render` ([`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md)) |
 | Points→discount quote | loyalty-user / checkout | `get_user_burn_rate` → `fn_resolve_burn_rate` |
 | Tier change notifications | loyalty-user | Driven by tier change chokepoint / notification templates |
 

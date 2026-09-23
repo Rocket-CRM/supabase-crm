@@ -302,7 +302,7 @@ This is the abstraction merchants should use when planning rollout:
 **Landing workflow**
 
 1. On-site content → **Customize** → landing overview (publish state, URL hint).
-2. **Edit** opens full-screen CMS at `/display-settings/shopify-landing-page` (sections, global theme palette v2, SEO, publish).
+2. **Edit** opens full-screen CMS at `/display-settings/shopify-landing-page` (sections, brand scheme modal, SEO, publish).
 3. **Publish** transitions `merchant_shopify_landing_page_settings.publish_status` to `published`.
 4. Storefront serves composed JSON/HTML via app proxy + theme extension (liquid bootstrap for shell).
 
@@ -310,10 +310,10 @@ This is the abstraction merchants should use when planning rollout:
 
 | Concern | Where |
 |---------|--------|
-| Brand color, points name, symbol | `merchant_display_settings` (read-only in landing editor) |
+| Brand scheme v2.1 (`shopify_brand_scheme`), points name, symbol | `merchant_display_settings` (`primary_color` synced from `tokens.primary`; theme import via admin GraphQL — see **Display_Settings.md** › System › Shopify › Brand scheme and colours) |
 | Hub hero / redeem modal / product fallback images | `merchant_widget_settings` row `widget_type = shopify_hub` |
-| Landing page theme, SEO, CTA defaults | `merchant_shopify_landing_page_settings` |
-| Landing sections order/content | `display_settings` where `page = shopify_loyalty_landing` |
+| Landing page shell (padding, import meta), SEO, publish | `merchant_shopify_landing_page_settings` (no page-level CTA defaults; section CTAs fixed in storefront) |
+| Landing sections order/content + per-section colours | `display_settings` where `page = shopify_loyalty_landing` (`surface`, `text_hex`, `heading_hex`; hero background/tint/content card) |
 
 ---
 
@@ -346,8 +346,9 @@ This is the abstraction merchants should use when planning rollout:
 
 ### Landing page
 
-- Public cache RPC **`api_get_shopify_landing_page_cached`**; enrichment merges earn/spend/VIP/referral tiles and member overlay when logged in.
-- Guest/member CTAs: inherit page default, open widget panel, login, or custom URL; referrals section for members is copy-link only.
+- Public cache RPC **`api_get_shopify_landing_page_cached`**; payload includes `brand_scheme` + slim `theme`; enrichment merges earn/spend/VIP/referral tiles and member overlay when logged in (no per-section `style_tokens` in cache).
+- Section colours: merchant sets `surface` swatch (`background` \| `dark_surface` \| `primary` \| `custom`) and optional custom heading/body hex; storefront derives cards, links, and buttons from `brand_scheme` + section config (`widget-builder` `resolveSectionTokens`). **Widget panel** drawer uses fixed neutrals for chrome/cards; scheme tints hero, launcher, links, and accents only — see `Display_Settings.md` touchpoint table.
+- Guest/member CTAs: fixed routing in storefront (guest → login; member → widget drawer page for that section); section config keeps `show` / `text` / `button_style` only; referrals member = copy-link; FAQ has no button.
 
 ### Wishlist
 

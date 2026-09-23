@@ -21,7 +21,7 @@ Not the same as `get_mission_leaderboard` (missions) or campaign activity groupi
 - Native view names must match `v_lb_*` or `mv_lb_*` and include `merchant_id`; Check/save rejects others.
 - Reader RPCs never accept client-supplied SQL identifiers — only `datawh_table_code` from the campaign row (allowlisted `format('%I', …)`).
 - Wrong member route for source kind → redirect to the correct path.
-- Native rows: server ranks and caps `top_x`; if the signed-in member is outside `top_x` but on the view, their row is appended for quota only.
+- Native rows: server ranks and caps `top_x` in `data`; when the signed-in member is on the view, `api_get_leaderboard_rows` also returns `personal_row` (matched via `user_key_field` and `user_accounts.id`) for the quota card. The table still paints only `top_x`.
 - Legacy path uses old CRM `?token=` identity and Metabase JSON API; native uses loyalty JWT (`user_accounts.id` on participation).
 - Translations: default copy on `campaign_leaderboard`; other languages via **Translation_System** `entity_type = leaderboard`. Table cell values are not translated.
 
@@ -56,7 +56,7 @@ Not the same as `get_mission_leaderboard` (missions) or campaign activity groupi
 1. Load localized campaign config.
 2. If participation required and not joined → show **Participate** only.
 3. Join writes `campaign_participation` (`userid` + `userid_text` = native user uuid).
-4. Load ranked rows; render columns and optional personal quota (match `user_key_field` to session user).
+4. Load ranked rows (`data`) and optional `personal_row`; render columns and personal quota from `personal_row` when present, else match `user_key_field` on `data`.
 5. Language toggle refreshes campaign RPC; static chrome uses `ui_translations` `page_key = leaderboard`.
 
 ## System
@@ -78,7 +78,7 @@ Not the same as `get_mission_leaderboard` (missions) or campaign activity groupi
 | `bff_upsert_leaderboard_campaign` | Admin | Upsert |
 | `bff_inspect_leaderboard_source` | Admin | Native column inspect |
 | `api_get_leaderboard_campaign` | Member | Public config + translations |
-| `api_get_leaderboard_rows` | Member | Ranked data + participation gate |
+| `api_get_leaderboard_rows` | Member | Ranked `data` (`top_x`) + `personal_row` for quota; participation gate when required |
 | `api_check_leaderboard_participation` / `api_join_leaderboard` | Member | Native join flow |
 | `check_campaign_participation_text` / `add_campaign_participant_text` | Legacy | Text user ids |
 

@@ -63,7 +63,7 @@ The platform separates **what merchants configure in their primary language** (c
 
 | Page | Owning repo | BFF / RPC |
 | --- | --- | --- |
-| App shell / language | loyalty-user | Merchant config languages; `get_ui_translations` (all pages) on init |
+| App shell / language | loyalty-user | Merchant config languages; `get_ui_translations` (all pages) on init — or Render bootstrap + `/v1/language-pack` when `LOYALTY_CACHE_READS_VIA=render` ([`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md)) |
 | Signup / login | loyalty-user | `signup_form` page keys |
 | Rewards / wallet | loyalty-user | `rewards`, `redemption_status` keys + `api_get_rewards_full_cached(p_language)` |
 | Profile / surveys | loyalty-user | `bff_get_user_profile_template(p_language, …)` |

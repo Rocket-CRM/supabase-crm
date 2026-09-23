@@ -28,6 +28,7 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 
 - Auth method configuration is merchant-wide; the member UI must not offer disabled methods. Shopify embedded admin hides standalone auth settings (`GLOBAL_SETTINGS_SECTIONS.auth` off on Shopify surface).
 - `bff-auth-complete` is the only hub that mints member sessions for LINE / OTP / `shopify_email` completion flows on loyalty-user.
+- **Signed in = member loaded, not cookie present.** A `loyalty_access_token` cookie with no loaded member summary is not a session: in LIFF, silent login re-runs; on web, the app reloads the summary once and opens the auth drawer if still empty. A member must never sit on the homepage with a cookie but no member (taps blocked, no login shown).
 - Phone numbers are normalized to E.164 (`+66…`) in `auth-send-otp` and `bff-auth-complete` before lookup or insert.
 - If LINE and phone in one request resolve to **different** existing users → `409` with credentials conflict; no merge.
 - OTP: 6 digits, 10-minute expiry, max 3 validation attempts per `session_id` (`fn_validate_otp` / `otp_requests`). OTP is never returned in API responses.
@@ -83,7 +84,7 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 
 | Page / surface | Owning repo | BFF / RPC |
 | --- | --- | --- |
-| Login / signup entry | loyalty-user | `bff_get_auth_config`, `auth-line`, `auth-send-otp` |
+| Login / signup entry | loyalty-user | `bff_get_auth_config`, `auth-line`, `auth-send-otp` — auth/LIFF config also in Render bootstrap when `LOYALTY_CACHE_READS_VIA=render` ([`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md)) |
 | Auth completion | loyalty-user | `bff-auth-complete` |
 | Profile completion | loyalty-user | `bff_get_user_profile_template`, `bff_save_user_profile` |
 | Edit profile (later) | loyalty-user | Same template RPC with `p_mode = 'edit'` |
@@ -94,7 +95,7 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 4. Branch on `next_step`:
    - `verify_line` / `verify_tel` / `verify_shopify` → collect missing proof (session already issued when linking).
    - `complete_profile_*` → bind `missing_data`, walk `form_step` sections, validate required fields per section.
-   - `complete` → navigate to member home (`get_user_summary` merged into `user_account` on hub response).
+   - `complete` → navigate to member home (hub merges summary into `user_account`; SSR `get_user_summary` in layout — browser skips refetch only when the hub payload's user id matches the SSR member; missing or different id → refetch; Phase A behaviour — see [`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md)).
 5. On final profile section → `bff_save_user_profile` → home.
 6. Optional: enter validated external code during profile → `bff_validate_signup_code` before save; consumption on save.
 7. Optional: after `complete`, apply referral member code per `Referral.md` (signup referral path).

@@ -65,6 +65,9 @@ Future Park runs a **deferred receipt-earning** program: members photograph mall
 | Approve / reject / re-edit | Updates row status; Future Park approve queues settlement without immediate purchase |
 | Duplicate confirmation modal | Required when combined duplicate check returns matches (HTTP 409 contract on proxy) |
 | Deferred merchant + Front Line Save | Creates `purchase_receipt_upload` queued like member auto-pass |
+| Front Line photo autofill hits a history duplicate | Row stays flagged at 0 points (Save blocked); the duplicate popup lists the matching receipts after extract |
+| Daily amount limit hit partially on Front Line | Est. Points, queued estimated points, and the printed slip earn only on `fn_preview_purchase_limits.eligible_amount` (e.g. 200,000 THB under 100,000 THB/user/day → points on 100,000) |
+| Front Line printed slip logo | Future Park uses bundled solid-black `/futurepark-logo.svg` when `merchant_display_settings.logo` is empty |
 | `points_engine` (merchant feature config) | Nightly job native vs Old CRM settlement |
 
 1. Open **Future Park Approve Receipts**, filter batches (pending vs decided, CRM sync).

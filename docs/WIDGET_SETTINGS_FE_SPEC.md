@@ -60,17 +60,16 @@ Rule: render only when `ok === true`. Otherwise show fallback UI.
 
 | Field | Values | Use |
 |---|---|---|
-| `theme.mode` | `light` \| `dark` | Top-level color scheme for widget surfaces. |
+| `theme.mode` | `light` \| `dark` | **Deprecated.** Widget panel always renders fixed light chrome (gray page, white cards); ignore for new work. |
 
 ### `config.header.background`
 
 | Field | Values | Use |
 |---|---|---|
 | `background.type` | `solid` \| `gradient` \| `image` | Picks which sub-block below to render. Ignore the others. |
-| `background.solid.color` | `#RRGGBB` (6-digit hex) | Background color when `type=solid`. |
-| `background.gradient.from` | `#RRGGBB` | Gradient start color when `type=gradient`. |
-| `background.gradient.to` | `#RRGGBB` | Gradient end color. |
-| `background.gradient.angle` | number (degrees, e.g. `135`) | CSS `linear-gradient` angle. |
+| `background.solid.color` | `null` | **Deprecated.** Storefront uses `brand_scheme.tokens.primary` when `type=solid`. |
+| `background.gradient.from` / `to` | — | **Removed in v1.1.0.** Storefront derives `primary → mix(primary, #FFFFFF, 0.35)` (hero only; panel chrome is fixed neutrals). |
+| `background.gradient.angle` | number (degrees, e.g. `135`) | CSS `linear-gradient` angle — merchant-configurable. |
 | `background.image.items` | array, 1–10 items when `type=image` | Carousel slides. Each item: `{ id, url, alt, order, size_kb? }`. Sort by `order` ascending before rendering. |
 | `background.image.carousel.autoplay` | bool | Auto-advance the carousel. |
 | `background.image.carousel.transition` | `fade` \| `slide` | Slide animation style. |
@@ -101,11 +100,11 @@ Mirrors the top-level `schema_version`. Prefer the top-level one; this is just a
 
 ## `resolved` — merchant display
 
-These come from `merchant_display_settings` and are shared across all widgets. Use them for points UI and brand color — do **not** read points/symbol from anywhere inside `config`. The deprecated `point` block inside `config` is rejected by the saver and will not appear here.
+These come from **`fn_brand_scheme_merged`** (and points fields on `merchant_display_settings`) and are shared across all widgets. Use them for points UI and brand color — do **not** read points/symbol from anywhere inside `config`. The deprecated `point` block inside `config` is rejected by the saver and will not appear here.
 
 | Field | Type | Use |
 |---|---|---|
-| `primary_color` | `#RRGGBB` or null | Primary accent color (launcher, header default, links, icon tints, button fallback). Mirrors `brand_scheme.tokens.primary` (scheme v2.1; v2.0 rows used `tokens.brand` — read `primary ?? brand`). Fall back to a neutral if null. |
+| `primary_color` | `#RRGGBB` or null | Primary accent color (launcher, header default, links, icon tints, button fallback). Mirrors `brand_scheme.tokens.primary` (v2.3; legacy rows: read `primary ?? brand`). Fall back to a neutral if null. |
 | `points.unit_label` | string, e.g. `"Points"`, `"Coins"` | Label shown next to a points amount. |
 | `points.symbol_type` | `icon` \| `image` (may be null) | Picks which symbol field to render. |
 | `points.symbol_icon` | string (icon name) | Render when `symbol_type=icon`. Treat unknown names as missing. |

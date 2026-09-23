@@ -148,6 +148,7 @@ App proxy is registered in `rewarding-shopify` `shopify.app.toml` → Supabase `
 | `shopify-extension-api` | Customer account UI backend |
 | `auth-hook-admin-sync` | Admin auth webhook sync |
 | `auth-line-login` | **Tombstone** — 410 Gone (retired 2026-05-14) |
+| `loyalty-cache-api` (Render) | Merchant-scoped **read** cache for loyalty-user shell; shared `x-cache-api-key` only — **no member JWT** ([`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md)) |
 
 ### Known gaps
 

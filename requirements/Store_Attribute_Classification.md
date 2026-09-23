@@ -48,7 +48,7 @@ Example (set matching): A set member “Online marketplace” (attribute only) i
 | --- | --- |
 | Categories / attributes / sub-attributes | Merchant taxonomy tree; channel and store-property flags on categories |
 | Attribute sets | Reusable targets for earn conditions, OCR rules, and other store-scoped config |
-| Store master | Create outlets, address fields, active flag, per-category assignments |
+| Store master | Create outlets, address fields, external reference, active flag, per-category assignments |
 | Set members | Attribute-wide, sub-attribute-specific, or direct store pins |
 
 | Page | Owning repo | BFF / RPC |
@@ -56,7 +56,7 @@ Example (set matching): A set member “Online marketplace” (attribute only) i
 | Store attributes master | loyalty-admin | `get_store_attributes_hierarchy`, `upsert_store_attributes_jsonb`, `delete_store_attributes_jsonb` |
 | Store attribute sets (list) | loyalty-admin | Direct read on `store_attribute_sets` + member counts (list RPC bypassed — broken column reference) |
 | Store attribute set (detail) | loyalty-admin | `get_store_attribute_set_members_with_category`, `upsert_store_attribute_set_with_members`, `admin_delete_store_attribute_set` |
-| Stores master | loyalty-admin | `get_stores_by_merchant`, `bff_upsert_store_master`, `bff_delete_store_master`; assignments via `store_attribute_assignments` table |
+| Stores master | loyalty-admin | `get_stores_by_merchant` (list + Edit store prefill, incl. `external_ref`), `bff_upsert_store_master`, `bff_delete_store_master`; assignments via `store_attribute_assignments` table |
 | Front line / events / rewards (store scope) | loyalty-admin | Store pickers and stock scoped by store master rows |
 
 1. On **Store attributes master**, define categories and nested attributes/sub-attributes; mark the channel category when receipt upload should use channel → store steps.
