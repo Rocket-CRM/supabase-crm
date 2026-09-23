@@ -113,10 +113,19 @@ export async function fetchNotificationAppearance(
       supabase.from("merchant_master").select("name").eq("id", merchantId).maybeSingle(),
       supabase
         .from("merchant_display_settings")
-        .select("logo, primary_color")
+        .select("logo, brand_scheme")
         .eq("merchant_id", merchantId)
         .maybeSingle(),
     ]);
+
+    const schemePrimary =
+      display?.brand_scheme &&
+      typeof display.brand_scheme === "object" &&
+      display.brand_scheme !== null &&
+      typeof (display.brand_scheme as { tokens?: { primary?: string } }).tokens?.primary ===
+        "string"
+        ? (display.brand_scheme as { tokens: { primary: string } }).tokens.primary.trim()
+        : "";
 
     return {
       fromName:
@@ -126,7 +135,7 @@ export async function fetchNotificationAppearance(
       logoUrl: firstHttps(appearance?.logo_url) ?? firstHttps(display?.logo),
       primaryColor:
         (typeof appearance?.primary_color === "string" && appearance.primary_color.trim()) ||
-        (typeof display?.primary_color === "string" && display.primary_color.trim()) ||
+        schemePrimary ||
         fallback.primaryColor,
     };
   } catch (e) {
