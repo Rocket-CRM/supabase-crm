@@ -38,6 +38,7 @@ domains(prio, name, pattern) AS (VALUES
   (15, 'Checkin',               'checkin'),
   (15, 'Spin Wheel',            'spin_wheel'),
   (20, 'Activity Log & Attribution', '(mkt_|activity_type|activity_field_def|activity_ledger|log_user_activity|attribution_field)'),
+  (20, 'Ops monitoring',        '(ops_daily_recon|_ops_daily_recon)'),
   (20, 'RFM Scoring',           'rfm'),
   (20, 'Funnel',                'funnel'),
   (15, 'Campaign',              'campaign'),
