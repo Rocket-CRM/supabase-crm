@@ -190,7 +190,7 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 
 | Function | Role |
 | --- | --- |
-| `api_get_display_blocks_cached` | Public FE; cached; enriches; persona `guest` when unauth |
+| `api_get_display_blocks_cached(p_page, p_language, p_merchant_code, p_persona_id text DEFAULT NULL)` | Public FE + Render cache-api; cached; enriches; optional `p_persona_id` override (else `auth.uid()` → `user_accounts.persona_id` → `guest`). Member app calls Render `GET /v1/display-blocks?persona_id=` from SSR when logged in. |
 | `bff_get_display_blocks_cached` | Authenticated FE; cached; adds `ui_config` |
 | `admin_get_display_blocks` | Admin; not cached; active + inactive |
 | `bff_get_display_settings` | Raw rows + translations (no enrichment) |
@@ -290,7 +290,7 @@ Rocket keeps a **small stored schema** aligned with Shopify Horizon's per-scheme
 | `buttons.primary.bg` | `primary_button_background` | `button` | none; `null` after import when stored as derived `#1C1C1C` sentinel | Primary CTA fill on landing sections; storefront falls back to `tokens.primary` when null. |
 | `buttons.primary.text` | `primary_button_text` | `button_label` | none | Label on primary buttons (“Text on primary” in onboarding). |
 | `buttons.secondary.text` | `secondary_button_text` | `secondary_button_label` | none | Label on secondary/outline buttons (fill/border derived at render). |
-| `buttons.radius_px` | `buttons_radius` (theme-level setting) | same | none | Shared corner radius for Rocket buttons on widget + landing. |
+| `buttons.radius_px` | `buttons_radius` (theme-level setting) | same | none | Shared corner radius for Rocket buttons and landing cards (spaced tiles and the outer edge of a collapsed card grid). Hero content-card radius stays on the section. |
 | `tokens.dark_surface` | — (no named role on the chosen scheme) | — | **derived** — background of the darkest colour scheme in the theme (`color_scheme_group`), or darkest `color1`–`color5` slot (`color_palette`) | Dark landing section swatch (`surface.swatch = dark_surface`); not the merchant’s primary accent. |
 
 Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secondary fill/hover, …) feed import previews only; storefront derivation uses stored tokens + the shared ladder in `widget-builder`.
@@ -323,7 +323,7 @@ Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secon
 | `text_hex` / `heading_hex` | **Auto** when both null (readable body/heading from scheme text on section bg). **Custom** = Horizon-style two text roles: headings (titles, step titles, FAQ questions, hero card titles) vs body (descriptions, labels, muted derives from body) |
 | `section_style` (legacy) | Upgraded on read/save to `surface` via `fn_shopify_landing_upgrade_section_config`; swatch `brand`/`extra` → `primary` |
 
-**Hero-only** (`shopify_landing_hero`): `background.image_url`; `background.tint` (enabled only when an image is set — solid/gradient, dark/light, strength %); `content_card` (`enabled`, `bg_color`, `bg_opacity_pct`, `radius_px`, `padding_px`) for the foreground card on top of the photo. Hero still uses the shared `surface` / text roles for the section chrome around the card.
+**Hero-only** (`shopify_landing_hero`): `background.image_url`; `background.tint` (enabled only when an image is set — solid/gradient, dark/light, strength %); `content_card` (`enabled`, `bg_color`, `bg_opacity_pct`, `radius_px`, `padding_px`) for the foreground card on top of the photo; `side_image_position` plus `side_image_url` and `side_image_object_fit` (`contain` = fit, default; `cover` = fill and crop to the side frame). Hero still uses the shared `surface` / text roles for the section chrome around the card.
 
 **Section types without extra colour knobs** — `how_it_works`, `ways_to_earn`, `ways_to_spend`, `vip`, `referrals`, `faq` share the appearance group (surface + text). FAQ has no CTA. Referrals member audience uses copy-link instead of a styled button.
 

@@ -771,7 +771,7 @@ F: admin_delete_display_block(p_block_id uuid) -> boolean
 F: admin_get_display_blocks(p_page text DEFAULT 'homepage'::text) -> json
 F: admin_get_display_settings(p_page text DEFAULT NULL::text) -> TABLE(id uuid, block_type text, block_st...
 F: admin_update_display_block(p_block_id uuid, p_block_type text DEFAULT NULL::text, p_block_style text DEFAULT NULL::text, p_page text DEFA...) -> boolean
-F: api_get_display_blocks_cached(p_page text DEFAULT NULL::text, p_language text DEFAULT NULL::text, p_merchant_code text DEFAULT NULL::text) -> json
+F: api_get_display_blocks_cached(p_page text DEFAULT NULL::text, p_language text DEFAULT NULL::text, p_merchant_code text DEFAULT NULL::text, p_persona_id text DEFAULT NULL::text) -> json
 F: bff_get_display_blocks_cached(p_page text DEFAULT 'homepage'::text, p_language text DEFAULT NULL::text) -> json
 F: bff_get_display_settings(p_page text DEFAULT 'homepage'::text, p_language_code text DEFAULT 'en'::text) -> TABLE(id uuid, block_type text, block_st...
 F: fn_derive_display_block_ui_config(p_block_type text, p_block_style text, p_config jsonb) -> jsonb
