@@ -1,5 +1,6 @@
 ## 2026-09-23
 
+- **FuturePark (approve reject reason)** — Future Park Approve Receipts reject multi-select adds `reject.member_name_mismatch` (“ชื่อที่ระบุในใบเสร็จไม่ตรงกับชื่อสมาชิก” / EN fallback); labels still persist in `purchase_receipt_upload.notes`. Seeded `ui_translation_admin` via `fp_approve_reject_member_name_mismatch`. See `requirements/FuturePark.md` §Rules / §Admin journey.
 - **Display Settings (Shopify widget cache)** — Widget settings are cached only in loyalty-cache-api (Redis scope `widget`): new plain `api_get_widget_settings`; dropped `api_get_widget_settings_cached`, `fn_invalidate_widget_settings_cache` and the four legacy widget invalidator triggers; `bff_get_widget_settings` no longer caches; added `widget` purge triggers on `tier_conditions`, `earn_conditions`, `earn_factor_group`. `/v1/widget-settings` is public (per-IP limit, `no-store`) and accepts shop-domain merchant codes; storefront bundles rebuilt to call it. Migrations `20260923040000_widget_settings_plain_read.sql`, `20260923041000_widget_settings_drop_sql_cache.sql` (live). See `requirements/Display_Settings.md` §System.
 
 ## 2026-09-22

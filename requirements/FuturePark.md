@@ -43,6 +43,7 @@ Future Park runs a **deferred receipt-earning** program: members photograph mall
 - Confirm persists rows: auto-pass → `status=approved`, `approved_method=auto`, `crm_sync_status=queued`; validation issues → `status=pending`, `crm_sync_status=not_applicable`. Confirm does **not** create purchases or points.
 - Nightly sync (**23:00 Bangkok**, pg_cron `0 16 * * *` UTC): processes `queued` rows — **native** creates `purchase_ledger` + points; **old_crm** uses template pipeline.
 - Admin approve and Front Line deferred Save also set **queued** without immediate ledger; edits allowed until `crm_sync_status=confirmed`.
+- Admin **reject** on Future Park Approve Receipts requires at least one fixed multi-select reason (including member-name mismatch); joined labels are stored in `purchase_receipt_upload.notes` (no DB enum).
 - Member history: **Pending** tab while any receipt in batch is pending or approved-but-not-settled; **Reviewed** when batch fully decided; reviewed rows show approved/rejected count chips.
 - `receipt_approval_rules` matches force manual review with admin-visible rule name; member history shows processing without rule text.
 - Datetime policy: missing visible time → `missing_receipt_time` manual path; never send midnight as fabricated time to Old CRM payloads.
@@ -62,7 +63,7 @@ Future Park runs a **deferred receipt-earning** program: members photograph mall
 | --- | --- |
 | Upload group: Has pending / Fully decided | Batch list segmentation |
 | CRM sync filters | Queued / confirmed / failed settlement states |
-| Approve / reject / re-edit | Updates row status; Future Park approve queues settlement without immediate purchase |
+| Approve / reject / re-edit | Updates row status; Future Park approve queues settlement without immediate purchase; reject reasons are a fixed admin multi-select (incl. receipt name ≠ member name) written to `notes` |
 | Duplicate confirmation modal | Required when combined duplicate check returns matches (HTTP 409 contract on proxy) |
 | Deferred merchant + Front Line Save | Creates `purchase_receipt_upload` queued like member auto-pass |
 | `points_engine` (merchant feature config) | Nightly job native vs Old CRM settlement |
