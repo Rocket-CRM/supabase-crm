@@ -100,11 +100,11 @@ Mirrors the top-level `schema_version`. Prefer the top-level one; this is just a
 
 ## `resolved` — merchant display
 
-These come from `merchant_display_settings` and are shared across all widgets. Use them for points UI and brand color — do **not** read points/symbol from anywhere inside `config`. The deprecated `point` block inside `config` is rejected by the saver and will not appear here.
+These come from **`fn_brand_scheme_merged`** (and points fields on `merchant_display_settings`) and are shared across all widgets. Use them for points UI and brand color — do **not** read points/symbol from anywhere inside `config`. The deprecated `point` block inside `config` is rejected by the saver and will not appear here.
 
 | Field | Type | Use |
 |---|---|---|
-| `primary_color` | `#RRGGBB` or null | Primary accent color (launcher, header default, links, icon tints, button fallback). Mirrors `brand_scheme.tokens.primary` (scheme v2.1; v2.0 rows used `tokens.brand` — read `primary ?? brand`). Fall back to a neutral if null. |
+| `primary_color` | `#RRGGBB` or null | Primary accent color (launcher, header default, links, icon tints, button fallback). Mirrors `brand_scheme.tokens.primary` (v2.3; legacy rows: read `primary ?? brand`). Fall back to a neutral if null. |
 | `points.unit_label` | string, e.g. `"Points"`, `"Coins"` | Label shown next to a points amount. |
 | `points.symbol_type` | `icon` \| `image` (may be null) | Picks which symbol field to render. |
 | `points.symbol_icon` | string (icon name) | Render when `symbol_type=icon`. Treat unknown names as missing. |

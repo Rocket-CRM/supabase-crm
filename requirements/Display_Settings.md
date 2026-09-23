@@ -16,9 +16,9 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 
 **Persona scope** — Placements may target all personas, specific persona UUIDs, and/or `guest` for anonymous homepage variants.
 
-**Merchant display settings** — Points unit label and symbol used across widgets and read-only in the landing CMS (`merchant_display_settings`).
+**Merchant display settings** — Points unit label and symbol; **`brand_scheme`** (v2.3.0) is the single source for brand colours and radii across member app, Shopify on-site, widgets, and notification email fallbacks; optional **`logo`** on the same row (admin brand RPC `p_assets`).
 
-**Shopify brand scheme (v2.1)** — Merchant-wide palette on `merchant_display_settings.shopify_brand_scheme` (`_schema_version: 2.1.0`): `source` (custom vs linked theme), `tokens` (`primary`, `background`, `dark_surface`, `text`), `buttons` (primary fill/label, secondary label, `radius_px`). Names mirror Shopify Horizon colour-scheme **roles** so import is a field copy, not a guess. `primary` is the accent (launcher, widget header default, links, icon tints, primary-button fallback); `background` is the widget panel body. v2.0 `tokens.brand` merges to `primary`. SQL stores **chosen** hex only; storefront **rewarding-shopify** (`widget-builder`) derives readability, cards, borders, hovers, and header gradients. Mapping table, import pipeline, touchpoint apply, and landing section overrides: **System › Shopify › Brand scheme and colours**.
+**Brand scheme (v2.3)** — Stored on `merchant_display_settings.brand_scheme` (`_schema_version: 2.3.0`): `source` (custom vs linked theme), `tokens` (`primary`, `accent`, `background`, `dark_surface`, `text`), `buttons` (primary fill/label, secondary label, `radius_px`), `cards` (`radius_px` for landing/card surfaces). Names mirror Shopify Horizon **roles** where import applies; member **`secondary_color`** and widget/landing accents use `tokens.accent`. v2.0 `tokens.brand` and v2.1-only rows merge up on read. SQL stores **chosen** hex and radii; **rewarding-shopify** (`widget-builder`) derives readability, borders, hovers, and header gradients. Flat MDS columns (`primary_color`, radius fields) were removed after unification (backup `merchant_display_settings_brand_backup`). Mapping, import, touchpoints: **System › Shopify › Brand scheme and colours**.
 
 **Widget settings** — Per–`widget_type` JSON (theme, header, earn-channel chrome). `shopify` drives the storefront panel; `shopify_hub` holds Loyalty Hub hero / redeem modal / product fallback images.
 
@@ -37,9 +37,10 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 - Cache TTL ~5 minutes for member-app display blocks; any write to placements or display translations invalidates all cache keys for that merchant.
 - Enrichment failure on a single block returns raw `config` plus `enrichment_error`; sibling blocks still render.
 - **Shopify landing** — Publish transitions `merchant_shopify_landing_page_settings.publish_status` to `published`; storefront reads composed payload via app proxy + theme extension. Entitlement **`display.shopify_landing_page`** (Essential+) required; customer-account surfaces and wishlist are on all plans including Free.
-- **Shopify brand scheme** — Optional button hex `#1C1C1C` is stored as `null` (Derived). Landing section `surface.swatch` is `background | dark_surface | primary | custom` (`primary` uses `tokens.primary`; legacy `brand`/`extra` normalize to `primary` on read). `merchant_display_settings.primary_color` is synced from `tokens.primary` on every scheme save; upsert invalidates landing and widget caches. Landing enrichment does not attach `style_tokens`; cached/admin landing payloads expose top-level `brand_scheme` (merged raw) and slim `theme` (`section_padding_px`, import meta only).
-- **On-site colour ladder (Shopify landing bundle)** — One derivation module in `rewarding-shopify` widget-builder: level-0 background = scheme token verbatim; level-1 cards/rows = one tint step; text = readable scheme text on each surface; muted = body at alpha; links = readable primary. **Widget panel** uses fixed Figma neutrals for page chrome (`#F5F5F6`), cards (`#FFFFFF`), body/muted text, and borders — **not** `tokens.background` / `tokens.text`. Scheme applies on the widget to launcher + hero solid/gradient (`tokens.primary`, gradient end mixed toward white), links, icon/coin tints, progress fill, and landing-style primary/secondary buttons when rendered in the panel; header angle is the only free widget header knob. Landing section Custom text = two roles: `heading_hex` (titles, incl. hero headline, step titles, FAQ questions) and `text_hex` (body); Auto leaves both null; both validated hex-or-null. Storefront CSS must not introduce colour literals outside CSS variables (linted at widget-builder build).
-- **Shopify landing CTAs** — Routing is fixed per section + audience in the storefront bundle, not merchant-configurable: guest → log in / sign up on every section; member → the widget drawer page for that section's feature (hero → my rewards, how-it-works / ways-to-earn → earn channels, ways-to-spend → redeem, VIP → tier status; referrals member shows copy-link, FAQ has no button). Section CTA config holds only `show`, `text`, `button_style` (`link_type` / `page` / `url` / `url_param` stripped on save); page config has no `cta_defaults`. Hero `background.tint` renders only when `background.image_url` is set.
+- **Shopify brand scheme** — Optional button hex `#1C1C1C` is stored as `null` (Derived). Landing section `surface.swatch` is `background | dark_surface | primary | custom` (`primary` uses `tokens.primary`; legacy `brand`/`extra` normalize to `primary` on read). **`admin_upsert_brand_scheme`** validates merged v2.3 JSON only (no flat-column sync). Upsert invalidates landing and widget caches. Landing enrichment does not attach `style_tokens`; cached/admin landing payloads expose top-level `brand_scheme` (merged raw) and slim `theme` (`section_padding_px`, import meta only).
+- **On-site colour ladder (Shopify landing bundle)** — One derivation module in `rewarding-shopify` widget-builder: level-0 background = scheme token verbatim; level-1 cards/rows = one tint step; text = readable scheme text on each surface; muted = body at alpha; links = readable primary. Card grid look is page-level (`theme.cards`: `gap_px` 0–48, `border` none|line, `fill` flat|raised). **Landing card** corner radius uses `cards.radius_px`; **buttons** use `buttons.radius_px` (independent on Shopify merchants). At gap 0 with line borders the tiles share one outline and card radius clips the group's outer corners (one card or many); spaced cards keep the radius on each tile. Card padding and icon box are derived constants. How-it-works step icons render as the uploaded or default image with no recolor. Audience description override (`guest`/`member` `intro_override`) is shown and applied on referrals only.
+- **Shopify landing layout keys** — Hero `content_align` (start|center|end), `side_image_position` (none|start|end) + `side_image_url` (contained image, independent of `background.image_url`); earn/spend `grid.columns_desktop` (2|3|4, tablet = min(n,2), mobile 1) and `tile_layout` (stacked|inline, default stacked); how_it_works `tile_layout`, `steps_marker` (icon|number), default step icons resolved in the storefront bundle for preview and published alike; no icon ring, no forced step index. **Widget panel** uses fixed Figma neutrals for page chrome (`#F5F5F6`), cards (`#FFFFFF`), body/muted text, and borders — **not** `tokens.background` / `tokens.text`. Scheme applies on the widget to launcher + hero solid/gradient (`tokens.primary`, gradient end mixed toward white), links, icon/coin tints, progress fill, and landing-style primary/secondary buttons when rendered in the panel; header angle is the only free widget header knob. Landing section Custom text = two roles: `heading_hex` (titles, incl. hero headline, step titles, FAQ questions) and `text_hex` (body); Auto leaves both null; both validated hex-or-null. Storefront CSS must not introduce colour literals outside CSS variables (linted at widget-builder build).
+- **Shopify landing CTAs** — Routing is fixed per section + audience in the storefront bundle, not merchant-configurable: guest → log in / sign up on every section; member → the widget drawer page for that section's feature (hero → my rewards, how-it-works / ways-to-earn → earn channels, ways-to-spend → redeem, VIP → tier status; referrals member shows copy-link, FAQ has no button). Section CTA config holds only `show`, `text`, `button_style` (`link_type` / `page` / `url` / `url_param` stripped on save); page config has no `cta_defaults`. Hero `background.tint` renders only when `background.image_url` is set. Hero Auto text and button contrast resolve against the content card / tint backdrop when a cover image is set.
 - **Shopify hub / banners** — View models are composed server-side (`fn_compose_shopify_hub`, widget settings cache). Checkout **points estimate** is not shipped (extension directory excluded from production app manifest).
 
 ## Journeys
@@ -65,7 +66,7 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 | Member app homepage / pages | loyalty-admin | `admin_get_display_blocks`, batch create/update/delete |
 | Block picker metadata | loyalty-admin | `get_display_settings_menu()` |
 | Points label (global) | loyalty-admin | `admin_upsert_merchant_points_display` → `merchant_display_settings` |
-| Shopify brand colours | loyalty-admin | `admin_get_shopify_brand_scheme` / `admin_upsert_shopify_brand_scheme` → `{ scheme, updated_at }` |
+| Shopify brand colours | loyalty-admin | `admin_get_brand_scheme` / `admin_upsert_brand_scheme(p_scheme, p_assets)` → `{ scheme, logo, updated_at }`; **General settings** and **Display settings** hub open the same modal (`surface`: standalone vs shopify field matrix) |
 | Online store display | loyalty-admin | Same block pipeline, `page` for headless `/store` |
 | Shopify widget panel | loyalty-admin | `admin_get_widget_settings` / `admin_upsert_widget_settings` (`shopify`) |
 | Shopify Loyalty Hub images | loyalty-admin | `admin_get_widget_settings` / `admin_upsert_widget_settings` (`shopify_hub`) |
@@ -93,8 +94,8 @@ Display settings answer **what shoppers see** and **how it is packaged** on each
 
 | Surface | Owning repo | BFF / RPC |
 | --- | --- | --- |
-| Authenticated app pages | loyalty-user | `bff_get_display_blocks_cached` |
-| Public / code-based merchant | loyalty-user | `api_get_display_blocks_cached` |
+| Authenticated app pages | loyalty-user | `bff_get_display_blocks_cached`; when `LOYALTY_CACHE_READS_VIA=render`, shell blocks from Render bootstrap / `/v1/display-blocks` — [`Member_App_Cached_Reads.md`](./Member_App_Cached_Reads.md) |
+| Public / code-based merchant | loyalty-user | `api_get_display_blocks_cached`; same Render path when flag=`render` for bundled pages |
 | Headless online store | loyalty-user | Display blocks for store pages + chrome tabs |
 
 1. App requests blocks for `page` (+ language).
@@ -120,7 +121,7 @@ Shopper-facing touchpoints (packaging in **rewarding-shopify**; gateways in Edge
 
 1. **Landing** — Public `api_get_shopify_landing_page_cached` (cache key `:v2:`); payload includes `brand_scheme` + slim `theme`; sections enriched without `style_tokens`; member overlay when logged in; section CTAs route by section + audience (guest → login, member → that section's drawer page).
 2. **Loyalty Hub** — Session token → `shopify-extension-api` `/hub`; redeem POST `/hub/redeem` with status poll; referrals and spend tiles from composer.
-3. **Points on product** — Anonymous `api_get_widget_settings_cached('shopify', shop)`; earn estimate from `resolved.earn_rate`.
+3. **Points on product** — Anonymous loyalty-cache-api `GET /v1/widget-settings?merchant_code={shop}&widget_type=shopify`; earn estimate from `resolved.earn_rate`.
 4. **Points balance banner** — Extension `GET /balance` (member JWT); `{points}` / `{points_name}` in merchant message.
 5. **Points after purchase** — `GET /order-points?order_id=`; guest-safe `{ status: 'guest' }`.
 6. **Wishlist** — Theme/proxy HMAC path vs account UI `GET/POST /wishlist` (no app proxy from UI extension sandbox). Headless `/store/wishlist` uses Supabase JWT — see **System › Shopify** below (`wishlist_item`, `bff_user_*` / `fn_shopify_wishlist_*`).
@@ -135,9 +136,9 @@ Extension collections: `loyalty-account` → hub, balance, wishlist; `loyalty-ch
 | --- | --- |
 | `display_block_template` | Global catalogue of block shapes (`block_type`, `block_style`, default `config`) |
 | `display_settings` | Per-merchant placements: `page`, `order`, `active_status`, `persona_ids`, `config` |
-| `merchant_display_settings` | Points unit label, symbol type/icon/image, `shopify_brand_scheme` (v2.1), `primary_color` synced from `tokens.primary` on scheme upsert |
+| `merchant_display_settings` | Points unit label, symbol type/icon/image, **`brand_scheme`** (v2.3), **`logo`** |
 | `merchant_widget_settings` | Per `widget_type` (`shopify`, `shopify_hub`, …) JSON config + `active_status`; Shopify panel `_schema_version` **1.1.0** (header angle-only; solid/gradient colours derived at render) |
-| `merchant_shopify_landing_page_settings` | Landing SEO + `publish_status`; per-merchant `config.theme` = padding + import flags only (no page-level CTA defaults) |
+| `merchant_shopify_landing_page_settings` | Landing SEO + `publish_status`; per-merchant `config.theme` = `section_padding_px` + `cards` + import flags (no page-level CTA defaults) |
 | `widget_config_template` | Default shapes for widget types (validation / merge) |
 
 **`display_block_template`** — `block_type` enum includes member blocks (`banner`, `profile_card`, `tier_progress`, …) and Shopify landing section types (`shopify_landing_hero`, `shopify_landing_how_it_works`, `shopify_landing_ways_to_earn`, `shopify_landing_ways_to_spend`, `shopify_landing_referrals`, `shopify_landing_vip`, `shopify_landing_faq`). `block_style` is free text (e.g. `style_1`, `grid`, `carousel`).
@@ -209,10 +210,11 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 | Function | Role |
 | --- | --- |
 | `admin_get_widget_settings` / `admin_upsert_widget_settings` / `admin_reset_widget_settings` | Widget JSON per `widget_type` |
-| `bff_get_widget_settings` / `api_get_widget_settings_cached` | Member/storefront reads; widget cache key `:v2:`; payload includes `brand_scheme` (raw merged) |
+| `bff_get_widget_settings` / `api_get_widget_settings` | Plain reads (no SQL-side cache); payload includes `brand_scheme` (raw merged). Storefront reads go through loyalty-cache-api `GET /v1/widget-settings` (public, per-IP rate limit, `no-store`), which caches in Redis scope `widget`; `trg_cache_purge_*` on `merchant_widget_settings`, `merchant_display_settings`, `widget_config_template`, `tier_master`, `tier_conditions`, `earn_factor`, `earn_factor_group`, `earn_conditions` purge it |
 | `admin_upsert_merchant_points_display` | Points label + symbol on `merchant_display_settings` |
-| `admin_get_shopify_brand_scheme` / `admin_upsert_shopify_brand_scheme` | Read/write v2.1 scheme; response `{ scheme, updated_at }` only; upsert syncs `primary_color` from `tokens.primary` |
-| `fn_shopify_brand_scheme_default` / `fn_shopify_brand_scheme_merge` / `fn_validate_shopify_brand_scheme` | v2.1 shape (`tokens.primary`), merge (incl. v1 `heading` → `text`, v2.0 `brand` → `primary`), validation |
+| `admin_get_brand_scheme` / `admin_upsert_brand_scheme(p_scheme jsonb, p_assets jsonb DEFAULT '{}')` | Read/write v2.3 scheme + logo; response `{ scheme, logo, updated_at }`; upsert busts landing + widget cache |
+| `fn_brand_scheme_default` / `fn_brand_scheme_merge` / `fn_validate_brand_scheme` / `fn_brand_scheme_merged` | v2.3 shape (`tokens.accent`, `cards.radius_px`), merge (legacy `brand`→`primary`, v1 `heading`→`text`), validation |
+| `get_display_settings_fast` / `get_display_settings_batch` | Member bootstrap: **`primary_color`**, **`secondary_color`**, card/button radius **strings** derived from `fn_brand_scheme_merged` (not stored columns) |
 | `fn_shopify_landing_page_theme_layout` | Slim landing `theme` JSON (padding + import meta) |
 | `fn_resolve_widget_merchant_display` | Points/tiers/earn + raw merged `scheme` (no `scheme_resolved`) |
 
@@ -265,32 +267,36 @@ Only `group_*` keys are scanned by enrichment/validation. Other top-level keys a
 
 #### Brand scheme and colours
 
-Rocket keeps a **small stored schema** aligned with Shopify Horizon's per-scheme roles. Horizon themes expose many roles per colour scheme (`heading`, borders, shadows, hover states, secondary button fill, …); v2.1 **persists only the rows below**. The import parser may read extra roles to build previews, but `admin_upsert_shopify_brand_scheme` saves mapped fields only. Everything else is derived at render (see Rules › On-site colour ladder).
+Rocket keeps a **small stored schema** aligned with Shopify Horizon's per-scheme roles. Horizon themes expose many roles per colour scheme (`heading`, borders, shadows, hover states, secondary button fill, …); v2.3 **persists only the rows below**. The import parser may read extra roles to build previews, but `admin_upsert_brand_scheme` saves mapped fields only. Everything else is derived at render (see Rules › On-site colour ladder).
 
-**Stored shape (`shopify_brand_scheme` v2.1)**
+**Stored shape (`brand_scheme` v2.3)**
 
 | Field | Meaning |
 | --- | --- |
 | `source` | `kind: custom \| theme` plus `theme_id`, `theme_name`, `scheme_model`, `scheme_id`, `dark_scheme_id`, `imported_at`, `detached_at` when linked to a Shopify theme |
-| `tokens.primary` | Accent colour (synced to `merchant_display_settings.primary_color` on upsert) |
+| `tokens.primary` | Brand accent (launcher, widget header default, links, icon tints, primary-button fallback) |
+| `tokens.accent` | Secondary accent (member app `secondary_color`, UI accents); default `#666666` when unset |
 | `tokens.background` | Light surface for **landing** sections (default swatch); stored for import fidelity, not widget panel chrome |
 | `tokens.dark_surface` | Dark section surface token (not a Horizon role on the chosen scheme) |
 | `tokens.text` | Body text colour (Horizon `foreground`) |
 | `buttons.primary.bg` / `.text` | Primary button fill and label; `null` fill = derived from `tokens.primary` at render |
 | `buttons.secondary.text` | Secondary button label |
-| `buttons.radius_px` | Corner radius (from theme `buttons_radius`) |
+| `buttons.radius_px` | Button corner radius (theme `buttons_radius`) |
+| `cards.radius_px` | Landing/card tile corner radius (theme `card_corner_radius` on import); independent from buttons on Shopify merchants |
 
-**Horizon and Dawn-family import mapping** (v2.1 stored fields; legacy v2.0 `tokens.brand` merges to `tokens.primary` on read)
+**Horizon and Dawn-family import mapping** (v2.3 stored fields; legacy versions merge on read)
 
 | Ours | Horizon scheme role | Dawn-family fallback | Transformation | Description |
 | --- | --- | --- | --- | --- |
 | `tokens.background` | `background` | `background` | none | Default light landing section surface (`surface.swatch = background`); widget drawer uses fixed neutrals at render. |
 | `tokens.text` | `foreground` | `text` (or `foreground` on palette) | none | Body copy colour; base for Auto text on landing sections. |
-| `tokens.primary` | `primary` | `button` (primary button fill) | none on Horizon; Dawn: if no `primary` role, use button fill, else palette `extra`, else text — **field presence only**, no colour scoring | Brand accent: launcher, widget header default, links, icon tints, primary-button fill when `buttons.primary.bg` is null; synced to `primary_color`. |
+| `tokens.primary` | `primary` | `button` (primary button fill) | none on Horizon; Dawn: if no `primary` role, use button fill, else palette `extra`, else text — **field presence only**, no colour scoring | Brand accent: launcher, widget header default, links, icon tints, primary-button fill when `buttons.primary.bg` is null. |
+| `tokens.accent` | — | — | default `#666666` when null | Member secondary colour and complementary accents. |
 | `buttons.primary.bg` | `primary_button_background` | `button` | none; `null` after import when stored as derived `#1C1C1C` sentinel | Primary CTA fill on landing sections; storefront falls back to `tokens.primary` when null. |
 | `buttons.primary.text` | `primary_button_text` | `button_label` | none | Label on primary buttons (“Text on primary” in onboarding). |
 | `buttons.secondary.text` | `secondary_button_text` | `secondary_button_label` | none | Label on secondary/outline buttons (fill/border derived at render). |
-| `buttons.radius_px` | `buttons_radius` (theme-level setting) | same | none | Shared corner radius for Rocket buttons and landing cards (spaced tiles and the outer edge of a collapsed card grid). Hero content-card radius stays on the section. |
+| `buttons.radius_px` | `buttons_radius` (theme-level setting) | same | none | Button corner radius on landing CTAs and widget buttons. |
+| `cards.radius_px` | `card_corner_radius` (theme-level setting) | same | none | Landing card tiles and outer collapsed grid radius (`--rl-card-radius`). |
 | `tokens.dark_surface` | — (no named role on the chosen scheme) | — | **derived** — background of the darkest colour scheme in the theme (`color_scheme_group`), or darkest `color1`–`color5` slot (`color_palette`) | Dark landing section swatch (`surface.swatch = dark_surface`); not the merchant’s primary accent. |
 
 Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secondary fill/hover, …) feed import previews only; storefront derivation uses stored tokens + the shared ladder in `widget-builder`.
@@ -300,7 +306,7 @@ Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secon
 1. **Fetch** — Embedded Shopify session; Admin GraphQL loads the shop **MAIN** theme `config/settings_schema.json` + `config/settings_data.json` (`loyalty-admin` `theme-import/fetch-main-theme-shared.ts`).
 2. **Detect model** — `color_scheme_group` + `color_schemes` (Horizon and modern OS 2.0) vs legacy `color_palette` (Dawn family). Unsupported → import modal error.
 3. **Pick scheme** — Import UI lists each scheme with **primary** swatch + hex first, then background and primary-button swatches. Merchant chooses the light scheme; parser auto-picks the **darkest** scheme by background luminance for `dark_surface` (overridable in full brand modal).
-4. **Apply** — `parseThemeImport` → `themeImportApplyToBrandScheme` (field copy; `tokens.primary` ← Horizon `primary` or Dawn fallback chain above) → `admin_upsert_shopify_brand_scheme`. `source.kind = theme` until merchant detaches in the brand scheme modal.
+4. **Apply** — `parseThemeImport` → `themeImportApplyToBrandScheme` (field copy; `tokens.primary` ← Horizon `primary` or Dawn fallback chain; **`cards.radius_px`** ← `card_corner_radius`, **`buttons.radius_px`** ← `buttons_radius`) → `admin_upsert_brand_scheme`. `source.kind = theme` until merchant detaches in the brand scheme modal.
 5. **Onboarding** — Step 4 auto-opens import; after apply shows **Primary** (editable), **Background**, **Text**, **Primary button** (read-only; “Primary (default)” when fill is derived), and **Text on primary** toggle (`buttons.primary.text`). Full edit: brand scheme modal from landing or widget editors.
 6. **Landing shell meta** — Import ids copy into `merchant_shopify_landing_page_settings.config.theme.import` (padding + provenance only; not a second palette).
 
@@ -308,7 +314,7 @@ Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secon
 
 | Touchpoint | Config source | Colour behaviour |
 | --- | --- | --- |
-| **Widget panel** | `api_get_widget_settings_cached` → `brand_scheme` + `resolved.primary_color` | Fixed chrome: gray page (`#F5F5F6`), white cards, fixed body/muted text (Figma widget homepage). **Scheme:** launcher, hero solid/gradient (`tokens.primary`, gradient toward white), links, accents, progress fill, primary/secondary buttons from stored `buttons.*`; header hex not in widget JSON (v1.1.0). Earn-channel views use the same token bundle. |
+| **Widget panel** | `/v1/widget-settings` (`api_get_widget_settings`) → `brand_scheme` + `resolved.primary_color` | Fixed chrome: gray page (`#F5F5F6`), white cards, fixed body/muted text (Figma widget homepage). **Scheme:** launcher, hero solid/gradient (`tokens.primary`, gradient toward white), links, accents, progress fill, primary/secondary buttons from stored `buttons.*`; header hex not in widget JSON (v1.1.0). Earn-channel views use the same token bundle. |
 | **Landing page (global)** | `api_get_shopify_landing_page_cached` → top-level `brand_scheme`, slim `theme` (`section_padding_px`, import meta) | Page shell does not override tokens; enrichment does **not** attach per-section `style_tokens`. |
 | **Landing sections** | `display_settings` rows (`page = shopify_loyalty_landing`) | Per-section overrides below; `resolveSectionTokens` in `widget-builder` merges section config + `brand_scheme`. |
 | **Loyalty Hub / account UI extensions** | Hub composer + `shopify_hub` image slots | Programme cards use CRM layout; merchant images only in widget settings — not landing section colours. |
@@ -335,7 +341,7 @@ Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secon
 | --- | --- | --- |
 | UI extensions | Shopify session token | `shopify-extension-api` |
 | Theme / app proxy | HMAC + customer id + cookies | `shopify-proxy` |
-| Product points block | None | `api_get_widget_settings_cached` |
+| Product points block | None | `/v1/widget-settings` (`api_get_widget_settings`) |
 
 **`shopify-extension-api` routes (representative)**
 
@@ -367,7 +373,7 @@ Horizon roles **not** stored in v2.1 (heading, border, shadow, link hover, secon
 
 | Concern | Store |
 | --- | --- |
-| Brand scheme v2, points name, symbol | `merchant_display_settings` (`shopify_brand_scheme`, `primary_color`) |
+| Brand scheme v2.3, logo, points name, symbol | `merchant_display_settings` (`brand_scheme`, `logo`) |
 | Hub hero / redeem modal / product fallback images | `merchant_widget_settings` (`shopify_hub`) |
 | Landing layout, SEO | `merchant_shopify_landing_page_settings` |
 | Landing section order/content | `display_settings` where `page = shopify_loyalty_landing` |
