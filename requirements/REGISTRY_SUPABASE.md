@@ -1343,6 +1343,8 @@ F: bulk_upload_promo_codes_validated(p_codes text[], p_source_id uuid, p_merchan
 F: check_reward_eligibility_enhanced(p_user_id uuid, p_reward_id uuid) -> boolean
 F: cleanup_old_promo_code_imports() -> void
 F: custom_ausiris_demo_seed_promo_codes() -> jsonb
+F: custom_rocket_demo_merchant_id() -> uuid
+F: custom_rocket_demo_seed_promo_codes() -> jsonb
 F: fn_campaign_reward_slot_attach(p_slot jsonb, p_reward_id uuid) -> jsonb
 F: fn_campaign_reward_slot_detach(p_slot jsonb, p_reward_id uuid) -> jsonb
 F: fn_check_reward_group_limits(p_user_id uuid, p_reward_id uuid, p_quantity integer, p_merchant_id uuid) -> jsonb
