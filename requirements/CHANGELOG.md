@@ -1,5 +1,7 @@
 ## 2026-09-24
 
+- **Rocket Demo promo pools** — Added idempotent `custom_rocket_demo_seed_promo_codes()` (370 codes across five partner cash-coupon rewards; 201 linked to real member redemptions with used / claimed-unused / expired mix). Migration `20260924130000_rocket_demo_seed_promo_codes.sql` (live; seed executed once).
+
 - **Earn rules simplification** — Removed merchant **Dimensions** / dimensional mode (`__earn_rate_dimensions:` markers) for Basic merchants; admin tabs are **Basic earn config** (+ **Earn Studio** when `not_basic`) or **Advanced earn** + **Points settings** when `advanced_earn_enabled`. Data cleanup migration for five live merchants + safe marker drops (Rocket Demo, Dr.PONG, Prakaivanich). `bff_search_earn_rule_entities` allows empty query (browse on focus) and `p_offset`. loyalty-admin Advanced earn row saves route through `bff_upsert_earn_factor_group` / `admin_delete_earn_factor`. Migrations `20260924120000_earn_dimensions_cleanup_five_merchants.sql`, `20260924120100_earn_rule_entity_search_empty_query.sql` (live).
 
 ## 2026-09-22 — Earn rules lazy-load (EARNRULE-0030)
