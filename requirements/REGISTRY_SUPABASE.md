@@ -67,6 +67,7 @@ F: bff_upsert_activity_type(p_activity_type_id uuid DEFAULT NULL::uuid, p_code t
 F: bff_upsert_attribution_field(p_field_id uuid DEFAULT NULL::uuid, p_field_key text DEFAULT NULL::text, p_label text DEFAULT NULL::text, p_fi...) -> jsonb
 F: bff_upsert_mkt_campaign(p_campaign_id uuid DEFAULT NULL::uuid, p_name text DEFAULT NULL::text, p_description text DEFAULT NULL::text, ...) -> jsonb
 F: bff_upsert_mkt_config(p_attribution_model text DEFAULT NULL::text, p_attribution_lookback_days integer DEFAULT NULL::integer) -> jsonb
+F: fn_log_admin_action(p_action text, p_entity_type text, p_entity_id uuid, p_payload jsonb DEFAULT '{}'::jsonb, p_before jsonb DEFAULT NULL, p_after jsonb DEFAULT NULL, p_related jsonb DEFAULT '{}'::jsonb, p_reason text DEFAULT NULL, p_source text DEFAULT NULL, p_verified_actor_admin_id uuid DEFAULT NULL) -> void
 F: fn_log_user_activity(p_merchant_id uuid, p_user_id uuid, p_activity_code text, p_occurred_at timestamp with time zone DEFAULT now()...) -> jsonb
 F: fn_mkt_compute_purchase_attribution() -> jsonb
 X: activity_field_def -> set_updated_at (BEFORE UPDATE)
@@ -79,6 +80,7 @@ X: mkt_config -> set_updated_at (BEFORE UPDATE)
 ## Admin Panel
 
 T: admin_analytics_menu
+T: admin_audit_log
 T: admin_menu_config
 T: admin_role_permissions
 T: admin_roles
@@ -275,6 +277,7 @@ F: bff_admin_delete_user_asset(p_user_id uuid, p_asset_id uuid) -> jsonb
 F: bff_admin_get_asset(p_asset_id uuid) -> jsonb
 F: bff_admin_get_user_asset_groups(p_user_id uuid) -> jsonb
 F: bff_admin_get_user_assets(p_user_id uuid, p_asset_type_code text DEFAULT 'CAR'::text) -> jsonb
+F: bff_admin_list_audit_log(p_filters jsonb DEFAULT '{}'::jsonb, p_limit integer DEFAULT 50, p_cursor timestamp with time zone DEFAULT NULL) -> jsonb
 F: bff_admin_list_assets(p_asset_type_code text DEFAULT 'CAR'::text, p_status_filter text DEFAULT 'all'::text, p_search text DEFAULT NU...) -> jsonb
 F: bff_admin_set_user_asset_status(p_user_id uuid, p_asset_id uuid, p_status text) -> jsonb
 F: bff_admin_sync_assets(p_asset_ids uuid[]) -> jsonb
@@ -601,7 +604,7 @@ F: bff_get_earn_factor_group_details(p_mode text DEFAULT 'edit'::text, p_earn_fa
 F: bff_get_earn_rule_rates_details() -> jsonb
 F: bff_get_earn_factors_by_group(p_earn_factor_group_id uuid) -> jsonb
 F: bff_list_uncovered_stores(p_query text DEFAULT NULL::text, p_limit integer DEFAULT 10, p_offset integer DEFAULT 0) -> jsonb
-F: bff_search_earn_rule_entities(p_kind text, p_query text DEFAULT NULL::text, p_ids uuid[] DEFAULT NULL::uuid[], p_attribute_ids uuid[] DEFAULT NULL::uuid[], p_include_inactive boolean DEFAULT false, p_limit integer DEFAULT 20) -> TABLE(id uuid, code text, label text, sublabel text, active boolean, meta jsonb)
+F: bff_search_earn_rule_entities(p_kind text, p_query text DEFAULT NULL::text, p_ids uuid[] DEFAULT NULL::uuid[], p_attribute_ids uuid[] DEFAULT NULL::uuid[], p_include_inactive boolean DEFAULT false, p_limit integer DEFAULT 20, p_offset integer DEFAULT 0) -> TABLE(id uuid, code text, label text, sublabel text, active boolean, meta jsonb)
 F: bff_get_expiry_reminder_settings() -> jsonb
 F: bff_get_points_expiry_schedule() -> jsonb
 F: bff_list_ticket_types() -> jsonb
@@ -2231,6 +2234,7 @@ F: fn_is_disposable_email(p_email text) -> boolean
 F: fn_is_event_import_label_header_row(p_key_row text[], p_candidate_row text[]) -> boolean
 F: fn_is_member_code_unique_violation(p_constraint_name text) -> boolean
 F: fn_is_valid_thai_national_id(p_number text) -> boolean
+F: fn_jsonb_diff(p_before jsonb, p_after jsonb, p_ignore_keys text[] DEFAULT ARRAY['updated_at'::text, 'created_at'::text]) -> jsonb
 F: fn_jsonb_deep_merge_landing(p_base jsonb, p_patch jsonb) -> jsonb
 F: fn_jsonb_to_text_array(p_json jsonb) -> text[]
 F: fn_jsonb_to_uuid_array(p_json jsonb) -> uuid[]

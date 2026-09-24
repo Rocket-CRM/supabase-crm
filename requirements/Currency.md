@@ -103,12 +103,13 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 | Award delay fields on merchant | When Inngest schedules **currency/award** after source event |
 | Simple vs Advanced (Shopify) | Which embedded editor loads; does not change engine semantics |
 
-1. Open **Earn rules** — hub shows Basic, Studio, lifecycle, and channel shortcuts; standalone admin defaults to full Studio when not Simple-eligible.
-2. Configure **Basic** earn rate and multipliers (or **Studio** for multi-group, personas, thresholds, fixed grants, time conditions).
-3. Set **points expiry** and **award timing** on merchant currency settings (same hub area / linked settings).
-4. Define **ticket types** (names, credit vs raffle, Shopify store credit flag) before ticket earn factors.
-5. Save — upsert BFFs rewrite factor groups/factors/conditions for that editor scope.
-6. On **Customer 360**, inspect **wallet history** and **lots** (expiry dates, deductible balance, reversals).
+1. Open **Earn rules** — two merchant modes: **Basic** (single earn config tab: rate per tier or flat, bonus multipliers, expiry, award timing, lifecycle) or **Advanced Earn** (platform flag + column config; merchant edits rows on **Advanced earn**, **Points settings** for delay/expiry/lifecycle only; Earn Studio hidden).
+2. **Basic** merchants use the earn card on **Basic earn config**; **not_basic** merchants see **Earn Studio** instead of the simple card. There is no merchant **Dimensions** or **Rates** tab in Basic mode.
+3. Configure earn rate and multipliers on Basic, or **Studio** / **Advanced earn** for multi-group, personas, store columns, thresholds, and time conditions.
+4. Set **points expiry** and **award timing** on merchant currency settings (same hub area / linked settings).
+5. Define **ticket types** (names, credit vs raffle, Shopify store credit flag) before ticket earn factors.
+6. Save — upsert BFFs rewrite factor groups/factors/conditions for that editor scope.
+7. On **Customer 360**, inspect **wallet history** and **lots** (expiry dates, deductible balance, reversals).
 
 Common pitfalls: shared condition group edits affecting multiple factors; two rates on same currency silently collapsing to best rate; enabling expiry without valid mode fields blocks earns; mixing Simple UI after Advanced save sticks on Advanced (`ui_mode`).
 
