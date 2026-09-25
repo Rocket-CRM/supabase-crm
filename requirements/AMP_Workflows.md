@@ -2,7 +2,7 @@
 
 Rule-based marketing automation: saved audiences, visual workflow graphs, simplified lifecycle automations, and the execution/analytics contracts that tie them to Inngest.
 
-Owner surfaces: loyalty-admin (Audience Builder, Workflow List, Lifecycle Automations), loyalty-user (engagement beacon on member-app links), Render/Inngest (`inngest-amp-serve`, event routers), Supabase Edge (`amp-dispatch-realtime-event`, `amp-dispatch-workflow-batch`, `dispatch-workflow-trigger`, `link-redirect`, `engagement-beacon`)
+Owner surfaces: loyalty-admin (Audience Builder, **Targeted broadcast**, Workflow List, Lifecycle Automations), loyalty-user (engagement beacon on member-app links), Render/Inngest (`inngest-amp-serve`, event routers), Supabase Edge (`amp-dispatch-realtime-event`, `amp-dispatch-workflow-batch`, `dispatch-workflow-trigger`, `link-redirect`, `engagement-beacon`), messaging-service (LINE push / broadcast / multicast)
 
 ## Concept
 
@@ -45,26 +45,59 @@ Graph orchestration, node handlers, cache layer, and historical pipeline notes: 
 | Type | Membership source | Realtime triggers | Ongoing sync |
 | --- | --- | --- | --- |
 | `dynamic` | Condition SQL + backfill | On (when active) | Hourly `fn_amp_reconcile_dynamic_audiences` resnapshot |
-| `static` | Snapshot at activate + `bff_refresh_audience` | Off | Manual refresh only |
+| `static` | Snapshot at activate + `bff_refresh_audience` | Off | `refresh_schedule`: `manual` (default) or `daily` at `refresh_time` (merchant local) |
 | `imported` | `bff_import_audience_members` (CSV) | Off | Import only; conditions ignored |
 
-`bff_refresh_audience` / `fn_amp_resnapshot_audience` — For an **active** audience of any type: compile current conditions, soft-exit non-matches, insert new matches, recount `member_count`. Direct adds from resnapshot bypass enrollment logging; a later batch run may re-dispatch those users; `fn_add_to_audience` dedupe makes that harmless.
+`bff_refresh_audience` / `fn_amp_resnapshot_audience` — For an **active** audience of any type: compile current conditions, soft-exit non-matches, insert new matches, recount `member_count`, set `last_refreshed_at`. Direct adds from resnapshot bypass enrollment logging; a later batch run may re-dispatch those users; `fn_add_to_audience` dedupe makes that harmless. Whether resnapshot inserts start campaign workflows whose trigger is `audience_entered` is unverified.
+
+### Scheduled static refresh
+
+- `amp_audience_master`: `refresh_schedule` (`manual` | `daily`), `refresh_time`, `next_refresh_at`, `last_refreshed_at`. Set via `bff_create_audience` / `bff_update_audience` (`p_refresh_schedule`, `p_refresh_time`); `next_refresh_at` computed on save/activate, cleared on deactivate.
+- pg_cron `amp_run_due_audience_refreshes` (`*/5 * * * *`) → `fn_amp_run_due_audience_refreshes()`: active daily static audiences with `next_refresh_at <= now()` (`SKIP LOCKED`) → `fn_amp_resnapshot_audience` → advance `next_refresh_at`. Timezone: `merchant_display_settings.ui_config->>'timezone'`, else `Asia/Bangkok`.
+- Targeted broadcast to a static audience resnapshots first when `amp_broadcast_master.refresh_before_send` is true (default).
 
 ### Dynamic reconciliation
 
 - pg_cron `amp-reconcile-dynamic-audiences` (`20 * * * *`) runs `fn_amp_reconcile_dynamic_audiences()` for each active dynamic audience → `fn_amp_resnapshot_audience`.
 - Emits `workflow_log` event `audience_reconciled` per audience with `entered`, `exited`, `member_count`.
 
+### Entry types
+
+| `entry_type` | Dispatch |
+| --- | --- |
+| `audience` | Member runs from audience membership (synthetic membership group when `groups` empty). |
+| `condition` | Member runs for users matching entry condition groups. |
+| `all_line_friends` | One LINE **broadcast** run (`run_scope = broadcast`). |
+| `line_option_selected` | Realtime enrollment on LINE postback (no batch). |
+| `past_line_interaction` | One **push** run per matching LINE user (`run_scope = line`). |
+| `all_line_friends_exclude_members` | On activate or **schedule**: page LINE follower IDs (messaging-service), drop friends linked on `user_accounts.line_id`, one **push** per remaining friend (`run_scope = line`). When `allow_re_enrollment` is off, friends who already have `execution_started` for this workflow (matched by `line_user_id`) are skipped before fan-out. Requires verified/premium LINE OA; members without linked LINE are not excluded. |
+
+### Targeted broadcast (one-shot LINE send)
+
+**Targeted broadcast** is a separate admin surface (`/targeted-broadcast`) for a **single identical LINE message** to an audience — not a workflow journey. Use workflows when waits, branches, or per-recipient follow-up matter.
+
+| Audience | Delivery |
+| --- | --- |
+| Segment (`audience`) | Active `amp_audience_member` with linked `line_id` and `channel_line` not false → LINE **multicast** in chunks of 500 |
+| All LINE friends | One LINE **broadcast** API call |
+| LINE friends (non-members) | Follower list minus linked members → **multicast** in chunks of 500 |
+
+Rules: no merge fields, no per-recipient tracked links. Member-app links carry `?bc=<broadcast_id>`; logged-in members report page engagement via `engagement-beacon` → `amp_engagement_event.broadcast_id`. Content Library postback buttons are signed with broadcast context (`b=`); taps record `fn_amp_record_broadcast_postback` and can enroll **When LINE option selected** workflows. Frozen recipient batches in `amp_broadcast_batch`; send orchestration via Inngest `amp/broadcast.send` (`inngest-amp-serve`). Scheduled sends: `fn_amp_run_due_broadcasts` (pg_cron `amp_run_due_broadcasts`, every minute).
+
+After send: admin **Refresh LINE stats** (`bff_amp_refresh_broadcast_line_stats` → messaging-service insight APIs; broadcast mode uses stored `line_request_id`, multicast uses custom aggregation unit = broadcast id). **Create segment from clickers** → static audience via `bff_amp_create_audience_from_broadcast_clickers`.
+
+Admin BFFs: `bff_list/get/upsert_amp_broadcast`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers`.
+
 ### Batch and scheduled dispatch
 
 - `bff_amp_batch_run` → `fn_amp_find_matching_users` → `workflow_log` `batch_run_requested` → `fn_amp_dispatch_batch_chunks` (default 500 users per `pg_net` POST) → `amp-dispatch-workflow-batch` → per-user Inngest triggers.
-- `fn_amp_run_due_scheduled_workflows` (pg_cron `amp_run_due_scheduled_workflows`, every minute) uses the same matcher and chunk helper; `scheduled_run_dispatched` logs carry `batch_count` and `pg_net_request_ids`.
+- `fn_amp_run_due_scheduled_workflows` (pg_cron `amp_run_due_scheduled_workflows`, every minute) uses the member matcher and chunk helper for most entry types; **`all_line_friends`** and **`all_line_friends_exclude_members`** dispatch like manual batch run (broadcast run vs follower seed). `scheduled_run_dispatched` logs carry `batch_count` and `pg_net_request_ids` where applicable.
 - `amp-dispatch-workflow-batch` only validates workflow + emits events; it does not execute nodes.
 
 ### Condition evaluation (shared semantics)
 
 - Batch matcher `fn_amp_find_matching_users` evaluates **all** groups on the first condition node; `groups_operator` `and`/`all` → INTERSECT, `or`/`any` → UNION (default AND).
-- Per-user path `fn_evaluate_amp_condition_group` — group combination stays in the caller (Inngest).
+- Per-user path `fn_evaluate_amp_condition_group` — group combination stays in the caller (Inngest). **Conditional Split** nodes use the same SQL evaluator (no client-side filter subset).
 - **Zero-row aggregates never match** in either path.
 - `fn_amp_assert_collection` whitelists all 13 metadata collections plus pseudo-collection `amp_audience_member` (`is_member_of` / `is_not_member_of`).
 - Audience entry: `fn_amp_resolve_entry_groups` synthesizes membership group when `entry_type = audience` and `groups` empty.
@@ -92,9 +125,10 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Surface | Repo | Primary RPCs / APIs |
 | --- | --- | --- |
 | Audience Builder | loyalty-admin | `bff_*_audience*`, `bff_get_workflow_collections`, `bff_amp_preview_condition`, `bff_import_audience_members` |
+| Targeted broadcast | loyalty-admin | `bff_*_amp_broadcast*`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers` |
 | Workflow List | loyalty-admin | `bff_get_amp_workflow_full`, `bff_upsert_amp_workflow_with_graph`, `bff_amp_batch_run`, `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_amp_analytics_workflow` |
 | Lifecycle Automations | loyalty-admin | `bff_list/get/upsert/delete_lifecycle_automation`, `bff_get_lifecycle_action_options` |
-| Member app (engagement) | loyalty-user | `engagement-beacon` edge (after `link-redirect` click with `rct` token) |
+| Member app (engagement) | loyalty-user | `engagement-beacon` edge (`rct` from tracked links; `bc` + member JWT for broadcast attribution) |
 
 ### Admin journey
 
@@ -138,6 +172,8 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | `amp_audience_member` | Membership rows: `entered_at`, `exited_at`, `source_workflow_id` |
 | `amp_tracked_link` | Per-recipient wrapped URL tokens |
 | `amp_engagement_event` | Click and page engagement events |
+| `amp_broadcast_master` | Targeted broadcast definition: audience type, `message_config`, status, counts, schedule |
+| `amp_broadcast_batch` | Frozen LINE send units (≤500 `line_user_ids` per row, or empty for broadcast mode) |
 | `inngest_workflow_log` | Auxiliary Inngest run metadata (separate from `workflow_log`) |
 
 Indexes on `workflow_log` include `(workflow_id, node_id, event_type)` and `(workflow_id, event_type)` for analytics queries.
@@ -148,7 +184,9 @@ Indexes on `workflow_log` include `(workflow_id, node_id, event_type)` and `(wor
 
 **Workflow graph BFFs** — `bff_get_amp_workflow_full`, `bff_upsert_amp_workflow_with_graph`, `bff_duplicate_amp_workflow`, `bff_get_workflow_collections` (+ v2/v3/v4 extension helpers), `bff_amp_preview_condition`.
 
-**Run and match** — `bff_amp_batch_run`, `fn_amp_find_matching_users`, `fn_amp_compile_workflow_match_sql`, `fn_amp_compile_condition_group`, `fn_amp_compile_audience_membership`, `fn_amp_eval_audience_membership`, `fn_amp_resolve_entry_groups`, `fn_amp_reconcile_dynamic_audiences`, `fn_amp_resnapshot_audience`, `fn_amp_run_due_scheduled_workflows`, `fn_amp_dispatch_batch_chunks`, `fn_amp_user_already_enrolled`, `fn_add_to_audience`.
+**Run and match** — `bff_amp_batch_run`, `fn_amp_find_matching_users`, `fn_amp_compile_workflow_match_sql`, `fn_amp_compile_condition_group`, `fn_amp_compile_audience_membership`, `fn_amp_eval_audience_membership`, `fn_amp_resolve_entry_groups`, `fn_amp_reconcile_dynamic_audiences`, `fn_amp_resnapshot_audience`, `fn_amp_run_due_scheduled_workflows`, `fn_amp_dispatch_batch_chunks`, `fn_amp_user_already_enrolled`, `fn_amp_filter_enrolled_line_ids`, `fn_amp_segment_broadcast_line_ids`, `fn_add_to_audience`.
+
+**Targeted broadcast** — `bff_list/get/upsert_amp_broadcast`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers`, `fn_amp_run_due_broadcasts`, `fn_amp_record_broadcast_beacon`, `fn_amp_record_broadcast_postback`.
 
 **Analytics** — `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_get_amp_node_link_stats`, `bff_amp_analytics_workflow`, `bff_amp_analytics_overview`, `bff_amp_analytics_user_timeline`, `bff_get_resource_content_engagement`.
 
@@ -179,13 +217,16 @@ Domain write → chokepoint_event_outbox → OutboxPublisher → inngest-event-r
 
 **Scheduled cron** — `amp_run_due_scheduled_workflows` (`* * * * *`) → `fn_amp_run_due_scheduled_workflows()`.
 
+**Targeted broadcast cron** — `amp_run_due_broadcasts` (`* * * * *`) → `fn_amp_run_due_broadcasts()`.
+
 **Dynamic audience cron** — `amp-reconcile-dynamic-audiences` (`20 * * * *`) → `fn_amp_reconcile_dynamic_audiences()`.
 
 ### External services
 
 | Service | Role |
 | --- | --- |
-| `inngest-amp-serve` | Durable workflow executor (node handlers, enroll gate, engagement condition delegation) |
+| `inngest-amp-serve` | Durable workflow executor; `amp/broadcast.send` for targeted broadcast |
+| messaging-service | LINE push, broadcast, multicast; `GET /line/quota`, `GET /line/insight/delivery`, `GET /line/insight/aggregation`, `POST /line/followers` |
 | `inngest-event-router-serve` | Routes domain events to AMP dispatch |
 | Edge `amp-dispatch-realtime-event` | Realtime fan-in to trigger matching |
 | Edge `amp-dispatch-workflow-batch` | Batch fan-out to Inngest |
