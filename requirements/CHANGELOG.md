@@ -1,3 +1,7 @@
+## 2026-09-25
+
+- **Mission (repeat model)** — Mission types are Standard / Milestone only (Single/Recurring retired; 8 rows → standard). Admin **Completion frequency** replaced by **Progress loops per bill** (standard + one sum condition only); progress limits are the only "how many times" control (60 Once missions migrated to loop on + 1 per member, all time; new missions default to it). `fn_validate_mission_upsert` adds `MISSION_TYPE_RETIRED` / `LOOP_REQUIRED` / `MAX_LOOPS_SHAPE`; `fn_update_mission_progress` keeps the bar full once an all-time limit is used up (`fn_mission_all_time_limit_reached`). Admin mission settings reordered with one **Progress and claims** section. Migrations `mission_keep_full_bar_when_all_time_limit_reached`, `mission_retire_single_recurring_and_once_to_progress_limit`, `mission_save_rules_loops_per_bill_and_retired_types` (live). See `requirements/Mission.md` §Concept, §Rules.
+
 ## 2026-09-24
 
 - **Earn channels (member cache)** — `bff_get_earn_channels` no longer reads/writes legacy SQL Upstash; member reads cache only via loyalty-cache-api Redis + Vercel Data Cache, with purge on `earn_channel` DML through `trg_cache_purge_earn_channel`. Migration `20260924223000_bff_get_earn_channels_plain_sql.sql` (live). See `requirements/Earn_Channel.md` §System > Flows.
