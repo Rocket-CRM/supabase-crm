@@ -1,3 +1,7 @@
+## 2026-09-26
+
+- **Mission (AMP drafts + lifetime guard)** — `fn_amp_analysis_create_mission_draft` now matches admin defaults for standard missions (loop on, 1 per member all time progress limit, per-bill cap 1 when there is a single sum condition). Removed the legacy once-per-member block in `fn_update_mission_progress` that treated `allow_progress_loop = false` as “complete at most once ever.” Migration `20260926123000_amp_mission_draft_defaults_and_drop_lifetime_block.sql` (live). See `requirements/Mission.md` §Rules.
+
 ## 2026-09-25
 
 - **Mission (repeat model)** — Mission types are Standard / Milestone only (Single/Recurring retired; 8 rows → standard). Admin **Completion frequency** replaced by **Progress loops per bill** (standard + one sum condition only); progress limits are the only "how many times" control (60 Once missions migrated to loop on + 1 per member, all time; new missions default to it). `fn_validate_mission_upsert` adds `MISSION_TYPE_RETIRED` / `LOOP_REQUIRED` / `MAX_LOOPS_SHAPE`; `fn_update_mission_progress` keeps the bar full once an all-time limit is used up (`fn_mission_all_time_limit_reached`). Admin mission settings reordered with one **Progress and claims** section. Migrations `mission_keep_full_bar_when_all_time_limit_reached`, `mission_retire_single_recurring_and_once_to_progress_limit`, `mission_save_rules_loops_per_bill_and_retired_types` (live). See `requirements/Mission.md` §Concept, §Rules.
