@@ -20,7 +20,14 @@ A **mission** is a merchant campaign with a type, schedule, eligibility, progres
 
 **Claim** — **Auto** missions grant outcomes when completion is detected. **Manual** missions increment unclaimed completions; the member must **claim** to run outcome dispatch (supports quantity and milestone level on claim).
 
-**Reset** — Optional calendar or per-member period reset (`daily`, `weekly`, `monthly`) clears progress for another lap; milestone missions cannot use progress reset frequency. **Loop** missions allow multiple completions per period when enabled.
+**Reset** — Optional calendar or per-member period reset (`daily`, `weekly`, `monthly`) clears the progress bar for another lap. Reset never changes how many completions a member has left. Milestone missions cannot use reset.
+
+**Repeat** — Every standard mission can be completed again. Three independent settings shape repetition:
+- **Progress loops per bill** — how many completions one purchase can trigger (standard missions with one sum condition only).
+- **Progress limits** — how many times a member, or the whole campaign, can complete per day / week / month / year / all time. This is the only "how many times" control; new missions default to 1 per member, all time.
+- **Reset** — when the bar clears.
+
+The former **Single** and **Recurring** mission types are retired: standard + reset + progress limit covers both.
 
 **Exclusivity groups** — Optional text groups on progress or claim: only one mission in a group may advance or be claimed at a time; others surface a locked state.
 
@@ -41,7 +48,12 @@ Outcomes always flow through the same **central outcome dispatcher** used by che
 - **Measurement:** `count` adds one per qualifying event; `sum` adds the event amount (purchases use final/total amount on header events, line amount on item events). Binary condition types (forms, referrals) use count semantics.
 - **Filters:** product/SKU/category/brand arrays and store attribute set must match when configured; min/max transaction amount enforced on purchase-shaped events; tier filters on conditions restrict which rows apply.
 - **User perspective** on the mission (`customer` vs `seller`) determines whether purchase/seller fields bind to the buyer or seller on evaluation.
-- **Progress reset:** when frequency is set, `fn_batch_reset_global_missions` (global mode, Render crons) or `fn_batch_reset_due_missions` (user-specific / due rows) clears period progress; milestone missions reject reset frequency at validation. **Carry over progress** and **allow progress loop** control whether partial progress survives reset and how many completions per transaction/period are allowed (`max_loops_per_transaction` caps burst loops).
+- **Progress reset:** when frequency is set, `fn_batch_reset_global_missions` (global mode, Render crons) or `fn_batch_reset_due_missions` (user-specific / due rows) clears period progress; milestone missions reject reset frequency at validation. Reset does not restore progress-limit headroom.
+- **Repeat (standard):** standard missions always loop (`allow_progress_loop` = true; a save with it off returns `LOOP_REQUIRED`). After each completion the bar resets for the next lap — unless the member has used up an all-time progress limit, in which case the bar stays full on this and later events.
+- **Progress loops per bill:** `max_loops_per_transaction` caps completions from one event. Allowed only on standard missions with exactly one `sum` condition (otherwise `MAX_LOOPS_SHAPE`); blank = no per-bill cap. Completions = `floor((current + amount) / target)`, capped by the per-bill cap and remaining progress-limit headroom. **Carry over progress** keeps the remainder below target for the next lap (same shape only, `CARRY_OVER_SHAPE`).
+- **Progress limits:** scope `user` (per member) or `total` (campaign-wide), time unit day / week / month / year / all time; checked before every completion. Multiple rows stack; a tighter window may not exceed a wider one (`STACKED_LIMIT_EXCEEDS_WIDER`). Milestone: each completed level counts as one completion.
+- **Retired types:** `single` / `recurring` remain in the enum but saves return `MISSION_TYPE_RETIRED`; all rows were migrated to `standard` (Once-configured missions got a 1 per member, all time progress limit so behaviour did not change).
+- **Legacy fallback:** a non-milestone mission with loop off — only creatable outside admin (see Known gaps) — still completes at most once per member.
 - **Exclusivity:** if another mission in the same progress group already holds progress, new progress is blocked; claim exclusivity blocks claim until the group frees — UI may show `exclusivity_locked` on `button_action`.
 - **Claim limit binding:** a mission may define multiple claim-cap rows. The engine picks one **binding** row (tightest remaining headroom; when headroom ties, per-member `user` scope wins over mission-wide scopes). Member detail and failed claims expose that row’s scope, cap, and time unit so the app can show the correct exhausted copy.
 - **Claim limit copy (member):** mission-wide scopes (`total`, `store`, `user_store`) use “campaign / total” exhausted wording; per-member `user` scope uses “your limit this period” wording. Partial batch claims that would exceed the binding cap return `claim_limit_exceeded` with the same binding fields.
@@ -70,22 +82,26 @@ Outcomes always flow through the same **central outcome dispatcher** used by che
 | Eligible personas / persona groups | Who may see and join |
 | Signup window start/end | New-member eligibility window |
 | Progress reset frequency + reset mode | Global calendar reset vs user period anchor |
-| Carry over progress / allow loop / max loops per transaction | Reset and repeat behaviour |
+| Progress loops per bill + carry over progress | Completions one bill can trigger; remainder kept for next lap (shown only for standard + one sum condition) |
+| Progress limits | How many times a member / the campaign can complete (default 1 per member, all time) |
+| Claim limits | Caps on claims (`mission_limit_claim`) |
 | Progress / claim exclusivity group | Mutual exclusion within group |
 | User perspective | Customer vs seller attribution on purchases |
 | Conditions | Types, targets, measurement, filters, milestone level metadata |
 | Outcomes | Per level or mission-wide grants (full replace on save) |
-| Progress / claim limits | Caps via `mission_limit_progress` / `mission_limit_claim` |
 | Images, goal copy, T&C | Member-facing presentation |
 
+Mission settings page order: Basic info → Conditions → Outcomes → **Progress and claims** (activation, claim type, reset, progress loops per bill, milestone skip; progress and claim limits; exclusivity groups) → Schedule & status → Audience & eligibility → Rich descriptions.
+
 1. Open **Mission list**; create via **Mission settings** or edit an existing row.
-2. Set type, activation, claim mode, schedule, eligibility, and exclusivity fields.
+2. Set basic info and type (standard / milestone).
 3. Add **conditions** (parallel set for standard; ordered levels for milestone) with filters and targets.
 4. Attach **outcomes** per level or once for standard; pick entities for ticket/reward outcomes.
-5. Configure progress/claim limits if caps are required.
-6. Save (`bff_upsert_mission` validates via `fn_validate_mission_upsert`, replaces children).
-7. Toggle active from list when ready; use reports for completion/claim analytics.
-8. On **Front line**, staff open **Claim mission** for a member: join manual missions, claim manual outcomes, print summary; history via admin claim history RPC.
+5. In **Progress and claims**, set activation, claim mode, reset, progress loops per bill, progress/claim limits, and exclusivity groups.
+6. Set schedule and eligibility.
+7. Save (`bff_upsert_mission` validates via `fn_validate_mission_upsert`, replaces children; progress/claim limits are full-replace).
+8. Toggle active from list when ready; use reports for completion/claim analytics.
+9. On **Front line**, staff open **Claim mission** for a member: join manual missions, claim manual outcomes, print summary; history via admin claim history RPC.
 
 Entitlement: admin nav typically requires `campaign` + `campaign.mission` feature flags.
 
@@ -141,7 +157,9 @@ Legacy `current_progress` on `mission_progress` remains for compatibility; autho
 | `bff_claim_mission` / `bff_frontline_claim_mission` | Manual claim (member vs staff) |
 | `fn_mission_access_state` | Central visibility/join/claim gating |
 | `fn_evaluate_mission_conditions` | Map event → increment map |
-| `fn_update_mission_progress` | Apply JSONB updates, waterfall, completion detection |
+| `fn_update_mission_progress` | Apply JSONB updates, waterfall, per-bill loops, completion detection |
+| `fn_check_progress_limits` | Completions left under progress limits; checked before every completion |
+| `fn_mission_all_time_limit_reached` | True when an all-time progress limit is used up; keeps the bar full instead of resetting |
 | `fn_process_mission_outcomes` / `fn_distribute_mission_completion` | Grant on auto-complete or claim |
 | `fn_has_active_missions` / `fn_get_active_missions_by_condition_type` | Router fan-out lookup (replaces Redis mission cache on live path) |
 | `fn_check_mission_exclusivity` | Exclusivity enforcement |
@@ -191,6 +209,9 @@ Purchase / wallet / (other) chokepoint writers
 
 - **Form and referral condition types** — Still defined in admin and evaluation RPCs, but **no chokepoint router** publishes matching events (legacy CDC-only path dead since 2026-06-04). Progress for these types does not advance in production until emitters + router events exist.
 - **Redis mission cache** — Live routers query `fn_has_active_missions` / `fn_get_active_missions_by_condition_type`; Redis pre-filter in `MissionConsumer` applies only if Kafka consumers are re-enabled.
+- **AMP mission drafts** — `fn_amp_analysis_create_mission_draft` inserts standard missions with loop off and no progress limit, so they rely on the legacy once-per-member fallback. Once that path adopts the admin default (loop on + 1 per member, all time), the fallback in `fn_update_mission_progress` can be removed.
+- **Milestone and progress limits** — one event that completes several levels records one completion per level without checking remaining limit headroom mid-burst.
+- **Weekly reset** — weekly reset frequency saves, but scheduled global reset jobs exist only for daily and monthly.
 - **Purchase_Transaction.md** — Older passages describing 30s batch mission evaluation and DB triggers for auto missions are stale relative to chokepoint + Inngest path; treat this doc as authoritative for mission progress timing.
 
 ## Related
