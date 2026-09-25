@@ -86,7 +86,9 @@ Rules: no merge fields, no per-recipient tracked links. Member-app links carry `
 
 After send: admin **Refresh LINE stats** (`bff_amp_refresh_broadcast_line_stats` → messaging-service insight APIs; broadcast mode uses stored `line_request_id`, multicast uses custom aggregation unit = broadcast id). **Create segment from clickers** → static audience via `bff_amp_create_audience_from_broadcast_clickers`.
 
-Admin BFFs: `bff_list/get/upsert_amp_broadcast`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers`.
+**Send log:** once a send starts, the broadcast page shows one row per LINE call (`amp_broadcast_batch`): recipients (blank = all friends), status `pending` / `sent` / `failed`, attempts, sent time, error, LINE request ID. Filter by status; 50 per page via `bff_list_amp_broadcast_batches` (never returns `line_user_ids`). LINE accepts or rejects a whole call, so there is no per-recipient result. `bff_get_amp_broadcast_details` returns only `batch_summary` counts. The audience detail page lists sends to that segment (`bff_list_amp_broadcasts(p_audience_id, p_limit, p_offset)`); a row opens the same send log.
+
+Admin BFFs: `bff_list/get/upsert_amp_broadcast`, `bff_list_amp_broadcast_batches`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers`.
 
 ### Batch and scheduled dispatch
 
@@ -125,7 +127,7 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Surface | Repo | Primary RPCs / APIs |
 | --- | --- | --- |
 | Audience Builder | loyalty-admin | `bff_*_audience*`, `bff_get_workflow_collections`, `bff_amp_preview_condition`, `bff_import_audience_members` |
-| Targeted broadcast | loyalty-admin | `bff_*_amp_broadcast*`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers` |
+| Targeted broadcast | loyalty-admin | `bff_*_amp_broadcast*`, `bff_list_amp_broadcast_batches`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers` |
 | Workflow List | loyalty-admin | `bff_get_amp_workflow_full`, `bff_upsert_amp_workflow_with_graph`, `bff_amp_batch_run`, `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_amp_analytics_workflow` |
 | Lifecycle Automations | loyalty-admin | `bff_list/get/upsert/delete_lifecycle_automation`, `bff_get_lifecycle_action_options` |
 | Member app (engagement) | loyalty-user | `engagement-beacon` edge (`rct` from tracked links; `bc` + member JWT for broadcast attribution) |
@@ -186,7 +188,7 @@ Indexes on `workflow_log` include `(workflow_id, node_id, event_type)` and `(wor
 
 **Run and match** — `bff_amp_batch_run`, `fn_amp_find_matching_users`, `fn_amp_compile_workflow_match_sql`, `fn_amp_compile_condition_group`, `fn_amp_compile_audience_membership`, `fn_amp_eval_audience_membership`, `fn_amp_resolve_entry_groups`, `fn_amp_reconcile_dynamic_audiences`, `fn_amp_resnapshot_audience`, `fn_amp_run_due_scheduled_workflows`, `fn_amp_dispatch_batch_chunks`, `fn_amp_user_already_enrolled`, `fn_amp_filter_enrolled_line_ids`, `fn_amp_segment_broadcast_line_ids`, `fn_add_to_audience`.
 
-**Targeted broadcast** — `bff_list/get/upsert_amp_broadcast`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers`, `fn_amp_run_due_broadcasts`, `fn_amp_record_broadcast_beacon`, `fn_amp_record_broadcast_postback`.
+**Targeted broadcast** — `bff_list/get/upsert_amp_broadcast`, `bff_list_amp_broadcast_batches`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers`, `fn_amp_run_due_broadcasts`, `fn_amp_record_broadcast_beacon`, `fn_amp_record_broadcast_postback`.
 
 **Analytics** — `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_get_amp_node_link_stats`, `bff_amp_analytics_workflow`, `bff_amp_analytics_overview`, `bff_amp_analytics_user_timeline`, `bff_get_resource_content_engagement`.
 
