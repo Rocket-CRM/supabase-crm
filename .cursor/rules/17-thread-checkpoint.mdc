@@ -1,0 +1,52 @@
+---
+description: Thread length discipline. Always-applied because the agent doesn't track its own thread depth, and the top 10% of turns by length drive 60% of total token spend.
+alwaysApply: true
+---
+
+# Thread Checkpoint Discipline
+
+## Why this rule exists
+
+Every assistant turn replays the full conversation history through cache. A 100-turn thread at deep turns costs 5–25M tokens **per turn**. Audit data: post-revamp top 10% of turns burn 60% of all spend, all sitting deep in 100–200-turn threads. The single largest token saving available is to stop letting threads grow.
+
+## Hard checkpoint trigger
+
+When **either** condition is met, the next assistant turn must checkpoint and stop:
+
+- **15 user messages** in the thread, OR
+- **80 assistant tool calls** in the thread (count `tool_use` blocks across all assistant messages)
+
+Soft trigger (recommend a checkpoint but proceed if user explicitly wants to continue): **10 user messages** or **50 tool calls**.
+
+## Checkpoint procedure
+
+The checkpoint turn must do exactly three things, in order:
+
+1. **Write a handoff file** to `.cursor/plans/<task-slug>-checkpoint-<YYYYMMDD>.md` containing:
+   - **Task**: one-sentence summary of what the thread is working on.
+   - **Status**: bullets of decisions made, files changed, what's verified working.
+   - **Open**: bullets of what's left to do — concrete and ordered.
+   - **Next exact step**: the literal first action the next thread should take (e.g. "Read `requirements/architecture/event-chokepoints.md` §Phase 2, then `apply_migration` for the trigger relocation listed in Status bullet 4").
+   - **Critical context the next thread must know**: UUIDs, file paths, function names, decisions that aren't yet in committed code or docs.
+
+2. **Reply with exactly**:
+   > **Thread checkpoint reached** (`<N user turns / M tool calls>`). I've written the handoff to `.cursor/plans/<filename>`. Please start a fresh thread and attach that file as your first message — the new thread will pick up at the next exact step listed there.
+
+3. **Stop.** Do not propose further work in this thread. Do not preemptively start the next step.
+
+## Exemptions
+
+- **User explicitly overrides** ("keep going", "ignore the checkpoint rule for now"). Honor the override but warn once: "Continuing past checkpoint trigger increases per-turn cost roughly proportional to remaining turns."
+- **Single-turn completion**: if the next turn would finish the entire task, do it instead of checkpointing.
+- **Pure read-only Q&A threads** (no Writes, no MCP changes, no StrReplace): the cache replay cost is symmetric; checkpointing is optional but recommended at the 15/80 hard trigger.
+- **Discovery → implementation handoff**: after heavy discovery (>5 tool calls or any `pg_get_functiondef`), recommend a fresh thread before implementation even if turn counts are low — see `20-discovery-discipline.mdc` and `docs/PROJECT_CONTEXT_STRUCTURE.md`.
+
+## Anti-patterns to stop
+
+- Continuing a thread past 100 turns "because we're almost done." You're not — the audit shows these always grow further.
+- Stuffing the next phase into the same thread because "the context is already loaded." That context is exactly the cost.
+- Treating the checkpoint as optional. The audit shows operator judgement (the prior policy) does not work — threads grow to 200+ turns without intervention.
+
+## When in doubt
+
+Checkpoint. A two-minute handoff write saves a $20+ deep turn.

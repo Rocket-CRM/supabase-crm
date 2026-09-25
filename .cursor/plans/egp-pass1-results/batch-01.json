@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "verdict": "No",
+    "reason": "ซื้อสิทธิ์ใช้งานซอฟต์แวร์ตรวจสอบคุณภาพ/ความปลอดภัย — licensed package, not custom build",
+    "budget": 3000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 3,
+    "verdict": "No",
+    "reason": "บำรุงรักษา MWA Data Warehouse + ลิขสิทธิ์ซอฟต์แวร์ — named incumbent AMS/license lock",
+    "budget": 4815000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 4,
+    "verdict": "No",
+    "reason": "บำรุงรักษาซอฟต์แวร์ WLMA Pro — named proprietary product AMS",
+    "budget": 10883612,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 5,
+    "verdict": "No",
+    "reason": "บำรุงรักษาซอฟต์แวร์ CPOS เก็บค่าผ่านทาง — named toll system AMS/vendor lock",
+    "budget": 3210000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 6,
+    "verdict": "No",
+    "reason": "สิทธิ์บำรุงรักษา Oracle Database — licensed vendor support, not custom software",
+    "budget": 8025000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 7,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาโปรแกรม AI ผู้ช่วยสุขภาพ สสส. — custom software we can build",
+    "budget": 2640000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 10,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาโปรแกรมระบบ Refill ยา — custom hospital software; small budget",
+    "budget": 500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 11,
+    "verdict": "Maybe",
+    "reason": "ซื้อสิทธิ์ ITSM/CMDB พร้อมพัฒนา — licensed package + custom; 88m consortium",
+    "budget": 88000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 12,
+    "verdict": "No",
+    "reason": "ดูแลซอฟต์แวร์ลิขสิทธิ์ระบบเก็บค่าผ่านทาง HQ — licensed toll AMS/vendor lock",
+    "budget": 13910000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 13,
+    "verdict": "Maybe",
+    "reason": "บำรุงรักษาซอฟต์แวร์และฮาร์ดแวร์คลังพัสดุ Modern Warehouse; 45m consortium",
+    "budget": 45543060,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 14,
+    "verdict": "No",
+    "reason": "บำรุงรักษาคอมพิวเตอร์ อุปกรณ์เครือข่าย และซอฟต์แวร์ — hardware/network AMS",
+    "budget": 3437625,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 18,
+    "verdict": "No",
+    "reason": "บำรุงรักษาโปรแกรมระบบบริการการศึกษา — incumbent AMS; small budget",
+    "budget": 527296,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 25,
+    "verdict": "No",
+    "reason": "บำรุงรักษาระบบ HR กรุงเทพฯ จากโครงการเดิม — incumbent AMS/vendor lock",
+    "budget": 3287100,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 26,
+    "verdict": "No",
+    "reason": "ปรับปรุงข้อมูลแผนที่ภาษี LTAXGIS — named local-gov GIS package; small budget",
+    "budget": 500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 28,
+    "verdict": "No",
+    "reason": "บำรุงรักษาโปรแกรมงานบริการ HOMC — named hospital package AMS; small budget",
+    "budget": 750000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  }
+]

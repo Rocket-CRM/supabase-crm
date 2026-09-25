@@ -1,0 +1,90 @@
+[
+  {
+    "id": 119,
+    "project_name": "จ้างจัดทำโครงการพัฒนาระบบรายงานข้อมูลการปฏิบัติงานดับไฟป่า โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69059414634)",
+    "budget": 500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18M8gi8zD7nCne%252FO%252BpBn92rzKIRzXRL6MkxsKqegBb282qR9BGOPe1D",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 121,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบสารสนเทศด้านงานพิธีการทูต (e-Protocol) ระยะที่ ๒ อาคารกระทรวงการต่างประเทศ ถนนศรีอยุธยา สำนักงานปลัดกระทรวงการต่างประเทศ แขวงทุ่งพญาไท เขตราชเทวี กรุงเทพมหานคร ๑ ระบบ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049452446)",
+    "budget": 4500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18oGPni87kryyNnrbjGN7u6rG1%252FUFTVeyHX39fPS0bnCdlRtpTa6U4h",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 122,
+    "project_name": "ประกวดราคาจ้างดำเนินโครงการพัฒนาการเชื่อมโยงข้อมูลเจ้าหน้าที่รัฐที่เกี่ยวข้องกับการค้ามนุษย์ กับระบบฐานข้อมูลของประเทศไทย ด้านการดำเนินคดีและการช่วยเหลือผู้เสียหายจากการค้ามนุษย์ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049379219)",
+    "budget": 1757500,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18O%252Fe694iVbTjwQjX%252BWLXPMM3NHilbJdwUHSbRpnOY4kmnsW3MG9UsE",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 123,
+    "project_name": "ประกวดราคาจ้างโครงการเพิ่มประสิทธิภาพระบบกลางการเชื่อมต่อข้อมูลกับหน่วยงานภายนอกแบบอัตโนมัติ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049163574)",
+    "budget": 3000000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18eRJcyj94EtPu5SjMAJOJd%252BdiD%252F1TjWsagWoI3p2V7D2ELpttmNy2t",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 124,
+    "project_name": "ประกวดราคาจ้างจัดการระบบบริหารจัดการการท่องเที่ยวอุทยานแห่งชาติ (E-National Park) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059298402)",
+    "budget": 67000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BBzmxModMrqsna%252FtJIj%252FFE8q10RUDW1GUQEfMFADpscwcDh6BTDwGg",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69059298402/TOR-69059298402.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 126,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบแพลตฟอร์มกลางในการบริหารจัดการข้อมูลบริการโทรคมนาคมเพื่อแก้ไขและป้องกันปัญหาอาชญากรรมทางเทคโนโลยี ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049250486)",
+    "budget": 4000000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19tn6YyPF%252FbnQ9pCakyZ9NZ%252BSXYFL0HyVNZiyQ3mfHv1095RITUksXD",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 129,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบมาตรฐานข้อมูลกลาง (Common Data Data Governance Repository) ระยะที่ ๒ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049356031)",
+    "budget": 35000000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18hU5cvf6CkF5MSh3gtosYDIJfwj8r%252F%252FWLtxB4eNL1PRvCNGnqi32YS",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 130,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบสารสนเทศด้านเฝ้าระวังสถานการณ์ด้านสิทธิมนุษยชน ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69029018854)",
+    "budget": 3000000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18oO1Bn7Gr9waYoDR%252FNMB7kJw0CLzeXCuUqlv2lAYvHBDw%252B%252BE3CxN61",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  }
+]

@@ -1,0 +1,6 @@
+=== marketplace-earnable-backfill ALL start 2026-09-03T16:48:30Z ===
+since_date=2026-08-10
+--- platform=shopee start 2026-09-03T16:48:30Z ---
+--- platform=shopee end 2026-09-03T18:05:21Z ---
+--- platform=tiktok start 2026-09-03T18:05:21Z ---
+curl: (16) Error in the HTTP2 framing layer

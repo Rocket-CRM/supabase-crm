@@ -1,0 +1,94 @@
+---
+description: Tool batching, MCP result hygiene, and identifier hygiene. Always-applied because the agent doesn't know it's failing at batching — every single-tool turn replays the full thread history through cache, and large MCP results re-replay for the rest of the thread.
+alwaysApply: true
+---
+
+# Tool Batching, MCP Result Hygiene, Identifier Hygiene
+
+## Why this is always-applied
+
+Every assistant turn replays the full conversation history through cache. A single-tool turn that should have been batched costs one extra full-thread replay (often 1–2M tokens at deep turns). Large MCP results re-stream on every subsequent turn until thread end. These are the two largest variable costs in any long thread — they dwarf per-turn fixed costs by orders of magnitude.
+
+## Batchable (one turn)
+
+- Multiple `Grep` patterns across different files or different keywords.
+- `Grep` + `Read` for files whose path you already know.
+- Multiple `execute_sql` introspection queries on different tables, functions, or columns.
+- `search_docs` (+ optional `get_section`) on the CRM Knowledge MCP for the same product question.
+- Reading several small files (per-domain summary + relevant requestable rule + a small source section).
+- A heading-pattern grep across multiple `<Domain>.md` files.
+
+## Necessarily sequential
+
+- `Grep` returns line numbers → `Read` at offset/limit.
+- Identify domain from `_index.md` → grep `REGISTRY_SUPABASE.md` for that domain (only if the first grep narrows the second; otherwise batch both).
+- Get function signature → read function body (only when body is needed unconditionally).
+- Read a business rule → propose a fix.
+- User approval → execute change.
+
+## Worked example — Discovery turn 1 for a new task
+
+User asks: *"Why is the wallet expiry running on burned points?"*
+
+A single first turn should fire:
+- `Grep` `_index.md` for `expiry|wallet|burn`
+- `Grep` `REGISTRY_SUPABASE.md` for the same terms
+- `Grep` `REGISTRY_RENDER.md` for `expiry` (likely a cron)
+- `search_docs` on the CRM Knowledge MCP for "currency expiry"
+- `execute_sql` to list functions matching `%expiry%`
+
+Turn 2 then narrows to the specific function body discovered in turn 1.
+
+## Anti-patterns to stop
+
+- "Let me check X" → one tool call → "Now let me check Y." Both should be one turn unless Y depends on X.
+- Sequential `Read` of three known files.
+- Per-table introspection across five tables in five separate turns.
+- "Let me also check the rule file" as a tail call when the rule was identifiable up front — load it in the same turn.
+- Four progressively-refined Grep patterns on the same path across four turns. Either widen the first pattern or run candidates in parallel.
+- **`pg_get_functiondef` before a function is named** — signatures and registry grep first; bodies only for build/fix on that function (`20-discovery-discipline.mdc`).
+- **Forensic audit to confirm feature absence** — Product Q&A: CRM Knowledge + registry + one schema check, then answer.
+- **Re-reading agent-tools dump files** — extract findings when the MCP result arrives; don't `Read`/`Grep` saved dumps on later turns.
+
+## Limits
+
+- If a single batch would exceed ~10 parallel calls, split for readability — but err on the side of more parallel, not fewer.
+- Tool results that arrive together must still be reasoned over together — don't drop one because you missed it in the response.
+
+## MCP Result Hygiene (extract findings, don't carry raw dumps)
+
+After any `CallMcpTool` result larger than ~2KB (Supabase table dumps, function bodies, `execute_sql` row sets, `list_tables` output, CRM Knowledge blocks), the **next assistant turn must extract the salient finding to text**. The full raw result replays through cache on every subsequent turn for the rest of the thread.
+
+Concrete behavior:
+
+- After `execute_sql` returning >10 rows: state in text the count, the columns, and the 2–3 rows that matter for the task. Don't quote the whole result.
+- After `list_tables` or schema introspection: state in text the names of the 1–3 tables relevant, not the full list.
+- After fetching a function body via MCP: if you used it to make a decision, state the decision and the 5–10 critical lines. Don't paraphrase the whole body.
+- After CRM Knowledge `search_docs` / `get_section`: quote only the excerpts that directly answer the question.
+
+Heuristic: if your next turn references the MCP result, replace the reference with a 1–3 sentence summary you write now. The raw result is still in cache — but every future turn will pay for it, and the model uses the summary anyway.
+
+## Discovery turn budgets (by task class)
+
+See `20-discovery-discipline.mdc` for full rules. Summary:
+
+| Task class | Max discovery turns before answer/present |
+|---|---|
+| Product Q&A | 2 |
+| Explain / analyze | 3 |
+| Schema-only (add column) | 1 |
+| Build / fix | 3 before checkpoint |
+
+Exceeding the budget without user approval is a workflow failure — not thoroughness.
+
+## Identifier Hygiene (do NOT batch with unverified IDs)
+
+A batched call is wasted if its inputs are wrong. Before passing any UUID, ID, name, or path into a tool call, the value must come from one of:
+
+- The user's message (copy-pasted or referenced).
+- A prior tool result in this thread (copy the exact string).
+- A confirmation query that returned it.
+
+Do **not** type a UUID from memory. Do **not** approximate a tail segment. Do **not** invent a function name "that probably exists." If you don't have the exact identifier, batch a lookup call alongside your other discovery calls and use the result on the next turn.
+
+Anti-example: calling `get_tier_conditions_by_type('edit', '0858f04a-6a78-4308-a7d1-edd2b0d20e7'::uuid)` where the final UUID segment is truncated. Result: one failed MCP round-trip whose error sits in context forever, plus a corrective retry next turn.

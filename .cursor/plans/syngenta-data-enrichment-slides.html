@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rocket Data Strategy for Syngenta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0f1a14; --bg-elev: #16241c; --panel: #1c2e24; --line: #2d4638;
+    --text: #e8f0ea; --muted: #8fa896; --accent: #3dcc7a; --accent-dim: #1f6b42;
+    --warn: #e6b84d; --bad: #e07a5f; --ok: #3dcc7a;
+    --stage1: #5b8def; --stage2: #3dcc7a; --stage3: #c9a227;
+    --stage4: #e07a5f; --stage5: #9b7ed9; --stage6: #4ecdc4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: "IBM Plex Sans", system-ui, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+  .deck { height: 100%; position: relative; }
+  .slide {
+    position: absolute; inset: 0; padding: 44px 56px 72px;
+    display: none; flex-direction: column; opacity: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 0%, rgba(61,204,122,.08), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(91,141,239,.06), transparent 45%),
+      var(--bg);
+  }
+  .slide.active { display: flex; opacity: 1; animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  h1 { font-family: "IBM Plex Serif", Georgia, serif; font-size: clamp(28px, 3.2vw, 42px); font-weight: 600; line-height: 1.15; max-width: 18ch; margin-bottom: 12px; }
+  h2 { font-family: "IBM Plex Serif", Georgia, serif; font-size: clamp(20px, 2.3vw, 30px); font-weight: 600; margin-bottom: 8px; }
+  .sub { color: var(--muted); font-size: 14px; max-width: 68ch; line-height: 1.5; margin-bottom: 22px; }
+  .nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: rgba(15,26,20,.92); border-top: 1px solid var(--line); z-index: 50; backdrop-filter: blur(8px); }
+  .nav button { background: var(--panel); border: 1px solid var(--line); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font: inherit; font-size: 13px; }
+  .nav button:hover { border-color: var(--accent); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 55%; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); cursor: pointer; border: none; }
+  .dot.on { background: var(--accent); }
+  .page-num { font-size: 12px; color: var(--muted); min-width: 72px; text-align: right; }
+
+  .chain { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: stretch; flex: 1; min-height: 0; }
+  .chain-node { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 12px; display: flex; flex-direction: column; position: relative; }
+  .chain-node::after { content: "→"; position: absolute; right: -14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; z-index: 2; }
+  .chain-node:last-child::after { display: none; }
+  .chain-node.focus { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(61,204,122,.35); }
+  .chain-node.dim { opacity: .45; }
+  .stage-label { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+  .stage-name { font-size: 13px; font-weight: 600; line-height: 1.25; margin-bottom: 8px; min-height: 2.4em; }
+  .pct { font-family: "IBM Plex Serif", Georgia, serif; font-size: 32px; font-weight: 600; line-height: 1; margin-bottom: 2px; }
+  .meter { height: 6px; background: var(--bg); border-radius: 99px; overflow: hidden; margin: 8px 0 10px; }
+  .meter > i { display: block; height: 100%; border-radius: 99px; width: var(--w); }
+  .assess { margin-top: auto; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 6px; display: inline-block; width: fit-content; }
+  .assess.strong { background: rgba(61,204,122,.15); color: var(--ok); }
+  .assess.partial { background: rgba(230,184,77,.15); color: var(--warn); }
+  .assess.thin { background: rgba(224,122,95,.15); color: var(--bad); }
+  .assess.none { background: rgba(143,168,150,.12); color: var(--muted); }
+  .syngenta-hint { font-size: 11px; color: var(--muted); line-height: 1.35; margin-top: 8px; }
+  .s1 .stage-label, .s1 .pct { color: var(--stage1); } .s1 .meter > i { background: var(--stage1); }
+  .s2 .stage-label, .s2 .pct { color: var(--stage2); } .s2 .meter > i { background: var(--stage2); }
+  .s3 .stage-label, .s3 .pct { color: var(--stage3); } .s3 .meter > i { background: var(--stage3); }
+  .s4 .stage-label, .s4 .pct { color: var(--stage4); } .s4 .meter > i { background: var(--stage4); }
+  .s5 .stage-label, .s5 .pct { color: var(--stage5); } .s5 .meter > i { background: var(--stage5); }
+  .s6 .stage-label, .s6 .pct { color: var(--stage6); } .s6 .meter > i { background: var(--stage6); }
+
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; font-size: 12px; color: var(--muted); }
+  .pill { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+  .funnel { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .funnel-step {
+    display: grid; grid-template-columns: 140px 1fr 100px; gap: 14px; align-items: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px;
+  }
+  .funnel-step.gold { border-color: var(--accent); background: rgba(61,204,122,.08); }
+  .funnel-step .lbl { font-size: 12px; font-weight: 600; }
+  .funnel-step .desc { font-size: 12px; color: var(--muted); line-height: 1.35; }
+  .funnel-step .n { font-family: "IBM Plex Serif", Georgia, serif; font-size: 22px; font-weight: 600; text-align: right; }
+  .funnel-bar { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin-top: 6px; grid-column: 1 / -1; }
+  .funnel-bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .stat .k { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .stat .v { font-family: "IBM Plex Serif", Georgia, serif; font-size: 24px; font-weight: 600; }
+  .stat .h { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+
+  .phase-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 14px; }
+  .phase-cell { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+  .phase-cell.focus { border-color: var(--accent); }
+  .phase-cell.dim { opacity: .4; }
+  .phase-cell .sn { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .bar-track { height: 8px; background: var(--bg); border-radius: 99px; overflow: hidden; margin-top: 3px; position: relative; }
+  .bar-track .before { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(143,168,150,.35); border-radius: 99px; }
+  .bar-track .after { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 99px; }
+  .bar-nums { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; }
+  .bar-nums .b { color: var(--muted); } .bar-nums .a { color: var(--accent); font-weight: 600; }
+  .bar-row { font-size: 10px; color: var(--muted); }
+
+  .q-pair { display: grid; grid-template-columns: 1.35fr 1fr; gap: 10px; margin-bottom: 8px; flex: 0 0 auto; min-height: 0; }
+  .q-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 0; overflow: hidden; }
+  .q-card.unlock { border-color: rgba(61,204,122,.35); }
+  .q-card.cannot { border-color: rgba(143,168,150,.35); }
+  .q-card h3 { font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .08em; }
+  .q-card.unlock h3 { color: var(--accent); }
+  .q-card.cannot h3 { color: var(--muted); }
+  .q-principle {
+    font-size: 11px; line-height: 1.4; color: var(--text);
+    margin: 0 0 10px; padding: 8px 10px; border-radius: 8px;
+    background: var(--bg-elev); border: 1px solid var(--line);
+  }
+  .q-principle strong { color: var(--accent); font-weight: 600; }
+  .q-card.cannot .q-principle strong { color: var(--warn); }
+  .q-cat { margin-bottom: 8px; }
+  .q-cat:last-child { margin-bottom: 0; }
+  .q-cat .cat-label {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--muted); margin-bottom: 3px;
+  }
+  .q-card.unlock .q-cat .cat-label { color: rgba(61,204,122,.85); }
+  .q-cat ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .q-cat li { font-size: 11px; line-height: 1.35; color: var(--text); padding-left: 11px; position: relative; }
+  .q-cat li::before { content: "▸"; position: absolute; left: 0; top: 0; color: var(--accent); font-size: 10px; }
+  .q-card.cannot .q-cat li::before { color: var(--muted); content: "–"; }
+
+  .assumptions { font-size: 11px; color: var(--muted); line-height: 1.45; margin-top: 10px; padding: 10px 12px; background: var(--bg-elev); border-radius: 8px; border: 1px solid var(--line); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; min-height: 0; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .card h3 { font-size: 15px; margin-bottom: 10px; }
+  table.comp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.comp th, table.comp td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  table.comp th { color: var(--muted); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+  table.comp td.num { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  .story-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; flex: 1; min-height: 0; }
+  .grower-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+  .grower-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-dim), var(--accent)); display: grid; place-items: center; font-weight: 700; }
+  .stage-dots { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
+  .stage-dot { flex: 1; min-width: 64px; text-align: center; padding: 8px 4px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); font-size: 10px; color: var(--muted); opacity: .35; transition: all .35s; }
+  .stage-dot.on { opacity: 1; border-color: var(--accent); color: var(--text); }
+  .stage-dot .dn { font-weight: 700; font-size: 11px; display: block; margin-bottom: 2px; }
+  .q-box { background: var(--bg-elev); border-left: 3px solid var(--accent); padding: 12px 14px; border-radius: 0 10px 10px 0; }
+  .q-box.blocked { border-left-color: var(--bad); }
+  .q-box .ql { font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .q-box.blocked .ql { color: var(--bad); }
+  .q-box p { font-size: 13px; line-height: 1.45; }
+  .play-row { display: flex; gap: 8px; }
+  .play-row button { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; font-size: 12px; cursor: pointer; }
+  .play-row button.active { border-color: var(--accent); background: rgba(61,204,122,.12); }
+  .timeline { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .timeline li { display: grid; grid-template-columns: 80px 1fr; gap: 10px; font-size: 12px; padding: 8px 10px; background: var(--bg); border-radius: 8px; opacity: .2; transform: translateX(-6px); transition: all .35s; }
+  .timeline li.show { opacity: 1; transform: none; border: 1px solid var(--line); }
+  .timeline .t { color: var(--accent); font-weight: 600; font-size: 10px; }
+  .chain-mini { display: flex; gap: 4px; margin-bottom: 12px; }
+  .chain-mini span { flex: 1; height: 8px; border-radius: 4px; background: var(--line); transition: background .35s; }
+  .chain-mini span.filled { background: var(--accent); }
+
+  .title-slide { justify-content: center; }
+  .title-slide h1 { max-width: 16ch; font-size: clamp(34px, 4.5vw, 52px); }
+  .title-meta { margin-top: 24px; display: flex; gap: 20px; color: var(--muted); font-size: 13px; flex-wrap: wrap; }
+  .warn-banner { background: rgba(230,184,77,.12); border: 1px solid rgba(230,184,77,.35); color: var(--warn); font-size: 12px; padding: 8px 12px; border-radius: 8px; margin-bottom: 14px; }
+
+  .funnel-step.nested {
+    display: block; padding: 12px 16px 14px;
+  }
+  .funnel-step.nested .lbl-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px;
+  }
+  .funnel-step.nested .n { text-align: right; }
+  .funnel-split {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;
+  }
+  .funnel-sub {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
+  .funnel-sub .sl { font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .funnel-sub .sn {
+    font-family: "IBM Plex Serif", Georgia, serif; font-size: 18px; font-weight: 600;
+  }
+  .funnel-sub .sd { font-size: 11px; color: var(--muted); line-height: 1.35; margin-top: 4px; }
+  .funnel-sub.warm { border-color: rgba(61,204,122,.45); }
+
+  .gallery {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+    flex: 1; min-height: 0; align-items: stretch;
+  }
+  .gallery-col {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 10px 14px; display: flex; flex-direction: column; min-height: 0;
+  }
+  .gallery-col .g-num {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .gallery-col .g-title {
+    font-size: 13px; font-weight: 600; line-height: 1.25; margin-bottom: 6px; min-height: 2.4em;
+  }
+  .gallery-col .g-syng {
+    font-size: 10px; color: var(--muted); line-height: 1.35; margin-bottom: 10px; min-height: 2.8em;
+  }
+  .gallery-col .chips {
+    display: flex; flex-direction: column; gap: 5px; overflow: auto; flex: 1;
+  }
+  .chip {
+    font-size: 11px; line-height: 1.3; padding: 6px 8px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--line); color: var(--text);
+  }
+  .chip .cat { display: block; font-size: 9px; font-weight: 600; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .chip.new { border-color: rgba(61,204,122,.45); background: rgba(61,204,122,.08); }
+  .chip.sys { opacity: .85; }
+  .gallery-col.s1 .g-num { color: var(--stage1); }
+  .gallery-col.s2 .g-num { color: var(--stage2); }
+  .gallery-col.s3 .g-num { color: var(--stage3); }
+  .gallery-col.s4 .g-num { color: var(--stage4); }
+  .gallery-col.s5 .g-num { color: var(--stage5); }
+  .gallery-col.s6 .g-num { color: var(--stage6); }
+  .gallery-legend {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 11px; color: var(--muted);
+  }
+
+  .p1-priority {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0 0 18px;
+    flex: 0 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .p1-stage {
+    flex: 1 1 0;
+    min-width: 0;
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+  .p1-stage .n {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--bg); color: var(--muted);
+    flex: 0 0 auto;
+  }
+  .p1-stage .t {
+    font-size: 12px; font-weight: 600; line-height: 1.2;
+    color: var(--text);
+  }
+  .p1-stage .tag {
+    font-size: 10px; font-weight: 600; padding: 4px 8px; border-radius: 999px;
+    white-space: nowrap;
+  }
+  .p1-stage .tag.light { background: rgba(230,184,77,.15); color: var(--warn); }
+  .p1-stage .tag.later { background: rgba(143,168,150,.12); color: var(--muted); }
+  .p1-stage .tag.on { background: rgba(61,204,122,.18); color: var(--ok); }
+  .p1-stage.muted { opacity: .55; }
+  .p1-stage.focus {
+    opacity: 1;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(61,204,122,.3);
+  }
+  .p1-stage.focus .n { background: rgba(61,204,122,.2); color: var(--accent); }
+  .card ul li { overflow-wrap: anywhere; }
+
+  .flow-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 300px;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    padding: 8px 4px;
+  }
+  .flow-origins {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 2;
+  }
+  .flow-card {
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    position: relative;
+    z-index: 2;
+  }
+  .flow-card.primary {
+    border-color: var(--accent);
+    background: rgba(61,204,122,.1);
+    box-shadow: 0 0 0 1px rgba(61,204,122,.28);
+  }
+  .flow-card.warm { border-color: rgba(61,204,122,.45); }
+  .flow-card .k {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 4px;
+  }
+  .flow-card.primary .k { color: var(--accent); }
+  .flow-card .t { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .flow-card .n {
+    font-family: "IBM Plex Serif", Georgia, serif; font-size: 26px; font-weight: 600; line-height: 1;
+  }
+  .flow-card .n small {
+    font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: var(--muted); font-weight: 500;
+  }
+  .flow-card .d { font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 8px; }
+  .flow-links {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+  }
+  .flow-links path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.25;
+    stroke-linecap: round;
+  }
+  .flow-links path.soft { stroke: rgba(61,204,122,.5); }
+  .flow-links text {
+    fill: var(--warn);
+    font-size: 11px;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+  }
+
+  @media (max-width: 960px) {
+    .slide { padding: 24px 16px 80px; overflow-y: auto; }
+    .chain, .phase-grid, .story-layout, .stats, .two-col, .q-pair, .funnel-split, .gallery { grid-template-columns: 1fr; }
+    .p1-priority { overflow-x: auto; }
+    .flow-wrap { grid-template-columns: 1fr; gap: 16px; }
+    .flow-links { display: none; }
+    .chain-node::after { display: none; }
+    .funnel-step { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <section class="slide title-slide active" data-slide="0">
+    <div class="eyebrow">Syngenta Thailand · Loyalty &amp; CRM</div>
+    <h1>Rocket data strategy for Syngenta</h1>
+    <p class="sub">171k is a CRM contact base (mostly migrated leads), not an active loyalty base. Strategy: convert tel pools → LINE, then enrich only the LINE base — vacant rates throughout.</p>
+    <div class="title-meta">
+      <span>CRM base ~171k</span>
+      <span>LINE or auth ~14k</span>
+      <span>LINE UID ~6k</span>
+      <span>← → navigate</span>
+    </div>
+  </section>
+
+  <!-- Cohorts -->
+  <section class="slide" data-slide="1">
+    <div class="eyebrow">Who is in the base</div>
+    <h2>171k ≠ loyalty members</h2>
+    <p class="sub">Live Syngenta merchant: almost everyone is <code>user_stage = lead</code>. <code>channel_line = on</code> for nearly all is a preference flag — <strong>not</strong> proof of a LINE user ID. Use these indicators instead.</p>
+    <div class="funnel">
+      <div class="funnel-step">
+        <div class="lbl">CRM contact base</div>
+        <div class="desc">Tel known · mostly migrated leads from prior CRM / events · not necessarily loyalty-active</div>
+        <div class="n">171k</div>
+        <div class="funnel-bar"><i style="width:100%"></i></div>
+      </div>
+      <div class="funnel-step nested">
+        <div class="lbl-row">
+          <div class="lbl">Tel only</div>
+          <div class="n">~157k</div>
+        </div>
+        <div class="desc">Phone, no <code>line_id</code>, no <code>auth_user_id</code> — not digitally enrichable until LINE-linked. Two origins:</div>
+        <div class="funnel-bar"><i style="width:92%;background:var(--muted)"></i></div>
+        <div class="funnel-split">
+          <div class="funnel-sub">
+            <div class="sl">Migrated (not from Rocket events)</div>
+            <div class="sn">~132k</div>
+            <div class="sd">Prior CRM / CSV / Buzzebees — no live <code>sales_app</code> / <code>self_regis</code> event row</div>
+          </div>
+          <div class="funnel-sub warm">
+            <div class="sl">From system (Rocket event)</div>
+            <div class="sn">~25k</div>
+            <div class="sd">Tel-only ∩ event ledger · warmer activation priority</div>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-step">
+        <div class="lbl">Digital cohort</div>
+        <div class="desc">Has <code>line_id</code> <em>or</em> <code>auth_user_id</code> — can do LINE / self-service flows</div>
+        <div class="n">~14k</div>
+        <div class="funnel-bar"><i style="width:8%"></i></div>
+      </div>
+      <div class="funnel-step gold">
+        <div class="lbl">LINE UID known</div>
+        <div class="desc">Highest quality for broadcasts &amp; campaigns · enrichment denominator for Phase 1+</div>
+        <div class="n">~6.2k</div>
+        <div class="funnel-bar"><i style="width:3.6%"></i></div>
+      </div>
+      <div class="funnel-step">
+        <div class="lbl">Ever earned points</div>
+        <div class="desc">Actually touched loyalty economy (wallet ledger) — “active-ish”</div>
+        <div class="n">~3.7k</div>
+        <div class="funnel-bar"><i style="width:2.1%"></i></div>
+      </div>
+    </div>
+    <p class="assumptions"><strong>Indicators (live):</strong> lead ≈ 171k · registered ≈ 6 · auth ≈ 8.9k · line_id ≈ 6.2k · both ≈ 1.3k · signup_complete ≈ 12k · tier assigned ≈ 32k (many tiers without auth = migrated, not proof of active loyalty) · wallet ever ≈ 3.7k. Enrichment planning uses <strong>~6.2k LINE</strong> as primary base, with funnel goals to grow it — not 171k conversion.</p>
+  </section>
+
+  <!-- Acquisition & conversion strategy -->
+  <section class="slide" data-slide="1b">
+    <div class="eyebrow">Strategy · Acquisition &amp; conversion</div>
+    <h2>Two tel origins → LINE → Enrichment</h2>
+    <p class="sub">Migrated and From system are separate cards that merge into LINE, then enrichment.</p>
+
+    <div class="flow-wrap" id="acq-flow">
+      <svg class="flow-links" id="acq-links" aria-hidden="true"></svg>
+
+      <div class="flow-origins">
+        <div class="flow-card" id="n-migrated" data-node="migrated">
+          <div class="k">Tel-only · origin A</div>
+          <div class="t">Migrated</div>
+          <div class="n">~132k</div>
+          <div class="d">Prior CRM / CSV / Buzzebees — in accounts, not in Rocket live event ledger.</div>
+        </div>
+        <div class="flow-card warm" id="n-system" data-node="system">
+          <div class="k">Tel-only · origin B</div>
+          <div class="t">From system</div>
+          <div class="n">~25k</div>
+          <div class="d">Tel-only ∩ Rocket event (<code>sales_app</code> / <code>self_regis</code>). Warmer — activate first.</div>
+        </div>
+      </div>
+
+      <div class="flow-card primary" id="n-line" data-node="line">
+        <div class="k">Quality base</div>
+        <div class="t">LINE</div>
+        <div class="n">~6.2k <small>today</small></div>
+        <div class="d">Has <code>line_id</code>. Both origins merge here (vacant 2–5%/yr). Also accepts online-direct joins.</div>
+      </div>
+
+      <div class="flow-card" id="n-enrich" data-node="enrich">
+        <div class="k">After LINE only</div>
+        <div class="t">Enrichment</div>
+        <div class="n" style="font-size:22px">P1–P3</div>
+        <div class="d">Behavior &amp; proximal first; later context / disposition / distal.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activation funnel -->
+  <section class="slide" data-slide="2">
+    <div class="eyebrow">Conversion path (vacant)</div>
+    <h2>Grow the quality base before assuming enrichment</h2>
+    <p class="sub">Do not assume growers jump from tel-only lead → full enrichment. Each step has low conversion. Phase volumes are calculated on the cohort that can actually do the action.</p>
+    <div class="two-col">
+      <div class="card">
+        <h3>Funnel steps</h3>
+        <table class="comp">
+          <tr><th>From → To</th><th>Vacant rate</th><th>Why low</th></tr>
+          <tr><td>Tel-only → LINE linked</td><td class="num">2–5% / year</td><td>Need reason to add OA / claim</td></tr>
+          <tr><td>LINE → “active” (open/click)</td><td class="num">10–20% of LINE</td><td>Many silent followers</td></tr>
+          <tr><td>Active → profile complete</td><td class="num">15–25% of actives</td><td>Form fatigue</td></tr>
+          <tr><td>Active → survey complete</td><td class="num">8–12% of invited</td><td>Typical digital survey</td></tr>
+          <tr><td>Active → label upload start</td><td class="num">3–8% of invited</td><td>Photo friction; unproven habit</td></tr>
+          <tr><td>Upload start → approved</td><td class="num">~60–70%</td><td>Quality / ops reject</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>What this means for math</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:12px">Example Phase 1 label pilot (vacant):</p>
+        <table class="comp">
+          <tr><td>Invite from LINE cohort</td><td class="num">~6,000</td></tr>
+          <tr><td>× start upload 5%</td><td class="num">~300</td></tr>
+          <tr><td>× approve 65%</td><td class="num">~200</td></tr>
+          <tr><td>Not “thousands of 171k”</td><td class="num">~200 labels</td></tr>
+        </table>
+        <p class="assumptions" style="margin-top:14px">If LINE cohort grows via activation, volumes scale — we do <strong>not</strong> bake growth into Phase 1 promises.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Causal chain current on LINE base framing -->
+  <section class="slide" data-slide="3">
+    <div class="eyebrow">Concept · Causal chain</div>
+    <h2>Coverage today (counts, not %)</h2>
+    <p class="sub">Growers with usable data in each stage across the <strong>171k CRM</strong>. Left-loaded: identity is mass; season, intent, product use, and yield are thin panels.</p>
+    <div class="chain">
+      <div class="chain-node s1" style="--w:78%"><div class="stage-label">1</div><div class="stage-name">Identity &amp; baseline</div><div class="pct">~133k</div><div class="meter"><i></i></div><span class="assess strong">Strong</span><p class="syngenta-hint">Tel, geo, crop, area</p></div>
+      <div class="chain-node s2" style="--w:2%"><div class="stage-label">2</div><div class="stage-name">Environmental context</div><div class="pct">~3k</div><div class="meter"><i></i></div><span class="assess none">Empty</span><p class="syngenta-hint">Season / outbreak</p></div>
+      <div class="chain-node s3" style="--w:3%"><div class="stage-label">3</div><div class="stage-name">Disposition</div><div class="pct">~5k</div><div class="meter"><i></i></div><span class="assess none">Empty</span><p class="syngenta-hint">Objectives / attitudes</p></div>
+      <div class="chain-node s4" style="--w:18%"><div class="stage-label">4</div><div class="stage-name">Behavior &amp; exposure</div><div class="pct">~31k</div><div class="meter"><i></i></div><span class="assess partial">Partial</span><p class="syngenta-hint">Events · content 0</p></div>
+      <div class="chain-node s5" style="--w:9%"><div class="stage-label">5</div><div class="stage-name">Proximal outcomes</div><div class="pct">~15k</div><div class="meter"><i></i></div><span class="assess thin">Thin</span><p class="syngenta-hint">Product surveys unlinked</p></div>
+      <div class="chain-node s6" style="--w:1%"><div class="stage-label">6</div><div class="stage-name">Distal outcomes</div><div class="pct">~1.7k</div><div class="meter"><i></i></div><span class="assess none">Empty</span><p class="syngenta-hint">Yield / cost labels</p></div>
+    </div>
+    <div class="legend-row">
+      <span><i class="pill" style="background:var(--ok)"></i> Strong</span>
+      <span><i class="pill" style="background:var(--warn)"></i> Partial</span>
+      <span><i class="pill" style="background:var(--bad)"></i> Thin</span>
+      <span><i class="pill" style="background:var(--muted)"></i> Empty</span>
+      <span>Bar width still vs 171k · online phases only add to the ~6.2k LINE slice</span>
+    </div>
+  </section>
+
+  <!-- Causal chain data gallery -->
+  <section class="slide" data-slide="3b">
+    <div class="eyebrow">Concept · Data gallery</div>
+    <h2>What lives in each causal stage</h2>
+    <p class="sub">Left → right is the story for one grower. Examples from the enrichment table (not every field).</p>
+    <div class="gallery">
+      <div class="gallery-col s1">
+        <div class="g-num">1 · Baseline</div>
+        <div class="g-title">Identity &amp; farm</div>
+        <div class="g-syng">Who they are + stable farm traits</div>
+        <div class="chips">
+          <div class="chip"><span class="cat">Identity</span>Phone · LINE link · member code</div>
+          <div class="chip"><span class="cat">Profile</span>Name · province · district · subdistrict</div>
+          <div class="chip"><span class="cat">Grower</span>Crop mix · grower type · retailer</div>
+          <div class="chip"><span class="cat">Farm</span>1st / 2nd crop area · subcategory</div>
+          <div class="chip new"><span class="cat">Farm · new</span>Irrigation availability</div>
+          <div class="chip new"><span class="cat">Economic · proxy</span>Owned vs rented · spend band</div>
+        </div>
+      </div>
+      <div class="gallery-col s2">
+        <div class="g-num">2 · Context</div>
+        <div class="g-title">Environmental</div>
+        <div class="g-syng">Season / weather / outbreaks</div>
+        <div class="chips">
+          <div class="chip new"><span class="cat">Seasonal</span>Challenge stage this season</div>
+          <div class="chip new"><span class="cat">Seasonal</span>Reported outbreak</div>
+          <div class="chip new"><span class="cat">Seasonal</span>Confidence this season</div>
+          <div class="chip sys"><span class="cat">System</span>Weather (geo join — no ask)</div>
+          <div class="chip"><span class="cat">Season key</span>Harvest month</div>
+          <div class="chip"><span class="cat">Field sales</span>Weed / insect / disease blocks</div>
+        </div>
+      </div>
+      <div class="gallery-col s3">
+        <div class="g-num">3 · Disposition</div>
+        <div class="g-title">Attitudes &amp; goals</div>
+        <div class="g-syng">What they think / want</div>
+        <div class="chips">
+          <div class="chip new"><span class="cat">Attitudes</span>Risk tolerance</div>
+          <div class="chip new"><span class="cat">Attitudes</span>Innovation openness</div>
+          <div class="chip new"><span class="cat">Attitudes</span>Info source preference</div>
+          <div class="chip new"><span class="cat">Objectives</span>Primary goal this season</div>
+          <div class="chip new"><span class="cat">Objectives</span>Secondary goal</div>
+          <div class="chip"><span class="cat">Seed prefs</span>Preferred variety traits</div>
+        </div>
+      </div>
+      <div class="gallery-col s4">
+        <div class="g-num">4 · Behavior</div>
+        <div class="g-title">Actions &amp; exposure</div>
+        <div class="g-syng">What they do / see</div>
+        <div class="chips">
+          <div class="chip"><span class="cat">Touchpoint</span>Event register / attend</div>
+          <div class="chip new"><span class="cat">Content</span>Opens · clicks · interest tags</div>
+          <div class="chip"><span class="cat">Crop / seed</span>Varieties used · seed company</div>
+          <div class="chip"><span class="cat">Purchase</span>Purchase factors · channel</div>
+          <div class="chip"><span class="cat">Methods</span>Spray method · fertilizer band</div>
+          <div class="chip new"><span class="cat">Competitive</span>Exposure via label upload</div>
+        </div>
+      </div>
+      <div class="gallery-col s5">
+        <div class="g-num">5 · Proximal</div>
+        <div class="g-title">Adoption &amp; response</div>
+        <div class="g-syng">Near-term product results</div>
+        <div class="chips">
+          <div class="chip"><span class="cat">Product survey</span>Used Syngenta product list</div>
+          <div class="chip new"><span class="cat">Time series</span>Label upload × crop × season</div>
+          <div class="chip new"><span class="cat">Satisfaction</span>Event sat · product sat</div>
+          <div class="chip sys"><span class="cat">Commerce</span>Event orders · coupons</div>
+          <div class="chip"><span class="cat">CP detail</span>Spend total / mix (Big Grower)</div>
+        </div>
+      </div>
+      <div class="gallery-col s6">
+        <div class="g-num">6 · Distal</div>
+        <div class="g-title">Farm outcomes</div>
+        <div class="g-syng">What we want to predict</div>
+        <div class="chips">
+          <div class="chip new"><span class="cat">Yield</span>Better / same / worse vs last season</div>
+          <div class="chip new"><span class="cat">Yield</span>Yield satisfaction (1–5)</div>
+          <div class="chip new"><span class="cat">Yield</span>Attribution (what helped / hurt)</div>
+          <div class="chip new"><span class="cat">Cost</span>Cost-per-rai band (mass)</div>
+          <div class="chip"><span class="cat">Field sales</span>Exact kg/rai · exact cost</div>
+          <div class="chip"><span class="cat">Price</span>Selling / breakeven price</div>
+        </div>
+      </div>
+    </div>
+    <div class="gallery-legend">
+      <span>Order = causal story for prediction</span>
+      <span style="border:1px solid rgba(61,204,122,.45);background:rgba(61,204,122,.08);padding:2px 8px;border-radius:6px">New / priority ask</span>
+      <span>Plain = existing or system-captured</span>
+    </div>
+  </section>
+
+  <!-- Grower stories -->
+  <section class="slide" data-slide="4">
+    <div class="eyebrow">Grower stories</div>
+    <h2>Same chain — different cohort quality</h2>
+    <p class="sub">Click a grower. Animation shows which stages fill and which question unlocks.</p>
+    <div class="story-layout">
+      <div class="grower-card">
+        <div class="play-row" id="grower-tabs">
+          <button type="button" class="active" data-g="0">Somchai · tel lead</button>
+          <button type="button" data-g="1">Malee · LINE P1</button>
+          <button type="button" data-g="2">Wichai · spine</button>
+        </div>
+        <div class="grower-head" style="margin-top:14px">
+          <div class="avatar" id="g-av">S</div>
+          <div><h3 id="g-name" style="font-size:17px">Somchai</h3><p id="g-desc" style="font-size:12px;color:var(--muted)">Rice · tel-only lead</p></div>
+        </div>
+        <div class="stage-dots" id="g-stages">
+          <div class="stage-dot" data-i="0"><span class="dn">1</span>Base</div>
+          <div class="stage-dot" data-i="1"><span class="dn">2</span>Ctx</div>
+          <div class="stage-dot" data-i="2"><span class="dn">3</span>Disp</div>
+          <div class="stage-dot" data-i="3"><span class="dn">4</span>Beh</div>
+          <div class="stage-dot" data-i="4"><span class="dn">5</span>Prox</div>
+          <div class="stage-dot" data-i="5"><span class="dn">6</span>Dist</div>
+        </div>
+        <div class="chain-mini" id="g-mini"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <ul class="timeline" id="g-timeline"></ul>
+      </div>
+      <div class="grower-card" style="display:flex;flex-direction:column">
+        <div class="q-box" id="g-q" style="flex:1"><div class="ql" id="g-ql"></div><p id="g-qp"></p></div>
+        <p class="assumptions" style="margin-top:12px" id="g-note"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phase overview -->
+  <section class="slide" data-slide="5">
+    <div class="eyebrow">Phases</div>
+    <h2>Each phase owns different chain stages</h2>
+    <p class="sub">We do <strong>not</strong> try to complete the full causal chain in Phase 1. We pick stages that match the questions we need now — and that the LINE cohort can actually do.</p>
+    <div class="stats">
+      <div class="stat"><div class="k">Enrichment base</div><div class="v">~6.2k</div><div class="h">LINE UID · not 171k</div></div>
+      <div class="stat"><div class="k">Phase 1 focus</div><div class="v">Beh + Prox</div><div class="h">+ light baseline repair · label pilot</div></div>
+      <div class="stat"><div class="k">Phase 2 focus</div><div class="v">Ctx + Disp</div><div class="h">Season / objectives · deepen methods</div></div>
+      <div class="stat"><div class="k">Phase 3 focus</div><div class="v">Distal</div><div class="h">Yield ordinals on spine only</div></div>
+    </div>
+    <div class="phase-grid" style="grid-template-columns:repeat(3,1fr);flex:1">
+      <div class="phase-cell" style="padding:18px">
+        <div class="sn" style="color:var(--stage4)">Phase 1</div>
+        <div style="font-size:18px;font-weight:600;margin:6px 0">Behavior &amp; proximal</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.45">Content interest tags, event sat, product signals, <strong>conservative label-upload pilot</strong>, fix member links. Light farm-gap asks only where easy. Distal not required.</p>
+      </div>
+      <div class="phase-cell" style="padding:18px">
+        <div class="sn" style="color:var(--stage3)">Phase 2</div>
+        <div style="font-size:18px;font-weight:600;margin:6px 0">Context &amp; disposition</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.45">Seasonal / outbreak pulses, objectives, attitudes, farming methods, cost bands — once LINE engagement habit exists. Scale label upload only if P1 pilot works.</p>
+      </div>
+      <div class="phase-cell" style="padding:18px">
+        <div class="sn" style="color:var(--stage6)">Phase 3</div>
+        <div style="font-size:18px;font-weight:600;margin:6px 0">Distal labels</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.45">Yield vs last season + attribution on growers who already have product×season. Exact kg/rai stays field sales.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why P1 focus -->
+  <section class="slide" data-slide="6">
+    <div class="eyebrow">Phase 1 · Why these stages</div>
+    <h2>Why behavior + proximal first</h2>
+    <div class="warn-banner">Missing environmental / disposition / distal in Phase 1 is intentional — those stages are not required to answer P1 questions.</div>
+
+    <div class="p1-priority" aria-label="Phase focus by causal stage">
+      <div class="p1-stage muted">
+        <span class="n">1</span>
+        <span class="t">Baseline</span>
+        <span class="tag light">Light fix</span>
+      </div>
+      <div class="p1-stage muted">
+        <span class="n">2</span>
+        <span class="t">Context</span>
+        <span class="tag later">P2</span>
+      </div>
+      <div class="p1-stage muted">
+        <span class="n">3</span>
+        <span class="t">Disposition</span>
+        <span class="tag later">P2</span>
+      </div>
+      <div class="p1-stage focus">
+        <span class="n">4</span>
+        <span class="t">Behavior</span>
+        <span class="tag on">P1 focus</span>
+      </div>
+      <div class="p1-stage focus">
+        <span class="n">5</span>
+        <span class="t">Proximal</span>
+        <span class="tag on">P1 focus</span>
+      </div>
+      <div class="p1-stage muted">
+        <span class="n">6</span>
+        <span class="t">Distal</span>
+        <span class="tag later">P3</span>
+      </div>
+    </div>
+
+    <div class="two-col" style="flex:1;min-height:0">
+      <div class="card">
+        <h3>P1 questions (answerable without full chain)</h3>
+        <ul style="font-size:13px;line-height:1.55;color:var(--muted);padding-left:18px;margin:0">
+          <li>Who engages with which content topics? → retarget</li>
+          <li>Which events satisfy growers?</li>
+          <li>Who used which Syngenta products (survey + sparse labels)?</li>
+          <li>Can we bind event survey answers to members?</li>
+          <li>Does label upload even work for this audience? (pilot)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Why missing stages are OK for now</h3>
+        <ul style="font-size:13px;line-height:1.55;color:var(--muted);padding-left:18px;margin:0">
+          <li><strong>Context / disposition</strong> matter for prediction &amp; outbreak coordination — not for proving engagement mechanics.</li>
+          <li><strong>Distal yield</strong> without product×season is a weak label — wait for spine.</li>
+          <li><strong>Baseline</strong> already strong enough to segment invites; only patch irrigation / 2nd crop lightly.</li>
+          <li>Building LINE habit first beats asking abstract attitude questions to silent leads.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phase 1 numbers -->
+  <section class="slide" data-slide="7">
+    <div class="eyebrow">Phase 1 · Vacant volumes</div>
+    <h2>Phase 1 — behavior, proximal, label pilot</h2>
+    <p class="sub">Bars = <strong>growers with a usable signal</strong> in that stage (LINE enrichment base). Left grey = today · green = after P1. Scale max = ~6.2k LINE.</p>
+    <div class="stats">
+      <div class="stat"><div class="k">Denom. for digital</div><div class="v">~6.2k</div><div class="h">LINE UID known</div></div>
+      <div class="stat"><div class="k">Interest tags</div><div class="v">~600–1.2k</div><div class="h">10–20% of LINE open/click</div></div>
+      <div class="stat"><div class="k">Event sat</div><div class="v">~3–5k</div><div class="h">Subset of ~28k attendees w/ LINE</div></div>
+      <div class="stat"><div class="k">Approved labels</div><div class="v">~150–300</div><div class="h">Pilot · 3–8% start of invited</div></div>
+    </div>
+    <div class="phase-grid" id="p1-bars"></div>
+    <div class="q-pair">
+      <div class="q-card unlock">
+        <h3>Questions unlocked</h3>
+        <p class="q-principle"><strong>Principle:</strong> Who engaged, and what they did / used — observed behavior + thin product signals among LINE-reachable growers. Targeting &amp; nurture, not prediction.</p>
+        <div class="q-cat">
+          <div class="cat-label">Content &amp; channel interest</div>
+          <ul>
+            <li>Among LINE openers/clickers last 90 days, which topic clusters (pest ID, application, product education) get repeat engagement — and which crop×province cells over-index?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Event experience</div>
+          <ul>
+            <li>Of LINE-linked attendees, what share rate the event ≥4/5, and do first-time vs repeat growers differ by crop?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Product exposure (thin) · Mechanic learning</div>
+          <ul>
+            <li>Among linked product surveys (+ the small approved-label pilot), which SKUs / AIs show up most — concentrated in which provinces?</li>
+            <li>Of ~4k warm LINE invites to label upload, what % start and what % approve — enough to scale, or keep signals on surveys / field sales?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="q-card cannot">
+        <h3>Still cannot</h3>
+        <p class="q-principle"><strong>Blocked:</strong> Season / outbreak context, stated intent at scale, and farm outcomes. No causal or population claims yet.</p>
+        <div class="q-cat">
+          <div class="cat-label">Environmental coordination</div>
+          <ul>
+            <li>Which LINE rice growers in [province] report outbreak pressure this week at density worth a coordinated response?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Intent &amp; outcomes</div>
+          <ul>
+            <li>What are this season’s grower objectives by crop (yield vs cost vs risk)?</li>
+            <li>Who will get better yield / be receptive to a new SKU if we push product X vs Y?</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="assumptions"><strong>Vacant P1:</strong> Broadcast to ~6.2k LINE → open 15–25% → click 20% of opens → ~200–500 tags (or ~600–1.2k if digital ~14k). Survey completes 8–12% of invited actives. Label: invite ~4k warm LINE · start 5% · approve 65% ≈ <strong>~130–200</strong> (cap &lt;300).</p>
+  </section>
+
+  <!-- Phase 2 -->
+  <section class="slide" data-slide="8">
+    <div class="eyebrow">Phase 2</div>
+    <h2>Context, disposition — scale only what worked</h2>
+    <p class="sub">Bars = enriched grower <strong>headcounts</strong> (max ~6.2k LINE). Scale label upload only if P1 pilot works. Invites from tagged + event + P1 completers — not tel-only 157k.</p>
+    <div class="stats">
+      <div class="stat"><div class="k">Seasonal completes</div><div class="v">~500–900</div><div class="h">~10% of invited actives</div></div>
+      <div class="stat"><div class="k">Objectives / attitudes</div><div class="v">~400–800</div><div class="h">Same invite pool</div></div>
+      <div class="stat"><div class="k">Labels if scaled</div><div class="v">~400–800</div><div class="h">Only if P1 pilot OK</div></div>
+      <div class="stat"><div class="k">Cost bands</div><div class="v">~300–600</div><div class="h">Optional embed</div></div>
+    </div>
+    <div class="phase-grid" id="p2-bars"></div>
+    <div class="q-pair">
+      <div class="q-card unlock">
+        <h3>Questions unlocked</h3>
+        <p class="q-principle"><strong>Principle:</strong> Season / outbreak context + stated objectives among growers already warmed in P1. Situational targeting &amp; offer framing — still not yield causation.</p>
+        <div class="q-cat">
+          <div class="cat-label">Seasonal risk sensing</div>
+          <ul>
+            <li>Among tagged + event-active LINE growers, who reports outbreak / low crop confidence this season — by crop and province?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Intent &amp; objectives</div>
+          <ul>
+            <li>For the same invite pool, what share prioritize yield vs cost control vs risk reduction this season — and does that differ by primary crop?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Product × season panel · Spend context</div>
+          <ul>
+            <li>If label upload scaled after a clear P1 bar, which product×season combinations are growing in the panel (not in the 171k base)?</li>
+            <li>Among engaged CP users who answered a spend band, where do they sit — useful for offer tiers, not for full-market sizing.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="q-card cannot">
+        <h3>Still cannot</h3>
+        <p class="q-principle"><strong>Blocked:</strong> Distal farm outcomes linked to product under conditions. Panel ≠ population.</p>
+        <div class="q-cat">
+          <div class="cat-label">Outcome / prediction</div>
+          <ul>
+            <li>Under outbreak pressure C, who reports better yield after product X vs alternatives?</li>
+            <li>What % of all 171k CRM growers will buy a new SKU this season?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Exact economics</div>
+          <ul>
+            <li>Exact kg/rai and cost/rai for a mass digital cohort (still field sales / Big Grower).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="assumptions"><strong>Vacant P2:</strong> Invite from tagged + event + P1 completers only (~3–5k) — not tel-only 157k. If label pilot failed, keep product signals on event surveys and field sales — do not force upload.</p>
+  </section>
+
+  <!-- Phase 3 -->
+  <section class="slide" data-slide="9">
+    <div class="eyebrow">Phase 3</div>
+    <h2>Distal labels on the spine cohort only</h2>
+    <p class="sub">Bars = enriched grower <strong>headcounts</strong>. Yield ordinals only on spine growers — never promise 171k yield records.</p>
+    <div class="stats">
+      <div class="stat"><div class="k">Spine cohort</div><div class="v">~800–2k</div><div class="h">Label and/or seasonal + product</div></div>
+      <div class="stat"><div class="k">Yield pack complete</div><div class="v">~250–700</div><div class="h">30–40% of spine invited</div></div>
+      <div class="stat"><div class="k">Model-ready rows</div><div class="v">~200–500</div><div class="h">Stages 1+4+5+6 partially filled</div></div>
+      <div class="stat"><div class="k">Exact yield/cost</div><div class="v">field sales</div><div class="h">Hundreds max · not mass</div></div>
+    </div>
+    <div class="phase-grid" id="p3-bars"></div>
+    <div class="q-pair">
+      <div class="q-card unlock">
+        <h3>Questions unlocked</h3>
+        <p class="q-principle"><strong>Principle:</strong> Conditional learning on a spine panel — product / exposure + context + reported farm outcome for the same grower. Directional insight with stated bias, not census.</p>
+        <div class="q-cat">
+          <div class="cat-label">Conditional outcome learning</div>
+          <ul>
+            <li>On the spine (~200–500 model-ready rows), under outbreak/season condition C, who reports better vs worse yield after product X — vs peers with similar baseline?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Segment receptivity</div>
+          <ul>
+            <li>Which engaged crop×province×objective segments look most receptive to a new SKU narrative — before a mass push?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Sales narrative support</div>
+          <ul>
+            <li>What attribution themes (product + condition → reported outcome) are strong enough for field talking points, with “panel, not population” caveats?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="q-card cannot">
+        <h3>Still cannot</h3>
+        <p class="q-principle"><strong>Blocked:</strong> Inferring the full CRM base. Exact economics stay field-sales depth.</p>
+        <div class="q-cat">
+          <div class="cat-label">Population inference</div>
+          <ul>
+            <li>What will average yield / SKU adoption look like across all 171k leads?</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Exact farm economics</div>
+          <ul>
+            <li>Exact kg/rai and cost/rai for everyone who answered an ordinal yield pulse (still Big Grower / field sales).</li>
+          </ul>
+        </div>
+        <div class="q-cat">
+          <div class="cat-label">Scale without activation</div>
+          <ul>
+            <li>Growing the panel without growing LINE (and spine) in parallel — P3 volumes stay capped by activation.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="assumptions"><strong>Vacant P3:</strong> If spine is only ~1k, yield labels ~300–400 is success. Predictive modeling is on this panel, with clear bias vs full CRM base.</p>
+  </section>
+
+  <!-- Trajectory -->
+  <section class="slide" data-slide="10">
+    <div class="eyebrow">Summary</div>
+    <h2>Enriched growers by stage — headcounts</h2>
+    <p class="sub">Same vacant math as P1–P3 bars: growers with a usable signal in that stage (within the ~6.2k LINE base). Not % of 171k.</p>
+    <table class="comp">
+      <thead>
+        <tr><th>Stage</th><th>Today</th><th>After P1</th><th>After P2</th><th>After P3</th><th>Δ P1→P3</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Identity &amp; baseline</td><td class="num">~5.3k</td><td class="num">~5.6k</td><td class="num">~5.7k</td><td class="num">~5.7k</td><td class="num">+~0.4k</td></tr>
+        <tr><td>Environmental context</td><td class="num">~120</td><td class="num">~190</td><td class="num">~870</td><td class="num">~990</td><td class="num">+~870</td></tr>
+        <tr><td>Disposition</td><td class="num">~310</td><td class="num">~500</td><td class="num">~1.1k</td><td class="num">~1.2k</td><td class="num">+~0.9k</td></tr>
+        <tr><td>Behavior &amp; exposure</td><td class="num">~1.7k</td><td class="num">~3.4k</td><td class="num">~3.8k</td><td class="num">~4.0k</td><td class="num">+~2.3k</td></tr>
+        <tr><td>Proximal outcomes</td><td class="num">~620</td><td class="num">~1.7k</td><td class="num">~2.6k</td><td class="num">~2.8k</td><td class="num">+~2.2k</td></tr>
+        <tr><td>Distal outcomes</td><td class="num">~120</td><td class="num">~120</td><td class="num">~190</td><td class="num">~740</td><td class="num">+~620</td></tr>
+      </tbody>
+    </table>
+    <div class="q-pair" style="margin-top:14px">
+      <div class="q-card unlock" style="grid-column:1/-1">
+        <h3>Question-type principles by phase</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
+          <div class="q-cat">
+            <div class="cat-label">Phase 1 · Behavior / proximal</div>
+            <ul>
+              <li><strong>Can:</strong> engagement targeting, event quality, thin product exposure, mechanic tests</li>
+              <li><strong>Cannot:</strong> outbreak coordination, intent at scale, yield / SKU prediction</li>
+            </ul>
+          </div>
+          <div class="q-cat">
+            <div class="cat-label">Phase 2 · Context / disposition</div>
+            <ul>
+              <li><strong>Can:</strong> seasonal risk sensing, objectives by crop, product×season panel, spend bands</li>
+              <li><strong>Cannot:</strong> causal yield under conditions, 171k population claims</li>
+            </ul>
+          </div>
+          <div class="q-cat">
+            <div class="cat-label">Phase 3 · Distal on spine</div>
+            <ul>
+              <li><strong>Can:</strong> conditional outcome learning, segment receptivity, sales narrative themes</li>
+              <li><strong>Cannot:</strong> census inference, exact kg/rai for the mass digital cohort</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="assumptions" style="margin-top:12px"><strong>Read as panels:</strong> Behavior doubles in P1 (~1.7k → ~3.4k); distal only jumps in P3 (~120 → ~740). Against 171k those same people are still &lt;3% — so we show headcounts, not CRM %.</p>
+  </section>
+
+  <section class="slide" data-slide="11">
+    <div class="eyebrow">Appendix</div>
+    <h2>Loyalty indicators — how to read the DB</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>Use these</h3>
+        <table class="comp">
+          <tr><td><code>line_id</code> present</td><td class="num">~6.2k</td><td>LINE UID · best broadcast key</td></tr>
+          <tr><td><code>auth_user_id</code></td><td class="num">~8.9k</td><td>Self-service / login</td></tr>
+          <tr><td>line OR auth</td><td class="num">~14k</td><td>Digital cohort</td></tr>
+          <tr><td>Wallet ever</td><td class="num">~3.7k</td><td>Touched points</td></tr>
+          <tr><td>Signup complete</td><td class="num">~12k</td><td>Form completed once</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Do not treat as loyalty-active</h3>
+        <table class="comp">
+          <tr><td><code>user_stage = lead</code></td><td class="num">~171k</td><td>Default for almost all</td></tr>
+          <tr><td><code>channel_line = true</code></td><td class="num">~171k</td><td>Preference flag ≠ UID</td></tr>
+          <tr><td>Has <code>tier_id</code> only</td><td class="num">~32k</td><td>Often migrated assignment</td></tr>
+          <tr><td>Has <code>external_user_id</code></td><td class="num">~140k</td><td>Prior CRM id only</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="assumptions">CSV updated: label upload fields → Phase 1 with conservative note. Slides file: <code>syngenta-data-enrichment-slides.html</code>.</p>
+  </section>
+
+</div>
+
+<nav class="nav">
+  <button type="button" id="prev">← Prev</button>
+  <div class="dots" id="dots"></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="page-num" id="page-num">1 / 12</span>
+    <button type="button" id="next">Next →</button>
+  </div>
+</nav>
+
+<script>
+const STAGES = [
+  { short: "Baseline", types: "Profile · crop · farm" },
+  { short: "Context", types: "Season · outbreak" },
+  { short: "Disposition", types: "Objectives · attitudes" },
+  { short: "Behavior", types: "Events · content · labels" },
+  { short: "Proximal", types: "Product · satisfaction" },
+  { short: "Distal", types: "Yield · cost" },
+];
+/* Growers with usable signal in stage (LINE enrichment base ~6.2k). Not % of 171k. */
+const LINE_BASE = 6200;
+const COUNTS = {
+  // Baseline, Context, Disposition, Behavior, Proximal, Distal
+  today: [5300, 120, 310, 1700, 620, 120],
+  p1:    [5600, 190, 500, 3400, 1700, 120],
+  p2:    [5700, 870, 1100, 3800, 2600, 190],
+  p3:    [5700, 990, 1240, 4000, 2800, 740],
+};
+const FOCUS = {
+  p1: [0, 0, 0, 1, 1, 0],
+  p2: [0, 1, 1, 1, 1, 0],
+  p3: [0, 0, 0, 0, 0, 1],
+};
+
+function fmtCount(n) {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return "~" + (Number.isInteger(k) ? k : k.toFixed(1).replace(/\.0$/, "")) + "k";
+  }
+  return "~" + n;
+}
+function barPct(n) {
+  return Math.min(100, Math.round((n / LINE_BASE) * 100));
+}
+
+function renderPhaseBars(elId, beforeKey, afterKey, focusKey) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const before = COUNTS[beforeKey], after = COUNTS[afterKey], focus = FOCUS[focusKey] || [];
+  el.innerHTML = STAGES.map((s, i) => `
+    <div class="phase-cell ${focus[i] ? "focus" : "dim"}">
+      <div class="sn">${s.short}</div>
+      <div class="bar-row">${s.types}</div>
+      <div class="bar-track">
+        <i class="after" style="width:${barPct(after[i])}%"></i>
+        <i class="before" style="width:${barPct(before[i])}%"></i>
+      </div>
+      <div class="bar-nums"><span class="b">${fmtCount(before[i])}</span><span class="a">${fmtCount(after[i])}</span></div>
+    </div>`).join("");
+}
+renderPhaseBars("p1-bars", "today", "p1", "p1");
+renderPhaseBars("p2-bars", "p1", "p2", "p2");
+renderPhaseBars("p3-bars", "p2", "p3", "p3");
+
+const GROWERS = [
+  {
+    name: "Somchai", av: "S", desc: "Rice · tel-only CRM lead · no LINE UID",
+    stages: [1, 0, 0, 1, 0, 0],
+    events: [
+      { t: "Baseline", d: "Phone, province, rice — migrated lead" },
+      { t: "Behavior", d: "Maybe event register by tel — not LINE-reachable" },
+      { t: "Block", d: "Cannot get content tags, web survey, or label upload" },
+    ],
+    blocked: true, ql: "Not in enrichment denom.",
+    qp: "Online Phase 1 does not target Somchai until he links LINE. Activation campaign first — vacant 2–5%/year conversion from tel-only.",
+    note: "Represents most of the 171k. Do not count him in survey/label denominators.",
+  },
+  {
+    name: "Malee", av: "M", desc: "Sweet corn · has LINE UID · Phase 1",
+    stages: [1, 0, 0, 1, 1, 0],
+    events: [
+      { t: "Baseline", d: "Already in CRM · LINE linked" },
+      { t: "Behavior", d: "Interest tag: product education · event sat 4/5" },
+      { t: "Proximal", d: "Product survey linked · optional label pilot attempt" },
+    ],
+    blocked: false, ql: "P1 questions OK",
+    qp: "“Who engages with product content and left happy at events?” — Malee qualifies. No yield prediction yet — and that’s fine for Phase 1.",
+    note: "In the ~6.2k enrichment base. Context/disposition/distal still empty by design.",
+  },
+  {
+    name: "Wichai", av: "W", desc: "Rice · LINE · label + yield (rare panel)",
+    stages: [1, 1, 1, 1, 1, 1],
+    events: [
+      { t: "Beh/Prox", d: "Approved label uploads · product sat" },
+      { t: "Context", d: "Seasonal pulse · outbreak note (P2)" },
+      { t: "Distal", d: "Yield better vs last season (P3)" },
+    ],
+    blocked: false, ql: "Panel / prediction",
+    qp: "One of a few hundred model-ready rows — not proof the whole base looks like this. Use for learning, state the bias.",
+    note: "Success = hundreds on a spine, not tens of thousands on 171k.",
+  },
+];
+
+let growerTimer = null;
+function playGrower(idx) {
+  const g = GROWERS[idx];
+  document.querySelectorAll("#grower-tabs button").forEach((b, i) => b.classList.toggle("active", i === idx));
+  document.getElementById("g-av").textContent = g.av;
+  document.getElementById("g-name").textContent = g.name;
+  document.getElementById("g-desc").textContent = g.desc;
+  document.getElementById("g-note").textContent = g.note;
+  const q = document.getElementById("g-q");
+  q.classList.toggle("blocked", g.blocked);
+  document.getElementById("g-ql").textContent = g.ql;
+  document.getElementById("g-qp").textContent = g.qp;
+  const dots = [...document.querySelectorAll("#g-stages .stage-dot")];
+  const mini = [...document.querySelectorAll("#g-mini span")];
+  const tl = document.getElementById("g-timeline");
+  tl.innerHTML = g.events.map(e => `<li><span class="t">${e.t}</span><span>${e.d}</span></li>`).join("");
+  const items = [...tl.querySelectorAll("li")];
+  dots.forEach(d => d.classList.remove("on"));
+  mini.forEach(m => m.classList.remove("filled"));
+  items.forEach(i => i.classList.remove("show"));
+  clearTimeout(growerTimer);
+  let step = 0;
+  function tick() {
+    if (step < 6) {
+      if (g.stages[step]) { dots[step].classList.add("on"); mini[step].classList.add("filled"); }
+      step++; growerTimer = setTimeout(tick, 260);
+    } else items.forEach((item, i) => setTimeout(() => item.classList.add("show"), i * 180));
+  }
+  tick();
+}
+document.getElementById("grower-tabs").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-g]");
+  if (btn) playGrower(+btn.dataset.g);
+});
+
+const slides = [...document.querySelectorAll(".slide")];
+const dotsEl = document.getElementById("dots");
+let cur = 0;
+slides.forEach((_, i) => {
+  const b = document.createElement("button");
+  b.className = "dot" + (i === 0 ? " on" : "");
+  b.type = "button";
+  b.onclick = () => go(i);
+  dotsEl.appendChild(b);
+});
+
+function drawAcqLinks() {
+  const wrap = document.getElementById("acq-flow");
+  const svg = document.getElementById("acq-links");
+  if (!wrap || !svg || !wrap.offsetParent) return;
+  const wr = wrap.getBoundingClientRect();
+  const w = wr.width, h = wr.height;
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.setAttribute("width", w);
+  svg.setAttribute("height", h);
+
+  function anchor(el, side) {
+    const r = el.getBoundingClientRect();
+    const x = side === "right" ? r.right - wr.left : r.left - wr.left;
+    const y = r.top - wr.top + r.height / 2;
+    return { x, y };
+  }
+
+  const a = anchor(document.getElementById("n-migrated"), "right");
+  const b = anchor(document.getElementById("n-system"), "right");
+  const lineIn = anchor(document.getElementById("n-line"), "left");
+  const lineOut = anchor(document.getElementById("n-line"), "right");
+  const enrich = anchor(document.getElementById("n-enrich"), "left");
+
+  // curve toward mid X between origins and LINE
+  const mx = (a.x + lineIn.x) / 2;
+
+  function path(p0, p1, soft) {
+    const c1x = p0.x + (mx - p0.x) * 0.85;
+    const c2x = p1.x - (p1.x - mx) * 0.85;
+    return `<path class="${soft ? "soft" : ""}" d="M ${p0.x} ${p0.y} C ${c1x} ${p0.y}, ${c2x} ${p1.y}, ${p1.x} ${p1.y}" />`;
+  }
+
+  const midY = (a.y + b.y) / 2;
+  const labelX = mx - 10;
+  svg.innerHTML = [
+    path(a, lineIn, true),
+    path(b, lineIn, false),
+    `<path d="M ${lineOut.x} ${lineOut.y} C ${lineOut.x + 24} ${lineOut.y}, ${enrich.x - 24} ${enrich.y}, ${enrich.x} ${enrich.y}" />`,
+    `<text x="${labelX}" y="${a.y - 8}">conversion</text>`,
+    `<text x="${labelX}" y="${b.y + 16}">conversion</text>`,
+    `<text x="${(lineOut.x + enrich.x) / 2 - 14}" y="${lineOut.y - 10}">enrich</text>`,
+  ].join("");
+}
+
+function go(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, j) => s.classList.toggle("active", j === cur));
+  [...dotsEl.children].forEach((d, j) => d.classList.toggle("on", j === cur));
+  document.getElementById("page-num").textContent = `${cur + 1} / ${slides.length}`;
+  if (cur === 6) playGrower(0);
+  // acquisition flow slide index: title(0), cohorts(1), acq(2), ...
+  const acqIdx = [...document.querySelectorAll(".slide")].findIndex(s => s.dataset.slide === "1b");
+  if (cur === acqIdx) requestAnimationFrame(() => requestAnimationFrame(drawAcqLinks));
+}
+window.addEventListener("resize", () => {
+  const acqIdx = [...document.querySelectorAll(".slide")].findIndex(s => s.dataset.slide === "1b");
+  if (cur === acqIdx) drawAcqLinks();
+});
+document.getElementById("prev").onclick = () => go(cur - 1);
+document.getElementById("next").onclick = () => go(cur + 1);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); go(cur + 1); }
+  if (e.key === "ArrowLeft") go(cur - 1);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+[
+  {
+    "id": 69,
+    "project_name": "จ้างพัฒนาระบบจัดเก็บเอกสารอิเล็กทรอนิกส์ของมหาวิทยาลัยมหิดล โดยวิธีคัดเลือก (เลขที่โครงการ : 69069597998)",
+    "budget": 3000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252F5QgKwv7d2EvTuVNfo0TyNGH9V5JqyyRsdIYuRbPnz%252BgkHc2vOGnbQ",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 70,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบ ERP ใหม่ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049218564)",
+    "budget": 3000000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18HKkjR4ewuZHlx0x6xhbrKcfz%252BohCbjLREHHMuqAY20v%252FyUa8QLZAX",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 76,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบแพลตฟอร์มการจัดหาสินค้าและบริการจากซัพพลายเออร์ (Suppliers Sourcing Platform) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069045708)",
+    "budget": 10317475,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18h9gmn1vZJ%252B9hq16JSLA%252F%252B5a7%252F2MUuuMy12ByuZq9yy3uEErTecZWv",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 78,
+    "project_name": "ประกวดราคาจ้างโครงการการพัฒนาระบบบริหารจัดการความสัมพันธ์นักลงทุนและฐานข้อมูลกลาง (CRM Database Management System) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079202016)",
+    "budget": 4000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BVXXiBsYBANGgt04ZMjNYuFaM%252BF0oUgz3Ow6xBQEbkSOtIoRct4SoM",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079202016/TOR-69079202016.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 79,
+    "project_name": "ประกวดราคาจ้างโครงการยกระดับระบบวิเคราะห์ฐานข้อมูลขนาดใหญ่เพื่อขับเคลื่อนการบริหารจัดการน้ำประปา ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069355199)",
+    "budget": 9000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18htAC05MiuFjH%252F4bYJDQIBNmAPu93ov7GGHsdOlga3HG9AIbSdjsbB",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069355199/TOR-69069355199.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 80,
+    "project_name": "ประกวดราคาจ้างดำเนินโครงการพัฒนาและปรับปรุงระบบบริหารทรัพยากรองค์กร (ERP) กรมการค้าภายใน (ครั้งที่ 2) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059509830)",
+    "budget": 10000000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18rZh0EuuFf%252BwtR54CNWaI4Oi%252BEhGv%252BGxx%252FCPrXHQB1zD9cZeOu%252Bp7N",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 84,
+    "project_name": "จ้างพัฒนาระบบติดตามกระแสเงินสดโครงการวิจัยแบบเรียลไทม์ (Real-Time Cash Flow) โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69079226707)",
+    "budget": 2200000,
+    "pass1": "Yes",
+    "status_original": "",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19yNJe6ILZKddsTcbZV9lJ9pkd3nnSrJmxbYUIqKYdI%252F0B0yaHDuf3r",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 87,
+    "project_name": "จ้างทำระบบจัดทำคำของบประมาณกองทัพเรือ (Budget Proposal System BPS) โดยวิธีคัดเลือก (เลขที่โครงการ : 69069438456)",
+    "budget": 2500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18%252FYe0bm0F8U2Qquyz2kiSGVfr07wDxsl6hIwXiA0HeENP8z30nJB2o",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  }
+]

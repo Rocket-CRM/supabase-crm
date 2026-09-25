@@ -1,0 +1,90 @@
+[
+  {
+    "id": 109,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบแอปพลิเคชันประเมินงบประมาณสำหรับโครงการที่ใช้งานโมเดลทางภาษาษาขนาดใหญ่ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049203579)",
+    "budget": 3200000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252Bc1LpaTLcx9gRSLV9mpkBmAIkRVB3M71IiBV7a3OW7MRWQEKqkWfuA",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 110,
+    "project_name": "ประกวดราคาจ้างพัฒนาเพิ่มเสถียรภาพและประสิทธิภาพระบบ Core system Health Link ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059007424)",
+    "budget": 3000000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FO8hDVrW1O%252Fmh0UgKjZS%252FLG4tLJbQbuR3kqnz56eGiD94ktY70CXX9",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 111,
+    "project_name": "จ้างพัฒนาระบบบริหารจัดการการเบิกจ่ายสวัสดิการค่ารักษาพยาบาล โดยวิธีคัดเลือก (เลขที่โครงการ : 69069449195)",
+    "budget": 4990000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX183noOTac7FpjsDb8qNHo9ffU3eNfqa%252FFCIts%252B4Cxm6Z9cDBZfAaQ%252B0",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 112,
+    "project_name": "จ้างจ้างเพิ่มประสิทธิภาพระบบ KSP Self Service ของสำนักงานเลขาธิการคุรุสภากับแพลตฟอร์มกลางภาครัฐในรูปแบบ Single Sign-on โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69079124607)",
+    "budget": 2500000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18xq6hhJRQPtw9hDrtlrbxcLIIqKk%252FMC8W20Foq9LzydRr%252B74avP0MS",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 115,
+    "project_name": "ประกวดราคาจ้างโครงการระบบแก้ไขปัญหาหนี้สินเกษตรกรสมาชิกกองทุนฟื้นฟูและพัฒนาเกษตรกรลูกหนี้ธนาคารของรัฐ 4 แห่ง ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059130900)",
+    "budget": 3000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18mSj%252FNX3hlv77NdJ0RxAV3SXzt%252BEtfVlyl%252BjB8g0HBk%252F1SGQ92NzN7",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69059130900/TOR-69059130900.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 116,
+    "project_name": "จ้างโครงการจัดจ้างพัฒนาไมโครเซอร์วิสเพื่อเชื่อมต่อระหว่าง CCT Mobile Application กับ ฐานข้อมูลกลางของระบบ ภายใต้โครงการจัดสรรเงินอุดหนุนแบบมีเงื่อนไข (ทุนเสมอภาค) โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69069480650)",
+    "budget": 500000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX197%252FgNapSYph%252BZH%252BIsXMyVlpQ%252F7exlUbSBFbX17uXTbBanjTNvchVve",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 117,
+    "project_name": "จ้างพัฒนาระบบบริหารจัดการกลยุทธ์และงบประมาณ โดยวิธีคัดเลือก (เลขที่โครงการ : 69069417737)",
+    "budget": 16050000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BUX6GiKPpdJWzo0PJWgB45kbsTmePbbADybGn8EBDbQFyB45%252FpEtm7",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 118,
+    "project_name": "ประกวดราคาจ้างระบบบริหารจัดการเรียนรู้แบบออนไลน์สำหรับการพัฒนาบุคลากรและนิสิตคณะแพทยศาสตร์ จำนวน 1 ระบบ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049214765)",
+    "budget": 5500000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19DAE3UjqqGUdW2zid3GLH3PSowKikKts6AsBLq3Bm%252Fnb2hIL6Iv2g1",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  }
+]

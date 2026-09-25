@@ -1,0 +1,90 @@
+[
+  {
+    "id": 89,
+    "project_name": "จ้างจ้างพัฒนาระบบบูรณาการสารสนเทศจัดการทรัพยากรของ ทร.ระยะที่ ๑ โดยวิธีคัดเลือก (เลขที่โครงการ : 69069598887)",
+    "budget": 2465295,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BmdN0eVw858wLnLZPrS%252BnxGiOqQ0W8QGBMeF8grNSd%252FP9vHkP2c9Lo",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 91,
+    "project_name": "ประกวดราคาจ้างปรับปรุงระบบการเรียนรู้ออนไลน์เรื่องสารต้องห้ามทางการกีฬา (E-Learning) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079110636)",
+    "budget": 1000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252F16NTD3oiErjSb%252FER%252BhbnrlxhIbzeH0aHFvMJtRQz8u36x4um9eDS3",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079110636/TOR-69079110636.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 92,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบให้คำปรึกษาอัตโนมัติด้วยเทคโนโลยีปัญญาประดิษฐ์ (AI Chatbot) เพื่อสนับสนุนการปฏิบัติตามระเบียบกองทุนเพื่อส่งเสริมการอนุรักษ์พลังงาน ปีงบประมาณ พ.ศ. 2569 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069048765)",
+    "budget": 1657710,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BQ6D%252BvAN1vGBqtqw%252F%252BEJzYt7q%252FUJ8czqz3UHiOdXy9OKal21lj42bo",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 93,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบ NSDF Connect ระยะที่ 2 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079172997)",
+    "budget": 5000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18oOM%252FexsTLmvDUq4MRdnmlzaq3uQSF6K2hdYAge3ni2mERChIF%252Br6B",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079172997/TOR-69079172997.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 94,
+    "project_name": "จ้างพัฒนาและปรับปรุงระบบเงินกู้เงินยืม (EPL) เพื่อรองรับการปรับระเบียบด้านสวัสดิการเงินกู้เงินยืม ประจำปี 2569 โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69069352796)",
+    "budget": 1500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252Fn6N%252FlHR4xcKhcTZ4dTJHElOwfACya1Tn3mloYtblXk9N%252ForWuHt7E",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 98,
+    "project_name": "จ้างโครงการเพิ่มประสิทธิภาพระบบบริหารจัดการโครงการข้อตกลงคุณธรรม (Integrity Pact) โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69079098637)",
+    "budget": 5022894,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FhukWb4UYX%252BzItwckPo%252FDGC8cuuSQqKhqtDFMJRR356SACvakjSt%252B5",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 99,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบสารสนเทศเพื่อการจัดการ (Management Information System. MIS) จำนวน ๑ ระบบ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69039308491)",
+    "budget": 15625300,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18rFJLM0jhpZJt11h%252FhuZYBI1pKAb1eq5nf20wSXISznO692RtrLrYg",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 102,
+    "project_name": "ประกวดราคาจ้างจ้างพัฒนาระบบทะเบียนนักศึกษา สถาบันพระบรมราชชนก จำนวน 1 ระบบ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079149389)",
+    "budget": 7000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX180OAe8cVRt1TwpcP3agSPv%252FDdYJIJqeL31OodG72YzIPYO2aKMlXxp",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079149389/TOR-69079149389.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

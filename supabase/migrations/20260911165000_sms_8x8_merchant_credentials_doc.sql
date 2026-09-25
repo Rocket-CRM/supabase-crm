@@ -1,0 +1,15 @@
+-- Per-merchant 8x8 SMS credentials live in merchant_credentials.
+-- service_name:
+--   sms_8x8            -> single subaccount (OTP + marketing)
+--   sms_8x8_otp        -> OTP-only subaccount (TopCharoen, Yuedpao)
+--   sms_8x8_marketing  -> non-OTP subaccount (TopCharoen, Yuedpao)
+--
+-- credentials JSON:
+-- {
+--   "sender_name": "TopCharoen",
+--   "api_url": "https://sms.8x8.com/api/v1/subaccounts/TopCharoen_OTP/messages",
+--   "bearer_token": "<secret>"
+-- }
+--
+-- Load production secrets via superadmin_create_merchant_credentials or secure ops runbook.
+-- Do not commit bearer tokens to git.

@@ -1,0 +1,546 @@
+mongo_id,user_id,ledger_id,mongo_earn_id,current_deductible,target_deductible,reason
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,37666400-dace-4763-9794-e8775c3a69d1,6a421251f264a3fd7e9b5e92,658.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,91f48782-4d52-4bbd-a753-444cc9800048,6a423c46b37e188e2d3e2293,678.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,ce034de7-9a3c-4f48-8139-4edc60fe6430,6a449ad09fb866f69605f0a0,1295.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,da086e49-f08e-4c71-a35d-71cd66691ffc,6a44e1c89a2be2668cd1dd0a,759.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,2e0f2210-0c10-4186-b0d0-2c44c2695735,6a44e28177718d501493e8d8,270.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,1ce56762-91a3-4a32-8682-edd272fae811,6a4770f74af703868f5e586c,180.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,a96aa784-3d89-4a3c-99da-7b5db9e97ad4,6a4889808a12b0655cf1b319,507.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,fda2c42a-edef-44c4-b17d-50b32347a403,6a48b9079924e6478d7d7dc8,180.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,c0f0ff6b-8615-4882-82d3-3bde684e220b,,0.0,104.0,native_earn_full_amount; headline_mismatch_trim_fallback
+6805c2ca234f173997c1367c,76fa88d8-bc11-442b-a82e-568f00ae858e,2b324e93-bf5d-4e6f-8c71-9f31e3619916,,544.0,440.0,native_earn_full_amount
+67026fc7ecd4c2068ffcbe57,0277d347-51c5-4ee7-b445-975cb01a799d,1d492714-e37a-4788-a902-fe84ccbe5c50,6a452c8e47e65303a2277cd8,1554.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+67026fc7ecd4c2068ffcbe57,0277d347-51c5-4ee7-b445-975cb01a799d,a46963bb-aea2-4585-bfd8-50a5af4f0c91,6a452cd98338b081248754d3,1254.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn; headline_mismatch_trim
+67026fc7ecd4c2068ffcbe57,0277d347-51c5-4ee7-b445-975cb01a799d,a56ddb13-a96e-4946-b3f9-ea988536bf69,6a452d335ec065708657a9ae,1036.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67026fc7ecd4c2068ffcbe57,0277d347-51c5-4ee7-b445-975cb01a799d,5d21c250-c03a-4623-aa76-dd167ff2701d,6a452f5cea03b6b572d5f14f,165.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67026fc7ecd4c2068ffcbe57,0277d347-51c5-4ee7-b445-975cb01a799d,e74964ca-c3f3-477c-80b0-29b361fdbcc2,6a4530d4cec9a67c14923ad1,18.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67026fc7ecd4c2068ffcbe57,0277d347-51c5-4ee7-b445-975cb01a799d,06c5f3ec-7e0e-437c-ab83-579079adaf1a,,0.0,82.0,native_earn_full_amount; headline_mismatch_trim_fallback
+67026fc7ecd4c2068ffcbe57,0277d347-51c5-4ee7-b445-975cb01a799d,9f11a94a-a055-4fea-a0e0-d97c82fa8b2e,,440.0,358.0,native_earn_full_amount
+66fd4bbfaff5db31b4185117,5a7f8d5c-7152-41a0-b9de-13823334931b,1d5bdfe3-8c25-4f98-9833-dfcccdcf8cab,69e5a6ebf775ddf49dffc5cb,0.0,10546.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66fd4bbfaff5db31b4185117,5a7f8d5c-7152-41a0-b9de-13823334931b,4e36172e-3dd2-4c46-991e-ca85ce3ed9ac,69f360aa5e0f228c35409650,14102.0,448.0,migrated_sync_stg_mongo_balance
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,5b3e5a7a-c22a-4ada-a5b9-a1a4c16254db,6a4b02f3d1c78b33cace41c0,875.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,91898399-fc42-4633-aedb-f648115371e9,6a4b036aef3c041b13b08ff1,875.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,0fe6b67d-0f2f-4edd-9876-c71ce053a431,6a4b03ecb9a6630b95b697fc,2600.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,a34c4ec0-7e1f-4ebd-ada6-55df0828b1b4,6a4b043ee1282ecf48ad4d72,3860.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,3705851c-4ce3-46d3-a66d-3a45810fbdb3,6a4b04a1ca45f786cd1df1a3,2415.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,433ed560-0808-4163-9745-fdf3281df80b,6a4b0520d415f459e5181ba5,3318.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn; headline_mismatch_trim
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,bd3666c2-dcdd-43c0-8ae1-d60db1894a13,6a4b05a6e1282ecf48ada14e,5353.0,4296.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,9744a62e-e0ce-4f72-9c54-0dbaa735f578,6a4df1a9cdfecf5fd67a7ead,0.0,3450.0,migrated_sync_stg_mongo_balance
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,72ab5d72-8a75-4626-938f-d5fb7a4074d8,6a4df1ea1c280e02a97addd3,0.0,875.0,migrated_sync_stg_mongo_balance
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,af2e4862-8cd2-42bb-aa64-4a3f57fed94d,6a4df2b310439d941e12455b,0.0,1740.0,migrated_sync_stg_mongo_balance
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,14b70d65-9926-423f-8a2a-c99c4443a25d,6a4df3e9cb7b4c0d1bd5eb55,0.0,1675.0,migrated_sync_stg_mongo_balance
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,5ab7aa0e-f5f3-48f0-840d-ab54858d3e7b,6a4df445581bff1dc6fa920e,0.0,1890.0,migrated_sync_stg_mongo_balance
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,2f098f8e-2117-4173-b2e2-9cfbd7ce4195,6a4df4f657ff757ee74c0b8a,0.0,1675.0,migrated_sync_stg_mongo_balance
+65cb5a027ff1cec9ff05ab00,6529876b-b923-428c-830e-369c19b596a4,b1c10386-ec2b-4c4b-b347-7eeac57e8f8f,6a4df5d294393035c6b7cf34,270.0,875.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,aaa3cd85-d45e-47b0-8f46-23af52bc5ab8,6814805b6fc10327607d9a9a,0.0,405.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,711a80d9-638f-4674-b854-e737931930dc,681480c86fc10327607dc888,0.0,195.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,94e66b24-5772-476c-bb0b-7de1a2405a1e,6815c68b8b7ce21ec7b35f4e,0.0,269.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,21a64d28-48d4-4723-8dfc-e5a7c5a4a26a,681dca4520829dca0924f958,0.0,225.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,ed97b4a0-0c2b-4426-b92b-3dc38b46aed2,68241900c3f36c78b1e77ff7,0.0,95.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,69791b5c-bd8f-4d08-bfff-4a486c8a9e36,682802c478d21acb3c770cd2,0.0,119.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,0fbc709c-b0d3-440d-bb87-13c686a76ee8,683a950b44e4f6fe5cd40a8f,0.0,379.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,7a2177f7-9fcf-4805-a723-e3f5f4d9d33c,68562434abc8301b87a3a565,0.0,572.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,e678c836-86f4-49bc-9c84-7d1a0ae3c79f,68562e084bf90e4fb86cc207,0.0,22.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,433ea4ed-4125-4a04-975d-63070372fdf7,685767c920fea0dd7037f4ee,0.0,343.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,a4006435-8749-42cc-a80c-8f55ebd76a8c,6858c91c7b354119610fabb3,0.0,114.0,migrated_sync_stg_mongo_balance
+65e288ce2460cb673aa8532b,d4a7bba0-10b5-4c44-a85d-4a0a301f31cc,f9362fbf-fa8e-4ce2-97d7-b8f650c770dc,68b698a7541394ebd34c9d7d,0.0,329.0,migrated_sync_stg_mongo_balance
+668cfd9c52d5e255f01ac520,6dbd4113-887a-4205-a3f8-2b0c31afa666,123f8f07-252a-4a62-bacb-dc8418d0ebcf,686118b5a109c3e006361355,0.0,246.0,migrated_sync_stg_mongo_balance; fifo_existing_expiry_burn
+668cfd9c52d5e255f01ac520,6dbd4113-887a-4205-a3f8-2b0c31afa666,16bc2110-2540-42ac-85f4-c49aeeedee41,686230b487b6a31da6f258b6,0.0,1062.0,migrated_sync_stg_mongo_balance
+668cfd9c52d5e255f01ac520,6dbd4113-887a-4205-a3f8-2b0c31afa666,38a4efb6-92b6-4342-85ba-663f4de0342e,6865f7fdcc3c4d86def79b93,0.0,654.0,migrated_sync_stg_mongo_balance
+668cfd9c52d5e255f01ac520,6dbd4113-887a-4205-a3f8-2b0c31afa666,132eb630-5a1a-49df-8aff-97aa45f15ff1,686f63feb11dad6d66392469,0.0,1091.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,048e2273-5624-4e0f-9cbd-723b82e4ccfa,678def3a73ec96cea014f365,0.0,521.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,1f7ce012-3aa9-4d8e-8854-2914122d218c,678def7873ec96cea014ffb9,0.0,159.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,fd421f52-56c2-4f39-99e2-bf5d1319657d,678df1e373ec96cea015805f,0.0,384.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,87b19a8b-adbf-48eb-b82c-7248fde67ec5,678df258e1c544f2e7358c84,0.0,900.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,d49cb155-a17a-4a76-8f2e-05949ab90bc0,67b7f19de22c6d3101e00285,0.0,50.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,0bbe9c6b-e02f-46f7-9c2e-16362d169497,67b7f24eeeffb55772dc2108,0.0,75.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,6ee185ef-01a9-4e02-a9b6-cddb8b4cb95c,67b7f6f0001ed21584be9263,0.0,79.0,migrated_sync_stg_mongo_balance
+671f32f259c9218cf9166937,23637399-4191-4f50-8ee4-a00a37d4badd,aac7f559-1fa1-45cb-bb1f-08fb02f4a41a,67b7fe42eeffb55772e090fa,0.0,720.0,migrated_sync_stg_mongo_balance
+69e5ea9143c778fca7e327a5,87448ba1-631a-4237-886e-7a3f48cdbbdd,5dadb3cd-0b77-42c4-b583-4e085695e518,69f05207ead16dc869717cd0,82.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69e5ea9143c778fca7e327a5,87448ba1-631a-4237-886e-7a3f48cdbbdd,4b13d5b9-4b74-41d0-86be-c0fc32be3d7d,69f052abc57e4936cf519226,2475.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69e5ea9143c778fca7e327a5,87448ba1-631a-4237-886e-7a3f48cdbbdd,6ca93b35-d99b-4764-b30c-9effb448c0f7,69f5d24bd90d03f006817682,365.0,37.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6691fe1b40a462c93790e9eb,9b5110f9-c175-4ade-817e-28f19d217b1a,98e7010d-7b68-4e36-ad2d-4714cd47c52c,6853cd6bff0e98a165d6692f,0.0,1748.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6691fe1b40a462c93790e9eb,9b5110f9-c175-4ade-817e-28f19d217b1a,554b5861-6fe4-4550-9c95-484a2761f35c,68a93cf3183aaef6c6dee46e,0.0,81.0,migrated_sync_stg_mongo_balance
+6691fe1b40a462c93790e9eb,9b5110f9-c175-4ade-817e-28f19d217b1a,194b2231-bf24-44c9-93d5-69187bfbd29d,68a94062323cadaf272d7be2,0.0,928.0,migrated_sync_stg_mongo_balance
+669c9b25da59ebf0fbd0048b,3ad89e23-176b-45f2-a538-7c3ebfb0f122,3e96ccef-664f-42db-ac60-5c27b9c61f00,6a428b53b37e188e2dde6be4,360.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+669c9b25da59ebf0fbd0048b,3ad89e23-176b-45f2-a538-7c3ebfb0f122,decc4f0f-9348-40cd-bb83-adc1c692928e,6a476f24c4782ea092dd8cfd,1514.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+669c9b25da59ebf0fbd0048b,3ad89e23-176b-45f2-a538-7c3ebfb0f122,8de8bfce-1cd7-4620-9366-ba3888bc28b5,6a4882cd88ba82a148554ca3,1085.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+669c9b25da59ebf0fbd0048b,3ad89e23-176b-45f2-a538-7c3ebfb0f122,c76904bf-649d-493a-a7e3-9375b77fd3b6,,1659.0,1940.0,native_earn_full_amount; fifo_existing_native_burn; headline_mismatch_trim_fallback
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,4930af0c-4e60-4115-b8f0-c39ee54fda44,67b8522324ce4b7ee8a0fba4,0.0,11.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,0262a813-5fbf-4175-8b91-b1602951f3f5,67b954c9fd64614b7a9378d1,0.0,31.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,e10e9200-8f35-4eac-87c1-5a5bfa72d7e5,67b955011300c809ca1f2670,0.0,15.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,1b6f07c9-0c0b-44c6-bc01-d72946435dfc,67b9552e1300c809ca1f33dd,0.0,4.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,84bf2d4f-56f0-4ef7-ac6b-13d0ab742603,67b9555723abdb19ce5bdeee,0.0,1.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,97a3eda5-14ca-4fc8-a676-6a878371cc51,67b9557f46310c15e881ea33,0.0,3.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,a2867f38-fe37-46c7-8650-0fb6eecaf9e6,67b955abfd64614b7a93ab6c,0.0,4.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,248cc522-8701-4d62-8705-c53a9de2c2a6,67b955dc46310c15e881fe79,0.0,11.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,2964263b-39ff-410b-835c-c0d0a61e2f73,67b9560c1300c809ca1f7d48,0.0,25.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,f10a4461-cbf3-4227-975d-8834a5df2347,67b9563a46310c15e8821986,0.0,31.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,fdb6b923-52db-458c-9194-4875f8fc6c00,67b9566ffd64614b7a9409a5,0.0,15.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,4f45ed48-5e0b-4bc0-ad6e-2397b33b0364,67b956e81300c809ca1fc735,0.0,13.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,5c931f9f-283d-4fb4-afb4-1ec080319b4d,67b9572646310c15e8825448,0.0,31.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,b7e54fe7-b93f-4bad-9543-5a45f717d234,67b95781fd64614b7a9450ae,0.0,68.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,d48b8b7a-b01d-4611-a496-10c1674d7d6a,67b957c6fd64614b7a9461bb,0.0,102.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,f341303f-f561-4e73-bdf7-56f1606f7bcb,67b958491300c809ca203f74,0.0,26.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,2f76df88-1553-402e-ba46-833beb090e66,67b958a2fd64614b7a94ab4d,0.0,226.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,98786517-a772-4841-8d55-a8bd9573d12a,67b958dc23abdb19ce5d154a,0.0,907.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,27c953df-fee5-4d3a-affb-073eb6e33ddf,67bc2ee05be236916105a35b,0.0,256.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,78bf95c3-75f5-4cbf-a536-9efc8c6b8b29,67d0001773784b483f1d3346,0.0,8.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,97a92abd-d97a-43fe-8268-9749f052b9bf,67d000777cdbaa85ee69528c,0.0,29.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,91692a83-2321-4417-ad8e-7d6a72ee5dee,67d000a3f57397bf1135f429,0.0,2.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,ee78d521-5b18-406c-8820-f7f8c5358832,67d000da73784b483f1de6f5,0.0,22.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,d410fabc-0322-4c34-a116-05c7dd148587,67d1201f4fe8a7939ac5b226,0.0,19.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,63f04762-6cfd-430e-b18a-89e5d8710ed1,67de424c4e46be4fbb265a33,0.0,15.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,43fe409c-a6f7-44ea-8a8f-2302119a80a9,67de43d09e49b5afcbf75356,0.0,62.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,c4028c27-f83e-499b-9a9e-9a136fec7f45,67de440a4e46be4fbb27490e,0.0,6.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,98fb3f3c-cdc6-418f-a6fa-a361d2e9da23,67de460c9e49b5afcbf84534,0.0,41.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,a27166fc-0363-407f-b531-b0a6972e790f,67de464914502ea2b9c77459,0.0,40.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,9dcdf4f6-b847-4425-8aac-b041919ed2f9,67de492951243bc63d32cf87,0.0,8.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,85df89de-5478-422c-8ac2-11b84e5fbb37,67de4a719e49b5afcbfa754d,0.0,9.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,b2833efa-d950-4f4b-afbe-846e166b2b0d,67de4acf9e49b5afcbfa9f2c,0.0,61.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,779e2dfd-90bb-4666-9b13-298786f5fd13,67de4b394e46be4fbb2acaa2,0.0,95.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,2c8713cf-b2e5-4739-ad32-6bd921a0f058,67e26b4e714677324fe1c14e,0.0,15.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,457ade18-14bd-464b-94f6-f40a49c96b87,67e26b9d337a1c2adeed9f17,0.0,39.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,a27dfa13-2c6d-4786-8d90-0fc059b7dec5,67ee3c9830daa03a19a31ff2,0.0,5.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,6bf1f4c2-e232-4d51-a8c7-ab189834348b,67ee3cc82b1dae53c8f448f3,0.0,5.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,43b5629f-7f97-4824-8a90-12565c9a16cb,67ee3cf12b1dae53c8f45faa,0.0,67.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,c6d57d58-c76d-4499-8249-bbb861d45587,67ee3d3e69428beb22bdc610,0.0,29.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,6b146a15-8d61-406d-9d6b-f1b51ceaf1a2,67ee3dd830ef9ae2d6685f9e,0.0,20.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,db898956-ecf4-4d61-9963-36788ea4442e,67ee3e1e30daa03a19a3fc72,0.0,39.0,migrated_sync_stg_mongo_balance
+65413f58d6b1732a1ec5fbf9,4a9af9e7-5e90-4a6a-852c-499129660405,5e8149ab-35ce-40f1-86d0-638e47423e97,67ee3e432b1dae53c8f535f4,0.0,78.0,migrated_sync_stg_mongo_balance
+65413f8ad6b1732a1ec625e5,c0483745-a920-4af3-a5a9-f59defec06dc,dde61b52-4865-4c76-ba26-9db16b456e5b,6a4385772122a5afdb58f8e8,836.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65413f8ad6b1732a1ec625e5,c0483745-a920-4af3-a5a9-f59defec06dc,ca686af1-dcf5-46b0-b736-ea4699596570,6a44ee49289c03bf579c8be0,552.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65413f8ad6b1732a1ec625e5,c0483745-a920-4af3-a5a9-f59defec06dc,f93d3754-364b-442d-9d0e-c54de47c862a,6a48deb92621b628a104003f,516.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65413f8ad6b1732a1ec625e5,c0483745-a920-4af3-a5a9-f59defec06dc,48ce7535-27ac-45ee-bb6f-2c26b69c5d98,6a48dfefaccb7e3e485e0cc8,460.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+65413f8ad6b1732a1ec625e5,c0483745-a920-4af3-a5a9-f59defec06dc,03a4f9a5-d9c0-4c7b-b1e6-7ae001e96e5f,6a4f806e48dbc28518f7960e,122.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+66c2e14d7366c9ef91127a82,c3a36840-ae4f-4995-9c2f-522410a8636f,de5f460a-e6d1-4e7e-b690-84f845ecb1c6,66c4463f2a81849e452eb88f,0.0,530.0,migrated_sync_stg_mongo_balance
+66c2e14d7366c9ef91127a82,c3a36840-ae4f-4995-9c2f-522410a8636f,7e0ee72f-ea49-4551-aabd-70dd5a08d8c6,66e2803cfef7600e7070fa86,0.0,530.0,migrated_sync_stg_mongo_balance
+66c2e14d7366c9ef91127a82,c3a36840-ae4f-4995-9c2f-522410a8636f,c77ee744-3866-4c4f-8a42-8e3f2247178e,671361966411c6f73ada720c,0.0,530.0,migrated_sync_stg_mongo_balance
+66c2e14d7366c9ef91127a82,c3a36840-ae4f-4995-9c2f-522410a8636f,bd5ebed4-30a5-44d6-a337-460d0008af2d,671899d9816432f87b5832fa,0.0,530.0,migrated_sync_stg_mongo_balance
+65413f29d6b1732a1ec5d591,3c2527ee-11dd-4a52-b5df-1f6f06e7ecec,3baac979-4022-4736-b69d-3d09746aa2ce,6889e810bfe89c91bf23630b,0.0,392.0,migrated_sync_stg_mongo_balance
+65413f29d6b1732a1ec5d591,3c2527ee-11dd-4a52-b5df-1f6f06e7ecec,a5069e94-b2e1-4199-9e22-670490b7b8a0,688c9af3f174441a187e4569,0.0,1380.0,migrated_sync_stg_mongo_balance
+65413f29d6b1732a1ec5d591,3c2527ee-11dd-4a52-b5df-1f6f06e7ecec,c50410ca-123c-4388-b4dd-471d707a439f,68a484845e738d6f5e9d99e6,0.0,344.0,migrated_sync_stg_mongo_balance
+6566b316285bf1f861c02126,31705816-258b-4edc-b26b-e4e645cc80df,4bfffadc-c114-4ff2-9001-6dffe6f44525,6a2c08a8535636b6a8629d17,150.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566b316285bf1f861c02126,31705816-258b-4edc-b26b-e4e645cc80df,e1edbf72-7d8e-40ee-8052-06024459a86e,6a2cefa54e87444077499374,413.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566b316285bf1f861c02126,31705816-258b-4edc-b26b-e4e645cc80df,6a8a943a-de68-48fb-b693-dcf133f7e8d0,6a2cf01a7384ff7b8769495f,689.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566b316285bf1f861c02126,31705816-258b-4edc-b26b-e4e645cc80df,82ef18e8-66fd-43e1-8541-21bd8758c3ef,6a2cf3b651f80bd2c8358371,243.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566b316285bf1f861c02126,31705816-258b-4edc-b26b-e4e645cc80df,96b6a316-0960-47e1-adec-d31c087535bf,6a2cf3dd4e874440774b6d43,202.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566b316285bf1f861c02126,31705816-258b-4edc-b26b-e4e645cc80df,2d55ad16-735e-41a4-8849-58c39cbfea6e,6a2cf43a4e874440774b85cb,174.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566b316285bf1f861c02126,31705816-258b-4edc-b26b-e4e645cc80df,e58343d9-4321-433d-b318-bcd36d73cb7c,6a2cf4f351f80bd2c8360b1b,487.0,436.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66a719f56376f16e91adc8bc,fc18f25e-eb61-4b9e-957d-1f74af4be191,67410c2e-0e3e-408e-a6c7-a38e009f260f,6a44b11b686a661bfc64de65,262.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66a719f56376f16e91adc8bc,fc18f25e-eb61-4b9e-957d-1f74af4be191,9b84f964-df69-4f32-ac4a-b0f0e6e336ac,6a44b1ddd73d20bc6dcd1053,340.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66a719f56376f16e91adc8bc,fc18f25e-eb61-4b9e-957d-1f74af4be191,49a384f7-9a27-4edb-97c0-b2838182d8fe,6a486cf597ca5de879922766,485.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66a719f56376f16e91adc8bc,fc18f25e-eb61-4b9e-957d-1f74af4be191,ebabbf03-f1c1-4abb-a8c1-72af62f242e3,6a4b4223ca45f786cd4b6ff2,828.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66a719f56376f16e91adc8bc,fc18f25e-eb61-4b9e-957d-1f74af4be191,7bd8e257-1cb1-474d-9472-b507af4b1923,,0.0,678.0,native_earn_full_amount; headline_mismatch_trim_fallback
+66a719f56376f16e91adc8bc,fc18f25e-eb61-4b9e-957d-1f74af4be191,40790208-4196-4683-be5d-3df5387f7eda,,1388.0,710.0,native_earn_full_amount
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,f714feef-66c0-41a7-8070-fdf05ba04883,6a423cff51bdc009365864ea,209.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,639c561b-c70c-49ee-b4e4-d42f64ad4df0,6a466022bb6040c805c2a481,51.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,e87d75dc-4ea4-4bf5-828a-cc80fd642436,6a46608376d3f269041c861d,30.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,cd996414-66c6-40d1-a443-15b8970c6fbf,6a4660d676d3f269041d4a45,78.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,9a9f9898-e131-4c59-99cd-dcad99765273,6a479f1d469b0a1342436678,175.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,ff24aac0-db4a-4248-91c7-ac6fd4f9eb15,6a48b6ebec56e69fb3b41c19,44.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,1118445d-3f8c-4be1-bc45-8373c6129034,6a48b8ca761f16aab6891fb5,52.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,aafb09fb-d485-4e51-83b3-99e969b2c848,6a4ccb706f534d2e5817f998,417.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+679b5621738c06b72462eb29,39e0724c-b6b9-4822-88fb-688156626a1e,ea9ae894-926c-45dd-bb52-187679813cbf,6a4ccc45a94a83da6d993059,615.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,03abd4b1-f13b-4a68-933d-6085a8a7abb8,68e509b5a646847a1565d54c,418.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,d1ad82ee-9b85-4ec8-9779-dc1df45aa81d,68e5166c23acd8364966e9de,1546.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,9a541975-d76d-46a6-84b8-146c06658f92,690ae79f3c92699652846b2a,207.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,c01ac315-4788-4a64-b71a-c78028ba7ece,690ae7e50213eb6daa29111b,163.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,cf0ff024-f367-4dd5-8c0c-1df044d0b46e,69326e01c7b6814735bae311,134.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,afceb66a-c8cd-4c52-bd31-d37c9327ce5f,69326e4bc7b6814735bb176e,771.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,dd701dd9-7895-4f79-9c67-878daa7dbcec,69326e97f685e31c0817eaa7,276.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,309bfc09-cda2-4525-a04e-fed6bff18a1f,69326ee8241b52c5564241e2,201.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,678907c6-1871-46bd-8aa2-99068a6a69c4,69326f4ef685e31c081868fe,276.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,b891d448-374b-481e-8c1e-40eea407fe68,696a3a9c533bf931133bc6b5,336.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,d462085a-09de-4d6e-8e96-304ca6763f7e,696a3bd183b1c3cd298c65d6,741.0,504.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,82833062-fc6b-4b69-a618-b4d12d67dbea,68ddce88b20d98a1a998717c,333.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,f89144ed-9e20-4be6-92a4-be889c64d25e,68e4d82a63dd06f65f84a82f,62.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,90ec418e-fb4c-4d48-9f2d-a37a33dc50ff,68eb34684c9002ecae8eaffb,62.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,2ff3eb59-f227-4883-9943-a5af69bd21b2,68ef9af8498284198f84ed96,20.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,882817a7-88e1-4a42-aa17-732012e6420b,68f72e4a898167b3acb2de2d,16.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,43e1bd85-0fa5-4c77-8e2b-b36eab56d4c1,68f72ed1898167b3acb33f97,16.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,ead2ac34-144b-4044-8fc7-f079cd9624c7,691199839a9768a5161e7be5,300.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,39e67647-e094-4501-b6ba-5a776d4911c3,691d29ef42e3dde808df33a0,19.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,2e47a389-70a5-4697-8938-f17087975cf5,691d308656251a6b9805e555,30.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654b14d13be528ce10f2fa31,871d5b20-c8de-4fb4-8065-565dc8522f6e,191bf497-0e69-4228-bd6f-0be0b9c27f89,691fe400ade640fb0accfc2f,906.0,159.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6899fb7578eaa295468ddc49,0c03aeb9-727e-451d-80cb-f6eb767af872,ecc68ef7-fd00-4a8a-9b52-22b86f1d5eef,68c96f59b8161fc70f082ac1,0.0,158.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+6899fb7578eaa295468ddc49,0c03aeb9-727e-451d-80cb-f6eb767af872,79781fb5-4b29-4758-b68f-2830d7081302,68c96f8d5c7b379d789a183c,0.0,495.0,migrated_sync_stg_mongo_balance
+6899fb7578eaa295468ddc49,0c03aeb9-727e-451d-80cb-f6eb767af872,eed72e8f-ed12-4bbc-9972-15c6d38a01ce,6901ef3394b5a46f87d79e53,0.0,94.0,migrated_sync_stg_mongo_balance
+6899fb7578eaa295468ddc49,0c03aeb9-727e-451d-80cb-f6eb767af872,8fb46586-6382-4357-b137-f37b46a15180,6906f635f6c72c7e2b6475d4,0.0,120.0,migrated_sync_stg_mongo_balance
+6899fb7578eaa295468ddc49,0c03aeb9-727e-451d-80cb-f6eb767af872,953b490e-38b1-4ca3-904e-c3160eaa9e2d,6906f8acad9dbb3ba7becddc,0.0,240.0,migrated_sync_stg_mongo_balance
+6899fb7578eaa295468ddc49,0c03aeb9-727e-451d-80cb-f6eb767af872,040246b4-e581-4c80-9b4d-ddfc90baebbe,6907133143964061de216943,0.0,398.0,migrated_sync_stg_mongo_balance
+6899fb7578eaa295468ddc49,0c03aeb9-727e-451d-80cb-f6eb767af872,23bb5ed9-ad3c-412a-9e6d-6c31aa0d7d5d,690c5ff751f0c6c5eb214906,98.0,195.0,migrated_sync_stg_mongo_balance
+671660f9a61d7e6999c72b2a,2bec1b40-59f3-437e-837c-8efbeb58b416,172fd7f2-b870-41e2-b216-83d20f37b5f3,6a476da2c824c32cb0429d72,518.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+671660f9a61d7e6999c72b2a,2bec1b40-59f3-437e-837c-8efbeb58b416,ef33603d-9d3c-4a6f-81d8-8e6d7aa68934,6a476eadc824c32cb045dc50,472.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+671660f9a61d7e6999c72b2a,2bec1b40-59f3-437e-837c-8efbeb58b416,aa675036-6eec-467e-8fc3-529e65454c09,6a4b55ecf6fd40c155e5b315,800.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+671660f9a61d7e6999c72b2a,2bec1b40-59f3-437e-837c-8efbeb58b416,31a51a92-367d-4345-a87b-801ee6e05261,,0.0,210.0,native_earn_full_amount; fifo_existing_native_burn
+6774cdd4543dd36f206e8597,83aa76d2-dff8-422a-a556-dc8d72ce7089,5f4d1e99-175e-4a75-9219-f86db88f95dc,6774ce2199cb338539902afa,0.0,1563.0,zero_lots_allocate
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,ea430c8e-805f-4b5b-800b-17757e53226c,6a449ed71ca4fa65e1c2240a,1090.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,122461b4-d3ab-4832-88f8-012c60b68910,6a449f8ed27efd29581b8ea0,2632.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,2c8c64d7-c6ea-4799-9290-078f947a8949,6a44a00a47e65303a2105be6,180.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,a52edf01-5d5e-4bd7-86f7-87ea4431a538,6a4f8bb2f0045675b095fe84,259.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,5d93643e-4c30-4825-9ee2-c7b312ddf601,6a4f8c0d597019766fad5f13,1206.0,74.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,2059a042-d4d0-466b-b445-779f49b81718,,0.0,107.0,native_earn_full_amount
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,7dcfed60-b3c9-4ed1-9abb-2d6ec3a59b04,,0.0,2842.0,native_earn_full_amount
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,bd81c0d8-9ccb-4031-a375-cd55d4696002,,0.0,425.0,native_earn_full_amount
+662b506678f244ead7feee7c,d5312302-f9a8-49e6-bdc0-e3b49c4c1757,b12823ee-4bbb-4820-aa9e-017dc1937983,,0.0,418.0,native_earn_full_amount
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,45421af4-337b-4a6d-ae1b-cf442626f968,6a4b58f3364177c5f18588a6,290.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn; headline_mismatch_trim
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,acfc85c4-d5ec-4312-a30f-569c376b9ade,6a4b59799358d72d9137ed55,123.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,e89606d0-fe5f-403e-8c62-550ba546c520,6a4b5db88942f2d507bf0b53,463.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,629b69c9-f835-4707-9bf9-647393a98654,6a4b5e04f5ef3f5fea7807f0,22.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,dd97a121-00ee-40d1-8648-9975e3d6508c,6a4b5ec8711b7b2c79f51efd,104.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,74a5be13-3fd1-443c-a5cc-17f2af04ec59,6a4b6066bb4eaa10a9738a8c,183.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,dfe251c7-cce0-4f8d-805e-ecaa379754e2,6a4b60ad36a8f764fcd2521c,180.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,ba58ee98-cb8b-4c84-9ac7-880b29754a57,,0.0,19.0,native_earn_full_amount; headline_mismatch_trim_fallback
+68dbfe9263e4b4136140fa46,192f7286-372e-439c-8659-5a9d0c08d89a,6cd78084-dd83-4bdf-a642-8bf1fd39ca2a,,263.0,244.0,native_earn_full_amount
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,efe587b3-da53-4111-bdf4-f94804a2eab7,69a142809180cd5526ebf757,21.0,0.0,migrated_sync_stg_mongo_balance
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,77d08d0f-9757-46b5-8127-b1c15bf7bd51,6a42065a2832d2af7e72836b,18.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,33872c6c-2397-4b17-95e2-79ece0d27f22,6a4240c3f264a3fd7efd0885,21.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,ddcdd455-efeb-4f85-9530-e5a8b0b89507,6a42414b51bdc00936624c74,30.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,28d38ee5-e66a-4837-b32b-63b8e3bfa57e,6a42842431473359d66b6c2b,86.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,5fda565c-3a23-4ff9-bb50-1cc1152e88e7,6a4382347bf7c430ff2c4c32,439.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,70632592-608a-4666-8e53-9c76517a6808,6a450c589a2be2668c63aa41,87.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,c824a3f6-8f42-4216-85a4-8082080c874d,6a450ec55ec065708636b825,36.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,37ab4efa-c9a0-47e1-b90b-fc623061934c,6a4635ccbfe7109a783be6a9,30.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,c17b742e-b5ba-474b-8315-8cc62ec86ceb,6a46362bbfe7109a783df2bc,130.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,5b12968c-cb73-4327-b475-687b815a0e39,6a4cfcb99595eb326c0c1a70,115.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,c2320fe4-2ad5-42da-92d9-f90384580f5a,6a4cfeb5d63d46c371fa556a,87.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,f286c184-7b0d-4d75-9bcd-bec276ac93ea,6a4f8c6324b043beb0ec4f88,138.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69a141e528fa02e24cb7f910,9a14fca3-a6a0-4452-a3be-2e11a20ec0e4,effdb266-09b1-450e-8d97-36c88cf5deff,,0.0,21.0,native_earn_full_amount; headline_mismatch_trim_fallback
+67a581dfd41bf7c429d14296,c4322c80-096c-4205-adf8-edf874c66132,78b2cd34-81c9-45bb-bcf7-81abcba8dc62,68e0f188cd20467cd1d694b8,92.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67a581dfd41bf7c429d14296,c4322c80-096c-4205-adf8-edf874c66132,1e87914d-e9b5-487d-9cfd-bf94fb795fed,68e0f1b5d39f2a59c308e0ea,1154.0,213.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,f379d00a-96ed-4497-8769-85d2f73e2db5,6851157f8925f916e74e8dd0,0.0,166.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,084956bf-2735-488a-ad78-4f477ccffc44,685116618925f916e74f1226,0.0,129.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,dd95d43f-c98d-4945-b82b-692c49c2e56d,685116cd09fcff7635d4d096,0.0,90.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,3e396085-e7ae-43c4-9666-0f0ef8604534,6851174002578855091e8990,0.0,20.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,b4e8cb64-5647-48bf-9af2-784010c8a936,6858ccf06ea681b6b8c5fe90,0.0,10.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,8faa4006-38db-47c3-a827-6e63ab047212,6858cd477b35411961121334,0.0,40.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,2e943c41-dc1a-4be2-9e1f-02efd5f79cc5,6858cd825c8c2342467c4b1f,0.0,23.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,19ba4be7-20a6-46f1-b12d-1ee4fada43d7,6871e74a3829305f5450df68,0.0,13.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,66894cca-0129-431d-b614-d42bec1ef970,687dbde1df1a2a41b61c2072,0.0,93.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,446a1840-d0a5-4173-a6e7-bb6e092a8534,687dc068df1a2a41b61e4095,0.0,55.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,fab233cf-2695-441a-8106-446163aa9c19,687dc32cb013cd8955bdc5a5,0.0,54.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,de7f827f-6369-4ae8-8359-9bb15b44ea0f,687dc36fcf68adf2b377237f,0.0,81.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,e92af145-8024-4e28-a0ee-f31364d1ef9e,6892bc51c485e44db2c130cb,0.0,14.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,5af3d757-cd87-49b3-bd58-d6fa563ced42,689999e64b1a2e4fc0be71ec,0.0,106.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,080add53-eda0-414f-a297-6da52f84198b,68abe3fc47a2c6184e93fccd,0.0,4.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,9f4e803a-cb19-44bc-b755-ed313e23391b,68abe619a4f1a124013fd77c,0.0,34.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,1bedcae6-5a23-40a6-9d93-9e4e0a3fc350,68abe98abf87aea442691e60,0.0,69.0,migrated_sync_stg_mongo_balance
+65413f65d6b1732a1ec60795,0687be3a-c330-4f48-a942-5d64d702f016,e445380f-8c43-482b-8ebd-e22a90288260,68abe9ca6327678f56c7a369,0.0,18.0,migrated_sync_stg_mongo_balance
+6583b8aaf8e9301fa214d75e,60d71d67-6bb0-4c55-833a-75ceabd95e79,6541777f-ac1b-431f-8006-fc70a46639cb,6a4b57b8a9870ab73f74d703,409.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6583b8aaf8e9301fa214d75e,60d71d67-6bb0-4c55-833a-75ceabd95e79,ff6dfa79-daa8-417a-ae5e-e52f393ecc35,6a4b5b98e3a8a0a7e6827cce,311.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6583b8aaf8e9301fa214d75e,60d71d67-6bb0-4c55-833a-75ceabd95e79,cfd59a13-f9e4-469d-8c5a-2d44f8735e43,6a4b5dcf7a5077981365623c,114.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6583b8aaf8e9301fa214d75e,60d71d67-6bb0-4c55-833a-75ceabd95e79,01cce576-3385-4b53-b343-5e8d33b51198,6a4b5e6832a12bab9fe3b44b,107.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6583b8aaf8e9301fa214d75e,60d71d67-6bb0-4c55-833a-75ceabd95e79,cc232b16-c781-4037-a293-c789d7a0dcd0,6a4b5ec95ef2e9e13c2f0f05,9.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+657c1bc9288d451e5bfaae8a,d393a943-c476-471b-883d-8538ed5d7400,78405f24-4352-48c0-acf8-9b50e107b973,6885e7edc7bc89d30d045fec,0.0,385.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+657c1bc9288d451e5bfaae8a,d393a943-c476-471b-883d-8538ed5d7400,94855c81-05d3-407e-a8ac-d9df2d1c00e1,688dc9e4e0223b3a7037f3cb,0.0,360.0,migrated_sync_stg_mongo_balance
+657c1bc9288d451e5bfaae8a,d393a943-c476-471b-883d-8538ed5d7400,15a20d7a-011d-438b-8995-748e44a17d09,689d8b4aac4d351c9d9f9c18,0.0,17.0,migrated_sync_stg_mongo_balance
+657c1bc9288d451e5bfaae8a,d393a943-c476-471b-883d-8538ed5d7400,a0500c09-15e3-4473-9c06-65498934b419,68a0643ee6fb4c9f02013e92,0.0,138.0,migrated_sync_stg_mongo_balance
+657c1bc9288d451e5bfaae8a,d393a943-c476-471b-883d-8538ed5d7400,a4f9c43f-1c45-4085-a453-2b61b63e15cb,68b6e5943fe8f1ea0900fda1,0.0,47.0,migrated_sync_stg_mongo_balance
+67d156965cc4f811778f0732,b9e834c7-d060-4ae1-8609-b4abcdf3563c,e0a8369e-d7ae-4040-9b8a-ffbcb174d348,,0.0,273.0,native_earn_full_amount
+67d156965cc4f811778f0732,b9e834c7-d060-4ae1-8609-b4abcdf3563c,fb00a618-7e42-40e8-8598-cfaddbff3a99,,0.0,155.0,native_earn_full_amount
+67d156965cc4f811778f0732,b9e834c7-d060-4ae1-8609-b4abcdf3563c,62c07a4f-d0cf-46ac-975b-2dfc393475d1,,0.0,2867.0,native_earn_full_amount
+67d156965cc4f811778f0732,b9e834c7-d060-4ae1-8609-b4abcdf3563c,ae848833-ad24-47ef-813f-0ab524cc07ac,,0.0,1485.0,native_earn_full_amount
+67d156965cc4f811778f0732,b9e834c7-d060-4ae1-8609-b4abcdf3563c,00bca89d-034f-44fd-82b4-2466843c1df9,,7189.0,11470.0,native_earn_full_amount
+65d012eb7ff1cec9ffdbc8b0,18ae7a19-0965-40dc-b165-2d1147b22ddc,50cc2499-6202-4401-b4c8-9463b307c6d3,689fe4f5e6fb4c9f0291bd41,0.0,308.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65d012eb7ff1cec9ffdbc8b0,18ae7a19-0965-40dc-b165-2d1147b22ddc,244a8d9a-596c-409d-883a-6bdf78e73bae,68bcf46c5734828677afd18c,0.0,604.0,migrated_sync_stg_mongo_balance
+69f580122c7cc9555b88fbef,16b6dfbd-2f08-4f25-979f-b795f5d6f1ff,80350bf4-0e37-4210-93a4-0691d4f90b5c,6a16a9db2b99987da4721c08,523.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69f580122c7cc9555b88fbef,16b6dfbd-2f08-4f25-979f-b795f5d6f1ff,ba25ddda-65b4-40c9-9e84-a5461c4a4daf,6a1951fb2e03c430a9b9ee7b,228.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6a44b8fbf1e35578153d6b0e,4b20ce30-90db-4e65-a911-227bb6048c56,542d23eb-a78e-4165-a17e-d1fa5453842d,6a4509529fb866f6964dea76,562.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+6a44b8fbf1e35578153d6b0e,4b20ce30-90db-4e65-a911-227bb6048c56,57265e85-9fdc-48b4-8239-3810e483c630,6a4616fc893f40b94f840ff8,1236.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+6a44b8fbf1e35578153d6b0e,4b20ce30-90db-4e65-a911-227bb6048c56,9743bee9-64a8-4c70-a57c-12c1fe891b7a,6a477280c4782ea092e7bf9d,194.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+6a44b8fbf1e35578153d6b0e,4b20ce30-90db-4e65-a911-227bb6048c56,7b0a7d31-ac79-480e-8b17-1c6594f5b2ae,,0.0,64.0,native_earn_full_amount; fifo_existing_native_burn
+6a44b8fbf1e35578153d6b0e,4b20ce30-90db-4e65-a911-227bb6048c56,7aca75e4-575c-4a52-b2cb-207e5bd4c303,,0.0,580.0,native_earn_full_amount
+6a44b8fbf1e35578153d6b0e,4b20ce30-90db-4e65-a911-227bb6048c56,72bbae1e-26ad-49ec-a80c-119cf3851d52,,0.0,62.0,native_earn_full_amount
+6a44b8fbf1e35578153d6b0e,4b20ce30-90db-4e65-a911-227bb6048c56,5d99d272-ace3-48d6-9738-45eaac38f9aa,,0.0,580.0,native_earn_full_amount
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,207edc4d-91b3-47cf-8d04-02b1587875d6,688db7ef8be091024491837c,0.0,89.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,0d173bf2-701e-4eb5-9cb4-36a2495aeae3,688db863304a2c61bc182d34,0.0,118.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,dda75392-88c3-4b56-8430-802375366699,68905240e0223b3a709140bd,0.0,2.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,dbc8f0ec-86eb-4ed1-87e1-2dd52ff4bbe1,6890c5f1d8957f3eff3ffbc5,0.0,5.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,e7e0bd73-5138-4445-b6cb-57bc970e40c1,6898535296d9875f43f66cae,0.0,4.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,96da8e32-8bd1-4938-be93-549088f0cfae,689c84268f5e5925ff246701,0.0,3.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,c065faae-c6b8-417b-b2e2-d42cec1280de,68a0384e9ce3d6c08c977c05,0.0,4.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,850cf58a-1d80-48ba-8ca5-a6feb65c11c9,68a2af5a61d4fa46a213c74e,0.0,28.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,cd14e61e-e757-412c-8859-be7a81014138,68a4330e691ab4077c88455d,0.0,7.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,7a66d93b-4375-44eb-bff8-a38e38d6b097,68a433381b96cbfb4c360cea,0.0,6.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,4ba139e1-a065-4ee2-9218-1e352c56feb3,68a4547d5e738d6f5e82b854,0.0,86.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,4c80717d-15e1-410c-9d2f-98a2e6a70c1b,68a6cd94b06cee81a6c2a983,0.0,7.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,5d97b3f2-b299-482c-bdfd-a4bbcd0bcda1,68a816095f7580657aea84bf,0.0,9.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,4f24a337-0d9e-4889-827d-5a1dfc8be90d,68aa8b175de9cad8161cd1d0,0.0,13.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,6f78c6d5-9f4e-4f81-b8b0-4ed3651f605b,68ad64eb39b797efe01ab674,0.0,9.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,098a1b94-2f84-4a7d-a546-6a37962cf650,68afdc79ff7312113dee75e7,0.0,11.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,252c6eae-9525-41f4-b897-ac3bc0a44f55,68afdfef2604efbd3637ed2d,0.0,6.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,014f027e-349a-4a80-ab94-53d72b9dfad6,68b060cbaec716ab4f116e1a,0.0,3.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,39581a49-168f-4bcb-80ed-c7eb75cf944b,68b27d49b87737319022b5f9,0.0,13.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,9ffbaa1a-424a-4cf5-9457-91ea8cb7b0a2,68b2818ab877373190282114,0.0,51.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,cd51883a-d31e-49dd-a2ef-eddf12a3c7c9,68b2a0f6b9bf71e64f34b351,0.0,9.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,5c236f63-7c9d-4f07-90a6-039df39a00b8,68b3c5569a0a498ab05cc1c5,0.0,2.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,841eeb3d-6e67-44bb-8416-31e13710eb3e,68b4214a16873730b23f5d38,0.0,47.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,a8718d45-8ea9-4543-bbc1-4ca7ee38bf0c,68b50b14e06ec278df931eab,0.0,15.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,1578be57-165a-4889-afa0-00e8e85a7c01,68bd4de9549b79aef33376cc,0.0,8.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,92fd1b01-b2ef-402e-a650-285ed7f45feb,68bd5027278eb3c034261ebd,0.0,29.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,b70df773-b872-44f1-97b7-d86314153bef,68bd50e2f89d28288cf1d2ab,0.0,13.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,a0e1bc60-0ae4-4db9-ae76-4b97c2c8ad8c,68bfcad176731924877a4ca1,0.0,42.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,03c18928-17e1-4d2b-9c00-056365960f80,68bfcb10970e2a94c95f109c,0.0,24.0,migrated_sync_stg_mongo_balance
+655426826178c8b865836a89,80e712c9-ef6e-4d0e-a2c5-ceed05184d8b,e848f048-746d-41a0-b17f-a730157c1589,68c26d1f20f3c5944f4ad57c,0.0,7.0,migrated_sync_stg_mongo_balance
+69990eb58fed8f405589ea22,a2e96866-6710-4fbd-b707-2488d5989082,0ca5b120-0f58-43b7-bdba-24bbf02b188e,6a44d96c289c03bf575140ee,180.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69990eb58fed8f405589ea22,a2e96866-6710-4fbd-b707-2488d5989082,ff3b2e7c-5379-409b-81e8-6cc6bc12a5f5,6a450ac0289c03bf57f4edb9,77.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69990eb58fed8f405589ea22,a2e96866-6710-4fbd-b707-2488d5989082,c0d093c1-e997-4e1f-b4c3-bbcf5928c319,6a4cc824d63d46c3719da83f,180.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69990eb58fed8f405589ea22,a2e96866-6710-4fbd-b707-2488d5989082,d277e67d-8a39-4021-8e3f-e4402a7cdeb1,6a4cc997ab664d49f46be5e1,220.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69990eb58fed8f405589ea22,a2e96866-6710-4fbd-b707-2488d5989082,2d999d3e-c300-47b0-8316-92bc6fb93f8f,,0.0,52.0,native_earn_full_amount; headline_mismatch_trim_fallback
+69990eb58fed8f405589ea22,a2e96866-6710-4fbd-b707-2488d5989082,3489afc6-02f8-4e00-97fa-7f16040f55ae,,74.0,22.0,native_earn_full_amount
+67dcfddf78a2fd161ddcde00,3e091fa2-39fd-4b08-b3f1-7a23325d3fe3,a14a6122-080a-4c95-9ee6-212c9500ac37,67dd19ca14502ea2b97ffadf,0.0,76.0,migrated_sync_stg_mongo_balance; fifo_existing_expiry_burn
+67dcfddf78a2fd161ddcde00,3e091fa2-39fd-4b08-b3f1-7a23325d3fe3,7ec46e1c-7adb-4b9c-b2bf-27034a597437,67e10d323d0b42f071eb6309,0.0,96.0,migrated_sync_stg_mongo_balance
+67dcfddf78a2fd161ddcde00,3e091fa2-39fd-4b08-b3f1-7a23325d3fe3,10109a32-1e20-4cf2-ac4a-47d700d2b550,67ff1cc7cea1faa73564cb4c,0.0,168.0,migrated_sync_stg_mongo_balance
+67dcfddf78a2fd161ddcde00,3e091fa2-39fd-4b08-b3f1-7a23325d3fe3,0f6722eb-3f4f-42a7-8a22-0ff840362830,68c13126b6ee24e49b6b168d,0.0,307.0,migrated_sync_stg_mongo_balance
+66bee1cd1a75105cebc22890,43517420-8b03-4b1b-a30a-5e39513f8fe7,fc6e3d8f-f36e-4c55-acc7-88bea766aa17,68da204ccd02e71b83596d84,765.0,141.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+670b6c2cd2a0ec55f4141dd6,8f2f4682-739b-460a-b8a7-358f9dde4ce1,00161c3f-9e13-494e-8d6f-159443ece338,670b72123bcc3b91a4fc746c,0.0,621.0,migrated_sync_stg_mongo_balance
+657ff668288d451e5b231ec7,680b8024-e029-4ea4-8f2a-98ad3a284d14,6be02717-6f23-4924-859b-690cadf631bf,687472c4daea303a17bfba9e,0.0,172.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+657ff668288d451e5b231ec7,680b8024-e029-4ea4-8f2a-98ad3a284d14,1fcf8f24-aa91-4c23-abc7-6339b86afb02,687f44f549a70add486ce847,0.0,232.0,migrated_sync_stg_mongo_balance
+657ff668288d451e5b231ec7,680b8024-e029-4ea4-8f2a-98ad3a284d14,8a310add-2a08-4228-99d0-8f832c1e3c35,688c30ee244791aedf7759ef,0.0,45.0,migrated_sync_stg_mongo_balance
+657ff668288d451e5b231ec7,680b8024-e029-4ea4-8f2a-98ad3a284d14,58705415-f7ab-41fb-940f-664bd899d620,689d8354ac4d351c9d9620ae,0.0,101.0,migrated_sync_stg_mongo_balance
+6655976829a6894914448584,e4314cd7-0eff-4763-bf35-5a2016bdef97,a3e7f96c-0aef-4304-8a16-7c6d3a55139b,67ed1250d03f38f4914ec9cf,0.0,101.0,migrated_sync_stg_mongo_balance
+6655976829a6894914448584,e4314cd7-0eff-4763-bf35-5a2016bdef97,e341f51f-994e-4509-9ddf-c3f23d7b1db7,68246a99c3f36c78b11e41e3,0.0,31.0,migrated_sync_stg_mongo_balance
+6655976829a6894914448584,e4314cd7-0eff-4763-bf35-5a2016bdef97,7944d27a-5416-42da-8018-63396b66ca76,682fd1116bcf9064da76db61,0.0,31.0,migrated_sync_stg_mongo_balance
+6655976829a6894914448584,e4314cd7-0eff-4763-bf35-5a2016bdef97,f8a175e0-ef43-45c1-b270-a6e04a132eb7,684530d26c6066a52b8e7082,0.0,343.0,migrated_sync_stg_mongo_balance
+683ae0e6a7a1f5cb4b9b3e4d,1eb8999f-342f-4125-8270-daa7e3b1d570,05891ec5-94bc-432e-8807-a46614e95bd5,683ae13d455323828d907f68,0.0,500.0,zero_lots_allocate
+65e810a3a09d42f469aad503,82f36c1a-6de9-4ff7-9c24-3aee6e073221,dcaf5979-1349-404e-9851-c89096218d70,6a4206dbd75bfd924396e3b3,203.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e810a3a09d42f469aad503,82f36c1a-6de9-4ff7-9c24-3aee6e073221,7a75d420-a49f-4ef5-be42-5a5e1bd69019,6a420743f264a3fd7e82040f,92.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e810a3a09d42f469aad503,82f36c1a-6de9-4ff7-9c24-3aee6e073221,a6f860f6-ad88-4e66-a3f3-4230bb2969a4,6a438c578131bed262092576,18.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e810a3a09d42f469aad503,82f36c1a-6de9-4ff7-9c24-3aee6e073221,b9e2091c-4869-4a0a-966d-c089e81fb69f,6a46330b0748f09bf353d7e5,92.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e810a3a09d42f469aad503,82f36c1a-6de9-4ff7-9c24-3aee6e073221,8bf55d71-658c-49d3-a40e-3710d849ecc8,6a486d2f0693e57b7c832777,92.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e810a3a09d42f469aad503,82f36c1a-6de9-4ff7-9c24-3aee6e073221,705d1acd-c83d-478f-b7fb-9971efcd9195,,0.0,348.0,native_earn_full_amount; headline_mismatch_trim_fallback
+65e810a3a09d42f469aad503,82f36c1a-6de9-4ff7-9c24-3aee6e073221,6bdeb51b-f907-4aa9-b4b0-6e1e9bf8c658,,496.0,148.0,native_earn_full_amount
+66c81110b6ea3aa94e56e4ea,9b5ae71d-5085-40af-a26a-cd1f0d6e27d7,a5edb512-1fbb-481f-a934-d47e6d12759b,6880ab74d76443207598512a,0.0,180.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66c81110b6ea3aa94e56e4ea,9b5ae71d-5085-40af-a26a-cd1f0d6e27d7,350777b2-ee9b-48c1-996b-bda418569e5e,68942414995172c5c8b8328a,0.0,300.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,2c2b54e6-2dce-42b7-9f1e-b36117f2a525,67ce90d33982a0abd3a7cb3a,0.0,10.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,76b9e7b3-3811-462a-8476-5048c430278c,67ce934b95d4011ed44de7cf,0.0,3.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,e3a32674-c7b4-4f8c-b4f3-d291060726d4,67d14cdafc1614609cd4942b,0.0,7.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,17e78163-6c57-45f9-b9de-cba273fe425a,67da6fa5eeca4f489d716f87,0.0,16.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,f8ee567d-335e-4a7b-bc5d-855dd4e1aeb2,67dbd1f4943e1888336e1a3b,0.0,7.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,321ec738-6a06-4b89-84a7-f786a6d00f34,67de389414502ea2b9c0e9ba,0.0,9.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,a620b59a-3683-408e-af93-5b5d167405b8,67e5310449c505131f526976,0.0,1.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,10edf30f-d4c9-45a7-b531-e9c5da48d06b,67f77b79a99706023d4ebace,0.0,1.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,d1c7f704-ecdb-48d4-99d0-45c11254950a,67f78647010f8f84df61d1b0,0.0,1.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,1a24976a-4792-46b6-9112-55dcb087878e,67f79fcf010f8f84df77ec1c,0.0,1.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,0f9a52e6-87ca-4b8e-9a97-3d2f4af709bb,67f8d29d2283d538c4f5666a,0.0,8.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,e34aeeb9-be97-4e49-ab3a-f491cd2cd30f,67f8dc9ac9259d0684752113,0.0,5.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,cc5dfee2-8cbf-453a-9437-b331b00802b7,67fa16e32a58499ca8beb524,0.0,1.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,45fe95b2-80f0-462c-8569-b29a333167f8,67fa2b81878aca58eb0d2002,0.0,8.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,69ab31cb-8615-4359-8fb5-6d77e4dc57d4,67fb207a2283d538c475f3e4,0.0,3.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,5ad2632e-90de-4673-9981-48b5bbd633c0,6800b09f2283d538c4b3b085,0.0,2.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,63c3b207-feca-4321-974e-17dedb4491a6,6800b0ef0a4337bc5c796fad,0.0,9.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,aabc8e9b-4b1f-48b8-951a-019a52cb039e,6800bf7f0a4337bc5c845828,0.0,1.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,b5377b10-91d9-4610-a69b-a6de289af0fa,6804c1c86c431c170be98cf7,0.0,11.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,277844c3-91ff-41c9-80eb-1d715e0b4806,6805fa24f15f1a306c52534b,0.0,3.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,a0a6e827-95ee-4aff-b191-483f97b6fd85,680da24ea9f88f089f718332,0.0,71.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,f0d7afa0-d616-4f15-bb7b-2e66909652c4,680da29fa9f88f089f71983b,0.0,37.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,54198f5b-ea35-47ec-a9b3-9bb9689c4415,682a96e646fb54b74e6f3b1d,0.0,23.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,38dc3223-d0ae-4c54-bd25-fd2402cb6563,6830450310f3bb1803bf16f7,0.0,5.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,3f3e502b-9825-45b8-902c-3393f7e9e930,683164fb2b8e3db693fc22b6,0.0,32.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,57548a4b-3148-45cd-973f-e2578b2dcc26,68319400fb4fe84c8b5b4fa8,0.0,10.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,eed940da-795e-4c16-9e91-c9e77222713e,683194a9c7282053ff68f1c4,0.0,9.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,28accfcd-7c51-4bf0-a776-a1dc95242236,68328e751555fff4576a1e65,0.0,25.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,1e0986d3-19b7-49f6-89fe-2291be42d5f1,6832c7661555fff4579062e6,0.0,4.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,4a1041e8-b620-4aa4-b1fd-1e9e08ce5e07,6832db3453f5c3ec8f9dccfa,0.0,52.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,f0fb77e2-ed24-46b7-872c-310a72464264,6842cb38a7ba3ab52ad0a1d7,0.0,85.0,migrated_sync_stg_mongo_balance
+6554a5904673598ef1a8fc17,238eb951-801d-4cb7-945c-2f1556e464bf,1d0f9696-cc1d-4ba2-b402-9bfaeec29338,6846bdfc7aa53c1819414337,0.0,5.0,migrated_sync_stg_mongo_balance
+677f4e3d6478b7ccfc76b13a,6aacf6c5-4b10-40ea-a3e3-e9a056637a0b,a377e829-a948-411d-b5ea-1ddde650a90d,677f52016478b7ccfc77e42c,0.0,396.0,migrated_sync_stg_mongo_balance
+677f4e3d6478b7ccfc76b13a,6aacf6c5-4b10-40ea-a3e3-e9a056637a0b,56b11ce5-de8b-4143-8a10-998471cb0b27,679c5fe47f346f55790adbe9,0.0,60.0,migrated_sync_stg_mongo_balance
+65413f68d6b1732a1ec609b1,2e91acdf-db08-4029-b85e-ae90586ae21e,e4627ba1-d1dc-482c-89fe-9229d8379d55,6964a7bfdbe5b7f60c2aabe7,239.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn; headline_mismatch_trim
+65413f68d6b1732a1ec609b1,2e91acdf-db08-4029-b85e-ae90586ae21e,0227c013-dac5-4b15-a9a4-aca760696071,6964a7faff77b4817cc43eb2,2100.0,1889.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f86d6b1732a1ec621e5,167d1b6d-fa75-4924-9cfe-459eb8a1128d,1be6d8c8-4dc4-4e63-98cc-5ac05a06b500,682d7947bb48ae529de12b75,0.0,139.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f86d6b1732a1ec621e5,167d1b6d-fa75-4924-9cfe-459eb8a1128d,59aa8f87-3476-43f9-b0a8-51c0073b27a9,6862134687b6a31da6dc9103,0.0,84.0,migrated_sync_stg_mongo_balance
+65413f86d6b1732a1ec621e5,167d1b6d-fa75-4924-9cfe-459eb8a1128d,69aa7c2f-1f7a-4305-832f-7feafcce6c56,688b9c196ffa0eb55cf72c6c,0.0,137.0,migrated_sync_stg_mongo_balance
+65413f86d6b1732a1ec621e5,167d1b6d-fa75-4924-9cfe-459eb8a1128d,bea55ad8-38da-440e-979d-18ac77b14976,68a6c2aa71e4e8b7cfbbd3f6,0.0,40.0,migrated_sync_stg_mongo_balance
+65413f86d6b1732a1ec621e5,167d1b6d-fa75-4924-9cfe-459eb8a1128d,1df56545-4324-4c2a-9cdb-7a5ba9db0d7b,68b65e84fdb3d94a1cace951,0.0,37.0,migrated_sync_stg_mongo_balance
+67b549f6fb42c672d834fbc5,53f473d1-d30a-413b-a43c-7e2991109f92,5a8ff594-6840-4c3a-9540-625ba91591f1,6a4ce2ab0a46d36102828b02,435.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+662790b4d3a4a27e432a02bf,17b5601d-c2b8-408a-b379-cb121051da29,3e68139a-3cf3-4a7f-82d8-62d5e01fa5b0,6a450f435ec0657086376fcc,843.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662790b4d3a4a27e432a02bf,17b5601d-c2b8-408a-b379-cb121051da29,a912a00d-9c8f-42e3-99e8-7d0bdb6f2610,6a4cc8b9b959476ac40fc2e2,598.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662790b4d3a4a27e432a02bf,17b5601d-c2b8-408a-b379-cb121051da29,5cd31692-0c41-480a-8264-7889d8ba255c,6a4cc91dd63d46c3719f436d,850.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+662790b4d3a4a27e432a02bf,17b5601d-c2b8-408a-b379-cb121051da29,7e185d93-1744-4856-b14b-3504490fc8f0,,293.0,2157.0,native_earn_full_amount; fifo_existing_native_burn
+668d09de43dfd583f3c68b6c,aa7161bc-7cd6-4fec-bc36-83ebf135ad53,bddff06e-d047-4d7e-b611-520e387b3f8d,6a48ba3e9774e70502e81942,424.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68a82a6c87848cbc6c651792,cd3491bf-e717-44a5-abdd-2c679cce0074,8f640b6b-5a45-448a-afc9-6ce27ac56aa0,68bfa3b6970e2a94c9468dfe,0.0,142.0,migrated_sync_stg_mongo_balance; fifo_existing_expiry_burn
+68a82a6c87848cbc6c651792,cd3491bf-e717-44a5-abdd-2c679cce0074,7a0f62ea-dbf1-4266-a54f-9b0ed9806d34,68bfa429970e2a94c946f52f,0.0,237.0,migrated_sync_stg_mongo_balance
+66cfe07ec806008d7e3348d1,e667c9d3-1dbe-4173-b075-42fca35106eb,6f580c03-e0b5-49f8-b62e-e4e1efa87633,6a3cb074c669cffcd9ec2a6a,0.0,2186.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66cfe07ec806008d7e3348d1,e667c9d3-1dbe-4173-b075-42fca35106eb,53e6df5c-04b4-4f36-a951-bdf035d0732f,6a3cb6da99712c83bae35b12,2697.0,133.0,migrated_sync_stg_mongo_balance
+65413f68d6b1732a1ec60995,e17610f1-8f95-446c-a32f-8cf20691d9ae,48950ad3-ea96-45ba-85cf-990e4ab3a9fd,684fb7007885c24a9a645d8f,0.0,351.0,migrated_sync_stg_mongo_balance
+65413f68d6b1732a1ec60995,e17610f1-8f95-446c-a32f-8cf20691d9ae,64213f8c-0bc5-4a8e-9933-7c917eada2c1,684fb8487885c24a9a64f749,0.0,20.0,migrated_sync_stg_mongo_balance
+677dd6c88cb32551667d8b87,6f19b2a6-a193-4180-a39c-e00f2e0f6d21,65b463a2-5b04-4e72-9aec-0b06f40071aa,6a4636ebbfe7109a78416468,355.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+677dd6c88cb32551667d8b87,6f19b2a6-a193-4180-a39c-e00f2e0f6d21,e11f320c-c79a-43fa-bce2-12c5e0c230a3,,0.0,123.0,native_earn_full_amount; headline_mismatch_trim_fallback
+677dd6c88cb32551667d8b87,6f19b2a6-a193-4180-a39c-e00f2e0f6d21,6619394d-9ff4-4bae-8aa3-14020ae12b0e,,654.0,531.0,native_earn_full_amount
+65ea71c4db4b00146286eee9,69a18985-553a-40b5-bfa2-605e6959a26e,dfe66d0e-e40a-4ea5-9af1-45f46920fdd2,6a1d3c7f4084f1723d8a25bb,0.0,351.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+655dc0bf53039f6a991d9b9c,09b753ab-6f76-46e6-95b6-4d9067a5490c,55ab5e09-202a-4976-9e24-31c113bb7332,6a452c8f47e65303a2277d8c,155.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+655dc0bf53039f6a991d9b9c,09b753ab-6f76-46e6-95b6-4d9067a5490c,70bc7d08-3930-41b6-9167-154f75b87f72,6a452cd98338b081248754e5,125.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+655dc0bf53039f6a991d9b9c,09b753ab-6f76-46e6-95b6-4d9067a5490c,a443994a-5275-4999-a95f-86fab22d7fb8,6a452d335ec065708657a9c1,103.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+655dc0bf53039f6a991d9b9c,09b753ab-6f76-46e6-95b6-4d9067a5490c,aaa4fac8-4e06-42bc-a403-b8fb26de0b65,6a452f5cea03b6b572d5f161,16.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+655dc0bf53039f6a991d9b9c,09b753ab-6f76-46e6-95b6-4d9067a5490c,15c2b571-0f46-46fe-af54-fb5f11ef8c8f,6a4530d4cec9a67c14923ae3,1.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+655dc0bf53039f6a991d9b9c,09b753ab-6f76-46e6-95b6-4d9067a5490c,978d4161-bff8-4c50-8a17-fa60dd74a926,,0.0,63.0,native_earn_full_amount; fifo_existing_native_burn
+66b4296299028b6d1f439f42,4f63443d-b500-447e-ac1e-0c62a15e19d0,8b38df78-a9f3-4b31-8e32-f0c03ff64167,69b370627db876a608f29ef2,60.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66b4296299028b6d1f439f42,4f63443d-b500-447e-ac1e-0c62a15e19d0,142748dc-7161-4b7d-844b-f7500c29f7f5,69b3bbe0f8267429d34cea2c,260.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66b4296299028b6d1f439f42,4f63443d-b500-447e-ac1e-0c62a15e19d0,27edd66d-ca06-412f-aad9-d00a2c7af690,69ba0be5cf10d75a545b8f7b,1214.0,1199.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67c55c9505e9d1d86e1ad419,b12070ac-a9be-4a4d-aac2-9a8f86f12706,4e662f4c-00c0-41b6-a11d-edb66d103a3f,67c55fd77037b5d4742a377c,0.0,324.0,migrated_sync_stg_mongo_balance
+66976add542efa4fb60e9039,cf3e4ac5-31ca-491d-b599-a8f9b9ac20b2,ce929497-8e80-4ead-bec0-bdd52b592c24,68804bf4219f7b6612e39c84,0.0,322.0,migrated_sync_stg_mongo_balance
+66e3b213c3678f0895f04e7b,fdd5b2a3-10ff-48f8-ba12-ea38e3846d0c,a8daeb5c-197a-4c51-9574-b94120d28f8a,6a0d382ef036a65a662742ec,1447.0,1251.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66e3b213c3678f0895f04e7b,fdd5b2a3-10ff-48f8-ba12-ea38e3846d0c,f149bde8-173b-49c8-8041-22f42cd0a129,6a0d7c37e205c0708ec70fdb,200.0,83.0,migrated_sync_stg_mongo_balance
+66fe3ba60dc50ec6c8529257,41534223-f441-42ad-9ddf-ab7876e8555a,29676bac-e4bc-4fb1-94f2-fbfa29fc930c,68524717a752d3f16cf18030,0.0,188.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66fe3ba60dc50ec6c8529257,41534223-f441-42ad-9ddf-ab7876e8555a,73348721-cfa6-4d1c-9cf2-64920b42ea98,6891b07a9052291b2667dc8a,0.0,26.0,migrated_sync_stg_mongo_balance
+66fe3ba60dc50ec6c8529257,41534223-f441-42ad-9ddf-ab7876e8555a,5760343a-152e-4082-990d-6de2f98836d1,689ff52e90bc2fec188ddd31,0.0,57.0,migrated_sync_stg_mongo_balance
+66fe3ba60dc50ec6c8529257,41534223-f441-42ad-9ddf-ab7876e8555a,f3339076-e6ad-48e2-aa1d-cb2327d86d29,68a3cff4691ab4077c47db7b,0.0,40.0,migrated_sync_stg_mongo_balance
+654dce53110214afb09b3401,aceddd39-a50e-4604-8ed6-766e4c10c5fc,c8a5e4ef-035c-4944-8856-a77642d03bd8,6a3e49cb05987c20f1eee5a5,232.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654dce53110214afb09b3401,aceddd39-a50e-4604-8ed6-766e4c10c5fc,b1ee5a1b-d0de-4dde-afa1-ee0ae31c1e9d,6a3f2f8fd51e244317113777,1050.0,996.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+683c0a2382116f7196e91782,40d697c7-d1f1-4fe4-9aac-52868df23646,797402cd-416c-45d5-8fc4-1bc2866ebe23,68df9e0e7cad0aa86dc4df9a,597.0,491.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+683c0a2382116f7196e91782,40d697c7-d1f1-4fe4-9aac-52868df23646,9affb557-20fa-4dfd-946b-76d4f01f97eb,68df9ea17b311cdeb9abb6df,685.0,512.0,migrated_sync_stg_mongo_balance
+66b82b009fd57c76f203deb0,d6b86c80-c6b1-4d06-8de5-0c3fa6a7f3aa,07fecfd0-689e-4a36-9a45-abf4e3a1b355,689c6a2ac83129318e2fd0ef,0.0,21.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66b82b009fd57c76f203deb0,d6b86c80-c6b1-4d06-8de5-0c3fa6a7f3aa,d282a5d4-306d-4c66-8f88-e824ef971562,68a6c15db06cee81a6a96f8b,0.0,75.0,migrated_sync_stg_mongo_balance
+66b82b009fd57c76f203deb0,d6b86c80-c6b1-4d06-8de5-0c3fa6a7f3aa,96627d61-ae2e-4592-a900-66efc075db13,68a837831a9a3a63323bc0f9,0.0,63.0,migrated_sync_stg_mongo_balance
+66b82b009fd57c76f203deb0,d6b86c80-c6b1-4d06-8de5-0c3fa6a7f3aa,976b26c3-d32c-446e-8c4b-c61130feb66c,68b3b3f2ac3ca150547ceb71,0.0,114.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,9ed87747-d607-4ef0-80be-32e4635ecbdd,68a83a8f87848cbc6c72f36d,0.0,6.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,ac6dd9ef-361a-4a89-b8b3-84e3f19f6c20,68a843f95f7580657a12424f,0.0,16.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,702a80f4-3550-4dfa-80e3-f162a5fd0c64,68ad7f2039b797efe02f4e7c,0.0,10.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,31641e68-79f6-4001-a34c-8c2350ca7028,68ae8c541ffdb3746fd0251c,0.0,21.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,315abc74-2127-4a43-a029-6af9939a0e2c,68b50901e06ec278df92646b,0.0,92.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,7186733f-c59a-4e36-9483-e5eb8d0c9548,68b509abe06ec278df92959c,0.0,21.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,0f630542-caf6-4202-8c69-fcd3ab9b4558,68b509fec4cdaf17d9614923,0.0,21.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,693dbb50-66ec-452d-83ac-a34aa6a4199d,68bd49198ef89e8bf95f9730,0.0,6.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,c7f25459-7e8b-4b16-995b-ebbef0e1bbbe,68bd4947278eb3c0341ec686,0.0,20.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,4f20e8e3-2de4-4ebf-97b1-d9ab1539de0c,68bd498d549b79aef32ec521,0.0,4.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,f92ffe2d-316d-4d27-a2b6-bfb8bfdc957d,68bfa3b6970e2a94c9468e12,0.0,20.0,migrated_sync_stg_mongo_balance
+67a842bf29f632d514add01f,ab7067cd-213a-4539-a05a-634f2f7a2617,8485c023-a2f0-4dd0-955b-81526bd8352e,68bfa429970e2a94c946f543,0.0,23.0,migrated_sync_stg_mongo_balance
+67f7af73010f8f84df859ca7,9cefd9f0-ab62-4426-8fc2-344ebcd55815,61fb5a01-1f2a-4553-8366-2962e01cbf2f,,3489.0,3737.0,native_earn_full_amount; fifo_existing_native_burn
+65413f68d6b1732a1ec609a1,eac6f8e7-1c1d-4b0d-b460-1842b99b1722,9779f401-78ba-4fd6-b46a-d5fe8f9563ad,68c8d5171718d5a8519fefa6,45.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f68d6b1732a1ec609a1,eac6f8e7-1c1d-4b0d-b460-1842b99b1722,93d1a917-20e7-4da4-b111-5c216c571d33,68c8d5721718d5a851a0439a,15.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f68d6b1732a1ec609a1,eac6f8e7-1c1d-4b0d-b460-1842b99b1722,ad19b545-49ee-444c-9338-5d5520c793ef,68c8d6201718d5a851a11049,3.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f68d6b1732a1ec609a1,eac6f8e7-1c1d-4b0d-b460-1842b99b1722,b177d0d8-a66d-4232-bd18-6fab3091fafb,68c8d94e1ff74ba716fe75d5,35.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f68d6b1732a1ec609a1,eac6f8e7-1c1d-4b0d-b460-1842b99b1722,29d53b3c-de8e-44bb-88c3-8c3e14211a03,68d201774d5f6a3a6b94381b,48.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f68d6b1732a1ec609a1,eac6f8e7-1c1d-4b0d-b460-1842b99b1722,4224f76b-f5cb-4f0f-a7bf-7698dcc03f4e,68d7ba81eb091d0491bfd0cc,13.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f68d6b1732a1ec609a1,eac6f8e7-1c1d-4b0d-b460-1842b99b1722,6d281e7c-0d28-4cdf-8534-8cd88d7ffec1,68d7be2fd2e84acc297f61b8,96.0,8.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f67d6b1732a1ec608d1,c00110c8-2440-47d5-b36c-d12153debe62,9000b8f3-c49c-42e9-8c5d-f20e91c330ec,6871e74a3829305f5450df34,0.0,104.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f67d6b1732a1ec608d1,c00110c8-2440-47d5-b36c-d12153debe62,79d60703-89de-47ba-a63e-409e9e24de46,6892bc51c485e44db2c13096,0.0,140.0,migrated_sync_stg_mongo_balance
+6569add96be01478736755f5,b70ace42-b432-425c-b560-29d235ac262e,d45cfb90-f62a-434f-ab6e-c2a6ff3de709,6569eefb5b0fdbb884851d25,0.0,228.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+674adaf9c6a1827801bb37ba,6d40f5ec-da82-4a81-b382-6f508b344708,0dd99d04-b15e-4fe8-b674-79d7f7264492,67b14c2d165e74c3280a0995,0.0,116.0,migrated_sync_stg_mongo_balance
+674adaf9c6a1827801bb37ba,6d40f5ec-da82-4a81-b382-6f508b344708,21f2ec06-fd83-45c4-bafa-625844f24fd0,680a296745af04d6a2024e06,0.0,110.0,migrated_sync_stg_mongo_balance
+668f8106a94421ad6a72c699,e6ff7132-45f1-4b05-858b-2e0746633a25,61762d97-ad48-4639-b686-717e08fd1e17,6891926e9052291b2649d9a8,0.0,226.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+655f0bd2d16c226c47351b37,4506ca7e-dc61-4d4b-b0ae-a11cea60aa62,e2efee2f-572c-44f8-9bf1-62ef3db43777,685f7561cd1181407752c342,0.0,55.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+655f0bd2d16c226c47351b37,4506ca7e-dc61-4d4b-b0ae-a11cea60aa62,48c15a99-027a-4742-85bf-d2c96a6ca6af,6891af09dcce0c56203383f4,0.0,75.0,migrated_sync_stg_mongo_balance
+655f0bd2d16c226c47351b37,4506ca7e-dc61-4d4b-b0ae-a11cea60aa62,397349d0-373c-40dc-8c6b-22c52bef0010,689bfac00d29c855f9fddd55,0.0,9.0,migrated_sync_stg_mongo_balance
+655f0bd2d16c226c47351b37,4506ca7e-dc61-4d4b-b0ae-a11cea60aa62,ff718739-04b8-4226-acb9-ed54db279b3e,68a2ec7e61d4fa46a24c2bac,0.0,76.0,migrated_sync_stg_mongo_balance
+655f0bd2d16c226c47351b37,4506ca7e-dc61-4d4b-b0ae-a11cea60aa62,ebe23c4c-ab14-4a87-9ce4-f4828cc92777,68a5c11a71e4e8b7cf61d162,0.0,5.0,migrated_sync_stg_mongo_balance
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,8842b952-8d3f-4b6a-bfd9-d86ea08d8c67,689c009dad3acaf2be026877,0.0,13.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,3aa9ff98-1d52-4fde-bdef-924aacb35b17,689d81e7104f57ccaa0fe1e1,0.0,4.0,migrated_sync_stg_mongo_balance
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,4db20a95-2d9b-4578-b048-088e1dd698de,689edc06e6fb4c9f0234f875,0.0,33.0,migrated_sync_stg_mongo_balance
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,78835071-a5c0-4356-bb8f-e1fff1841f4a,68a2b02661d4fa46a214a017,0.0,19.0,migrated_sync_stg_mongo_balance
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,c766ba0c-b394-40d8-b566-570ca9acc272,68a6d5efb06cee81a6d6ba88,0.0,52.0,migrated_sync_stg_mongo_balance
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,53349db0-acce-49d5-b1d6-ddf286b0fa83,68abdbf4183aaef6c62eb184,0.0,13.0,migrated_sync_stg_mongo_balance
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,8ddbef20-afa9-4052-af2c-85f6a5e9e2f9,68afdd637a2a05954c160408,0.0,6.0,migrated_sync_stg_mongo_balance
+656b0189a7379d24b92816f4,65e0d8e2-b7e8-476a-934e-ee0b2613f6ca,e541dbc5-7498-4edb-aa71-acafc73c09df,68b01cda2604efbd366b6a0c,0.0,65.0,migrated_sync_stg_mongo_balance
+6893026c544880a06e454431,24c8f546-2cc2-481f-9d3f-625a76f5f85d,6b22dc38-c5e8-4770-b138-b33ee3c9b21e,6a224ae1346b03a4d48c156c,0.0,2460.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6893026c544880a06e454431,24c8f546-2cc2-481f-9d3f-625a76f5f85d,923925bb-5d34-4bf6-aa2a-cfc2bade17fb,,2709.0,54.0,native_earn_full_amount
+65487e3f4dc5c2da5fdc9855,b1e302da-8d97-46de-80dd-e8956425eeac,f544fcb0-e1ab-4b93-937e-86e2bd3d41a9,6885e7edc7bc89d30d046000,0.0,125.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65487e3f4dc5c2da5fdc9855,b1e302da-8d97-46de-80dd-e8956425eeac,d74bf7f1-d8a9-4c26-b3b9-5e3ed0827e1d,688dc9e4e0223b3a7037f4fb,0.0,36.0,migrated_sync_stg_mongo_balance
+65487e3f4dc5c2da5fdc9855,b1e302da-8d97-46de-80dd-e8956425eeac,3e674da9-29dd-452d-921c-8fe1583df745,689d8b4aac4d351c9d9f9c2b,0.0,1.0,migrated_sync_stg_mongo_balance
+65487e3f4dc5c2da5fdc9855,b1e302da-8d97-46de-80dd-e8956425eeac,7fb8c3c9-b762-4a8a-bba8-36ad2ebc6514,68a0643ee6fb4c9f02013ea5,0.0,13.0,migrated_sync_stg_mongo_balance
+65487e3f4dc5c2da5fdc9855,b1e302da-8d97-46de-80dd-e8956425eeac,176716b6-e1ca-4de0-be55-ada4e9df7795,68b6e5953fe8f1ea0900fddc,0.0,4.0,migrated_sync_stg_mongo_balance
+660bbc6eb8ce99920eecda4b,000a4cba-d5e7-4c62-8a2a-c49437012e18,969ce393-c5c2-474a-8131-fbc7665cea78,68bba2f6b04121416711ca40,0.0,162.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+683da331ffc927fc29b8510d,a75a274d-1bf2-421a-ae37-4c99ad6f2116,4c306b1e-1ad7-426c-93a3-7aac4b360743,688dd605304a2c61bc446184,0.0,154.0,migrated_sync_stg_mongo_balance; fifo_existing_expiry_burn; headline_mismatch_trim
+671ca9bc91c0eac90144ba37,366d7c0b-498b-483d-9965-f8dede770702,6801b785-1c1c-4ebb-a811-17557d79091d,6949fc20a607ac16333087c0,188.0,48.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e042bef594d02b1127f645,31ea3461-fbd5-4321-a642-ddde2c15e2e9,71a80b5d-d614-40dd-a909-ea76a0aa45cd,69e0b2906c49be7699181212,57.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e042bef594d02b1127f645,31ea3461-fbd5-4321-a642-ddde2c15e2e9,39ce86af-5f44-4904-aa9a-97003418bb28,69e0b3add47b7871fe4d296b,1.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e042bef594d02b1127f645,31ea3461-fbd5-4321-a642-ddde2c15e2e9,9d622025-2f4b-4659-a2fa-d5860fd58c4f,69e0b441e10abdd3529561d3,1.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e042bef594d02b1127f645,31ea3461-fbd5-4321-a642-ddde2c15e2e9,e527ea57-1a0d-49db-b487-039b9a2cf7de,69e0bac765b21da4242f1755,45.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65e042bef594d02b1127f645,31ea3461-fbd5-4321-a642-ddde2c15e2e9,ee35a692-dcae-4c5d-84bf-61e2f2e2adda,69e0bb5e6c49be76991b261e,93.0,65.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f44d6b1732a1ec5eafd,ab0eed90-6825-4c0c-bc94-f327cbc141e0,232bfbcc-d9de-4b53-8354-de02da82a766,69af94ad1abbbf085ff0187c,4.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn; headline_mismatch_trim
+65413f44d6b1732a1ec5eafd,ab0eed90-6825-4c0c-bc94-f327cbc141e0,6c81650a-5809-4c13-98b7-98b3b9630cfc,69af94f4740801089cf7a9b8,16.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f44d6b1732a1ec5eafd,ab0eed90-6825-4c0c-bc94-f327cbc141e0,72f4cdd0-4b5f-4385-93b0-ae7345f9fa41,69b2e9ce84c0b90d47c24781,26.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f44d6b1732a1ec5eafd,ab0eed90-6825-4c0c-bc94-f327cbc141e0,962a325f-81d0-4f02-a272-7fd52e922eaa,69b2ea89526986b1832bb057,3.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f44d6b1732a1ec5eafd,ab0eed90-6825-4c0c-bc94-f327cbc141e0,63559fa6-d7e7-41e0-807a-9519ba65c027,69b3ee4c5162d0ebef5c6c92,61.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f44d6b1732a1ec5eafd,ab0eed90-6825-4c0c-bc94-f327cbc141e0,1d8140e8-8c76-4ffd-8e23-0a06ae0fa11c,69b530c4615d99fdf8369168,24.0,7.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65532a96a5707806f44a54d4,a71e425d-82b5-47f5-8a26-013a2a346b62,578d7ac5-1a0c-40f6-857d-d27ced95d459,689191f29052291b26497ef3,0.0,42.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65532a96a5707806f44a54d4,a71e425d-82b5-47f5-8a26-013a2a346b62,000957b9-63a5-4a9c-b8c6-a703c11fb83f,68919228c485e44db2366d35,0.0,5.0,migrated_sync_stg_mongo_balance
+65532a96a5707806f44a54d4,a71e425d-82b5-47f5-8a26-013a2a346b62,ab492e9c-133c-48e4-80da-799b6f6e02ba,6891926e9052291b2649d9be,0.0,41.0,migrated_sync_stg_mongo_balance
+65532a96a5707806f44a54d4,a71e425d-82b5-47f5-8a26-013a2a346b62,8a94985e-0b27-41f5-a504-91fd0964addd,6892d9e46ddfa4c1ba38eb13,0.0,17.0,migrated_sync_stg_mongo_balance
+65532a96a5707806f44a54d4,a71e425d-82b5-47f5-8a26-013a2a346b62,598b588d-44db-48ad-8939-8728c8bf4f08,689851597f2c5623e970696b,0.0,15.0,migrated_sync_stg_mongo_balance
+662a2cdb57324743e39d2330,44bda93e-b7c2-4715-be2d-2a7f1723ace8,b8544f6e-8485-4458-950c-a5e6dc1b9b2f,69d9b529a60d201bb1f85182,58.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+662a2cdb57324743e39d2330,44bda93e-b7c2-4715-be2d-2a7f1723ace8,fdc4bff6-de41-415b-baa5-002da23d1e52,69d9f29d3192e2789bd715bd,61.0,2.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+662a2cdb57324743e39d2330,44bda93e-b7c2-4715-be2d-2a7f1723ace8,25bb2f89-2375-4f34-89ad-b9571838cf83,69d9fdf57d3d88c89ff467f5,16.0,14.0,migrated_sync_stg_mongo_balance
+654af99f3be528ce10ea0372,0c2ecc66-52a7-4fe7-bd2b-1ef0b9f1e5c9,040dbd68-fb07-42b2-8a9c-7003feabf83f,685cd25e070d8fc839f27f0a,0.0,12.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654af99f3be528ce10ea0372,0c2ecc66-52a7-4fe7-bd2b-1ef0b9f1e5c9,b98bbf81-4e47-471a-bf35-19d05ae50fbc,685cd27a5e87017ea94b5210,0.0,33.0,migrated_sync_stg_mongo_balance
+654af99f3be528ce10ea0372,0c2ecc66-52a7-4fe7-bd2b-1ef0b9f1e5c9,983459b9-54b0-4e7e-9657-ede5f735a7dd,687472c5daea303a17bfbadc,0.0,31.0,migrated_sync_stg_mongo_balance
+654af99f3be528ce10ea0372,0c2ecc66-52a7-4fe7-bd2b-1ef0b9f1e5c9,9685be81-b8aa-43f2-948c-119e286972de,687f44f549a70add486ce85a,0.0,23.0,migrated_sync_stg_mongo_balance
+654af99f3be528ce10ea0372,0c2ecc66-52a7-4fe7-bd2b-1ef0b9f1e5c9,741d3aa0-f030-47c9-a8ef-41f3e91e251c,688c30ee244791aedf775a2f,0.0,4.0,migrated_sync_stg_mongo_balance
+654af99f3be528ce10ea0372,0c2ecc66-52a7-4fe7-bd2b-1ef0b9f1e5c9,24450544-570d-4e59-93a4-928161952563,689d8355ac4d351c9d9620c1,0.0,10.0,migrated_sync_stg_mongo_balance
+654af99f3be528ce10ea0372,0c2ecc66-52a7-4fe7-bd2b-1ef0b9f1e5c9,20a5df70-3dba-4e13-88ef-317da9793100,689f1657e6fb4c9f025d462d,0.0,6.0,migrated_sync_stg_mongo_balance
+67dbac23b90f211f7353d9ad,dad22722-0109-46bf-94e3-84ae3668505e,af75d15e-cb51-48b1-aa6e-8a34d85a789e,68b65b32d760096529b745d6,0.0,7.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67dbac23b90f211f7353d9ad,dad22722-0109-46bf-94e3-84ae3668505e,e0f7aac4-6c08-453a-9fdc-04077dcada2b,68b7beb13fe8f1ea092d2e40,0.0,1.0,migrated_sync_stg_mongo_balance
+67dbac23b90f211f7353d9ad,dad22722-0109-46bf-94e3-84ae3668505e,882a6794-7b69-4361-88d5-4e7b0a0afbe1,68b8f010f37c22518273b2e4,0.0,30.0,migrated_sync_stg_mongo_balance
+67dbac23b90f211f7353d9ad,dad22722-0109-46bf-94e3-84ae3668505e,8afe7647-54e2-4dc4-9773-16c2320c183d,68b93e9327bd0a78f6323954,0.0,12.0,migrated_sync_stg_mongo_balance
+67dbac23b90f211f7353d9ad,dad22722-0109-46bf-94e3-84ae3668505e,6f2bacb2-429e-41de-905f-537e20ff8917,68c23d675645ac3434d5e5ac,0.0,68.0,migrated_sync_stg_mongo_balance
+6556c87483ce8659fd3f8d58,2e2b645b-4a92-4f2f-80cc-23af189d7808,5746807e-1125-44f1-b231-b8854682138d,688ef1c062d167b65937ce24,0.0,52.0,migrated_sync_stg_mongo_balance
+6556c87483ce8659fd3f8d58,2e2b645b-4a92-4f2f-80cc-23af189d7808,1d8fb514-1e35-4d61-9bf9-9f507cf924c4,68917f66dcce0c5620085559,0.0,52.0,migrated_sync_stg_mongo_balance
+6556c87483ce8659fd3f8d58,2e2b645b-4a92-4f2f-80cc-23af189d7808,b8bc9b99-c38d-4452-8108-b00ee8e2ebd1,6892bc2f6ddfa4c1ba175f28,0.0,6.0,migrated_sync_stg_mongo_balance
+65680575b188295efca43586,f596f347-c4e9-466e-955c-15cce84ecb25,a002ed44-93e8-489f-8ede-e30c159d4036,6899641d335719925db0c576,0.0,5.0,migrated_sync_stg_mongo_balance
+65680575b188295efca43586,f596f347-c4e9-466e-955c-15cce84ecb25,fea66481-81c8-407d-ab86-0c6b9befbbb3,68a488d81b96cbfb4c6cdabe,0.0,95.0,migrated_sync_stg_mongo_balance
+656b052ea7379d24b928fa54,5c4bd772-99e3-43a7-8e74-9bd70d73d96c,37f9c0cc-3e97-4537-8b78-2be3331ef532,69a5b9b35f172fcdaa090ac8,117.0,20.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+67f221e748b413a962c0baa1,ce63af19-54ff-4d31-abfa-94ff390bb6df,7b0abf63-0825-48e9-a30f-1bcd4f7d806a,6a41f300a4c91a0c495c08b0,88.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+67f221e748b413a962c0baa1,ce63af19-54ff-4d31-abfa-94ff390bb6df,a630af94-0a38-40be-800b-7144f8b3e105,6a47735ecd859f6681ec17cd,819.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+67f221e748b413a962c0baa1,ce63af19-54ff-4d31-abfa-94ff390bb6df,868c5c0f-b6bd-4fa0-9ee4-4a44439bd88a,,0.0,470.0,native_earn_full_amount; fifo_existing_native_burn
+67f221e748b413a962c0baa1,ce63af19-54ff-4d31-abfa-94ff390bb6df,90aec12e-a609-4ef1-a218-fa12db2565dc,,0.0,340.0,native_earn_full_amount
+69d8b96e141e0efff212f3a3,fb282052-f769-49b2-a0f8-0697bebb14e9,a5c2f79c-4031-4055-9b97-46a6bdfc3493,69f317e7163217f2e773bef2,0.0,410.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+69d8b96e141e0efff212f3a3,fb282052-f769-49b2-a0f8-0697bebb14e9,ab25fcb7-beb7-4edf-b066-3091c4eac1eb,69f318286d73c494f2b23776,664.0,162.0,migrated_sync_stg_mongo_balance
+6a4ba2e4e7aba5deb5eaea47,6d4210a7-b37e-47b0-af1b-cbe8387bb12d,ed39b501-1a32-467f-b59a-8339bcbd7f9e,6a4f80c924b043beb0db2504,113.0,0.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn
+6a4ba2e4e7aba5deb5eaea47,6d4210a7-b37e-47b0-af1b-cbe8387bb12d,bd29e6f9-5333-4481-a116-c807748e1586,,0.0,21.0,native_earn_full_amount; fifo_existing_native_burn
+65ab53d9f597943cdd10266f,1ffbad86-6119-47b3-b152-77f4713a0f48,7abd7320-eb69-42d1-9436-ecf8e4fb42c6,6a4496e136842a4b40700941,92.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66ee90d62e0828fb9cd311bc,a9afdd18-4840-41a0-81c1-a75ef1fb2a14,050677b7-93cc-4ecf-b2e7-5cf68d55ea53,6a37b48e9a214e466cbf128f,92.0,4.0,migrated_sync_stg_mongo_balance; fifo_existing_native_burn; headline_mismatch_trim
+65695159ce749ea73f049894,f58dfe80-7d93-4ff5-9f3d-2a8603527518,42bd15d2-adbf-42b7-bb5d-70dfbe60de01,689048816491294033e484f0,0.0,22.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65695159ce749ea73f049894,f58dfe80-7d93-4ff5-9f3d-2a8603527518,b62fd1be-b958-4b56-8234-bb5692e1c3dd,68996a88129df96c21fcc390,0.0,33.0,migrated_sync_stg_mongo_balance
+65695159ce749ea73f049894,f58dfe80-7d93-4ff5-9f3d-2a8603527518,fd6d2302-d8f7-4ec8-8c2a-0a15228a70f7,68a01fccab771430dfb74be8,0.0,13.0,migrated_sync_stg_mongo_balance
+65695159ce749ea73f049894,f58dfe80-7d93-4ff5-9f3d-2a8603527518,6386bc66-d24d-405c-b621-f01c271c9534,68baa79ffcc420f52abd35e8,0.0,18.0,migrated_sync_stg_mongo_balance
+6555a54238a9666a9c3c4203,6f3c7f2d-c6e7-405f-aefc-bdbe9c85d4de,110cfa8b-aecf-4785-8add-86fa710f923e,688db97b67b0c6fb058d1337,0.0,81.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6694e1d330baa5401765db0a,d1bca277-2aba-4bb9-9ea2-cbe7109264da,43b758b0-569a-49b5-a157-14b724003502,66de8f28174e0271503a4d0b,0.0,21.0,migrated_sync_stg_mongo_balance
+6694e1d330baa5401765db0a,d1bca277-2aba-4bb9-9ea2-cbe7109264da,71f29151-82bd-4195-b8ea-a3aafeaed8b3,67cc34fe9cf7419b8c561274,0.0,23.0,migrated_sync_stg_mongo_balance
+6694e1d330baa5401765db0a,d1bca277-2aba-4bb9-9ea2-cbe7109264da,6c4b3587-e889-499e-89b4-ae8425f1ee82,683d4e9fe8a6bf9f5140b6d9,0.0,15.0,migrated_sync_stg_mongo_balance
+6694e1d330baa5401765db0a,d1bca277-2aba-4bb9-9ea2-cbe7109264da,dad9535b-ae42-467c-80c2-3176b52faa41,68519f8553d2018eecd878f2,0.0,20.0,migrated_sync_stg_mongo_balance
+65545654415a5d9aa75e39dc,491b5e4f-bc49-43bb-920c-ed40018230f0,1a6d92c0-e825-4eb7-b059-33e5d0d0bb42,688dd605304a2c61bc4461a2,0.0,79.0,migrated_sync_stg_mongo_balance
+6731d7ddcdf216fb22f543ba,373221c3-c3b2-4e82-ae2f-dc471078e042,bab24a83-83de-43aa-a93a-341c2474c38a,6731d8860b359bf77fbe48dd,0.0,75.0,zero_lots_allocate
+654885704dc5c2da5fdd2cd3,77b2a0ea-a21a-44f5-9c95-a05c61fb532e,07245c9f-b464-4fc3-9715-c08d1207535c,6a352c2d22d01110c16e80c3,101.0,33.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654c675bbc8d51bf6ae05367,f59ba826-7f68-451d-9968-c8029f70397e,86d18865-36a5-44ec-8bb9-7b75cc0e3f2d,689190f2dcce0c5620159be9,0.0,32.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+654c675bbc8d51bf6ae05367,f59ba826-7f68-451d-9968-c8029f70397e,65d33065-49bb-43cb-a1f0-c71183b857c0,68919133c485e44db2360180,0.0,33.0,migrated_sync_stg_mongo_balance
+654c675bbc8d51bf6ae05367,f59ba826-7f68-451d-9968-c8029f70397e,1140b720-67a8-4cd2-82c0-28a9df66a8cb,689191a9c485e44db2362f0d,0.0,2.0,migrated_sync_stg_mongo_balance
+65f418434aaafb5d9c6567bc,a89f1104-c0f2-42e3-9735-5cb96506f5ae,80cfc38d-482f-4ff5-bf48-b3c06440437a,,170.0,237.0,native_earn_full_amount; headline_mismatch_trim_fallback
+68ddf023234c171c8f55fa45,b1519aa8-088f-47fb-9112-75a36865ce88,b6dcb660-38a0-4c88-9705-788ab0f7ca22,69ed7c613c0cf7d0c5541e3a,119.0,69.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+68ddf023234c171c8f55fa45,b1519aa8-088f-47fb-9112-75a36865ce88,f9f7d261-f0bc-403b-8abc-ad6c566cf44b,69ed7cafb7f822eea99b1be9,76.0,61.0,migrated_sync_stg_mongo_balance
+6566d5a7285bf1f861d3b2db,17d52d2b-9325-479b-ba6b-f604f70c38e1,b9707c96-563d-4f25-90f5-fc2e05c56ec1,68c8d46f0037b99f486fbb9c,3.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566d5a7285bf1f861d3b2db,17d52d2b-9325-479b-ba6b-f604f70c38e1,c59d6c63-9ce3-4170-8cec-0977cd8c31d8,68c8d4e145a30f9bf35d7a26,42.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6566d5a7285bf1f861d3b2db,17d52d2b-9325-479b-ba6b-f604f70c38e1,15e7dbf9-0f6e-42ce-bca6-bfc2b566b255,68e6515719e0a2183e18608f,35.0,16.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6806003a5f7ddb1be79a08ab,6a7bbfc6-50aa-4acb-9713-fc848f21dc14,bc767d2a-54ef-43aa-909c-c46ff123520c,68060073234f173997e7bd54,0.0,62.0,zero_lots_allocate
+67ee3ff130ef9ae2d669cb58,db18cead-6e46-4692-9b09-499841056796,7188bcce-77a2-4290-857a-3da3173f3ced,67ee4d6c69428beb22cb46ea,0.0,60.0,migrated_sync_stg_mongo_balance
+6567f73b53be67b4b161520c,225436c6-e6e4-4f31-9725-29d648797207,9c84c260-63c7-4e59-b42d-48df3044774f,6901eeaa94b5a46f87d4c94b,69.0,10.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f6bd6b1732a1ec60c81,ac6af112-d0ca-44b7-b03b-5b9ccf08188a,89ed6e90-c378-412d-b9a1-dfe2d432d47a,6895bf7f995172c5c8c78955,0.0,57.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f5bd6b1732a1ec5fefd,d319b760-5a40-4641-b25d-a668a4c07721,07e4bfa2-e55a-4ab0-94f4-f7727b49bba3,68f9fea10b0283fe1a0ed469,0.0,50.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65547dae0b5cd6c7b1a56d44,b941ce2b-978a-481b-9926-d155f5606896,401bd253-890d-490f-bae5-6d93fd7c53b8,692e50195d6963e2b477e084,0.0,272.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65547dae0b5cd6c7b1a56d44,b941ce2b-978a-481b-9926-d155f5606896,df7fa792-1cb8-4eff-93eb-401bd4ee7003,692e50790d7774878a8f14d9,719.0,397.0,migrated_sync_stg_mongo_balance
+66d669b0e1ab924c761d301b,1423d02b-0443-49a5-9870-aad360f78c79,c65868d8-d64b-4eeb-ab79-871184a188c2,68450108366ecc50fbfb6f9d,0.0,48.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f8bd6b1732a1ec62910,2d8a6fd7-32ee-47c9-8a2d-2b2b672a9c7e,d30b928e-a07d-4ce5-997e-5538814480a4,69f9a5a9789d48a9f2d1d17e,43.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f51d6b1732a1ec5f601,2a301e35-7fcd-4023-a36e-df3b57b5c563,2f4ea2d7-8ebf-48d4-846c-c47163b05c79,696c87c38fde645c0ec094ef,146.0,103.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66ac500e1cee7e255d491885,94e8def6-2b61-4229-afc5-bd2dc289280f,804c84f2-1e90-47a9-b954-faa27c01a1b7,68ca3a3b9ecbfffe5b9953e7,18.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+66ac500e1cee7e255d491885,94e8def6-2b61-4229-afc5-bd2dc289280f,def0ac64-a4c8-4ec2-aaee-51b5763738fd,68ca3a819ecbfffe5b9980c2,53.0,34.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65532d4ba5707806f44c1983,42a8eb41-f6ac-48af-99c0-2465f5d7d5c7,1500beff-8e66-49a4-a63b-ae6d26948cad,67c55fd77037b5d4742a379a,0.0,32.0,migrated_sync_stg_mongo_balance
+65536c55375eb91adad56a57,f97ac591-9387-462f-9a78-b2a4ed1f7ab7,91532f19-a87d-44b0-9641-5928d1dde4dd,68804bf4219f7b6612e39cb7,0.0,32.0,migrated_sync_stg_mongo_balance
+68303e00d4294a954e1f5d42,692c20ac-b496-4d26-a695-39bf755e61f2,001a6d75-b6a4-42d1-83fb-9428dd8e6b17,68fc926fd7cd47d147ee2c94,144.0,118.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6556ee6383ce8659fd4b9a2f,027131cb-716d-4d66-ad20-bdc0044f2052,a7669ce7-73ea-4093-9aa5-32f419785eb4,68c2a55820f3c5944f9b7345,0.0,26.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6a151548654c118a1ed3b445,d945a0eb-5a47-434b-882e-0f9b8f0fe3f0,071edb12-7654-40f9-b30f-332beb8c321f,6a3e433455de5d3b9dcaf3b2,0.0,179.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+6a151548654c118a1ed3b445,d945a0eb-5a47-434b-882e-0f9b8f0fe3f0,8d4c030c-3a90-483b-9a37-dd10fb72cbcd,,229.0,25.0,native_earn_full_amount
+65413f80d6b1732a1ec61d79,c10027e0-b861-4173-9d6b-6ad41627aaa5,cbc672c2-40eb-49f4-9d33-380629dfbcb2,6825b2f6c18f858242155386,0.0,3.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65413f80d6b1732a1ec61d79,c10027e0-b861-4173-9d6b-6ad41627aaa5,62097eab-4759-4a9d-8f91-4be577fb802c,683d4e9fe8a6bf9f5140b781,0.0,1.0,migrated_sync_stg_mongo_balance
+65413f80d6b1732a1ec61d79,c10027e0-b861-4173-9d6b-6ad41627aaa5,283f47e9-a01f-4e26-a2ba-ca368f92e3cf,68519f8653d2018eecd8790e,0.0,2.0,migrated_sync_stg_mongo_balance
+65413f80d6b1732a1ec61d79,c10027e0-b861-4173-9d6b-6ad41627aaa5,1e17b263-51c1-4297-9b98-a60a1f792526,6868a7003263a5efe1603774,0.0,6.0,migrated_sync_stg_mongo_balance
+65413f80d6b1732a1ec61d79,c10027e0-b861-4173-9d6b-6ad41627aaa5,58098f1e-7a0b-440f-b1bb-40d70d63be12,68a40e88691ab4077c6f3e40,0.0,7.0,migrated_sync_stg_mongo_balance
+667ccc63d0a18ca2e8bbf91a,90eede70-c6fb-4277-bd3e-c0bd3fbbc3f4,65a9b717-e953-4563-849e-69e09ca19979,6a1968b3a0b39b155fd3ad18,0.0,132.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+667ccc63d0a18ca2e8bbf91a,90eede70-c6fb-4277-bd3e-c0bd3fbbc3f4,7a5d3b8e-d764-4264-8644-9d89fdf78be3,6a1e605f9f8c4c4de676e3d4,206.0,57.0,migrated_sync_stg_mongo_balance
+67a1cdf3a3e44df46372046d,fc12adec-2891-4b0d-aa04-238e9691a816,96747fa1-8df8-463d-ad2a-34832ae4a3d0,6819d1fb4ffc1b6592dcb7d8,0.0,16.0,migrated_sync_stg_mongo_balance
+6568533da4927a9361aedf69,b784671b-9957-46aa-8f8c-a25d5da2df44,c880d020-83cb-4a25-94fb-567defd395f6,6858c2676ea681b6b8bfc308,0.0,15.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+665839237cb088a4d63dea7f,90829544-94b2-4a65-9636-f2ae982e2eea,cb412ffe-0cd9-4e93-bba5-7a1caff4cc79,68ca5c219ecbfffe5bb42399,6.0,0.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+665839237cb088a4d63dea7f,90829544-94b2-4a65-9636-f2ae982e2eea,6403b6b2-6e8c-42ac-8a5a-140b59535929,68ca5c4ddb75dd7e99e4533f,15.0,12.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+662df862ee82cdf5e3bb2d9e,92bebfd3-041c-4ef3-99d2-978bafd45937,3ab3935e-da27-4973-b73d-b9f60e65f08e,68c23e6f5645ac3434d70804,0.0,5.0,migrated_sync_stg_mongo_balance; headline_mismatch_trim
+65544f2be53fa9ae2a404290,f7560608-89bd-4735-969e-1586c0299814,18c539d1-a9a1-4fcb-bad7-6017d6649c06,687ca11126b1d2d74ccc9a83,0.0,1.0,migrated_sync_stg_mongo_balance
+67cea723cabb8eb04372b3f0,0271c3e6-0fe4-4910-bd9a-2c4bb8873040,2e19c896-6dea-4e39-86a5-43b0f09604cb,68baa79ffcc420f52abd3622,0.0,1.0,migrated_sync_stg_mongo_balance

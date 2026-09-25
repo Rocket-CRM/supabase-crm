@@ -1,0 +1,60 @@
+{
+  "kind": "pillar_matrix",
+  "title": "Executive overview — current state to proposed CRM",
+  "pillars": [
+    {
+      "objective": "Investment Journey",
+      "current": [
+        "Excel and person-held contact history",
+        "No shared pre-incentive stage trail",
+        "Continuity breaks when officers rotate"
+      ],
+      "future": [
+        "One investment case as working record",
+        "Configurable pre-incentive stages",
+        "Activity timeline on every case"
+      ],
+      "impact": [
+        "Promotion history survives staff change",
+        "Clear next action per case",
+        "Ready handoff toward EEC OSS"
+      ]
+    },
+    {
+      "objective": "Executive visibility",
+      "current": [
+        "Hard to see delayed cases",
+        "SLA pressure invisible until meetings",
+        "Cross-bureau blockers stay informal"
+      ],
+      "future": [
+        "Heat map of workload and aging",
+        "Ticket and stage SLA with escalate",
+        "Dashboards with พ.ศ. / fiscal filters"
+      ],
+      "impact": [
+        "Leaders intervene before breach",
+        "Bureau ownership is visible",
+        "Board packs from live data"
+      ]
+    },
+    {
+      "objective": "Integration & data",
+      "current": [
+        "Scattered bureau spreadsheets",
+        "Duplicate companies under near-names",
+        "OSS status re-keyed by hand"
+      ],
+      "future": [
+        "SSO EECO named-user login",
+        "EEC OSS status on the case",
+        "Clean structured DB after migration"
+      ],
+      "impact": [
+        "One identity directory for ≥100 users",
+        "No parallel password store",
+        "Structured 1:N contacts at handover"
+      ]
+    }
+  ]
+}

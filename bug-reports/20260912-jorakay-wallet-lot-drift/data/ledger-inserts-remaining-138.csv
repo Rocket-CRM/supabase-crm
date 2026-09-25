@@ -1,0 +1,11 @@
+mongo_id,user_id,amount,deductible_balance,reason
+6563f123ffd7efcec974f172,14d69324-43b1-4968-ac10-6d036faa3eb6,400.0,400.0,orphan_wallet_no_points_ledger
+65b1c02512e71882a727eb8c,1a0a3ce3-2873-4f06-9e1a-f0f5139fbc55,50.0,50.0,orphan_wallet_no_points_ledger
+65b1be9912e71882a7271072,242404b5-772c-4820-acf0-fea8df090da1,50.0,50.0,orphan_wallet_no_points_ledger
+65b1c2c812e71882a72a4356,3673c7b3-86ac-4648-97b5-4bb916a05747,50.0,50.0,orphan_wallet_no_points_ledger
+65b1c02912e71882a727ec85,3d50e13c-a20a-4610-9e3b-e0d368739817,50.0,50.0,orphan_wallet_no_points_ledger
+65b1c32412e71882a72ae409,4201b34a-019d-49fe-b6f5-5d3c300a2e2d,50.0,50.0,orphan_wallet_no_points_ledger
+65b1c1fd12e71882a7296505,932b88ec-4e56-447f-9f81-9136a93c8520,50.0,50.0,orphan_wallet_no_points_ledger
+65b1c0c612e71882a72856c8,c4482a47-51c1-42b8-910d-707cf14ad3b1,50.0,50.0,orphan_wallet_no_points_ledger
+65b1c10712e71882a7288863,e244f0b8-ff81-49ad-8005-3d938c5c9ccc,50.0,50.0,orphan_wallet_no_points_ledger
+65b1c15b12e71882a728dda6,ff4f10c8-d9de-47d7-8f5b-081b5e8c782f,50.0,50.0,orphan_wallet_no_points_ledger

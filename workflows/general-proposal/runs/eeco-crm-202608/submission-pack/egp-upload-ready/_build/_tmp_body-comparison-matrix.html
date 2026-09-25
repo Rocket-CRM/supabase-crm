@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<title>ตารางเปรียบเทียบคุณลักษณะเฉพาะและข้อกำหนด</title>
+<style>
+
+  @font-face {
+    font-family: "Sarabun";
+    src: url("file:///Users/rangwan/Documents/Supabase CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/fonts/SarabunRegular.ttf") format("truetype");
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: "Sarabun";
+    src: url("file:///Users/rangwan/Documents/Supabase CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/fonts/SarabunBold.ttf") format("truetype");
+    font-weight: 700;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Sarabun", "TH SarabunPSK", sans-serif;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+  .hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #000;
+  }
+  .logo { height: 26px; width: auto; }
+  .doc-meta { text-align: right; font-size: 9px; line-height: 1.35; }
+  h1 {
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    margin: 4px 0 2px;
+  }
+  .sub {
+    text-align: center;
+    font-size: 9.5px;
+    margin: 0 0 5px;
+  }
+  .table-wrap {
+    border: 1.25px solid #000;
+    width: 100%;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    font-size: 8.5px;
+    line-height: 1.28;
+  }
+  th, td {
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 3px 4px;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  th:last-child, td:last-child { border-right: none; }
+  tr:last-child td { border-bottom: none; }
+  th {
+    font-weight: 700;
+    text-align: center;
+    background: #f3f3f3;
+  }
+  col.c1 { width: 36%; }
+  col.c2 { width: 36%; }
+  col.c3 { width: 8%; }
+  col.c4 { width: 20%; }
+  td.cmp { text-align: center; white-space: nowrap; font-weight: 700; }
+  td.cmp.better { background: #eef7ee; }
+  td.ref { white-space: normal; }
+
+@page { size: A4 landscape; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+.sheet {
+  width: 297mm;
+  height: 210mm;
+  padding: 9mm 12mm 9mm 10mm;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+}
+.sheet:last-child {
+  page-break-after: auto;
+  break-after: auto;
+}
+</style>
+</head>
+<body>
+<section class="sheet">
+  <div class="hdr">
+    <img class="logo" src="file:///Users/rangwan/Documents/Supabase CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/rocket-logo-full.svg" alt="Rocket" />
+    <div class="doc-meta">
+      เอกสารประกอบการยื่นข้อเสนอ · เลขที่โครงการ 69079202016<br />
+      เอกสารประกวดราคาอิเล็กทรอนิกส์ เลขที่ ๐๑๘/๒๕๖๙ · วันเสนอราคา ๗ สิงหาคม ๒๕๖๙
+    </div>
+  </div>
+  <h1>ตารางเปรียบเทียบคุณลักษณะเฉพาะและข้อกำหนด</h1>
+  <div class="sub">
+    ผู้ยื่นข้อเสนอ: บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด · อ้างอิง TOR ข้อ ๑๐.๒ (๖)
+    · หน้า 1/3
+  </div>
+  <div class="table-wrap">
+    <table>
+      <colgroup>
+        <col class="c1" /><col class="c2" /><col class="c3" /><col class="c4" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>คุณลักษณะเฉพาะและข้อกำหนดที่หน่วยงานกำหนด</th>
+          <th>คุณสมบัติที่ผู้ยื่นข้อเสนอนำเสนอ</th>
+          <th>เปรียบเทียบ</th>
+          <th>เอกสารอ้างอิง</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr>
+    <td>3.1 กลุ่มผู้ใช้งาน เจ้าหน้าที่และผู้บริหารของ สกพอ. ตั้งแต่ระดับปฏิบัติการไปจนถึงระดับผู้บริหารระดับสูง ทั้งนี้ ระบบต้องสามารถรองรับผู้ใช้งานแบบระบุตัวตน (Named Users) ได้รวมจานวนไม่น้อยกว่า 100 บัญชี โดยระบบจะต้องได้รับการออกแบบให้สามารถขยายจานวนบัญชีผู้ใช้งานเพิ่มเติมได้ในอนาคต</td>
+    <td>ระบบ CRM รองรับ Named Users ไม่น้อยกว่า 100 บัญชี และขยายจำนวนบัญชีและบทบาทได้</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 2, 4</td>
+  </tr>
+<tr>
+    <td>3.2 การรองรับการปฏิบัติงานนอกสถานที่: ระบบต้องถูกออกแบบให้รองรับการใช้งานผ่านอุปกรณ์เคลื่อนที่ (Mobile/Tablet Friendly) และสามารถเข้าถึงผ่านเครือข่ายอินเทอร์เน็ตจากภายนอกสานักงานหรือจากต่างประเทศได้ … โดยระบบต้องมีมาตรฐานการรักษาความมั่นคงปลอดภัยขั้นสูงรองรับ</td>
+    <td>หน้าจอแบบ Responsive บน Next.js รองรับเดสก์ท็อปและแท็บเล็ต เข้าถึงผ่าน HTTPS พร้อม SSO, RBAC, Dynamic Watermark และ Audit Trail</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 2, 4, 5.2, 5.6</td>
+  </tr>
+<tr>
+    <td>5.1 จัดทาแผนการดาเนินงาน (Project Plan) โดยแผนการดาเนินงานดังกล่าวต้องประกอบด้วยระยะเวลาดาเนินงานและรายชื่อบุคลากรในโครงการ โดยครอบคลุมทุกขั้นตอนของโครงการ รวมถึงการติดตั้ง</td>
+    <td>จัดทำ Project Plan พร้อมกำหนดการ บุคลากรทุกตำแหน่ง ขั้นตอนพัฒนา ทดสอบ โอนย้าย ติดตั้ง และส่งมอบ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6</td>
+  </tr>
+<tr>
+    <td>5.2 การศึกษาและวิเคราะห์ความต้องการ (Business Analysis) ผู้รับจ้างต้องดาเนินการรวบรวม ศึกษา และวิเคราะห์ความต้องการของผู้ใช้งาน (User Requirements) จากผู้บริหารและเจ้าหน้าที่ … เพื่อนามาจัดทาเอกสารความต้องการของระบบ (Business Requirement Document: BRD) โดยต้องนาเสนอกระบวนการทางาน (Workflow) ที่สอดคล้องกับนโยบายการบูรณาการข้อมูล (Centralized Intelligence)</td>
+    <td>บริษัทฯ จะรวบรวมและวิเคราะห์ความต้องการจากผู้บริหารและเจ้าหน้าที่ แล้วจัดทำ BRD พร้อม Workflow ของ Investment Journey และ Ticket ในเฟสที่ 1</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 3, 5.3, 6</td>
+  </tr>
+<tr>
+    <td>5.3.1 รวบรวมโครงสร้างข้อมูลเดิม (Data Schema) จากทุกสานักที่เกี่ยวข้อง เพื่อใช้เป็นข้อมูลตั้งต้นสาหรับการโอนย้ายข้อมูล</td>
+    <td>รวบรวม Schema ก่อนจัด Data Mapping สำหรับการโอนย้าย</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 4.5, 5.7</td>
+  </tr>
+<tr>
+    <td>5.3.2 จัดทาเอกสารการออกแบบระบบ (System Design Document)</td>
+    <td>ส่งมอบ SDD ในเฟสที่ 1</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 4, 6</td>
+  </tr>
+<tr>
+    <td>5.3.3 แผนภาพความสัมพันธ์ของข้อมูล (Entity-Relationship Diagram: ER Diagram) หรือเอกสารเทียบเท่าที่อธิบายโครงสร้างความสัมพันธ์ ของข้อมูลได้ (ในกรณีที่เสนอระบบแบบ SaaS)</td>
+    <td>ERD เชิงแนวคิดในข้อเสนอฯ; ERD ฉบับทางการในเฟสที่ 1</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 4.3, 4.5</td>
+  </tr>
+<tr>
+    <td>5.3.4 ออกแบบหน้าจอผู้ใช้งาน (User Interface/ User Experience Design) โดยออกแบบในลักษณะหน้าจอแสดงผลกราฟิก ( Graphic User Interface) ที่มีแบบฟอร์ม (Form-based) และปุ่มคาสั่ง (Button Control) ที่ชัดเจน ใช้งานง่าย รองรับการแสดงผลบนอุปกรณ์พกพาเพื่อลดระยะเวลาในการเรียนรู้ระบบของเจ้าหน้าที่</td>
+    <td>หน้าจอแบบฟอร์มสำหรับ Activity, Task, Ticket และ Investment Case พัฒนาด้วย Next.js และรองรับอุปกรณ์เคลื่อนที่</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 4, 5.2, 5.3</td>
+  </tr>
+<tr>
+    <td>5.3.5 ออกแบบระบบ (System Design) โดยระบุ สภาพแวดล้อมของระบบ (System Environment)</td>
+    <td>บริษัทฯ จะระบุ Application stack และสภาพแวดล้อมของระบบ โดยติดตั้ง Production บนคลาวด์ที่ สกพอ. จัดหา และบริหารสภาพแวดล้อม Non-production กับ POC</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 3, 4</td>
+  </tr>
+<tr>
+    <td>5.3.6 ออกแบบการเชื่อมต่อระบบ (Integration Scope) และกาหนดการเชื่อมต่อระบบ (API Interface Document) สาหรับระบบ EEC OSS</td>
+    <td>บริษัทฯ จะจัดทำ API Interface Document ร่วมกับ สกพอ. และเชื่อมต่อเพื่อแสดงสถานะ EEC OSS บน Investment Case</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.5</td>
+  </tr>
+<tr>
+    <td>5.3.7 จัดทาเอกสารแสดงรายละเอียดคุณสมบัติของโครงสร้างพื้นฐาน ประกอบด้วย ระบบฐานข้อมูล (Database) เครือข่าย (Network) และสถาปัตยกรรมระบบ (System Architecture) พร้อมทั้งกาหนดคุณสมบัติขั้นต่าของโครงสร้างพื้นฐานที่ผู้ว่าจ้างต้องจัดเตรียมให้เพียงพอต่อการใช้งานในวงกว้าง (Production) โดย สกพอ. จะประสานงานกับผู้ให้บริการ Cloud เช่น GDCC เพื่อจัดหาเครื่องแม่ข่ายต่อไป</td>
+    <td>บริษัทฯ จะจัดทำคุณสมบัติขั้นต่ำด้านฐานข้อมูล เครือข่าย และสถาปัตยกรรมแบบไม่ผูก Vendor พร้อมติดตั้งและตั้งค่าระบบบนโฮสต์ที่ สกพอ. จัดหา</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 3, 4, 6</td>
+  </tr>
+<tr>
+    <td>5.4 การประเมินความเสี่ยง ผลกระทบ และการปรับปรุงแก้ไขเพื่อรองรับการทางานร่วมกับระบบต่าง ๆ ภายในของ สกพอ. ที่เกี่ยวข้อง เช่น ระบบบริการ EEC OSS ซึ่งให้บริการด้านเขตส่งเสริมเศรษฐกิจพิเศษ ด้านสิทธิประโยชน์ ด้านอนุมัติ อนุญาต และด้านการให้คาปรึกษา เป็นต้น</td>
+    <td>ประเมินความเสี่ยงและผลกระทบต่อ EEC OSS และระบบที่เกี่ยวข้อง พร้อมกำหนดแนวทางแก้ไขในเฟสที่ 1</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.5, 6</td>
+  </tr>
+<tr>
+    <td>5.5.1 การรับ/ป้อนข้อมูล (Data Capture) — 1) …รองรับการบันทึกแหล่งข้อมูลที่ได้รับมาจากหลากหลายช่องทาง เช่น โซเชียลมีเดีย (LINE OA, Facebook Messenger) อีเมล และ Call Center เป็นต้น 2) รองรับการนาเข้าและส่งออกข้อมูลจานวนมาก (Bulk Upload) ผ่านไฟล์มาตรฐาน เช่น CSV, Excel พร้อมระบบตรวจสอบความถูกต้องของข้อมูลเบื้องต้น (Data Validation)</td>
+    <td>บันทึกแหล่งที่มาจาก LINE OA, Facebook Messenger, อีเมล และ Call Center พร้อมนำเข้า CSV/Excel ผ่านการตรวจสอบฟิลด์บังคับ รูปแบบ และข้อมูลซ้ำ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.1</td>
+  </tr>
+<tr>
+    <td>5.5.2 การจัดเก็บและบริหารข้อมูล (Data Management) — 1) หน้าจอแสดงข้อมูลลูกค้าแบบศูนย์รวม (Single Source of Truth) … 2) …ชุดข้อมูล (Master Data) … 3) …ระบบให้คะแนน (Lead Scoring) … 4) รองรับการตรวจสอบและจัดการข้อมูลซ้าซ้อนโดยอัตโนมัติ … 5) …บันทึกประวัติการให้ความยินยอม (Consent) …ตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล</td>
+    <td>Customer 360 แสดง Master Data, Lead Scoring และประวัติ Consent พร้อมตรวจข้อมูลซ้ำด้วย Tax ID และชื่อนิติบุคคล — <strong>เพิ่ม</strong> หน้าจอรวมข้อมูลซ้ำแบบมีผู้ใช้ตรวจสอบก่อนยืนยันการรวม</td>
+    <td class="cmp better">ดีกว่า</td>
+    <td class="ref">ข้อเสนอฯ 5.1, 9</td>
+  </tr>
+<tr>
+    <td>5.5.3 การบริหารความสัมพันธ์ (Relationship &amp; Activity Management) — 1) สามารถบันทึกปฏิสัมพันธ์การให้บริการ ติดตาม และกิจกรรมที่เกี่ยวข้องกับนักลงทุน (Interaction &amp; Activity Tracking) … Timeline … รองรับการใช้งานผ่านอุปกรณ์พกพา (Mobile/Tablet) … 2) ระบบจัดการงานและปฏิทินนัดหมาย (Task &amp; Calendar Management) … 3) ระบบออกเลขรับเรื่อง (Ticket Management) … SLA Tracking … Escalate …</td>
+    <td>บันทึก Activity พร้อมไฟล์แนบ จัดการ Task และปฏิทิน และเปิด Ticket พร้อมการมอบหมายและ SLA — <strong>เพิ่ม</strong> คิวบันทึกงานภาคสนามเมื่อออฟไลน์ และหน้าจอกำหนดเส้นทางการส่งต่อรายสำนัก</td>
+    <td class="cmp better">ดีกว่า</td>
+    <td class="ref">ข้อเสนอฯ 5.2, 9</td>
+  </tr>
+<tr>
+    <td>5.5.4 การติดตามสถานะ (Pipeline / Workflow Management) — 1) ระบบต้องสามารถติดตามสถานะของนักลงทุน หรือโครงการลงทุน ในรูปแบบ Pipeline หรือ Workflow โดยสามารถกาหนดขั้นตอน (Stage) และเงื่อนไขการเปลี่ยนสถานะได้ รวมถึงสามารถแสดงความคืบหน้าของแต่ละรายการได้อย่างชัดเจน 2) รองรับ ระบบติดตามและแจ้งเตือนระยะเวลามาตรฐานการให้บริการ (Service Level Agreement)</td>
+    <td>เปิด Investment Case บน Pipeline ย้าย Stage ตามเส้นทางและ Checklist ที่กำหนด พร้อม Stage SLA และประวัติการเปลี่ยนสถานะ — <strong>เพิ่ม</strong> คลังเทมเพลต Journey สำหรับ FDI การลงทุนในประเทศ และ Aftercare</td>
+    <td class="cmp better">ดีกว่า</td>
+    <td class="ref">ข้อเสนอฯ 5.3, 9</td>
+  </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="sheet">
+  <div class="hdr">
+    <img class="logo" src="file:///Users/rangwan/Documents/Supabase CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/rocket-logo-full.svg" alt="Rocket" />
+    <div class="doc-meta">
+      เอกสารประกอบการยื่นข้อเสนอ · เลขที่โครงการ 69079202016<br />
+      เอกสารประกวดราคาอิเล็กทรอนิกส์ เลขที่ ๐๑๘/๒๕๖๙ · วันเสนอราคา ๗ สิงหาคม ๒๕๖๙
+    </div>
+  </div>
+  <h1>ตารางเปรียบเทียบคุณลักษณะเฉพาะและข้อกำหนด</h1>
+  <div class="sub">
+    ผู้ยื่นข้อเสนอ: บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด · อ้างอิง TOR ข้อ ๑๐.๒ (๖)
+    · หน้า 2/3
+  </div>
+  <div class="table-wrap">
+    <table>
+      <colgroup>
+        <col class="c1" /><col class="c2" /><col class="c3" /><col class="c4" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>คุณลักษณะเฉพาะและข้อกำหนดที่หน่วยงานกำหนด</th>
+          <th>คุณสมบัติที่ผู้ยื่นข้อเสนอนำเสนอ</th>
+          <th>เปรียบเทียบ</th>
+          <th>เอกสารอ้างอิง</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr>
+    <td>5.5.5 รายงานและวิเคราะห์ (Reporting &amp; Analytics) — 1) ระบบต้องสามารถจัด ท ารายงานและวิเคราะห์ข้อมูล (Reporting &amp; Analytics) โดยรองรับการแสดงผลในรูปแบบ Dashboard และสามารถปรับแต่งรายงานได้ เช่น รายงานตามประเทศ อุตสาหกรรม มูลค่าการลงทุน เป็นต้น 2) สามารถส่งออกข้อมูลในรูปแบบ excel หรือ PDF ได้เป็นอย่างน้อย เป็นต้น</td>
+    <td>Dashboard และ Heat Map ใช้ข้อมูลจาก Case และ Ticket ชุดเดียวกัน รองรับรายงานตามประเทศ อุตสาหกรรม และมูลค่าการลงทุน พร้อมส่งออก Excel/PDF — <strong>เพิ่ม</strong> รายงานสรุปสำหรับผู้บริหารตามรอบเวลา</td>
+    <td class="cmp better">ดีกว่า</td>
+    <td class="ref">ข้อเสนอฯ 5.4, 9</td>
+  </tr>
+<tr>
+    <td>5.5.6 การเชื่อมโยงข้อมูล (Integration &amp; Data Sharing) — 1) ระบบต้องสามารถเชื่อมโยงและแลกเปลี่ยนข้อมูลกับระบบอื่น (System Integration) ผ่าน API … โดยเชื่อมกับระบบ SSO EECO และ EEC OSS ของ สกพอ. เป็นต้น 2) รองรับการเชื่อมต่อข้อมูลผ่าน Open API (RESTful API / SOAP) เพื่อความยืดหยุ่นในการขยายระบบในอนาคต</td>
+    <td>ระบบจะยืนยันตัวตนผ่าน SSO EECO และดึงสถานะ EEC OSS มาแสดงบน Investment Case โดยใช้ REST เป็นหลักและรองรับ SOAP เมื่อระบบปลายทางกำหนด</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.5</td>
+  </tr>
+<tr>
+    <td>5.6.1 การกรองข้อมูล (Data Filtering): ระบบต้องสามารถแสดงผลภาพรวมภาระงาน (Heat Map) และต้องสามารถกรองข้อมูลรูปแบบปีพุทธศักราช (พ.ศ.) และปีงบประมาณได้</td>
+    <td>Heat Map แสดงภาระงานและรายการเสี่ยง SLA พร้อมตัวกรองปี พ.ศ. และปีงบประมาณ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.4</td>
+  </tr>
+<tr>
+    <td>5.6.2 ข้อกาหนดซอฟต์แวร์เสริม: ในกรณีที่ระบบที่นาเสนอจาเป็นต้องใช้เครื่องมือวิเคราะห์ข้อมูลภายนอก (เช่น Business Intelligence Tool) เพื่อให้สามารถแสดงผลแบบเจาะลึก (Drill-down) ได้อย่างอิสระ ผู้รับจ้างจะต้องเป็นผู้รับผิดชอบค่าใช้จ่ายของสิทธิ์การใช้งาน (License) ซอฟต์แวร์เสริมดังกล่าว ให้ครอบคลุมตามจานวนผู้ใช้งานทั้งหมดของโครงการ</td>
+    <td>ใช้ Dashboard ในระบบเป็นค่าเริ่มต้น หาก BRD ระบุว่าต้องใช้เครื่องมือ BI ภายนอก บริษัทฯ จะรับผิดชอบค่า License สำหรับผู้ใช้งานโครงการทั้งหมด</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.4</td>
+  </tr>
+<tr>
+    <td>5.7.1 ระบบ Single Sign-On (SSO) เพื่อการยืนยันตัวตน (Authentication) และการดึงข้อมูลพื้นฐาน (Master Profile)</td>
+    <td>เข้าสู่ระบบด้วย SSO EECO</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.5</td>
+  </tr>
+<tr>
+    <td>5.7.2 ระบบบริการ EEC OSS เพื่อดาเนินการดึงข้อมูล (Pull) สถานะการของบริการมาแสดงผล โดยผู้รับจ้างต้องกาหนดขอบเขต Endpoint API ให้ชัดเจนร่วมกับ สกพอ. ในขั้นตอนการวิเคราะห์ระบบ</td>
+    <td>แสดงสถานะ EEC OSS บน Investment Case และกำหนดขอบเขต Endpoint ร่วมกับ สกพอ. ในขั้นวิเคราะห์ความต้องการ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.3, 5.5</td>
+  </tr>
+<tr>
+    <td>5.8.1 การควบคุมการเข้าถึงข้อมูล (Access Control) ต้องมีระบบการกาหนดสิทธิ์การเข้าถึงข้อมูลแบบแบ่งลาดับชั้น (Role-Based Access Control) โดยยึดหลักความจาเป็นในการรับรู้ (Need-to-know basis) โดยเฉพาะเอกสารที่มีชั้นความลับสูง (เช่น หนังสือแสดงเจตจานง (LOI) ข้อตกลงรักษาความลับ (NDA) และงบการเงิน (Financial Statements)) … จากัดสิทธิ์การมองเห็นเฉพาะผู้บริหารระดับสูง หรือผู้ปฏิบัติงานที่เป็นเจ้าของโครงการ (Project Owner) เท่านั้น</td>
+    <td>ระบบจะกำหนดสิทธิ์ตามบทบาทและชั้นความลับ โดยจำกัด LOI, NDA และงบการเงินตามหลัก Need-to-know ให้เฉพาะผู้บริหารหรือเจ้าของโครงการที่ได้รับอนุญาต</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.6</td>
+  </tr>
+<tr>
+    <td>5.8.2 มาตรการรักษาความมั่นคงปลอดภัยของข้อมูล (Data Security Safeguards) … 1) ระบบลายน้า (Dynamic Watermark): ต้องมีระบบประทับลายน้ากึ่งโปร่งใสลงบนเอกสารความลับ … แสดงชื่อบัญชีผู้ใช้งานและวันเวลาที่เรียกดูเอกสารนั้น ๆ ทันทีที่มีการเปิดอ่านหรือดาวน์โหลด 2) การบันทึกประวัติการใช้งานระบบ (Audit Trail &amp; Access Log): ระบบต้องเก็บบันทึกร่องรอยการใช้งานระดับแอปพลิเคชัน (Application Log) อย่างละเอียด … Who / What / When …</td>
+    <td>ระบบจะประทับ Dynamic Watermark ที่ระบุชื่อบัญชีและเวลาเมื่อเปิดดูหรือดาวน์โหลดเอกสารลับ พร้อมบันทึกผู้ใช้ การกระทำ และเวลาใน Application Audit Log</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.6</td>
+  </tr>
+<tr>
+    <td>5.8.3 จัด ให้มีการรักษาความปลอดภัยของข้อมูลส่วนบุคคล (PDPA) ของนักลงทุนและผู้ใช้งานทั้งด้านการบริหารจัดการ ( Administrative Safeguard) ด้านเทคนิค (Technical Safeguard) และทางกายภาพ (Physical) ตามมาตรฐานสากลของแต่ละชุดข้อมูล …</td>
+    <td>บันทึก Consent บังคับสิทธิ์ด้วย RBAC และเก็บ Audit Log พร้อมจัดทำแนวทางมาตรการด้านการบริหาร เทคนิค และกายภาพร่วมกับ สกพอ.</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 4.4, 5.1, 5.6</td>
+  </tr>
+<tr>
+    <td>5.9.1 การทาความสะอาดและตรวจสอบข้อมูล (Data Cleansing &amp; De-duplication): ก่อนการนาเข้าข้อมูล ผู้รับจ้างต้องจัดให้มีพื้นที่พักข้อมูล (Staging Area) เพื่อดาเนินการทาความสะอาดข้อมูลดิบ จัดระเบียบโครงสร้างข้อมูล (Data Mapping) และขจัดข้อมูลที่ซ้าซ้อนกัน โดยอ้างอิงจากเลขประจาตัวผู้เสียภาษี (Tax ID) หรือชื่อนิติบุคคล</td>
+    <td>พักข้อมูลใน Staging ตรวจสอบและปรับรูปแบบ จัดทำ Data Mapping ขจัดข้อมูลซ้ำด้วย Tax ID หรือชื่อนิติบุคคล แล้วจึงโหลดข้อมูลที่ผ่านการตรวจสอบ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.7</td>
+  </tr>
+<tr>
+    <td>5.9.2 เงื่อนไขการส่งมอบฐานข้อมูล: เมื่อส่งมอบงาน ฐานข้อมูลในระบบจะต้องอยู่ในสภาพที่สมบูรณ์ เป็นโครงสร้างมาตรฐาน (Structured Data) ไม่มีความซ้าซ้อน และต้องสามารถรองรับ ความสัมพันธ์ของข้อมูล แบบหนึ่งต่อหลายรายการ (One-to-Many) ได้อย่างถูกต้อง เช่น กรณีผู้ติดต่อ 1 ราย มีสถานะเป็นตัวแทนของหลายนิติบุคคล …</td>
+    <td>ส่งมอบฐานข้อมูลแบบ Structured Data ที่ลดข้อมูลซ้ำและรองรับผู้ติดต่อ 1 รายต่อหลายนิติบุคคล</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.7, 6</td>
+  </tr>
+<tr>
+    <td>5.9.3 การจัดการข้อมูลและการเข้าถึง — • เก็บ Log File การใช้งานระบบตามที่กฎหมายกาหนด • บันทึกประวัติการเข้าใช้งานของผู้ใช้ (User Access Log) อย่างน้อย 180 วัน • History Log ต้องสามารถตรวจสอบย้อนหลังได้ และมีมาตรการป้องกันการแก้ไขหรือปลอมแปลงข้อมูล • จัดทาระบบสารองข้อมูล (Data Backup) และแผนกู้คืนระบบ (Disaster Recovery Plan) • กาหนดสิทธิ์การเข้าถึงข้อมูลตามระดับความสาคัญ (Role-based Access Control, RBAC)</td>
+    <td>เก็บ Application Log และ User Access Log อย่างน้อย 180 วันแบบตรวจสอบย้อนหลังได้ จัดทำ Backup/DR และบังคับสิทธิ์ด้วย RBAC</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.6–5.7, 6</td>
+  </tr>
+<tr>
+    <td>5.10.1 ดาเนินการทดสอบการยอมรับระบบ (User Acceptance Test: UAT) ร่วมกับเจ้าหน้าที่ สกพอ.</td>
+    <td>ดำเนิน UAT ร่วมกับเจ้าหน้าที่ สกพอ. ในเฟสที่ 2 พร้อมบันทึกผลและแก้ไขข้อค้นพบก่อนตรวจรับ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6.3</td>
+  </tr>
+<tr>
+    <td>5.10.2 การพัฒนาระบบและความปลอดภัย — • พัฒนาระบบตามมาตรฐาน OWASP (Open Web Application Security Project) เวอร์ชั่นล่าสุด • ให้บริการผ่าน SSL Certificate ของ สกพอ. สาหรับการเข้ารหัสข้อมูล</td>
+    <td>บริษัทฯ จะพัฒนาระบบตามแนวทาง OWASP เวอร์ชันปัจจุบัน และให้บริการ Production ผ่าน SSL Certificate ที่ สกพอ. จัดเตรียม</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 5.6</td>
+  </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="sheet">
+  <div class="hdr">
+    <img class="logo" src="file:///Users/rangwan/Documents/Supabase CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/rocket-logo-full.svg" alt="Rocket" />
+    <div class="doc-meta">
+      เอกสารประกอบการยื่นข้อเสนอ · เลขที่โครงการ 69079202016<br />
+      เอกสารประกวดราคาอิเล็กทรอนิกส์ เลขที่ ๐๑๘/๒๕๖๙ · วันเสนอราคา ๗ สิงหาคม ๒๕๖๙
+    </div>
+  </div>
+  <h1>ตารางเปรียบเทียบคุณลักษณะเฉพาะและข้อกำหนด</h1>
+  <div class="sub">
+    ผู้ยื่นข้อเสนอ: บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด · อ้างอิง TOR ข้อ ๑๐.๒ (๖)
+    · หน้า 3/3
+  </div>
+  <div class="table-wrap">
+    <table>
+      <colgroup>
+        <col class="c1" /><col class="c2" /><col class="c3" /><col class="c4" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>คุณลักษณะเฉพาะและข้อกำหนดที่หน่วยงานกำหนด</th>
+          <th>คุณสมบัติที่ผู้ยื่นข้อเสนอนำเสนอ</th>
+          <th>เปรียบเทียบ</th>
+          <th>เอกสารอ้างอิง</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr>
+    <td>5.11 การจัดฝึกอบรม — 5.11.1 หลักสูตรสาหรับผู้ดูแลระบบ (Admin) … Train The Trainer จานวน 1 ครั้ง … ผู้เข้าร่วมไม่น้อยกว่า 8 คน … อาหารกลางวัน / อาหารว่าง ตามอัตราที่กาหนด … 5.11.2 หลักสูตรสาหรับผู้ใช้งาน (User) … Train The Trainer จานวน 2 ครั้ง … ผู้เข้าร่วมรวมทั้ง 2 ครั้ง ไม่น้อยกว่า 30 คน … 5.11.3 ผู้รับจ้างต้องจัดทาคู่มือหลักสูตร … Admin และ User … ทั้งนี้ ให้จัดส่งแผนการจัดฝึกอบรมให้ สกพอ. พิจารณาเห็นชอบก่อนดาเนินการด้วย</td>
+    <td>จัด Admin Train the Trainer 1 ครั้งสำหรับผู้เข้าร่วมไม่น้อยกว่า 8 คน และ User Train the Trainer 2 ครั้ง รวมไม่น้อยกว่า 30 คน พร้อมคู่มือและแผนอบรมที่ สกพอ. เห็นชอบ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6.5</td>
+  </tr>
+<tr>
+    <td>5.12 บุคลากรในโครงการ — ลาดับตาแหน่งตาม TOR (ผู้จัดการโครงการ; นักวิเคราะห์ระบบ (Business Analyst); นักออกแบบระบบอาวุโส (Senior System Analyst); นักพัฒนาระบบอาวุโส; นักพัฒนาระบบ; นักทดสอบระบบ ×2; ผู้ประสานงานโครงการ) พร้อมวุฒิการศึกษาและประสบการณ์ขั้นต่าตามตาราง TOR 5.12</td>
+    <td>เสนอครบทุกตำแหน่งตาม TOR 5.12 พร้อมผู้เชี่ยวชาญสนับสนุนเพิ่มเติมและแบบฟอร์มภาคผนวก ข</td>
+    <td class="cmp better">ดีกว่า</td>
+    <td class="ref">ข้อเสนอฯ ข้อ 6 (ทีมส่งมอบ); ภาคผนวก ข</td>
+  </tr>
+<tr>
+    <td>6. ระยะเวลาการดาเนินงาน — ผู้รับจ้างจะต้องดาเนินการตามที่กาหนดไว้ในสัญญาและส่งมอบงานตามข้อ 5. ขอบเขตของการดาเนินงาน ภายในระยะเวลา 210 วัน (นับรวมวันหยุดราชการและวันหยุดนักขัตฤกษ์) นับถัดจากวันที่ลงนามในสัญญา</td>
+    <td>แผนงานและข้อผูกพันไม่เกิน 210 วัน</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6</td>
+  </tr>
+<tr>
+    <td>7.1–7.3 การส่งมอบงาน — 7.1 งวดที่ 1 ภายใน 60 วัน … (Project Plan / BRD / System Design / ประเมินความเสี่ยง) 7.2 งวดที่ 2 ภายใน 180 วัน … (พัฒนาระบบ / ความมั่นคงปลอดภัย / Data Preparation / UAT และ Security Scan) 7.3 งวดที่ 3 ภายใน 210 วัน … (Structured Clean DB / Go-Live / อบรม / Backup &amp; DR / Licensing)</td>
+    <td>แผนงานกำหนดชุดส่งมอบภายใน 60, 180 และ 210 วัน พร้อมระยะเวลาสำรองก่อนแต่ละงวด</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6</td>
+  </tr>
+<tr>
+    <td>7.3.2 ดาเนินการติดตั้งและจัดทารายละเอียดตามข้อ 5.3.7 พร้อมเปิดใช้งานจริง (Go-Live &amp; Final Delivery) รวมถึงการส่งมอบสิทธิ์ขาด (Perpetual License) การส่งมอบซอร์สโค้ด (Source Code)</td>
+    <td>ติดตั้งระบบบนโฮสต์ที่ สกพอ. จัดหา เปิดใช้งานจริง และส่งมอบสิทธิ์ขาดพร้อมซอร์สโค้ด</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6</td>
+  </tr>
+<tr>
+    <td>7.3.6 เอกสารรับรองสิทธิการใช้งาน (Licensing) สาหรับซอฟต์แวร์หรือระบบคลาวด์ที่เกี่ยวข้อง โดยครอบคลุมระยะเวลาอย่างน้อย 3 ปี … ทั้งนี้ ต้องไม่มีการเรียกเก็บค่าใช้จ่ายรายปีเพิ่มเติมจาก สกพอ. ภายในระยะเวลา 3 ปีแรก</td>
+    <td>ส่งมอบเอกสารสิทธิ์ใช้งานที่ครอบคลุมอย่างน้อย 3 ปี โดยไม่มีค่ารายปีเพิ่มเติมในช่วง 3 ปีแรกตาม TOR</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6.5</td>
+  </tr>
+<tr>
+    <td>8. เงื่อนไขการชาระเงิน — สกพอ. จะชาระค่าจ้าง… โดยแบ่งออกเป็น 3 งวด ดังนี้ 8.1 งวดที่ 1 จานวนร้อยละ 20 … เมื่อผู้รับจ้างส่งมอบงานข้อ 7.1 … 8.2 งวดที่ 2 จานวนร้อยละ 50 … ข้อ 7.2 … 8.3 งวดที่ 3 จานวนร้อยละ 30 … ข้อ 7.3 …</td>
+    <td>เงื่อนไขการค้าตาม TOR ข้อ 8; วันที่ส่งมอบทางเทคนิคระบุในแผนงานข้อเสนอฯ</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">TOR ข้อ 8; ข้อเสนอฯ 6</td>
+  </tr>
+<tr>
+    <td>14. การรับประกัน — …ระยะเวลาที่รับประกัน 1 ปี … 14.1 …รับแจ้งได้ตลอดทุกช่วงเวลาตลอด 24 ชั่วโมง … ตอบกลับภายใน 30 นาที … 14.2.1 …แก้ไข…ภายใน 4 ชั่วโมง … 14.2.2 …ภายใน 24 ชั่วโมง … 14.2.3 …ภายใน 48 ชั่วโมง …</td>
+    <td>รับประกัน 1 ปี รับแจ้งเหตุตลอด 24 ชั่วโมง ตอบรับภายใน 30 นาที และแก้ไขตามระดับเหตุภายใน 4, 24 หรือ 48 ชั่วโมงตาม TOR ข้อ 14</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 7</td>
+  </tr>
+<tr>
+    <td>17. การสงวนสิทธิ์ของสานักงาน… — 17.1 บรรดาลิขสิทธิ์และกรรมสิทธิ์ในทรัพย์สินทางปัญญาของข้อมูล เอกสารคู่มือต่าง ๆ และสิ่งอื่นที่เกี่ยวข้องกับโครงการนี้ ให้ถือว่าเป็นกรรมสิทธิ์ของสานักงานคณะกรรมการนโยบายเขตพัฒนาพิเศษภาคตะวันออก (สกพอ.) ทั้งหมด …</td>
+    <td>ส่งมอบลิขสิทธิ์และกรรมสิทธิ์ในข้อมูล เอกสาร คู่มือ และผลงานที่เกี่ยวข้องแก่ สกพอ. ตาม TOR ข้อ 17</td>
+    <td class="cmp equal">เท่ากัน</td>
+    <td class="ref">ข้อเสนอฯ 6</td>
+  </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+</body>
+</html>

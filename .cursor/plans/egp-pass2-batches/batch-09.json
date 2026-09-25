@@ -1,0 +1,90 @@
+[
+  {
+    "id": 183,
+    "project_name": "ประกวดราคาจ้างการจัดจ้างพัฒนาระบบสารสนเทศติดตามและประเมินผล โครงการกองทุนพัฒนาการกีฬาแห่งชาติ ระยะที่ 2 (ส่วนขยายเชื่อมต่อกับระบบ ERP ติดตามการเบิกจ่าย) ครั้งที่ 2 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079482832)",
+    "budget": 5000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18fBwjTq54BnLIfdjk4IchgHNd7xzQwkjURanQzWJhrdgN6LS3Z0DIr",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079482832/TOR-69079482832.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 184,
+    "project_name": "ประกวดราคาจ้างโครงการเพิ่มประสิทธิภาพระบบสารสนเทศหลักขององค์กร (Core Business) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 68119547453)",
+    "budget": 21141300,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX188p2QTKilqr7gLwoXrT0PMBWY6pA9XF5jovq1GznC0SjdJfbudYrBs",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/68119547453/TOR-68119547453.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 185,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบปัญญาประดิษฐ์ (AI Portal) เพื่อการสืบค้นและถอดความข้อมูลภายในสำนักงาน กสทช. ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69039588949)",
+    "budget": 9500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18VWkHJCKoNn1MUNHl3cywd%252BOV35vloPYK2IlTwp5XeU3%252FK9D%252BSKdv5",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 192,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบบริหารจัดการองค์การ ในรูปแบบดิจิทัล Enterprise Resource Planning System (ERP) ของสถาบันการแพทย์ฉุกเฉินแห่งชาติ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049070787)",
+    "budget": 14720500,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18XMCHtiUg%252BNRqqHhvZOoERSWth2QY70HjcOrlukxntYbjBE4HZ10cF",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 194,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบสารบรรณอิเล็กทรอนิกส์ (e-Saraban) สำนักงานคณะกรรมการส่งเสริมการศึกษาเอกชนประจำปีงบประมาณ พ.ศ. 2569 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 68129053714)",
+    "budget": 7040400,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18xVn3BRxQubaDxaVRpvx0aLkvT%252BztUhb3IfsWvhL01UPAT7mUOnVXi",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 195,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบบริหารจัดการนวัตกรรมและความรู้ ปี 69 จำนวน 1 ระบบ รหัสจัดหาเลขที่ RD9-0273-E01 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69039416683)",
+    "budget": 5992000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BpZfladkCW%252B2WYMWNf18cY1%252FbD5QYkeu0EPrWiTAwOIlJjSryRk3Ij",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 203,
+    "project_name": "ประกวดราคาจ้างบำรุงรักษาระบบและข้อมูลด้านการป้องกันและบรรเทาสาธารณภัย ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079486697)",
+    "budget": 5000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252F7NjadAe%252BeAvqG2nRE192zl3VbBziZmkJoArygGBmIdXcXLu0Lb7n%252F",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079486697/TOR-69079486697.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 204,
+    "project_name": "ประกวดราคาจ้างโครงการปรับเปลี่ยนระบบบริหารจัดการเว็บไซต์ กรมสรรพสามิต ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69029174838)",
+    "budget": 25000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18l%252F7dNxiZ%252F9%252Fv5Uc323rX%252FPYxfrXjyneGEkwh3V60CDYf59v0onRZG",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69029174838/TOR-69029174838.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

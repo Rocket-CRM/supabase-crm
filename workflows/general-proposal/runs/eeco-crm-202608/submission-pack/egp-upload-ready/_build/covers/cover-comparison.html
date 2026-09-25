@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<title>ตารางเปรียบเทียบคุณสมบัติ</title>
+<style>
+  @font-face {
+    font-family: "Sarabun";
+    src: url("fonts/SarabunRegular.ttf") format("truetype");
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: "Sarabun";
+    src: url("fonts/SarabunBold.ttf") format("truetype");
+    font-weight: 700;
+  }
+  @page { size: A4 portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Sarabun", "TH SarabunPSK", sans-serif;
+    color: #000;
+    font-size: 12px;
+    line-height: 1.45;
+    /* Symmetric printable inset — extra right so outer border never clips */
+    padding: 14mm 16mm 14mm 14mm;
+    width: 210mm;
+    min-height: 297mm;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #000;
+  }
+  .logo { height: 36px; width: auto; }
+  .doc-meta { text-align: right; font-size: 12px; }
+  h1 {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 20px 0 10px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+  .center { text-align: center; margin: 3px 0; }
+  .slot {
+    text-align: center;
+    margin: 14px 0 16px;
+    font-weight: 700;
+  }
+  h2 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 16px 0 6px;
+  }
+  p { margin: 6px 0; text-align: justify; }
+  .table-wrap {
+    border: 1.25px solid #000;
+    width: 100%;
+    margin-top: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    font-size: 12px;
+  }
+  th, td {
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 6px 7px;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  th:last-child, td:last-child { border-right: none; }
+  tr:last-child td { border-bottom: none; }
+  th {
+    font-weight: 700;
+    text-align: center;
+    background: #fff;
+  }
+  td.num { text-align: center; width: 10%; }
+  col.c1 { width: 10%; }
+  col.c2 { width: 42%; }
+  col.c3 { width: 48%; }
+  .note { margin-top: 14px; font-size: 12px; }
+  .attach { margin-top: 10px; font-size: 12px; }
+  .attach ol { margin: 4px 0 0 20px; padding: 0; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <img class="logo" src="rocket-logo-full.svg" alt="Rocket" />
+    <div class="doc-meta">
+      เอกสารประกอบการยื่นข้อเสนอ<br />
+      เลขที่โครงการ 69079202016<br />
+      เอกสารประกวดราคาอิเล็กทรอนิกส์ เลขที่ ๐๑๘/๒๕๖๙<br />
+      วันเสนอราคา ๗ สิงหาคม ๒๕๖๙
+    </div>
+  </div>
+
+  <h1>ตารางเปรียบเทียบคุณสมบัติ</h1>
+  <div class="subtitle">
+    ตารางเปรียบเทียบคุณลักษณะเฉพาะและข้อกำหนดของหน่วยงาน<br />
+    กับคุณสมบัติที่ผู้ยื่นข้อเสนอนำเสนอ
+  </div>
+  <div class="center">
+    โครงการพัฒนาระบบบริหารจัดการความสัมพันธ์นักลงทุนและฐานข้อมูลกลาง<br />
+    (CRM &amp; Database Management System)
+  </div>
+  <div class="center">หน่วยงานผู้ว่าจ้าง: สำนักงานคณะกรรมการนโยบายเขตพัฒนาพิเศษภาคตะวันออก (สกพอ.)</div>
+  <div class="center">ผู้ยื่นข้อเสนอ: บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด</div>
+  <div class="slot">
+    ใช้ยื่นเป็นเอกสารส่วนที่ ๒ — ตารางเปรียบเทียบคุณสมบัติ<br />
+    ตามเอกสารประกวดราคา ข้อ ๑๐.๒ (๖)
+  </div>
+
+  <h2>ขอบเขตเอกสารฉบับนี้</h2>
+  <p>
+    เอกสารฉบับนี้นำเสนอรายละเอียดเป็นตารางเปรียบเทียบคุณสมบัติ โดยคอลัมน์ที่ ๑ แสดงคุณลักษณะเฉพาะและข้อกำหนดที่หน่วยงานกำหนด
+    คอลัมน์ที่ ๒ แสดงคุณสมบัติที่ผู้ยื่นข้อเสนอนำเสนอ คอลัมน์ที่ ๓ แสดงผลการเปรียบเทียบ (เท่ากัน / ดีกว่า)
+    และคอลัมน์ที่ ๔ อ้างอิงเอกสารข้อเสนอทางเทคนิคที่เกี่ยวข้อง
+  </p>
+
+  <h2>โครงสร้างตาราง</h2>
+  <div class="table-wrap">
+    <table>
+      <colgroup>
+        <col class="c1" /><col class="c2" /><col class="c3" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>คอลัมน์</th>
+          <th>ความหมาย</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td>คุณลักษณะเฉพาะและข้อกำหนดที่หน่วยงานกำหนด</td>
+          <td>ข้อความตาม TOR / ขอบเขตของงาน</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>คุณสมบัติที่ผู้ยื่นข้อเสนอนำเสนอ</td>
+          <td>สิ่งที่บริษัทฯ เสนอและจะส่งมอบ</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>เปรียบเทียบ</td>
+          <td>เท่ากัน หรือ ดีกว่า</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>เอกสารอ้างอิง</td>
+          <td>ข้อในข้อเสนอทางเทคนิค / ภาคผนวกที่เกี่ยวข้อง</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <strong>หมายเหตุ</strong>
+    รายการที่ระบุ “ดีกว่า” หมายถึงคุณสมบัติที่เสนอครบตาม TOR และมีส่วนเสริมที่เป็นประโยชน์ต่อการปฏิบัติงานของ สกพอ. โดยไม่คิดค่าใช้จ่ายเพิ่ม
+  </div>
+
+  <div class="attach">
+    <strong>เอกสารแนบต่อท้าย</strong>
+    <ol>
+      <li>ตารางเปรียบเทียบคุณลักษณะเฉพาะและข้อกำหนดฉบับเต็ม (หน้าถัดไป — ขึ้นแถวใหม่ทั้งแถวเมื่อขึ้นหน้า)</li>
+    </ol>
+  </div>
+</body>
+</html>

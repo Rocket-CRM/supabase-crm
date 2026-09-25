@@ -1,0 +1,6 @@
+cohort,mongo_id,user_id,wallet_before,wallet_after,wallet_update_delta,reason
+remaining_138,65413f4ad6b1732a1ec5efdd,6f264737-7583-48ab-ab51-28193e758805,1211.0,1188.0,-23.0,user_wallet_plus_earn_fifo
+remaining_138,65413f54d6b1732a1ec5f909,169434fe-4c0c-46b4-9c9b-15dac2e90009,41988.0,36954.0,-5034.0,user_wallet_plus_earn_fifo
+remaining_138,65413f57d6b1732a1ec5fbcd,15fd0ace-9201-4d3b-9329-cec5c18cfee8,10658.0,10670.0,12.0,user_wallet_plus_earn_fifo
+pilot_15,67510f45a33a4dc033969a91,ff511b13-f049-40fd-925f-0ef12ee595cb,118172.0,128882.0,10710.0,user_wallet_plus_earn_fifo
+remaining_138,6a4dd4dbe7aba5deb5edde98,6761dc57-bcf6-4d5f-a1a0-16c0610a3ac3,1194.0,1979.0,785.0,user_wallet_plus_earn_fifo

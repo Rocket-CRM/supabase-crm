@@ -1,0 +1,13 @@
+{
+  "name": "general-proposal-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "mockups:handoff": "node scripts/generate-handoff.mjs",
+    "mockups:view": "node viewer/server.mjs",
+    "mockups:preview": "node scripts/build-preview.mjs",
+    "mockups:capture": "node scripts/capture-mockups.mjs",
+    "mockups:embed": "node scripts/embed-mockups.mjs",
+    "mockups:apply-shortcodes": "node scripts/apply-shortcodes.mjs"
+  }
+}

@@ -1,0 +1,51 @@
+---
+description: Custom / government project proposal workflow — document groups, clarify, plan, produce, pack, review. Not Rocket CRM loyalty.
+alwaysApply: false
+---
+
+# General proposal workflow
+
+When this rule applies, follow `workflows/general-proposal/REFERENCE.md` and `workflows/general-proposal/SCAFFOLDS.md`. Stages are guidance, not a phase machine. Do not invent schemas or intake forms beyond those two files.
+
+For **Rocket CRM / loyalty** product proposals, use `22-proposal-generator-workflow.mdc` and `workflows/proposal-generator/` instead.
+
+## Trigger phrases
+
+- "general proposal", "custom project proposal", "submission proposal"
+- "EECO proposal", "Eastern Seaboard proposal"
+- "run general proposal", "resume general proposal"
+- User points at `workflows/general-proposal/runs/<slug>/`
+- User @-mentions this rule
+
+Do **not** treat bare "write a proposal" as this workflow if the user means Rocket loyalty — that belongs to `workflows/proposal-generator/`.
+
+## Immediate actions
+
+1. Read `workflows/general-proposal/REFERENCE.md` **and** `SCAFFOLDS.md`.
+2. Use or create `runs/<project>-<yyyymm>/` — that folder is the only state.
+3. Recommended order: **Document categories + classify** → Understand → **Clarify** → **Manual request MD** → **Plan proposal writing** → Produce (AI ‖ manuals/library) → Visuals → Combine pack → Late AI → **Principles / proposal review** → Polish → (**Thai convert + translation review** only when manually triggered).
+4. **Clarify before Plan/Write** unless the human explicitly says proceed with gaps. Rank questions; persist answers as Inputs.
+5. Classes: `manual` | `library` | `generate` | `hybrid` | `out_of_band`. Catalog: `resources/document-groups-catalog.md`.
+6. **Project context chain:** `sources/` (authority) → `dossier.md` (index with exact locations, decisions, gaps) → `outline.md` `reads` (per-section retrieval). There is no project-context MCP or automatic TOR pull. Point at source sections; do not draft from dossier paraphrase alone.
+7. **No product knowledge base.** Do not use CRM Knowledge MCP or `docs/PRODUCT_NARRATIVE.md` as fact sources. Facts = `sources/` + human answers + canonical libraries under `resources/`. Craft = Writing Principles (+ anti-slop when drafting).
+7a. **Craft scope.** Apply `CORE_WRITING_PRINCIPLES.md` in full. For `PROPOSAL_WRITING_PRINCIPLES.md`, the general-proposal workflow’s SCAFFOLDS/REFERENCE take precedence on voice, uneven depth, TOR placement, and section texture. Do not use CRM Knowledge verification, identical peer scaffolds, SCQA-style “this section covers…” openers, or per-module closing matrices unless this bid genuinely requires them.
+7b. **Language.** English first for draft, principles review, and Review 3. Thai only on explicit manual trigger (“localize to Thai”, “Thai convert”, …). Follow `Writing Principles/TRANSLATION_PRINCIPLES.md`: write Thai under `th/`; keep English at the run root as backup (optional `en/` snapshot). Never overwrite English with Thai. Structural cuts discovered during Thai review must first be applied to accepted English, then re-localized; record any human-authorized Thai-only divergence. After convert, write `th/translation-review.md`.
+8. No target length. Depth follows TOR judgment in the dossier. Customer-facing outputs only — no internal/AI meta in compiled docs.
+9. **Asset libraries** — personnel: `resources/personnel/` + `personnel-role-fit.md`; project proofs: `resources/project-proofs/` + `project-proof-stretch.md`; company docs: `resources/company-docs/INDEX.md`; company intro craft: `standard-company-profile.md`. Pricing when group included: `resources/pricing-breakdown.md`. Manual staff list: `manual-request-template.md` → run `manual-requests.md`.
+10. Company intro pulls selectively from human-approved run sources + `resources/standard-company-profile.md`; rewritten against bidder criteria; never a substitute for qualification evidence. Mockups = `{{mockup:Mxx}}` + registry with **`branding` + real government/agency logo** (`MOCKUPS.md`).
+11. After compile (or late AI / large rewrite): write `principles-review.md`, then deepen/cut only where judgment adds value. Before/after coverage must preserve unique commitments and accepted depth across architecture, system design, database, security, integration, migration, operations, and delivery.
+11a. **Cold-reader voice pass:** inspect representative passages from beginning, middle, and end. Banned-phrase search alone cannot pass.
+11b. **Visual preservation:** record diagrams/mockups removed or merged and where their unique branches, relationships, ownership, interfaces, controls, or dependencies survive. Anti-slop is not permission to shorten blindly.
+12. **Tick requirements by detailing features** — TOR order may organize chapters; bodies are operator/journey narrative (SCAFFOLDS).
+12a. **Exact TOR text** — matrix buyer-requirement column and in-body requirement presentation **verbatim from `sources/`**.
+13. **Official voice** for government packs — formal agency English at draft; formal agency Thai after convert.
+14. **Hosting from TOR** — vendor-agnostic min specs + who procures prod.
+14a. **Standard technical practices** — `resources/standard-technical-practices.md`. Dossier H1–H5 + Practices pull.
+14b. **Operations & support** — `resources/standard-operations-support.md`. Prefer separate section; TOR SLAs win.
+14c. **Delivery timeline & migration** — `resources/standard-delivery-timeline-migration.md`. No payment % in technical narrative. Principles review must pass timeline alignment + proposal voice.
+14d. **Company profile & differentiation** — `resources/standard-company-profile.md`. Canonical legal names; certificate/chairman signatory **นายรางวัล ดุษฎีสุรพจน์**; company-director form signatory **มัลลิกา กุลนาพันธ์**.
+15. **Extras** — only if pack allows; embed in feature subsections; assess in dossier only.
+16. **Owner-facing only** in compiled docs.
+17. **Core features parent** when TOR clusters modules.
+18. **Feature tables** carry sub-capabilities when useful.
+19. **Executive overview (mandatory)** — Current → Future → Impact + React pillar-matrix (`{{diagram:executive-overview}}`). Place the shortcode **immediately under** the “from today to proposed” heading (before theme prose). Thai delivery-team names from Appendix B / personnel canon. Mermaid timelines: A4-safe `TB` / phase subgraphs, not wide `LR`. Avoid `---` immediately before headings.

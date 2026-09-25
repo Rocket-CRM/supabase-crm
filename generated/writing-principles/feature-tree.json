@@ -1,0 +1,179 @@
+{
+  "domain_slug": "writing-principles",
+  "domain_name": "Writing Principles",
+  "knowledge_domain": "writing",
+  "retrieval_protocol": {
+    "universal_first": "Always fetch core-writing before any genre-specific playbook. Core principles apply to every structured writing task.",
+    "product_facts_boundary": "Writing MCP = craft and structure. CRM Knowledge MCP = Rocket product facts. Compose both for proposals, decks, and feature guides that mention platform capabilities.",
+    "default_sequence": [
+      "writing_get_my_context",
+      "writing_get_core_principles",
+      "writing_resolve_genre (if genre unclear)",
+      "writing_search_guidance (natural-language question)",
+      "writing_get_playbook_context (deterministic blocks for resolved slug)"
+    ],
+    "task_composition": [
+      {
+        "task": "Cold email, blog post, landing page, SEO page",
+        "sequence": ["core-writing", "genre slug", "translation (if localized)"],
+        "tools": ["writing_get_core_principles", "writing_search_guidance", "writing_get_playbook_context"]
+      },
+      {
+        "task": "Rocket B2B proposal / RFP response",
+        "sequence": ["core-writing", "proposal-writing", "CRM search_semantic for feature facts"],
+        "tools": ["writing_get_playbook_context(proposal-writing)", "CRM get_feature_answer_context"]
+      },
+      {
+        "task": "Sales or marketing deck",
+        "sequence": ["core-writing", "sales-slides", "CRM get_feature_context (if feature-specific slides)"],
+        "tools": ["writing_get_playbook_context(sales-slides)", "CRM get_feature_context"]
+      },
+      {
+        "task": "Thai / JP / TW localized copy",
+        "sequence": ["core-writing", "genre slug", "translation"],
+        "tools": ["writing_get_core_principles", "writing_get_playbook_context", "writing_get_playbook_context(translation)"]
+      },
+      {
+        "task": "CRM feature guide",
+        "sequence": ["core-writing", "feature-guide-writing", "CRM get_feature_context for the feature slug"],
+        "tools": ["writing_get_playbook_context(feature-guide-writing)", "CRM get_feature_context"]
+      },
+      {
+        "task": "Web content — pick the right part first",
+        "sequence": ["core-writing", "web-page-copy routing overview", "one of web-landing-copy | web-article-copy | web-seo-strategy | web-internal-linking"],
+        "tools": ["writing_get_playbook_context(web-page-copy)", "writing_get_playbook_context(part slug)"]
+      }
+    ]
+  },
+  "items": [
+    {
+      "slug": "core-writing",
+      "name": "Core Writing Principles",
+      "item_type": "feature",
+      "parent_slug": "writing-principles",
+      "sort_order": 10,
+      "source_file": "CORE_WRITING_PRINCIPLES.md",
+      "genre": "foundation",
+      "universal": true,
+      "when_to_use": "Every structured writing task — proposals, slides, web copy, feature guides, emails. Pyramid logic, MECE, vertical/horizontal logic, specificity, limits.",
+      "aliases": ["core principles", "pyramid principle", "MECE", "structured writing", "writing foundation"]
+    },
+    {
+      "slug": "proposal-writing",
+      "name": "Proposal Writing",
+      "item_type": "feature",
+      "parent_slug": "writing-principles",
+      "sort_order": 20,
+      "source_file": "PROPOSAL_WRITING_PRINCIPLES.md",
+      "genre": "proposal",
+      "universal": false,
+      "when_to_use": "B2B proposals, RFP responses, SOWs. R/U/S/W framework: read requirements, understand context, structure, write sections.",
+      "aliases": ["proposal", "RFP", "RFP response", "SOW", "bid response", "requirement mapping"]
+    },
+    {
+      "slug": "sales-slides",
+      "name": "Sales Presentation Slides",
+      "item_type": "feature",
+      "parent_slug": "writing-principles",
+      "sort_order": 30,
+      "source_file": "SALES_PRESENTATION_SLIDE_PRINCIPLES.md",
+      "genre": "slides",
+      "universal": false,
+      "when_to_use": "Sales decks, marketing presentations, buyer-facing slide narratives. One message per slide, decision story, proof, objections.",
+      "aliases": ["sales deck", "presentation", "pitch deck", "slides", "marketing deck"]
+    },
+    {
+      "slug": "web-page-copy",
+      "name": "Web Page Copy",
+      "item_type": "feature",
+      "parent_slug": "writing-principles",
+      "sort_order": 40,
+      "source_file": "WEB_PAGE_COPY_PRINCIPLES.md",
+      "genre": "web",
+      "universal": false,
+      "when_to_use": "Routing parent only — read Which part to use before fetching a part slug. Do not load all four parts at once.",
+      "aliases": ["web copy", "website copy", "marketing site"]
+    },
+    {
+      "slug": "web-landing-copy",
+      "name": "Web — Landing Page Copy",
+      "item_type": "sub_feature",
+      "parent_slug": "web-page-copy",
+      "sort_order": 41,
+      "source_file": "WEB_PAGE_COPY_PRINCIPLES.md",
+      "source_part": 1,
+      "source_part_title": "Landing Page Copy",
+      "genre": "landing",
+      "universal": false,
+      "when_to_use": "Product landing pages, homepage hero, feature LPs. 5-second clarity, customer-as-hero, CTAs, Thai/English voice.",
+      "aliases": ["landing page", "LP", "homepage", "hero section", "product page"]
+    },
+    {
+      "slug": "web-article-copy",
+      "name": "Web — Blog & Articles",
+      "item_type": "sub_feature",
+      "parent_slug": "web-page-copy",
+      "sort_order": 42,
+      "source_file": "WEB_PAGE_COPY_PRINCIPLES.md",
+      "source_part": 2,
+      "source_part_title": "Blog & Knowledge Articles",
+      "genre": "article",
+      "universal": false,
+      "when_to_use": "Blog posts, knowledge articles, thought leadership. Search journey, macro structure, E-E-A-T, consultant voice.",
+      "aliases": ["blog", "article", "knowledge article", "thought leadership", "content marketing"]
+    },
+    {
+      "slug": "web-seo-strategy",
+      "name": "Web — SEO Strategy",
+      "item_type": "sub_feature",
+      "parent_slug": "web-page-copy",
+      "sort_order": 43,
+      "source_file": "WEB_PAGE_COPY_PRINCIPLES.md",
+      "source_part": 3,
+      "source_part_title": "SEO Strategy & On-Page Signals",
+      "genre": "seo",
+      "universal": false,
+      "when_to_use": "SEO strategy for landing and knowledge pages. Intent tiers T1–T7, on-page signals, technical SEO, flywheel.",
+      "aliases": ["SEO", "on-page SEO", "keyword strategy", "search intent", "technical SEO"]
+    },
+    {
+      "slug": "web-internal-linking",
+      "name": "Web — Internal Linking",
+      "item_type": "sub_feature",
+      "parent_slug": "web-page-copy",
+      "sort_order": 44,
+      "source_file": "WEB_PAGE_COPY_PRINCIPLES.md",
+      "source_part": 4,
+      "source_part_title": "Internal Linking",
+      "genre": "linking",
+      "universal": false,
+      "when_to_use": "Pillar-cluster architecture, LP target tiers, AI linking workflow, cross-language link rules.",
+      "aliases": ["internal linking", "pillar cluster", "link architecture", "site structure"]
+    },
+    {
+      "slug": "translation",
+      "name": "Translation & Localization",
+      "item_type": "feature",
+      "parent_slug": "writing-principles",
+      "sort_order": 50,
+      "source_file": "TRANSLATION_PHILOSOPHY.md",
+      "genre": "translation",
+      "universal": false,
+      "cross_cutting": true,
+      "when_to_use": "Add after genre playbook when output is Thai, JP, TW, or mixed EN/local. Localize-don't-translate, term policy, tone calibration.",
+      "aliases": ["translation", "localization", "Thai copy", "Japanese copy", "Taiwanese copy", "localize"]
+    },
+    {
+      "slug": "feature-guide-writing",
+      "name": "Feature Guide Writing",
+      "item_type": "feature",
+      "parent_slug": "writing-principles",
+      "sort_order": 60,
+      "source_file": "FEATURE_GUIDE_WRITING_PRINCIPLES.md",
+      "genre": "feature_guide",
+      "universal": false,
+      "when_to_use": "CRM feature guides in requirements/feature-docs. 8-section template, multi-audience, route maps, status models.",
+      "aliases": ["feature guide", "product documentation", "help doc", "feature spec writing"]
+    }
+  ]
+}

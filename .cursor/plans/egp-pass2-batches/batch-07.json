@@ -1,0 +1,90 @@
+[
+  {
+    "id": 132,
+    "project_name": "จ้างพัฒนาระบบบันทึกข้อมูลประกอบการตรวจสอบรายงานการเงินของหน่วยงานในสังกัดสำนักงานปลัดกระทรวงสาธารณสุขAudit of Financial Statement Program (AFS) ระยะที่ ๑ จำนวน ๑ ระบบ โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69069380342)",
+    "budget": 500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX190re4%252Flxllg79m9YdjUFDoGa7bnu5hATo2oOgZUojIRI%252BtANC0wySg",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 133,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบ Smart Contract Center สำหรับกรมป้องกันและบรรเทาสาธารณภัย ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049142831)",
+    "budget": 31024200,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FcrlonjRX47cli27GBdkDUuIVn%252BJh7TD%252BnIpSSLNZRwAB82yCioH1f",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 139,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบผู้ช่วยอัจฉริยะสนับสนุนงานผู้ตรวจการแผ่นดิน (Ombudsman Intelligent Assistant System) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69029391048)",
+    "budget": 33715500,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252Fe8GvwMdB688FLy5UapOMbVXE5WPeNwgA4eqTbXOrYti7qdOt6zYFf",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69029391048/TOR-69029391048.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 142,
+    "project_name": "ประกวดราคาจ้างโครงการจ้างบำรุงรักษาและซ่อมแซมแก้ไขคอมพิวเตอร์ ซอฟต์แวร์ พร้อมโปรแกรมระบบบัญชีผู้เสียภาษีรายตัว (Taxpayer Account) ประจำปีงบประมาณ พ.ศ. 2570 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079300769)",
+    "budget": 14572800,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18UU52HX%252BMCP%252FDQ2WVY8MXiDo2ejCFJa7ifz4yi2Cy%252BmwrOZIu2i90O",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079300769/TOR-69079300769.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 143,
+    "project_name": "จ้างพัฒนาแพลตฟอร์มบริการ Generative AI จำนวน 1 ระบบ โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69079449096)",
+    "budget": 850000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18XczIBt5oNnewOcBsstJuY2UWWQV1lLSNJ2Dl3WjDefsNQgVdUV1yf",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 144,
+    "project_name": "ประกวดราคาจ้างเพิ่มประสิทธิภาพระบบบริหารการจัดซื้อจัดจ้างและการบริหารสัญญา กรมชลประทาน ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069452089)",
+    "budget": 5000000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BDek4IQk36l8cKyZXbnvV2vdn%252BESfOVw%252F7e0iggMcJI%252FaLgDaAa1SG",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 155,
+    "project_name": "จ้างบำรุงรักษาและดูแลระบบงาน MMS (AMS) และงานจ้างพัฒนาโปรแกรมรองรับการเปลี่ยน Process (CR) ระบบ MMS ปี 2569 - 2570 เลขที่ หจก2. 47/2569 โดยวิธีคัดเลือก (เลขที่โครงการ : 69079075573)",
+    "budget": 12305000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19t%252FASxVEGnhfVEsTdprNxaPbk%252FC%252BbKt69thkcdCizJ7TUtnS4hZ8lH",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 159,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบบริหารจัดการบัญชีผู้ใช้ แบบ Single Sign-On (SSO) ระยะที่ 2 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69019153273)",
+    "budget": 2300000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252F0vN3h2RXHnNECr3YhIjkgPuR1Y3ep5OPZ9UnzlLri3ovT5rTRSTP8",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  }
+]

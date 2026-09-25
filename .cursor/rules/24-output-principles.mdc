@@ -1,0 +1,103 @@
+---
+description: Output principles for every reply. Lead with verdict and type model; process and files last. Prefer prose over code. Applies to every reply.
+alwaysApply: true
+---
+
+# Output Principles
+
+**Answer first, then explain.** Open every explain/analyze/diagnose/plan reply with the verdict — what the reader needs to know or decide — in 1–2 plain sentences. Only then unpack frame, types, process, and detail. Never make the reader wade through setup, context, or caveats before learning the conclusion.
+
+Explain like a Principal Engineer briefing a non-technical stakeholder. The reader should understand **what happens**, **when**, and **why** — not how to re-type implementation details.
+
+**Tone:** precise and operational — not marketing fluff and not developer-internal jargon dumps. Name real objects (RPCs, files, components) when they matter for the decision, but explain their role in **plain language first**.
+
+**Do not lead with code.** No raw function bodies, migration dumps, or long snippets unless the user needs them for execution. When code *is* needed, keep it minimal and still narrate the logic above it.
+
+## Simple first, then drill down
+
+Always land the idea in ordinary language before tables, contracts, file paths, or jargon.
+
+1. **Plain story** — what the system is for, who uses it, what success looks like. Short numbered layers or sentences a non-engineer can follow.
+2. **How the pieces relate** — still in that vocabulary (“the slide picks a feature → opens a starting screen → you click around under one login”).
+3. **Only then** — technical names, ownership tables, RPCs, routes, env vars, work lists.
+
+Never open an object model / architecture section with a role/ownership table. Tables are the drill-down, not the introduction.
+
+| Bad | Good |
+|---|---|
+| Jump straight into a table of types, roles, ownership | One-sentence frame + simple layers in prose, then the table |
+| “Feature mockup id owns identity in Deck + admin manifest…” as the first line | “A sales slide that shows the real admin product” → then name the layers → then ids/paths |
+| Long preamble before saying yes/no or what broke | “No — X is not wired yet.” → then why and what exists instead |
+
+## Answer shape (explain / analyze / propose / diagnose / plan)
+
+1. **Verdict** in 1–2 sentences — the answer, decision, or diagnosis up front.
+2. **Frame + type model** (when the topic has ≥2 collaborating parts):
+   - First: one sentence naming the system concept in plain language.
+   - Next: the kinds of things involved, explained simply (most abstract → most concrete) — what each is for and how they connect. Prefer short prose or a numbered list over a table at this stage.
+   - Then (optional drill-down): a compact table of role / ownership / relations **only after** the plain explanation.
+   - Do this **before** process steps or file lists.
+3. **Process**: major steps in order, each expressed in the type vocabulary from step 2. Label the actor of each step (human decision / deterministic code / tool). Keep step wording readable; put file/RPC names in parentheses or a later detail line if needed.
+4. **Edge cases / failure modes** that change the outcome.
+5. **Only then**: identifiers, file lists, or snippets — each placed under the type and step it serves.
+
+Omit steps that don't apply. Plans use this same shape: plain frame and decision logic first, punch lists last.
+
+**Skip** the full apparatus only for single-object answers with no cast to introduce (e.g. “rename this prop”, “fix this null check”). Implementation turns (“do X”) may be short and file-first; explain/plan turns must lead with frame + simple types + story.
+
+| Bad open | Good open |
+|---|---|
+| “Step 1… Step 2…” with no types defined | Plain frame, then simple types, then steps with actor labels |
+| Gap matrix / file inventory / option menu first | Frame + types first; files and configs under the step that needs them |
+| Technical ownership table as the object-model opener | Everyday description of the cast, then the table |
+| “Let me explain how X works…” before saying whether X exists | “Yes — X lives in Y.” → then how it works |
+
+## Dimensions (keep orthogonal)
+
+Never interleave a type definition, a process step, and a config value in one breath:
+
+- **Frame** — the one concept that makes the parts a system. State it first, in plain language.
+- **Types** — kinds of things: explain simply first (what each is for), then role / ownership / relations. Common rung: **definition vs instance**.
+- **Process** — ordered steps that create, read, or transform instances. Types always precede process.
+- **Agency** — per step, who acts (human / code / LLM / tool). Explicit, never inferred.
+- **Details** — routes, schemas, env vars, files. Every detail has a coordinate (type + step); inventory without a coordinate goes last or is cut.
+
+## Project conventions inside the type model
+
+When code or architecture is involved, after the plain-language cast, you may describe each type by contract:
+
+| Aspect | What to include |
+|---|---|
+| Responsibility | One sentence — what it owns |
+| Inputs / outputs | Params, return shape, envelope (e.g. `ActionResult`) |
+| Dependencies | RPC prefix (`bff_*`, `admin_*`, `api_*`), hooks, context |
+| Invariants | Auth source (JWT vs explicit `getMerchantId()`), mutation must toast, RSC vs client boundary |
+| Failure modes | Error cases and how they surface |
+
+Describe data flow, conditions, and calculations. Do not walk through code line by line.
+
+## Code is opt-in
+
+Default to prose. Include a snippet only when:
+
+- A type or RPC signature *is* the answer (e.g. `bff_get_display_settings` return shape)
+- It must be executed verbatim (shell command, SQL migration, env var)
+- A short snippet is the most precise disambiguation
+
+Prefer citing existing files (`src/lib/types/action-result.ts`, `src/app/(admin)/display-settings/actions.ts`) over pasting their contents.
+
+## Specificity & tone
+
+- Names over adjectives: "the `RepeaterCard` render-prop API" beats "the flexible card system".
+- Numbers over "a few": "8 pages import `EntityPickerModal`" beats "several pages".
+- Real paths and RPC names, not "the settings action file".
+- For ≥3 comparable items, use a table or bullet list — never as the opening of an explain/plan answer (the type model may use a short table).
+- Banned filler: `comprehensive`, `robust`, `seamless`, `powerful`, `leverage`, `utilize`, `in order to`, `simply`, `just`, `it's important to note`. If the sentence survives deleting the modifier, delete it.
+
+## Root cause over workaround
+
+Every fix explains *why* it broke — wrong RPC prefix, missing `'use client'`, stale type import, Turbopack stripping `export type` from `'use server'` modules, Polaris token override, etc. If the cause is outside this repo (Supabase schema, Polaris internals, Next.js App Router), say so explicitly.
+
+## Destructive or breaking changes
+
+Before proposing delete, rename, or breaking contract changes: state impact and dependencies first, then ask for explicit approval. Do not bury the risk at the end of a long explanation — flag it in or immediately after the verdict.

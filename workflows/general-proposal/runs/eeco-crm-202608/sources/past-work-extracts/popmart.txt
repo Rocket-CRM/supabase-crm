@@ -1,0 +1,178 @@
+                                                                                                    ใบเสนอร ค
+                                                                                 เลขที่                QT2026080001
+บริษัท ร็อคเก็ต อินโนเวชั่น จำ กัด (สำ นักง นใหญ่)                               วันที่                03/08/2026
+เลขที่ 101 อ ค รโมบิคอม 3 ชั้น 5                                                 ผูข้ ย                accounting@rocket.in.th
+ซอยพระพินิจ ถนนนร ธิว สร ชนครินทร์
+แขวงทุ่งมห เมฆ เขตส ทร กรุงเทพมห นคร 10120                                       ชื่อง น               Rocket booking license and hosting
+เลขประจำ ตัวผู้เสียภ ษี 0105564035860                                                                  for Pop Mart (Ongoing monthly
+                                                                                                       costs - August 2026)
+ลูกค้
+POP MART (Thailand) CO., Ltd. (Head Office)
+1818, Rasa Two Building, 17th Floor, Room No.1704,1705 Phetchaburi
+Road, Makkasan Subdistrict, Ratchathewi District, Bangkok
+เลขประจำ ตัวผู้เสียภ ษี 0105566128393
+
+    #                                        ร ยละเอียด                                    จำ นวน                  ร ค ต่อหน่วย         ยอดรวม
+    1         Booking web application license                                                  1 Months               60,000.00       60,000.00
+              User
+              -Signup to book, using LINE and national id / passport information
+              -User view events and countdown to event opening
+              -User select event and store.
+              -User select date and available slot
+              -View “My bookings” page with unique booking id and QR
+              -BOT prevention using Cloudflare Turnstile and aws WAF bot rules
+              -Able to limit 1 id to only 1 event during a period of time (e.g. 1
+              month)
+              -Customized UI according to proposal
+
+              Admin
+              -Create store and event
+              -Set slot duration, slot capacity and other appointment rules by
+              event
+              -Incoming bookings calendar and list view by store
+              -Change booking status (pending / confirmed / cancelled) with
+              notification to user
+              -Export bookings list for all stores and per store (according to
+              admin permissions)
+              -Manage admin and store permissions
+    2         Hosting cost                                                                     1 Months               70,000.00       70,000.00
+              AWS hosting with auto-scaling for unlimited visitors
+              Hosting for up to 6 events per month, with unlimited traffic per
+              event
+    3         additional service line item                                                     1                     100,000.00      100,000.00
+
+                                                                                                             รวมเป็ นเงิน         230,000.00 บ ท
+                                                                                                      ภ ษีมูลค่ เพิ่ม 7%           16,100.00 บ ท
+                                                                                                    จำ นวนเงินรวมทั้งสิ้น         246,100.00 บ ท
+(สองแสนสี่หมื่นหกพันหนึ่งร้อยบ ทถ้วน)
+
+                                                                                                    หักภ ษี ณ ที่จ่ ย 3%            6,900.00 บ ท
+                                                                                                               ยอดชำ ระ           239,200.00 บ ท
+
+หม ยเหตุ
+Please make all payments payable to:
+Account in Thailand
+
+
+หน้ ที่ 1/2
+                                                                               ใบเสนอร ค
+                                                                     เลขที่        QT2026080001
+บริษัท ร็อคเก็ต อินโนเวชั่น จำ กัด (สำ นักง นใหญ่)                   วันที่        03/08/2026
+เลขที่ 101 อ ค รโมบิคอม 3 ชั้น 5                                     ผูข้ ย        accounting@rocket.in.th
+ซอยพระพินิจ ถนนนร ธิว สร ชนครินทร์
+แขวงทุ่งมห เมฆ เขตส ทร กรุงเทพมห นคร 10120                           ชื่อง น       Rocket booking license and hosting
+เลขประจำ ตัวผู้เสียภ ษี 0105564035860                                              for Pop Mart (Ongoing monthly
+                                                                                   costs - August 2026)
+ลูกค้
+POP MART (Thailand) CO., Ltd. (Head Office)
+1818, Rasa Two Building, 17th Floor, Room No.1704,1705 Phetchaburi
+Road, Makkasan Subdistrict, Ratchathewi District, Bangkok
+เลขประจำ ตัวผู้เสียภ ษี 0105566128393
+
+Account Number: 138-1-66390-2
+Name: Rocket Innovation Co., Ltd (บจก. ร็อคเก็ต อินโนเวชั่น)
+Bank: Kasikorn Bank (Branch: Empire Tower) (ส ข เอ็มไพร์ท วเวอร์)
+
+*All payment are non-refundable
+
+
+
+
+ในน ม POP MART (Thailand) CO., Ltd.                                                           ในน ม บริษัท ร็อคเก็ต อินโนเวชั่น จำ กัด
+
+
+
+                                                                                                                 03/08/2026
+        ผูส้ ั่งซื้อสินค้                  วันที่                               ผูอ้ นุมัติ                          วันที่
+
+
+หน้ ที่ 2/2
+                                                                                                    ใบเสนอร ค
+                                                                                 เลขที่                QT2026070023
+บริษัท ร็อคเก็ต อินโนเวชั่น จำ กัด (สำ นักง นใหญ่)                               วันที่                13/07/2026
+เลขที่ 101 อ ค รโมบิคอม 3 ชั้น 5                                                 ผูข้ ย                accounting@rocket.in.th
+ซอยพระพินิจ ถนนนร ธิว สร ชนครินทร์
+แขวงทุ่งมห เมฆ เขตส ทร กรุงเทพมห นคร 10120                                       ชื่อง น               Rocket booking license and hosting
+เลขประจำ ตัวผู้เสียภ ษี 0105564035860                                                                  for Pop Mart (Ongoing monthly
+                                                                                                       costs - July 2026)
+ลูกค้
+POP MART (Thailand) CO., Ltd. (Head Office)
+1818, Rasa Two Building, 17th Floor, Room No.1704,1705 Phetchaburi
+Road, Makkasan Subdistrict, Ratchathewi District, Bangkok
+เลขประจำ ตัวผู้เสียภ ษี 0105566128393
+
+    #                                       ร ยละเอียด                                     จำ นวน                  ร ค ต่อหน่วย         ยอดรวม
+    1         Booking web application license                                                  1 Months               60,000.00       60,000.00
+              User
+              -Signup to book, using LINE and national id / passport information
+              -User view events and countdown to event opening
+              -User select event and store.
+              -User select date and available slot
+              -View “My bookings” page with unique booking id and QR
+              -BOT prevention using Cloudflare Turnstile and aws WAF bot rules
+              -Able to limit 1 id to only 1 event during a period of time (e.g. 1
+              month)
+              -Customized UI according to proposal
+
+              Admin
+              -Create store and event
+              -Set slot duration, slot capacity and other appointment rules by
+              event
+              -Incoming bookings calendar and list view by store
+              -Change booking status (pending / confirmed / cancelled) with
+              notification to user
+              -Export bookings list for all stores and per store (according to
+              admin permissions)
+              -Manage admin and store permissions
+    2         Hosting cost                                                                     1 Months               70,000.00       70,000.00
+              AWS hosting with auto-scaling for unlimited visitors
+              Hosting for up to 6 events per month, with unlimited traffic per
+              event
+
+                                                                                                             รวมเป็ นเงิน         130,000.00 บ ท
+                                                                                                      ภ ษีมูลค่ เพิ่ม 7%            9,100.00 บ ท
+                                                                                                    จำ นวนเงินรวมทั้งสิ้น         139,100.00 บ ท
+(หนึ่งแสนส มหมื่นเก้ พันหนึ่งร้อยบ ทถ้วน)
+
+                                                                                                    หักภ ษี ณ ที่จ่ ย 3%            3,900.00 บ ท
+                                                                                                               ยอดชำ ระ           135,200.00 บ ท
+
+หม ยเหตุ
+Please make all payments payable to:
+Account in Thailand
+Account Number: 138-1-66390-2
+
+
+หน้ ที่ 1/2
+                                                                               ใบเสนอร ค
+                                                                     เลขที่        QT2026070023
+บริษัท ร็อคเก็ต อินโนเวชั่น จำ กัด (สำ นักง นใหญ่)                   วันที่        13/07/2026
+เลขที่ 101 อ ค รโมบิคอม 3 ชั้น 5                                     ผูข้ ย        accounting@rocket.in.th
+ซอยพระพินิจ ถนนนร ธิว สร ชนครินทร์
+แขวงทุ่งมห เมฆ เขตส ทร กรุงเทพมห นคร 10120                           ชื่อง น       Rocket booking license and hosting
+เลขประจำ ตัวผู้เสียภ ษี 0105564035860                                              for Pop Mart (Ongoing monthly
+                                                                                   costs - July 2026)
+ลูกค้
+POP MART (Thailand) CO., Ltd. (Head Office)
+1818, Rasa Two Building, 17th Floor, Room No.1704,1705 Phetchaburi
+Road, Makkasan Subdistrict, Ratchathewi District, Bangkok
+เลขประจำ ตัวผู้เสียภ ษี 0105566128393
+
+Name: Rocket Innovation Co., Ltd (บจก. ร็อคเก็ต อินโนเวชั่น)
+Bank: Kasikorn Bank (Branch: Empire Tower) (ส ข เอ็มไพร์ท วเวอร์)
+
+*All payment are non-refundable
+
+
+
+
+ในน ม POP MART (Thailand) CO., Ltd.                                                           ในน ม บริษัท ร็อคเก็ต อินโนเวชั่น จำ กัด
+
+
+
+                                                                                                                 13/07/2026
+        ผูส้ ั่งซื้อสินค้                  วันที่                               ผูอ้ นุมัติ                          วันที่
+
+
+หน้ ที่ 2/2
+

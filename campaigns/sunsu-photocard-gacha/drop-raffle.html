@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sunsu · Drop Raffle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0e0e10;
+      --charcoal: #1c1c20;
+      --surface: #ffffff;
+      --muted: #6b6b73;
+      --line: #ececef;
+      --acid: #c8ff00;
+      --hot: #ff2d6a;
+      --sky: #3ecfff;
+      --gold: #ffc53d;
+      --display: "Syne", "Noto Sans Thai", system-ui, sans-serif;
+      --display-heavy: "Archivo Black", "Syne", "Noto Sans Thai", system-ui, sans-serif;
+      --phone-w: 320px;
+      --phone-h: 680px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    button { font: inherit; border: 0; background: none; cursor: pointer; color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    body {
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      background: #f2f2f4;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      padding: 40px 28px 64px;
+      max-width: 1520px;
+      margin: 0 auto;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 14px 8px 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .brand-pill img {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .brand-pill .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--hot);
+      box-shadow: 0 0 0 0 rgba(255, 45, 106, 0.6);
+      animation: ping 1.4s ease-out infinite;
+    }
+    @keyframes ping {
+      0% { box-shadow: 0 0 0 0 rgba(255, 45, 106, 0.55); }
+      70% { box-shadow: 0 0 0 8px rgba(255, 45, 106, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 45, 106, 0); }
+    }
+
+    .page-head h1 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-top: 12px;
+    }
+    .page-head p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 48ch;
+      line-height: 1.45;
+    }
+
+    .deck {
+      display: grid;
+      grid-template-columns: repeat(4, var(--phone-w));
+      gap: 36px;
+      justify-content: center;
+      overflow-x: auto;
+      padding: 16px 8px 24px;
+    }
+
+    .phone {
+      width: var(--phone-w);
+      height: var(--phone-h);
+      background: #0e0e10;
+      border-radius: 36px;
+      box-shadow:
+        0 0 0 9px #111,
+        0 0 0 11px #2a2a2a,
+        0 24px 48px rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .notch {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 96px; height: 22px;
+      background: #111;
+      border-radius: 16px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      background: #f4f4f6;
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 76px;
+      scrollbar-width: none;
+    }
+    .scroll::-webkit-scrollbar { display: none; }
+
+    .nav {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 68px;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      z-index: 20;
+      padding: 6px 4px 10px;
+    }
+    .nav .item {
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .nav .item.active { color: var(--ink); }
+    .nav .item.active .ico {
+      background: var(--acid);
+      color: var(--ink);
+    }
+    .nav .ico {
+      width: 32px; height: 32px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+    }
+    .nav svg {
+      width: 18px; height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+      transition: transform 0.12s ease;
+    }
+    .btn:active { transform: translateY(2px); }
+    .btn-acid {
+      background: var(--acid);
+      color: var(--ink);
+      box-shadow: 0 6px 0 #8fb000;
+    }
+    .btn-acid:active { box-shadow: 0 2px 0 #8fb000; }
+    .btn-hot {
+      background: var(--hot);
+      color: #fff;
+      box-shadow: 0 6px 0 #b01040;
+    }
+    .btn-hot:active { box-shadow: 0 2px 0 #b01040; }
+    .btn-ink {
+      background: var(--ink);
+      color: #fff;
+      box-shadow: 0 6px 0 #000;
+    }
+    .btn-ink:active { box-shadow: 0 2px 0 #000; }
+    .btn-ghost {
+      background: #fff;
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+      box-shadow: 0 4px 0 #c8c8d0;
+    }
+    .btn-ghost:active { box-shadow: 0 1px 0 #c8c8d0; }
+    .btn-block { width: 100%; }
+    .btn-sm { padding: 11px 14px; font-size: 12px; }
+
+    .phone-label {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    /* —— LIVE DROP —— */
+    .drop-hero {
+      position: relative;
+      padding: 44px 14px 20px;
+      background: var(--ink);
+      color: #fff;
+      overflow: hidden;
+      min-height: 340px;
+    }
+    .drop-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          -18deg,
+          transparent,
+          transparent 18px,
+          rgba(200, 255, 0, 0.04) 18px,
+          rgba(200, 255, 0, 0.04) 19px
+        );
+      pointer-events: none;
+    }
+    .drop-hero .slash {
+      position: absolute;
+      right: -40px; top: 60px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle at 40% 40%, rgba(255, 45, 106, 0.45), transparent 65%);
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    .drop-hero .slash-2 {
+      position: absolute;
+      left: -60px; bottom: 20px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(200, 255, 0, 0.25), transparent 70%);
+      pointer-events: none;
+    }
+
+    .top-row {
+      position: relative; z-index: 2;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand-mini {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .brand-mini img {
+      width: 34px; height: 34px; border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+    }
+    .brand-mini strong {
+      font-family: var(--display);
+      font-weight: 800; font-size: 14px;
+      letter-spacing: -0.03em; display: block;
+    }
+    .brand-mini span {
+      font-size: 10px; color: rgba(255,255,255,0.55);
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--hot);
+      color: #fff;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .live-badge i {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: blink 0.9s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .drop-title {
+      position: relative; z-index: 2;
+      margin-top: 18px;
+    }
+    .drop-title .when {
+      font-size: 11px; font-weight: 700;
+      color: var(--acid);
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .drop-title h2 {
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      font-weight: 900;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      max-width: 14ch;
+    }
+    .drop-title h2 em {
+      font-style: normal;
+      font-weight: 900;
+      color: var(--acid);
+    }
+
+    .countdown {
+      position: relative; z-index: 2;
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .cd-block {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px 4px 8px;
+      text-align: center;
+    }
+    .cd-block b {
+      display: block;
+      font-family: var(--display-heavy);
+      font-weight: 400;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-block span {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+    }
+
+    .prize-rail {
+      position: relative; z-index: 2;
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .prize-rail::-webkit-scrollbar { display: none; }
+    .prize-chip {
+      flex: 0 0 auto;
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 6px 10px 6px 6px;
+      font-size: 11px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .prize-chip img {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #222;
+    }
+
+    .ticket-bar {
+      position: relative; z-index: 2;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .ticket-bar .yours {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+    }
+    .ticket-bar .yours b {
+      color: var(--acid);
+      font-family: var(--display-heavy);
+      font-weight: 400;
+      font-size: 22px;
+      margin-left: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sheet {
+      margin-top: -14px;
+      position: relative; z-index: 3;
+      background: #f4f4f6;
+      border-radius: 20px 20px 0 0;
+      padding: 16px 14px 8px;
+    }
+
+    .math-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .math-cell {
+      text-align: center;
+      padding: 12px 6px 10px;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1.5px solid var(--ink);
+      box-shadow: 0 4px 0 var(--ink);
+      position: relative;
+    }
+    .math-cell.accent {
+      background: #fff0f5;
+      border-color: var(--hot);
+      box-shadow: 0 4px 0 var(--hot);
+    }
+    .math-cell strong {
+      display: block;
+      font-family: var(--display-heavy);
+      font-weight: 400;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .math-cell.accent strong { color: var(--hot); }
+    .math-cell span {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .math-cell .step {
+      display: block;
+      font-family: var(--display);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .math-cell.accent .step { color: var(--hot); }
+
+    .warn-line {
+      font-size: 11px;
+      line-height: 1.45;
+      color: var(--muted);
+      padding: 0 2px 14px;
+    }
+    .warn-line b { color: var(--ink); }
+
+    .cta-stack { display: grid; gap: 14px; }
+
+    /* —— UPLOAD RESULT —— */
+    .result-top {
+      padding: 48px 16px 28px;
+      background: var(--ink);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-top::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 22px;
+      background: #f4f4f6;
+      border-radius: 20px 20px 0 0;
+    }
+    .stamp {
+      position: absolute;
+      right: 16px; top: 50px;
+      width: 64px; height: 64px;
+      border: 2px solid var(--acid);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--acid);
+      font-family: var(--display-heavy);
+      font-weight: 400;
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      text-align: center;
+      line-height: 1.15;
+      z-index: 2;
+      transform: rotate(8deg);
+    }
+    .result-top h2 {
+      position: relative; z-index: 1;
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      max-width: 16ch;
+      margin-bottom: 6px;
+      padding-right: 72px;
+    }
+    .result-top p {
+      position: relative; z-index: 1;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.4;
+      max-width: 26ch;
+    }
+
+    .ticket-stub {
+      margin: -6px 14px 12px;
+      position: relative;
+      z-index: 3;
+      background: transparent;
+      border-radius: 14px;
+      overflow: visible;
+      box-shadow: 0 8px 24px rgba(14,14,16,0.08);
+    }
+    .ticket-stub .stub-top {
+      padding: 14px 14px 12px;
+      background: #141416;
+      color: #fff;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      border-radius: 14px 14px 0 0;
+    }
+    .ticket-stub .stub-top small {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--acid);
+      margin-bottom: 4px;
+    }
+    .ticket-stub .stub-top strong {
+      display: block;
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      font-weight: 900;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .ticket-stub .stub-top .qty {
+      text-align: right;
+      line-height: 1;
+    }
+    .ticket-stub .stub-top .qty b {
+      display: block;
+      font-family: var(--display-heavy);
+      font-weight: 400;
+      font-size: 30px;
+      line-height: 1;
+      color: var(--acid);
+      font-variant-numeric: tabular-nums;
+    }
+    .ticket-stub .stub-top .qty span {
+      display: block;
+      margin-top: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+    }
+    /* Tear sits exactly on black→white edge */
+    .perforation {
+      height: 0;
+      position: relative;
+      z-index: 2;
+      margin: 0;
+      border: 0;
+      border-top: 1.5px dashed #9a9aa3;
+      background: #141416;
+    }
+    .perforation::before,
+    .perforation::after {
+      content: "";
+      position: absolute;
+      top: -7px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f4f4f6;
+      z-index: 3;
+    }
+    .perforation::before { left: -7px; }
+    .perforation::after { right: -7px; left: auto; }
+    .stub-body {
+      padding: 14px 14px 14px;
+      display: grid;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-top: 0;
+      border-radius: 0 0 14px 14px;
+    }
+    .stub-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .stub-row span { color: var(--muted); font-weight: 600; flex-shrink: 0; }
+    .stub-row b { font-weight: 800; text-align: right; }
+
+    .pack-count {
+      margin: 0 14px 12px;
+      padding: 12px;
+      background: var(--surface);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 10px rgba(14,14,16,0.05);
+    }
+    .pack-count img {
+      width: 52px; height: 52px;
+      object-fit: contain;
+    }
+    .pack-count strong {
+      display: block;
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+    .pack-count p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+
+    .note-box {
+      margin: 0 14px 14px;
+      padding: 10px 12px;
+      border-left: 3px solid var(--gold);
+      background: #fff8e6;
+      border-radius: 0 10px 10px 0;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #5a4a20;
+    }
+
+    /* —— CALENDAR —— */
+    .cal-head {
+      padding: 48px 16px 20px;
+      background: var(--ink);
+      color: #fff;
+      position: relative;
+    }
+    .cal-head::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 18px;
+      background: #f4f4f6;
+      border-radius: 20px 20px 0 0;
+    }
+    .cal-head h2 {
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      font-weight: 900;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+      position: relative; z-index: 1;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+    .cal-head p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      position: relative; z-index: 1;
+      line-height: 1.35;
+      max-width: 28ch;
+    }
+
+    .drop-list {
+      padding: 4px 14px 12px;
+      display: grid;
+      gap: 10px;
+    }
+    .drop-item {
+      position: relative;
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 12px 12px 12px 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(14,14,16,0.05);
+    }
+    .drop-item.live {
+      box-shadow: 0 0 0 2px var(--hot), 0 8px 24px rgba(255, 45, 106, 0.18);
+    }
+    .drop-item.live::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--hot);
+    }
+    .drop-item.locked {
+      opacity: 0.72;
+    }
+    .drop-item.past {
+      background: #ebebef;
+    }
+    .drop-item .di-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .drop-item .di-top strong {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+    .status-pill {
+      flex: 0 0 auto;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .status-pill.live { background: var(--hot); color: #fff; }
+    .status-pill.next { background: var(--acid); color: var(--ink); }
+    .status-pill.soon { background: #e8e8ec; color: var(--muted); }
+    .status-pill.done { background: #d8d8de; color: #555; }
+    .drop-item .window {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .drop-item .prizes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .drop-item .prizes span {
+      font-size: 10px;
+      font-weight: 700;
+      background: #f0f0f4;
+      padding: 3px 7px;
+      border-radius: 999px;
+      color: var(--ink);
+    }
+    .drop-item.live .prizes span { background: #ffe8ef; color: #a01040; }
+
+    .habit-note {
+      margin: 0 14px 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--muted);
+      text-align: center;
+    }
+    .habit-note b { color: var(--ink); }
+
+    /* —— RESULTS —— */
+    .draw-hero {
+      padding: 48px 16px 24px;
+      background:
+        linear-gradient(160deg, #1a0a12 0%, #0e0e10 55%, #12180a 100%);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .draw-hero::before {
+      content: "DRAWN";
+      position: absolute;
+      right: -10px; top: 80px;
+      font-family: var(--display-heavy);
+      font-weight: 400;
+      font-size: 56px;
+      letter-spacing: -0.04em;
+      color: rgba(255,255,255,0.04);
+      transform: rotate(-12deg);
+      pointer-events: none;
+    }
+    .draw-hero h2 {
+      position: relative; z-index: 1;
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+    .draw-hero p {
+      position: relative; z-index: 1;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.4;
+      max-width: 28ch;
+    }
+
+    .outcome {
+      margin: -8px 14px 12px;
+      position: relative;
+      z-index: 2;
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 16px 14px;
+      text-align: center;
+      box-shadow: 0 12px 32px rgba(14,14,16,0.12);
+    }
+    .outcome .big {
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .outcome .big.miss { color: var(--ink); }
+    .outcome .sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .outcome .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      text-align: left;
+    }
+    .outcome .stat {
+      background: #f4f4f6;
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .outcome .stat b {
+      display: block;
+      font-family: var(--display-heavy);
+      font-weight: 400;
+      font-size: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+    .outcome .stat span {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .winners {
+      padding: 0 14px 8px;
+    }
+    .winners h3 {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+    .winner-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+    }
+    .winner-row:last-child { border-bottom: 0; }
+    .winner-row .av {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--sky), var(--hot));
+      flex-shrink: 0;
+    }
+    .winner-row .av.b { background: linear-gradient(135deg, var(--acid), var(--gold)); }
+    .winner-row .av.c { background: linear-gradient(135deg, var(--hot), var(--gold)); }
+    .winner-row strong { display: block; font-weight: 800; font-size: 12px; }
+    .winner-row span { font-size: 10px; color: var(--muted); font-weight: 600; }
+    .winner-row .prize-tag {
+      margin-left: auto;
+      font-size: 9px;
+      font-weight: 800;
+      background: #ffe8ef;
+      color: #a01040;
+      padding: 3px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .next-tease {
+      margin: 4px 14px 10px;
+      padding: 12px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .next-tease strong {
+      display: block;
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+    }
+    .next-tease span {
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      font-weight: 600;
+    }
+    .next-tease .go {
+      flex: 0 0 auto;
+      background: var(--acid);
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .float-snack {
+      position: absolute;
+      width: 48px; height: 48px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,0.35));
+      animation: bob 2.8s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .float-snack.a { right: 12px; bottom: 70px; }
+    .float-snack.b { left: 8px; bottom: 100px; width: 40px; animation-delay: 0.7s; }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0) rotate(-6deg); }
+      50% { transform: translateY(-8px) rotate(4deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .live-dot, .live-badge i, .float-snack { animation: none; }
+    }
+
+    @media (max-width: 1380px) {
+      .deck { justify-content: start; padding-left: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="page-head">
+      <div>
+        <div class="brand-pill">
+          <img src="assets/sunsu-logo.png" alt="sunsu" />
+          <span class="live-dot" aria-hidden="true"></span>
+          sunsu Drop Raffle
+        </div>
+        <h1>Drop Raffle · หน้าต่างสั้น ตั๋วตามซอง</h1>
+        <p>ดรอปจำกัดเวลาแบบ sneaker drop — อัปใบเสร็จในหน้าต่างเท่านั้น · 1 ซอง sunsu = 1 ตั๋ว · พลาดรอบนี้ รอรอบหน้า</p>
+      </div>
+    </header>
+
+    <div class="deck">
+
+      <!-- 1 LIVE -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <header class="drop-hero">
+                <div class="slash" aria-hidden="true"></div>
+                <div class="slash-2" aria-hidden="true"></div>
+                <img class="float-snack a" src="assets/muek1.png" alt="" />
+                <img class="float-snack b" src="assets/packshot.png" alt="" />
+
+                <div class="top-row">
+                  <div class="brand-mini">
+                    <img src="assets/sunsu-logo.png" alt="sunsu" />
+                    <div>
+                      <strong>sunsu</strong>
+                      <span>Drop #07</span>
+                    </div>
+                  </div>
+                  <div class="live-badge"><i></i> LIVE</div>
+                </div>
+
+                <div class="drop-title">
+                  <div class="when">ศุกร์ 18:00–21:00</div>
+                  <h2>ซองเซ็น <em>หมึกกรุบ</em> + ที่นั่งแฟนมีต</h2>
+                </div>
+
+                <div class="countdown" aria-label="เวลาที่เหลือในหน้าต่างดรอป">
+                  <div class="cd-block"><b id="cdH">02</b><span>ชม.</span></div>
+                  <div class="cd-block"><b id="cdM">14</b><span>นาที</span></div>
+                  <div class="cd-block"><b id="cdS">37</b><span>วินาที</span></div>
+                </div>
+
+                <div class="prize-rail">
+                  <div class="prize-chip">
+                    <img src="assets/muek1.png" alt="" />
+                    ซองเซ็น ×20
+                  </div>
+                  <div class="prize-chip">
+                    <img src="assets/pouch-purple.png" alt="" />
+                    Merch ×10
+                  </div>
+                  <div class="prize-chip">
+                    <img src="assets/bus_group.png" alt="" />
+                    Fan-meet ×5
+                  </div>
+                </div>
+
+                <div class="ticket-bar">
+                  <div class="yours">ตั๋วของคุณ <b id="ticketCount">7</b></div>
+                </div>
+              </header>
+
+              <div class="sheet">
+                <div class="math-strip">
+                  <div class="math-cell">
+                    <span class="step">01</span>
+                    <strong>1</strong>
+                    <span>ซองบนใบเสร็จ</span>
+                  </div>
+                  <div class="math-cell">
+                    <span class="step">02</span>
+                    <strong>1</strong>
+                    <span>ตั๋วดรอปนี้</span>
+                  </div>
+                  <div class="math-cell accent">
+                    <span class="step">03</span>
+                    <strong>?</span>
+                    <span>จับหลังปิด</span>
+                  </div>
+                </div>
+
+                <p class="warn-line">นอกหน้าต่างอัปได้ — ได้แต้มปกติ <b>แต่ไม่นับตั๋วดรอปนี้</b></p>
+
+                <div class="cta-stack">
+                  <button class="btn btn-hot btn-block" type="button" id="btnUpload">อัปใบเสร็จตอนนี้</button>
+                  <button class="btn btn-ink btn-block" type="button">ดูปฏิทินดรอป</button>
+                </div>
+              </div>
+            </div>
+
+            <nav class="nav">
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/></svg></div><span>Live</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/><path d="M8 12h8"/></svg></div><span>Tickets</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></div><span>Drops</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Me</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">1 · Live Drop</p>
+      </div>
+
+      <!-- 2 TICKETS FROM RECEIPT -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <header class="result-top">
+                <div class="stamp">OCR<br>OK</div>
+                <h2>ใบเสร็จผ่าน — ได้ตั๋วแล้ว</h2>
+                <p>นับซอง sunsu ในหน้าต่าง LIVE เท่านั้น</p>
+              </header>
+
+              <div class="ticket-stub">
+                <div class="stub-top">
+                  <div>
+                    <small>ดรอป #07 · ศุกร์ 18–21 น.</small>
+                    <strong>ตั๋วราฟเฟิล</strong>
+                  </div>
+                  <div class="qty">
+                    <b>+4</b>
+                    <span>ตั๋ว</span>
+                  </div>
+                </div>
+                <div class="perforation" aria-hidden="true"></div>
+                <div class="stub-body">
+                  <div class="stub-row"><span>รหัสตั๋ว</span><b>#SR-07-8841 → 8844</b></div>
+                  <div class="stub-row"><span>รวมตั๋วรอบนี้</span><b>11</b></div>
+                  <div class="stub-row"><span>จับรางวัล</span><b>21:05 น.</b></div>
+                </div>
+              </div>
+
+              <div class="pack-count">
+                <img src="assets/packshot.png" alt="" />
+                <div>
+                  <strong>พบ 4 ซองบนใบเสร็จ</strong>
+                  <p>หมึกกรุบ ×2 · เจลลี่ ×2 — แต่ละซอง = 1 ตั๋ว</p>
+                </div>
+              </div>
+
+              <div class="note-box">
+                ยังได้แต้มสมาชิกจากใบเสร็จนี้ตามปกติ — ตั๋วเป็นโบนัสเฉพาะตอน LIVE
+              </div>
+
+              <div class="cta-stack" style="padding: 0 14px 8px;">
+                <button class="btn btn-acid btn-block" type="button">อัปใบเสร็จอีกใบ</button>
+                <button class="btn btn-ink btn-block" type="button">ดูตั๋วทั้งหมด</button>
+              </div>
+            </div>
+
+            <nav class="nav">
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/></svg></div><span>Live</span></div>
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/><path d="M8 12h8"/></svg></div><span>Tickets</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></div><span>Drops</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Me</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">2 · Receipt → Tickets</p>
+      </div>
+
+      <!-- 3 CALENDAR -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <header class="cal-head">
+                <h2>ปฏิทินดรอป</h2>
+                <p>loyalty ระหว่างแคมเปญใหญ่ — พลาดรอบนี้ รอรอบหน้า</p>
+              </header>
+
+              <div class="drop-list">
+                <article class="drop-item live">
+                  <div class="di-top">
+                    <strong>ซองเซ็น หมึกกรุบ + แฟนมีต</strong>
+                    <span class="status-pill live">Live</span>
+                  </div>
+                  <div class="window">ศุกร์นี้ · 18:00–21:00</div>
+                  <div class="prizes">
+                    <span>ซองเซ็น</span>
+                    <span>Merch</span>
+                    <span>ที่นั่งแฟนมีต</span>
+                  </div>
+                </article>
+
+                <article class="drop-item">
+                  <div class="di-top">
+                    <strong>เจลลี่ Bundle Merch</strong>
+                    <span class="status-pill next">ถัดไป</span>
+                  </div>
+                  <div class="window">ศุกร์หน้า · 18:00–21:00</div>
+                  <div class="prizes">
+                    <span>ถุงผ้า</span>
+                    <span>สติกเกอร์เซ็ต</span>
+                  </div>
+                </article>
+
+                <article class="drop-item locked">
+                  <div class="di-top">
+                    <strong>จับรางวัลที่นั่งคอนเสิร์ต</strong>
+                    <span class="status-pill soon">เร็วๆ นี้</span>
+                  </div>
+                  <div class="window">ประกาศวันทีหลัง</div>
+                  <div class="prizes">
+                    <span>ที่นั่งคอนเสิร์ต</span>
+                  </div>
+                </article>
+
+                <article class="drop-item past">
+                  <div class="di-top">
+                    <strong>ดรอป #06 · Pouch</strong>
+                    <span class="status-pill done">จับแล้ว</span>
+                  </div>
+                  <div class="window">จับแล้ว · ดูผลได้</div>
+                  <div class="prizes">
+                    <span>pouch-green</span>
+                    <span>pouch-purple</span>
+                  </div>
+                </article>
+              </div>
+
+              <p class="habit-note">เป้าหมาย: <b>sunsu drop Fridays</b> — นิสัยกลับมาอัปใบเสร็จทุกสัปดาห์</p>
+            </div>
+
+            <nav class="nav">
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/></svg></div><span>Live</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/><path d="M8 12h8"/></svg></div><span>Tickets</span></div>
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></div><span>Drops</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Me</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">3 · Drop Calendar</p>
+      </div>
+
+      <!-- 4 RESULTS -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <header class="draw-hero">
+                <h2>ผลดรอป #07</h2>
+                <p>หน้าต่างปิดแล้ว · จับรางวัลเสร็จ · รอบหน้าศุกร์นี้</p>
+              </header>
+
+              <div class="outcome">
+                <div class="big miss">ยังไม่ถูกรางวัล</div>
+                <p class="sub">ตั๋ว 11 ใบเข้าจับแล้ว — แต้มจากใบเสร็จยังอยู่ครบ</p>
+                <div class="stats">
+                  <div class="stat"><b>11</b><span>ตั๋วที่เข้าจับ</span></div>
+                  <div class="stat"><b>+240</b><span>แต้มสมาชิก</span></div>
+                </div>
+              </div>
+
+              <div class="winners">
+                <h3>ผู้โชคดีรอบนี้</h3>
+                <div class="winner-row">
+                  <div class="av" aria-hidden="true"></div>
+                  <div>
+                    <strong>@mintyy</strong>
+                    <span>ตั๋ว #SR-07-2201</span>
+                  </div>
+                  <span class="prize-tag">Fan-meet</span>
+                </div>
+                <div class="winner-row">
+                  <div class="av b" aria-hidden="true"></div>
+                  <div>
+                    <strong>@jellyking</strong>
+                    <span>ตั๋ว #SR-07-0912</span>
+                  </div>
+                  <span class="prize-tag">ซองเซ็น</span>
+                </div>
+                <div class="winner-row">
+                  <div class="av c" aria-hidden="true"></div>
+                  <div>
+                    <strong>@snackloop</strong>
+                    <span>ตั๋ว #SR-07-4410</span>
+                  </div>
+                  <span class="prize-tag">Merch</span>
+                </div>
+              </div>
+
+              <div class="next-tease">
+                <div>
+                  <strong>ดรอป #08 · Jelly Bundle</strong>
+                  <span>ศุกร์หน้า 18:00 — ตั้งเตือนไว้</span>
+                </div>
+                <button class="go" type="button">เตือนฉัน</button>
+              </div>
+            </div>
+
+            <nav class="nav">
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/></svg></div><span>Live</span></div>
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/><path d="M8 12h8"/></svg></div><span>Tickets</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></div><span>Drops</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Me</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">4 · Results</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const end = Date.now() + (2 * 3600 + 14 * 60 + 37) * 1000;
+    const hEl = document.getElementById("cdH");
+    const mEl = document.getElementById("cdM");
+    const sEl = document.getElementById("cdS");
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function tick() {
+      const left = Math.max(0, end - Date.now());
+      const s = Math.floor(left / 1000);
+      hEl.textContent = pad(Math.floor(s / 3600));
+      mEl.textContent = pad(Math.floor((s % 3600) / 60));
+      sEl.textContent = pad(s % 60);
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    let tickets = 7;
+    const ticketCount = document.getElementById("ticketCount");
+    const btnUpload = document.getElementById("btnUpload");
+    btnUpload.addEventListener("click", () => {
+      tickets += 1;
+      ticketCount.textContent = String(tickets);
+      btnUpload.textContent = "อัปแล้ว · +1 ตั๋ว (เดโม)";
+      setTimeout(() => { btnUpload.textContent = "อัปใบเสร็จตอนนี้"; }, 1200);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+---
+description: Keep the Rocket Demo data generator in sync when changing ledgers/RPCs it writes through
+alwaysApply: false
+---
+
+# Rocket Demo generator
+
+When you change tables or RPCs used by the Rocket Demo seed/daily generator, update and redeploy `demo/rocket-demo/`.
+
+## Touched surfaces
+
+- Members: `user_accounts`, `user_wallet`, `fn_ensure_member_code`, `persona_master`, `tag_master`, `user_tags`
+- Commerce: `purchase_ledger`, `purchase_items_ledger`
+- Points: `wallet_ledger`, `chokepoint_post_wallet_transaction`, `earn_factor_*`, `earn_conditions_*`
+- Rewards: `reward_master`, `reward_points_conditions`, `reward_redemptions_ledger`, `redeem_reward_with_points`
+- Campaigns: `mission*`, `spin_wheel*`, `form_templates` / `form_submissions` / `form_responses`
+- AMP: `amp_audience_master`, `amp_audience_member`, `amp_agent`, system audience workflows
+- Catalog/config: `tier_master`, `store_master`, `product_*`, `earn_channel`
+- Generator: `custom_internal_demo_config`, `custom_internal_demo_*` functions (incl. `bootstrap_engagement`, `enrich_engagement`, `generate_day_engagement`)
+- Cron: `custom-internal-demo-daily` → `custom_internal_demo_daily_job()`
+
+## What to update
+
+1. Canonical SQL under `demo/rocket-demo/waves/` and `config/`
+2. Redeploy via Supabase MCP (`apply_migration` / `execute_sql`)
+3. `demo/rocket-demo/README.md` if the runbook changes
+4. `requirements/CHANGELOG.md` + registries when shipping behavior changes
+
+Do not invent visible `DEMO-*` member labels — merchant_id is the cleanup key; seed tags stay in `metadata` / `external_ref` only.

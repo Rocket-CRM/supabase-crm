@@ -1,0 +1,107 @@
+[
+  {
+    "id": 121,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบ e-Protocol ระยะ 2 — custom software, งบ 4.5 ล้าน",
+    "budget": 4500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 122,
+    "verdict": "Maybe",
+    "reason": "เชื่อมโยงข้อมูลกับฐานข้อมูลหลายหน่วยงาน — integration",
+    "budget": 1757500,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 123,
+    "verdict": "Maybe",
+    "reason": "เพิ่มประสิทธิภาพระบบเชื่อมต่อข้อมูลหน่วยงานภายนอก — integration ของระบบเดิม",
+    "budget": 3000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 124,
+    "verdict": "Maybe",
+    "reason": "ระบบ E-National Park เป็นซอฟต์แวร์แต่งบ 67 ล้าน — consortium",
+    "budget": 67000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 126,
+    "verdict": "Yes",
+    "reason": "พัฒนแพลตฟอร์มกลางบริหารข้อมูลโทรคมนาคม — custom software, งบ 4 ล้าน",
+    "budget": 4000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 129,
+    "verdict": "Maybe",
+    "reason": "พัฒนาระบบ Common Data / Data Governance ระยะ 2 แต่งบ 35 ล้าน — consortium",
+    "budget": 35000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 130,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบเฝ้าระวังสถานการณ์สิทธิมนุษยชน — custom software, งบ 3 ล้าน",
+    "budget": 3000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 132,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบ AFS ระยะ 1 — custom software; small budget",
+    "budget": 500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 133,
+    "verdict": "Maybe",
+    "reason": "พัฒนาระบบ Smart Contract Center — software แต่งบ 31 ล้าน — consortium",
+    "budget": 31024200,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 135,
+    "verdict": "No",
+    "reason": "บำรุงรักษาระบบ School MIS เดิม — maintenance / vendor lock",
+    "budget": 1455000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 139,
+    "verdict": "Maybe",
+    "reason": "พัฒนาระบบ Ombudsman AI assistant — software แต่งบ 33.7 ล้าน — consortium",
+    "budget": 33715500,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 141,
+    "verdict": "No",
+    "reason": "แก้รหัสระบบบริหารสถานศึกษา ศธ.02 เดิม — incumbent / vendor lock; small budget",
+    "budget": 785000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 142,
+    "verdict": "Maybe",
+    "reason": "บำรุงรักษาคอมพิวเตอร์+ซอฟต์แวร์+Taxpayer Account — hardware+software / ระบบเดิม",
+    "budget": 14572800,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 143,
+    "verdict": "Yes",
+    "reason": "พัฒนาแพลตฟอร์ม Generative AI 1 ระบบ — custom software; small budget",
+    "budget": 850000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 144,
+    "verdict": "Yes",
+    "reason": "เพิ่มประสิทธิภาพระบบจัดซื้อจัดจ้างและบริหารสัญญา — custom software, งบ 5 ล้าน",
+    "budget": 5000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  }
+]

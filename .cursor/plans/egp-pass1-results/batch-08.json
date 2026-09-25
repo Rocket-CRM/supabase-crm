@@ -1,0 +1,107 @@
+[
+  {
+    "id": 225,
+    "verdict": "Yes",
+    "reason": "Custom PPBA proposal/budget database system; 14.75m sweet spot",
+    "budget": 14750000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 226,
+    "verdict": "Yes",
+    "reason": "Custom vetiver planting data IS upgrade; small budget",
+    "budget": 836842,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 228,
+    "verdict": "Yes",
+    "reason": "Custom PSM e-Service development; 7m sweet spot",
+    "budget": 7000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 229,
+    "verdict": "Yes",
+    "reason": "Custom digital document warehouse/database; 1.3m",
+    "budget": 1300000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 231,
+    "verdict": "Maybe",
+    "reason": "Study + e-license/NSW integration; 27m consortium",
+    "budget": 27179491,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 232,
+    "verdict": "Yes",
+    "reason": "Custom boxing sports IT database phase 2; 1m",
+    "budget": 1000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 234,
+    "verdict": "Yes",
+    "reason": "Custom food management information system; 6m",
+    "budget": 5987700,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 235,
+    "verdict": "Yes",
+    "reason": "Custom CU Adjunct appointment system phase 3; 2m",
+    "budget": 2000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 236,
+    "verdict": "Maybe",
+    "reason": "Custom I-EA-T real estate management but 70m consortium",
+    "budget": 70000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 238,
+    "verdict": "No",
+    "reason": "Existing HR system maintenance; likely incumbent lock-in",
+    "budget": 2600000,
+    "status_original": null
+  },
+  {
+    "id": 239,
+    "verdict": "Yes",
+    "reason": "Custom merger-review information system; 2.2m",
+    "budget": 2200000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 241,
+    "verdict": "No",
+    "reason": "FASTTOOLS/WLMA Pro licensed package maintenance; vendor lock",
+    "budget": 971560,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 242,
+    "verdict": "No",
+    "reason": "HIS server hardware + EMR Soft licensed maintenance",
+    "budget": 850000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 243,
+    "verdict": "No",
+    "reason": "Oracle software maintenance; licensed vendor lock",
+    "budget": 2903000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 244,
+    "verdict": "Maybe",
+    "reason": "ERP enhance via เฉพาะเจาะจง; likely incumbent lock-in",
+    "budget": 1865000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  }
+]

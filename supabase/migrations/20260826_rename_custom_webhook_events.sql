@@ -1,0 +1,5 @@
+-- Applied live via MCP (rename completed despite client timeout).
+-- Table: custom_integration_events
+-- Compat view: custom_webhook_events (updatable SELECT *)
+-- Column: event_kind text NOT NULL DEFAULT 'forward'
+--   CHECK (event_kind IN ('forward', 'inbound', 'outbound', 'replay'))

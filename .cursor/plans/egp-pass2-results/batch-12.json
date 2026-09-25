@@ -1,0 +1,74 @@
+[
+  {
+    "id": 248,
+    "fit": "Yes",
+    "fit_reason": "Custom ECT AI chatbot/knowledge-base build with source-code handover; no vendor/tech lock in sampled TOR.",
+    "status_latest": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "Scanned TOR (OCR p.1–12); ยื่นข้อเสนอ is e-GP process wording, no calendar bid-close date."
+  },
+  {
+    "id": 251,
+    "fit": "Yes",
+    "fit_reason": "Custom MeetFlow AI meeting-management system; Microsoft named only as export formats, not a licensed product buy.",
+    "status_latest": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "Scanned TOR (OCR p.1–12); no วันยื่นซอง/ปิดรับซอง date."
+  },
+  {
+    "id": 252,
+    "fit": "Yes",
+    "fit_reason": "Custom integrated website; TOR allows equivalent stacks (Azure/AWS/GCP or equal), not a locked vendor.",
+    "status_latest": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "Status from e-GP API flowName for 69089112468; scanned TOR OCR p.1–12, no bid-close date."
+  },
+  {
+    "id": 254,
+    "fit": "Maybe",
+    "fit_reason": "Custom fisheries entry/exit software and integrations in sampled pages; 127-page scan not fully OCR’d so field hardware not ruled out.",
+    "status_latest": "ยกเลิกโครงการ",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "e-GP page shows cancelled; OCR p.1–10 software/integration only; no bid-close date."
+  },
+  {
+    "id": 255,
+    "fit": "Yes",
+    "fit_reason": "Custom MFA Portal Gen2 (phase 1) software; Figma/Adobe XD are designer skills, not a licensed-product buy.",
+    "status_latest": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "Scanned TOR (OCR p.1–12); วันยื่นข้อเสนอ is document-completeness wording, no calendar date."
+  },
+  {
+    "id": 262,
+    "fit": "Yes",
+    "fit_reason": "Title is custom Budgeting Process software; no TOR to reverse Pass 1.",
+    "status_latest": "รายงานขอซื้อขอจ้าง",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_only; no TOR."
+  },
+  {
+    "id": 265,
+    "fit": "Yes",
+    "fit_reason": "TOR is custom international-student SIS with source-code handover, not a PC/license package despite ครุภัณฑ์ in the title.",
+    "status_latest": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "Scanned TOR (OCR p.1–12); Excel/CSV import only; no bid-close date."
+  },
+  {
+    "id": 267,
+    "fit": "Yes",
+    "fit_reason": "Custom Research Ecology phase-2 web system; university supplies servers/DB, no locked vendor product.",
+    "status_latest": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "Status from e-GP API flowName for 69079477134; scanned TOR OCR p.1–10, no bid-close date."
+  }
+]

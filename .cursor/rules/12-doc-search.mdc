@@ -1,0 +1,62 @@
+---
+description: Grep-first protocol for large requirement docs and registries. Always-applied because the agent doesn't realize when it's about to full-read a 100KB file.
+alwaysApply: true
+---
+
+# Doc Search — Grep First, Read Scoped
+
+## Hard bans (do not full-read with the Read tool)
+
+Never invoke `Read` without `offset`+`limit` on any of these:
+
+- `requirements/INDEX_FUNCTION.md` (deprecated, ~100KB)
+- Any `requirements/<Domain>.md` over 30KB (`Currency.md` ~139KB, `Tier.md` ~119KB, `Reward.md` ~102KB, `Purchase_Transaction.md`, `Authentication.md`, etc.)
+- `requirements/domains/_index.md` (~22KB — grep only)
+- `requirements/REGISTRY_SUPABASE.md` (~100KB — grep only)
+- Any file in `requirements/` whose size you don't know yet (check via `Glob` or `Shell` `wc -c`)
+
+These files are designed for grep, not for full reads. A full-read costs ~25–35K tokens for content that's 95% irrelevant to your task. **The Cursor hook in `.cursor/hooks/block-large-doc-read.sh` enforces this — full-reads will be rejected.**
+
+Requirement docs are large by design (full authoritative business rules + edge cases). The fix is grep-first access, not file-size reduction.
+
+## The protocol
+
+1. **Grep for headings.** Use ripgrep to find candidate sections by `^#` patterns or keyword.
+2. **Grep for the exact term.** Pull line numbers for the specific concept/symbol the user is asking about.
+3. **Read scoped.** Use `Read` with `offset` + `limit` to pull only the relevant section (typically 30–80 lines).
+4. **Re-grep if results are empty.** Try synonyms or related symbols before falling back to a wider read.
+
+Steps 1 and 2 are independent — batch them in one turn per `16-tool-batching.mdc`.
+
+## Heading grep patterns
+
+```bash
+# All H1/H2/H3 headings in a doc
+rg '^#{1,3} ' requirements/Currency.md
+
+# Section containing a keyword
+rg -n -i 'expiry|ttl' requirements/Currency.md
+
+# Find a function/table mention with line numbers
+rg -n '\bpost_wallet_transaction\b' requirements/Currency.md
+```
+
+The line numbers in `rg -n` output feed straight into `Read` with `offset` and `limit`.
+
+## Scoped read example
+
+If `rg -n '^## Currency Expiry Management' requirements/Currency.md` returns line 289, read with `offset: 289, limit: 150` and stop when the next H2 appears.
+
+## When a full read IS acceptable
+
+- File is `<10KB` and the user's task clearly needs all of it.
+- User explicitly says "read all of `<File>`."
+- The doc IS the deliverable (e.g. editing a feature guide end-to-end).
+
+## CRM Knowledge MCP vs doc grep
+
+For product / feature / marketing-shaped questions, prefer the CRM Knowledge MCP per `15-crm-knowledge-mcp.mdc`. It returns pre-chunked semantic blocks (`overview` / `rules` / `frontend_journey` / `technical_reference`) instead of forcing you to grep a 100KB doc. Use doc grep when the question is implementation-specific (function bodies, exact SQL, table schemas).
+
+## Reading multiple sections
+
+Batch the `Read` calls — independent reads in one turn. Don't sequentialize unless one read's content tells you where to do the next.

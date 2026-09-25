@@ -1,0 +1,25 @@
+name: Doc knowledge reconcile
+
+on:
+  schedule:
+    # Daily 17:00 UTC (~00:00 Bangkok)
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        working-directory: scripts
+        run: npm install @supabase/supabase-js@2 --no-fund --no-audit
+      - name: Reconcile requirements → doc_knowledge_chunks
+        working-directory: scripts
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node doc-knowledge-reconcile.mjs

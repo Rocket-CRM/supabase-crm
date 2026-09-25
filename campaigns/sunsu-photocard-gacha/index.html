@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sunsu × POP MART · Photocard Gacha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a1a1c;
+      --charcoal: #2a2a2e;
+      --surface: #ffffff;
+      --muted: #6b6b73;
+      --line: #ececef;
+      --cyan: #3ecfff;
+      --lime: #b8f000;
+      --magenta: #ff2d9b;
+      --gold: #ffc53d;
+      --shadow: 0 12px 32px rgba(26, 26, 28, 0.12);
+      --phone-w: 320px;
+      --phone-h: 680px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    button { font: inherit; border: 0; background: none; cursor: pointer; color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    body {
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      background: #ffffff;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      padding: 40px 28px 64px;
+      max-width: 1520px;
+      margin: 0 auto;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #111;
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 14px 8px 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .brand-pill img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .page-head h1 {
+      font-family: "Nunito", "Noto Sans Thai", sans-serif;
+      font-weight: 900;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-top: 12px;
+    }
+
+    .page-head p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 44ch;
+      line-height: 1.45;
+    }
+
+    .deck {
+      display: grid;
+      grid-template-columns: repeat(4, var(--phone-w));
+      gap: 36px;
+      justify-content: center;
+      overflow-x: auto;
+      padding: 16px 8px 24px;
+    }
+
+    .phone {
+      width: var(--phone-w);
+      height: var(--phone-h);
+      background: #f7f7f9;
+      border-radius: 36px;
+      box-shadow:
+        0 0 0 9px #111,
+        0 0 0 11px #2a2a2a,
+        0 24px 48px rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 96px;
+      height: 22px;
+      background: #111;
+      border-radius: 16px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      background: #f7f7f9;
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 76px;
+      scrollbar-width: none;
+    }
+    .scroll::-webkit-scrollbar { display: none; }
+
+    .nav {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 68px;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      z-index: 20;
+      padding: 6px 4px 10px;
+    }
+
+    .nav .item {
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .nav .item.active { color: var(--ink); }
+    .nav .item.active .ico {
+      background: linear-gradient(145deg, var(--cyan), var(--lime));
+      color: var(--ink);
+      box-shadow: 0 4px 12px rgba(62, 207, 255, 0.25);
+    }
+
+    .nav .ico {
+      width: 32px;
+      height: 32px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+    }
+
+    .nav svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 13px 16px;
+      font-weight: 800;
+      font-size: 13px;
+      transition: transform 0.12s ease;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(90deg, var(--magenta), #ff6b4a);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(255, 45, 155, 0.35);
+    }
+    .btn-ghost-dark {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .btn-ghost {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .btn-block { width: 100%; }
+    .btn-sm { padding: 9px 12px; font-size: 11px; }
+
+    .card-face {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 40%, #fff 0%, transparent 55%),
+        linear-gradient(160deg, #ffe8f2, #e8f9ff);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .card-face img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center 55%;
+      padding: 6px;
+    }
+    .card-face .rarity {
+      position: absolute;
+      top: 6px; left: 6px; z-index: 2;
+      font-size: 8px; font-weight: 800;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 3px 6px; border-radius: 999px;
+      color: #fff; background: rgba(26,26,28,0.72);
+    }
+    .card-face .rarity.rare { background: var(--cyan); color: var(--ink); }
+    .card-face .rarity.epic { background: var(--magenta); }
+    .card-face .rarity.holo { background: linear-gradient(90deg, var(--cyan), var(--magenta)); }
+    .card-face .dup {
+      position: absolute; top: 6px; right: 6px; z-index: 2;
+      font-size: 9px; font-weight: 800;
+      background: var(--lime); color: var(--ink);
+      padding: 2px 6px; border-radius: 999px;
+    }
+    .card-face.holo::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(115deg, transparent 20%, rgba(62,207,255,0.35) 40%, rgba(255,197,61,0.3) 50%, rgba(255,45,155,0.3) 60%, transparent 80%);
+      background-size: 200% 100%;
+      animation: holo 3s linear infinite;
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+    @keyframes holo { to { background-position: 200% 0; } }
+    .card-face.empty {
+      background: #e4e4ea;
+      display: grid; place-items: center;
+      color: #b0b0ba; font-size: 22px; font-weight: 800;
+    }
+    .card-face.empty img { display: none; }
+
+    .tint-a { background: radial-gradient(circle at 50% 40%, #fff 0%, transparent 50%), linear-gradient(160deg, #e8fbff, #fff3e8); }
+    .tint-b { background: radial-gradient(circle at 50% 40%, #fff 0%, transparent 50%), linear-gradient(160deg, #f3e8ff, #ffe8f0); }
+    .tint-c { background: radial-gradient(circle at 50% 40%, #fff 0%, transparent 50%), linear-gradient(160deg, #fff0e6, #e8f5ff); }
+    .tint-d { background: radial-gradient(circle at 50% 40%, #fff 0%, transparent 50%), linear-gradient(160deg, #ffe8f8, #e8fff4); }
+    .tint-e { background: radial-gradient(circle at 50% 40%, #fff 0%, transparent 50%), linear-gradient(160deg, #fff9e0, #e8f4ff); }
+    .tint-f { background: radial-gradient(circle at 50% 40%, #fff 0%, transparent 50%), linear-gradient(160deg, #e8f0ff, #fff5e8); }
+
+    .hero {
+      position: relative;
+      padding: 44px 16px 24px;
+      background: linear-gradient(165deg, #1f1f23 0%, #2c2c32 55%, #1a1a1c 100%);
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -40% -20% auto;
+      height: 200px;
+      background: conic-gradient(from 120deg, var(--cyan), var(--lime), var(--gold), var(--magenta), var(--cyan));
+      opacity: 0.35;
+      filter: blur(40px);
+      animation: spinGlow 14s linear infinite;
+    }
+    @keyframes spinGlow { to { transform: rotate(360deg); } }
+
+    .topbar {
+      position: relative; z-index: 2;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .brand img {
+      width: 40px; height: 40px; border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+    }
+    .brand strong {
+      font-family: "Nunito", "Noto Sans Thai", sans-serif;
+      font-weight: 900; font-size: 15px;
+      letter-spacing: -0.02em; display: block;
+    }
+    .brand span {
+      font-size: 11px; color: rgba(255,255,255,0.65);
+    }
+
+    .pull-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px; font-weight: 600;
+      backdrop-filter: blur(8px);
+    }
+    .pull-chip b { color: var(--lime); font-family: "Nunito", sans-serif; font-weight: 800; }
+
+    .hero-body { position: relative; z-index: 2; margin-top: 22px; }
+
+    .hero-kicker {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 8px;
+    }
+
+    .hero h2 {
+      font-family: "Nunito", "Noto Sans Thai", sans-serif;
+      font-weight: 900; font-size: 26px;
+      line-height: 1.1; letter-spacing: -0.03em;
+      max-width: 14ch; margin-bottom: 8px;
+    }
+
+    .hero p {
+      font-size: 13px; line-height: 1.45;
+      color: rgba(255,255,255,0.72);
+      max-width: 28ch; margin-bottom: 14px;
+    }
+
+    .pack-stage {
+      position: relative; height: 180px; margin: 4px 0 14px;
+    }
+
+    .pack-glow {
+      position: absolute; left: 50%; top: 50%;
+      width: 150px; height: 150px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,197,61,0.45), transparent 70%);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
+      50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+    }
+
+    .pack {
+      position: absolute; left: 50%; top: 4px;
+      width: 128px; height: 164px;
+      transform: translateX(-50%);
+      border-radius: 16px;
+      background: #1c1c20;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .pack::before {
+      content: "";
+      position: absolute; inset: 0;
+      border-radius: 16px; padding: 2px;
+      background: linear-gradient(135deg, var(--cyan), var(--lime), var(--gold), var(--magenta));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none; z-index: 2;
+    }
+    .pack img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      background: linear-gradient(160deg, #ffe8f2, #e8f9ff);
+      padding: 8px;
+    }
+    .pack-seal {
+      position: absolute; inset: auto 0 0;
+      padding: 24px 6px 10px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.7));
+      text-align: center; color: #fff; z-index: 1;
+    }
+    .pack-seal small {
+      display: block; font-size: 9px; font-weight: 800;
+      letter-spacing: 0.1em; color: var(--lime); margin-bottom: 2px;
+    }
+    .pack-seal strong {
+      font-family: "Nunito", sans-serif; font-weight: 900; font-size: 18px;
+    }
+
+    .float-fruit {
+      position: absolute; width: 44px; height: 44px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.25));
+      animation: floaty 3.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .float-fruit.a { left: 4px; top: 28px; }
+    .float-fruit.b { right: 0; top: 56px; width: 38px; animation-delay: 0.6s; }
+    .float-fruit.c { left: 12px; bottom: 4px; width: 34px; animation-delay: 1.1s; }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0) rotate(-4deg); }
+      50% { transform: translateY(-10px) rotate(4deg); }
+    }
+
+    .cta-row { display: grid; gap: 8px; }
+
+    .sheet {
+      margin-top: -16px;
+      position: relative; z-index: 3;
+      background: #f7f7f9;
+      border-radius: 22px 22px 0 0;
+      padding: 18px 14px 8px;
+    }
+
+    .section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .section-head h3 {
+      font-family: "Nunito", "Noto Sans Thai", sans-serif;
+      font-weight: 800; font-size: 16px; letter-spacing: -0.02em;
+    }
+    .section-head .link {
+      color: var(--magenta); font-size: 12px; font-weight: 700;
+    }
+
+    .how {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+      margin-bottom: 16px;
+    }
+    .how-step {
+      background: var(--surface); border-radius: 12px;
+      padding: 10px 8px; text-align: center;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }
+    .how-step .n {
+      width: 22px; height: 22px; margin: 0 auto 6px;
+      border-radius: 50%; display: grid; place-items: center;
+      font-family: "Nunito", sans-serif; font-weight: 800; font-size: 11px;
+    }
+    .how-step:nth-child(1) .n { background: var(--cyan); }
+    .how-step:nth-child(2) .n { background: var(--lime); }
+    .how-step:nth-child(3) .n { background: var(--gold); }
+    .how-step strong { display: block; font-size: 11px; margin-bottom: 2px; }
+    .how-step p { font-size: 10px; line-height: 1.35; color: var(--muted); }
+
+    .rarity-row {
+      display: flex; gap: 6px; overflow-x: auto;
+      padding-bottom: 4px; scrollbar-width: none;
+    }
+    .rarity-row::-webkit-scrollbar { display: none; }
+    .rarity-pill {
+      flex: 0 0 auto;
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface); border-radius: 999px;
+      padding: 7px 10px 7px 7px;
+      font-size: 11px; font-weight: 600;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.common { background: #9aa0a6; }
+    .dot.rare { background: var(--cyan); }
+    .dot.epic { background: var(--magenta); }
+    .dot.holo { background: linear-gradient(135deg, var(--cyan), var(--lime), var(--gold), var(--magenta)); }
+
+    .mission-hero {
+      padding: 48px 16px 56px;
+      background: linear-gradient(165deg, #1f1f23 0%, #2c2c32 55%, #1a1a1c 100%);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .mission-hero::before {
+      content: "";
+      position: absolute;
+      inset: -40% -30% auto;
+      height: 200px;
+      background: conic-gradient(from 200deg, var(--magenta), var(--cyan), var(--lime), var(--magenta));
+      opacity: 0.3;
+      filter: blur(40px);
+    }
+    .mission-hero::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 28px;
+      background: #f7f7f9;
+      border-radius: 22px 22px 0 0;
+      z-index: 1;
+    }
+    .mission-hero h2 {
+      position: relative; z-index: 2;
+      font-family: "Nunito", "Noto Sans Thai", sans-serif;
+      font-weight: 900; font-size: 26px;
+      letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px;
+    }
+    .mission-hero p {
+      position: relative; z-index: 2;
+      font-size: 12px; color: rgba(255,255,255,0.7);
+      max-width: 28ch; line-height: 1.4;
+    }
+
+    .progress-card {
+      margin: -42px 14px 0;
+      position: relative; z-index: 3;
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .progress-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .progress-meta strong {
+      font-family: "Nunito", "Noto Sans Thai", sans-serif;
+      font-weight: 800; font-size: 13px;
+    }
+    .progress-meta span { font-size: 12px; font-weight: 700; color: var(--magenta); }
+    .bar {
+      height: 9px; background: #eeeef2; border-radius: 999px; overflow: hidden;
+    }
+    .bar > i {
+      display: block; height: 100%; width: 62.5%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--lime), var(--gold));
+    }
+    .reward-note {
+      margin-top: 8px; font-size: 11px; color: var(--muted); line-height: 1.4;
+    }
+    .reward-note b { color: var(--ink); }
+
+    .filters {
+      display: flex; gap: 6px;
+      padding: 14px 14px 8px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .filters button {
+      flex: 0 0 auto;
+      padding: 7px 12px; border-radius: 999px;
+      background: #fff; color: var(--muted);
+      font-size: 11px; font-weight: 700;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .filters button.active { background: var(--ink); color: #fff; box-shadow: none; }
+
+    .binder-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 4px 14px 12px;
+    }
+    .binder-item .card-face { aspect-ratio: 3 / 4; }
+    .binder-item .name {
+      margin-top: 5px; font-size: 10px; font-weight: 800;
+      line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .binder-item .tag {
+      font-size: 8px; font-weight: 800; letter-spacing: 0.04em;
+      color: var(--muted); text-transform: uppercase;
+    }
+
+    .milestones {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+    .ms {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .ms .orb {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #eeeef2;
+      display: grid; place-items: center;
+      font-size: 10px; font-weight: 800;
+    }
+    .ms.done .orb {
+      background: linear-gradient(135deg, var(--cyan), var(--lime));
+      color: var(--ink);
+    }
+    .ms.next .orb {
+      background: var(--magenta);
+      color: #fff;
+    }
+
+    .sticky-cta { padding: 0 14px 8px; }
+
+    .trade-head {
+      padding: 48px 16px 36px;
+      background: linear-gradient(165deg, #1f1f23 0%, #2c2c32 100%);
+      color: #fff;
+      position: relative;
+    }
+    .trade-head::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 22px;
+      background: #f7f7f9;
+      border-radius: 22px 22px 0 0;
+    }
+    .trade-head h2 {
+      font-family: "Nunito", "Noto Sans Thai", sans-serif;
+      font-weight: 900; font-size: 24px;
+      letter-spacing: -0.03em; margin-bottom: 4px;
+      position: relative; z-index: 1;
+    }
+    .trade-head p {
+      font-size: 12px; color: rgba(255,255,255,0.68); line-height: 1.4;
+      position: relative; z-index: 1;
+    }
+
+    .tabs {
+      display: flex; gap: 6px;
+      padding: 4px 14px 8px;
+      overflow-x: auto; scrollbar-width: none;
+      margin-top: -6px;
+      position: relative;
+      z-index: 2;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tabs button {
+      flex: 0 0 auto;
+      padding: 8px 12px; border-radius: 999px;
+      background: #fff; color: var(--muted);
+      font-size: 11px; font-weight: 700;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .tabs button.active { background: var(--ink); color: #fff; box-shadow: none; }
+
+    .sticky-tip {
+      margin: 4px 14px 10px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 11px; line-height: 1.45;
+    }
+    .sticky-tip b { color: var(--magenta); }
+
+    .trade-list {
+      display: grid; gap: 8px;
+      padding: 4px 14px 12px;
+    }
+    .trade-row {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px; align-items: center;
+      box-shadow: 0 2px 10px rgba(26,26,28,0.05);
+    }
+    .trade-user {
+      font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px;
+    }
+    .swap { display: flex; align-items: center; gap: 6px; }
+    .swap .card-face { width: 48px; height: 64px; border-radius: 10px; }
+    .swap .card-face img { padding: 3px; }
+    .swap .arrow { font-size: 14px; font-weight: 900; }
+    .match { margin-top: 5px; font-size: 10px; font-weight: 700; color: #1a9b4a; }
+
+    .detail-top {
+      padding: 48px 16px 40px;
+      background: linear-gradient(165deg, #1f1f23 0%, #2c2c32 100%);
+      color: #fff;
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative;
+    }
+    .detail-top::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 24px;
+      background: #f7f7f9;
+      border-radius: 22px 22px 0 0;
+    }
+    .detail-back {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 800;
+      position: relative; z-index: 1;
+    }
+    .detail-back svg {
+      width: 18px; height: 18px;
+      stroke: currentColor; fill: none; stroke-width: 2.2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .holo-chip {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.06em;
+      padding: 5px 10px; border-radius: 999px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      position: relative; z-index: 1;
+    }
+
+    .detail-hero {
+      margin-top: -18px;
+      padding: 8px 20px 8px;
+      display: grid; place-items: center;
+      background: transparent;
+      position: relative; z-index: 2;
+    }
+
+    .detail-card {
+      width: 200px; height: 280px;
+      border-radius: 18px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 20px 48px rgba(0,0,0,0.22);
+      background:
+        radial-gradient(circle at 50% 40%, #fff 0%, transparent 55%),
+        linear-gradient(160deg, #fff0e6, #e8f5ff);
+    }
+    .detail-card img {
+      width: 100%; height: 100%;
+      object-fit: contain; object-position: center 50%;
+      padding: 12px;
+    }
+    .detail-card.holo::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(115deg, transparent 20%, rgba(62,207,255,0.4) 40%, rgba(255,197,61,0.35) 50%, rgba(255,45,155,0.35) 60%, transparent 80%);
+      background-size: 200% 100%;
+      animation: holo 2.5s linear infinite;
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+    .detail-card .footer-bar {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 10px 12px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.7));
+      color: #fff; z-index: 2;
+    }
+    .detail-card .footer-bar small {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.06em; opacity: 0.85;
+    }
+    .detail-card .footer-bar strong {
+      display: block; font-size: 12px; font-weight: 800;
+    }
+
+    .card-id {
+      text-align: center; font-size: 12px; font-weight: 700;
+      color: var(--muted); margin: 10px 0;
+    }
+
+    .info-table {
+      margin: 0 14px;
+      background: var(--surface);
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 10px rgba(26,26,28,0.05);
+    }
+    .info-table .row {
+      display: flex; justify-content: space-between;
+      padding: 11px 14px; font-size: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .info-table .row:last-child { border-bottom: 0; }
+    .info-table .row span { color: var(--muted); font-weight: 600; }
+    .info-table .row b { font-weight: 800; }
+    .info-table .row b.holo-txt {
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    .detail-actions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding: 14px;
+    }
+
+    .phone-label {
+      text-align: center; margin-top: 14px;
+      font-size: 12px; font-weight: 700; color: var(--muted);
+    }
+
+    @media (max-width: 1380px) {
+      .deck { justify-content: start; padding-left: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="page-head">
+      <div>
+        <div class="brand-pill">
+          <img src="assets/sunsu-logo.png" alt="sunsu" />
+          sunsu × POP MART
+        </div>
+        <h1>Photocard Gacha + Trading Floor</h1>
+        <p>1 ชิ้น sunsu ที่ยืนยันใบเสร็จ = 1 การ์ดสุ่มตัวละคร POP MART · เทรดใบซ้ำ · ครบเซ็ตแลกฟิกเกอร์</p>
+      </div>
+    </header>
+
+    <div class="deck">
+
+      <!-- 1 GACHA -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <header class="hero">
+                <div class="topbar">
+                  <div class="brand">
+                    <img src="assets/sunsu-logo.png" alt="sunsu" />
+                    <div>
+                      <strong>sunsu</strong>
+                      <span>× POP MART</span>
+                    </div>
+                  </div>
+                  <div class="pull-chip">Packs <b id="pullCount">3</b></div>
+                </div>
+
+                <div class="hero-body">
+                  <div class="hero-kicker">1 unit · 1 pull</div>
+                  <h2>เปิดซองดิจิทัล เก็บการ์ด POP MART</h2>
+                  <p>อัปใบเสร็จที่ตรวจแล้ว — ทุกชิ้น sunsu = 1 การ์ดสุ่ม Labubu</p>
+
+                  <div class="pack-stage">
+                    <div class="pack-glow"></div>
+                    <img class="float-fruit a" src="assets/peach.png" alt="" />
+                    <img class="float-fruit b" src="assets/strawberry.png" alt="" />
+                    <img class="float-fruit c" src="assets/mango.png" alt="" />
+                    <div class="pack" id="packBtn">
+                      <img src="assets/popmart/labubu_1.png" alt="Labubu" />
+                      <div class="pack-seal">
+                        <small>Mystery Pack</small>
+                        <strong>PULL</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="cta-row">
+                    <button class="btn btn-primary" id="btnPull" type="button">เปิดซอง · ใช้ 1 Pack</button>
+                    <button class="btn btn-ghost-dark" type="button">ไป Trading Floor</button>
+                  </div>
+                </div>
+              </header>
+
+              <div class="sheet">
+                <div class="section-head"><h3>วิธีเล่น</h3></div>
+                <div class="how">
+                  <div class="how-step">
+                    <div class="n">1</div>
+                    <p><strong>ซื้อ + อัปใบเสร็จ</strong>ยืนยันหน่วยสินค้า</p>
+                  </div>
+                  <div class="how-step">
+                    <div class="n">2</div>
+                    <p><strong>สุ่มการ์ด</strong>Common → Holo</p>
+                  </div>
+                  <div class="how-step">
+                    <div class="n">3</div>
+                    <p><strong>ครบเซ็ต</strong>แลกฟิกเกอร์ / Pop-up</p>
+                  </div>
+                </div>
+
+                <div class="section-head">
+                  <h3>อัตราการ์ด</h3>
+                  <span class="link">ดูอัลบั้ม</span>
+                </div>
+                <div class="rarity-row">
+                  <div class="rarity-pill"><span class="dot common"></span> Common 58%</div>
+                  <div class="rarity-pill"><span class="dot rare"></span> Rare 28%</div>
+                  <div class="rarity-pill"><span class="dot epic"></span> Epic 11%</div>
+                  <div class="rarity-pill"><span class="dot holo"></span> Holo 3%</div>
+                </div>
+              </div>
+            </div>
+
+            <nav class="nav">
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><path d="M8 4h8l2 4H6l2-4z"/><rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 13h6"/><circle cx="12" cy="16.5" r="1.2" fill="currentColor" stroke="none"/></svg></div><span>Gacha</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M6 4.5h9.5a2 2 0 0 1 2 2V19a.8.8 0 0 1-1.2.7L14 18.2l-2.3 1.5a.8.8 0 0 1-.9 0L8.5 18.2 6.2 19.7A.8.8 0 0 1 5 19V6.5a2 2 0 0 1 1-1.75z"/><path d="M9 8.5h6M9 12h6"/></svg></div><span>Binder</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 8h12"/><path d="M12 5l4 3-4 3"/><path d="M20 16H8"/><path d="M12 13l-4 3 4 3"/></svg></div><span>Trade</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Profile</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">1 · Gacha</p>
+      </div>
+
+      <!-- 2 BINDER -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <header class="mission-hero">
+                <h2>COLLECTION</h2>
+                <p>ครบเซ็ต POP MART → แลกฟิกเกอร์จริง หรือตั๋ว Pop-up</p>
+              </header>
+
+              <div class="progress-card">
+                <div class="progress-meta">
+                  <strong>POP MART Set · Vol.1</strong>
+                  <span>5 / 8</span>
+                </div>
+                <div class="bar"><i></i></div>
+                <p class="reward-note">อีก <b>3 ใบ</b> ปลดล็อกแลกรางวัล — การ์ดอยู่ในบัญชีสมาชิก ไม่หายตอนแคมเปญจบ</p>
+                <div class="milestones">
+                  <div class="ms done"><div class="orb">✓</div>2</div>
+                  <div class="ms done"><div class="orb">✓</div>4</div>
+                  <div class="ms next"><div class="orb">6</div>ฟิกเกอร์</div>
+                  <div class="ms"><div class="orb">8</div>Pop-up</div>
+                </div>
+              </div>
+
+              <div class="filters">
+                <button class="active" type="button">ทั้งหมด</button>
+                <button type="button">Labubu</button>
+                <button type="button">Holo</button>
+                <button type="button">Epic</button>
+              </div>
+
+              <div class="binder-grid" id="binderGrid"></div>
+
+              <div class="sticky-cta">
+                <button class="btn btn-primary btn-block" type="button">ลงใบซ้ำ 4 ใบในฟลอร์เทรด</button>
+              </div>
+            </div>
+
+            <nav class="nav">
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M8 4h8l2 4H6l2-4z"/><rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 13h6"/><circle cx="12" cy="16.5" r="1.2" fill="currentColor" stroke="none"/></svg></div><span>Gacha</span></div>
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><path d="M6 4.5h9.5a2 2 0 0 1 2 2V19a.8.8 0 0 1-1.2.7L14 18.2l-2.3 1.5a.8.8 0 0 1-.9 0L8.5 18.2 6.2 19.7A.8.8 0 0 1 5 19V6.5a2 2 0 0 1 1-1.75z"/><path d="M9 8.5h6M9 12h6"/></svg></div><span>Binder</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 8h12"/><path d="M12 5l4 3-4 3"/><path d="M20 16H8"/><path d="M12 13l-4 3 4 3"/></svg></div><span>Trade</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Profile</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">2 · Binder</p>
+      </div>
+
+      <!-- 3 TRADE -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <header class="trade-head">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;position:relative;z-index:1">
+                  <div>
+                    <h2>Trading Floor</h2>
+                    <p>แลกใบซ้ำ Labubu — ครบเซ็ตในแอป</p>
+                  </div>
+                  <div class="pull-chip" style="margin-top:2px"><b>342</b> offers</div>
+                </div>
+              </header>
+
+              <div class="tabs">
+                <button class="active" type="button">ทั้งหมด</button>
+                <button type="button">ข้อเสนอถึงฉัน</button>
+                <button type="button">ใบซ้ำของฉัน</button>
+              </div>
+
+              <div class="sticky-tip">
+                <b>ทิป:</b> การ์ด + เทรดอยู่ในบัญชี loyalty — ไม่หายตอนซองหมดเหมือนแคมเปญการ์ดในแพ็กเกจ
+              </div>
+
+              <div class="trade-list" id="tradeList"></div>
+            </div>
+
+            <nav class="nav">
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M8 4h8l2 4H6l2-4z"/><rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 13h6"/><circle cx="12" cy="16.5" r="1.2" fill="currentColor" stroke="none"/></svg></div><span>Gacha</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M6 4.5h9.5a2 2 0 0 1 2 2V19a.8.8 0 0 1-1.2.7L14 18.2l-2.3 1.5a.8.8 0 0 1-.9 0L8.5 18.2 6.2 19.7A.8.8 0 0 1 5 19V6.5a2 2 0 0 1 1-1.75z"/><path d="M9 8.5h6M9 12h6"/></svg></div><span>Binder</span></div>
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 8h12"/><path d="M12 5l4 3-4 3"/><path d="M20 16H8"/><path d="M12 13l-4 3 4 3"/></svg></div><span>Trade</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Profile</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">3 · Trading Floor</p>
+      </div>
+
+      <!-- 4 DETAIL -->
+      <div>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="scroll">
+              <div class="detail-top">
+                <div class="detail-back">
+                  <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+                  Labubu · Holo
+                </div>
+                <span class="holo-chip">HOLO</span>
+              </div>
+
+              <div class="detail-hero">
+                <div class="detail-card holo tint-c">
+                  <img src="assets/popmart/labubu_12.png" alt="Labubu Holo" />
+                  <div class="footer-bar">
+                    <small>SUNSU × POP MART</small>
+                    <strong>Labubu · Holo</strong>
+                  </div>
+                </div>
+              </div>
+
+              <p class="card-id">หมายเลขการ์ด No. 0421 / 5,000</p>
+
+              <div class="info-table">
+                <div class="row"><span>ซีซัน</span><b>Season 1 · Blind Box</b></div>
+                <div class="row"><span>ความหายาก</span><b class="holo-txt">Holo · 3%</b></div>
+                <div class="row"><span>ที่มา</span><b>ใบเสร็จที่ยืนยันแล้ว</b></div>
+                <div class="row"><span>พิมพ์ทั้งหมด</span><b>5,000 ใบ</b></div>
+                <div class="row"><span>คุณถืออยู่</span><b>×2</b></div>
+              </div>
+
+              <div class="detail-actions">
+                <button class="btn btn-ghost" type="button">เก็บไว้ก่อน</button>
+                <button class="btn btn-primary" type="button">ลงเทรดใบซ้ำ</button>
+              </div>
+            </div>
+
+            <nav class="nav">
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M8 4h8l2 4H6l2-4z"/><rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 13h6"/><circle cx="12" cy="16.5" r="1.2" fill="currentColor" stroke="none"/></svg></div><span>Gacha</span></div>
+              <div class="item active"><div class="ico"><svg viewBox="0 0 24 24"><path d="M6 4.5h9.5a2 2 0 0 1 2 2V19a.8.8 0 0 1-1.2.7L14 18.2l-2.3 1.5a.8.8 0 0 1-.9 0L8.5 18.2 6.2 19.7A.8.8 0 0 1 5 19V6.5a2 2 0 0 1 1-1.75z"/><path d="M9 8.5h6M9 12h6"/></svg></div><span>Binder</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 8h12"/><path d="M12 5l4 3-4 3"/><path d="M20 16H8"/><path d="M12 13l-4 3 4 3"/></svg></div><span>Trade</span></div>
+              <div class="item"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19.5c.9-3.2 3.4-4.8 6.5-4.8s5.6 1.6 6.5 4.8"/></svg></div><span>Profile</span></div>
+            </nav>
+          </div>
+        </div>
+        <p class="phone-label">4 · Card Detail</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const CARDS = [
+      { name: "Labubu · Cream", rarity: "common", img: "assets/popmart/labubu_1.png", tint: "a", dups: 0 },
+      { name: "Labubu · Green", rarity: "rare", img: "assets/popmart/labubu_2.png", tint: "d", dups: 2 },
+      { name: "Labubu · Pink", rarity: "rare", img: "assets/popmart/labubu_3.png", tint: "b", dups: 0 },
+      { name: "Labubu · Blue", rarity: "epic", img: "assets/popmart/labubu_4.png", tint: "a", dups: 3 },
+      { name: "Labubu · Cocoa", rarity: "common", img: "assets/popmart/labubu_5.png", tint: "e", dups: 1 },
+      { name: "Labubu · Secret", rarity: "epic", img: "assets/popmart/labubu_7.png", tint: "f", dups: 0, locked: true },
+      { name: "Labubu · Holo", rarity: "holo", img: "assets/popmart/labubu_12.png", tint: "c", dups: 0, locked: true },
+      { name: "Labubu · Gold", rarity: "holo", img: "assets/popmart/labubu_extra_22.png", tint: "e", dups: 0, locked: true },
+      { name: "Labubu · Night", rarity: "rare", img: "assets/popmart/labubu_8.png", tint: "b", dups: 0, locked: true },
+    ];
+
+    const TRADES = [
+      { user: "nine_kk", have: CARDS[1], want: CARDS[6], match: true },
+      { user: "jellyking", have: CARDS[2], want: CARDS[5], match: true },
+      { user: "mintyy", have: CARDS[4], want: CARDS[0], match: false },
+      { user: "snackloop", have: CARDS[3], want: CARDS[7], match: true },
+    ];
+
+    function faceHTML(c, opts = {}) {
+      if (c.locked && opts.showEmpty) return `<div class="card-face empty">?</div>`;
+      const r = c.rarity === "holo" ? "holo" : c.rarity;
+      return `<div class="card-face tint-${c.tint} ${c.rarity === "holo" ? "holo" : ""}">
+        <span class="rarity ${r}">${c.rarity}</span>
+        ${c.dups > 0 ? `<span class="dup">×${c.dups}</span>` : ""}
+        <img src="${c.img}" alt="${c.name}" />
+      </div>`;
+    }
+
+    document.getElementById("binderGrid").innerHTML = CARDS.map((c) => `
+      <article class="binder-item">
+        ${faceHTML(c, { showEmpty: true })}
+        <div class="name">${c.locked ? "???" : c.name}</div>
+        <div class="tag">${c.locked ? "LOCKED" : c.rarity}</div>
+      </article>
+    `).join("");
+
+    document.getElementById("tradeList").innerHTML = TRADES.map((t) => `
+      <article class="trade-row">
+        <div>
+          <div class="trade-user">@${t.user}</div>
+          <div class="swap">
+            ${faceHTML({ ...t.have, dups: 0, locked: false })}
+            <span class="arrow">⇄</span>
+            ${faceHTML({ ...t.want, dups: 0, locked: false })}
+          </div>
+          ${t.match ? '<div class="match">✓ คุณมีใบที่เขาต้องการ</div>' : ""}
+        </div>
+        <button class="btn btn-primary btn-sm" type="button">เสนอเทรด</button>
+      </article>
+    `).join("");
+
+    let packs = 3;
+    const btn = document.getElementById("btnPull");
+    const packBtn = document.getElementById("packBtn");
+    const pullCount = document.getElementById("pullCount");
+
+    function pull() {
+      if (packs <= 0) { btn.textContent = "อัปใบเสร็จเพื่อได้ Pack"; return; }
+      packs -= 1;
+      pullCount.textContent = String(packs);
+      btn.textContent = packs > 0 ? `เปิดซอง · ใช้ 1 Pack` : "อัปใบเสร็จเพื่อได้ Pack";
+      const pool = CARDS.filter((c) => !c.locked);
+      const hit = pool[Math.floor(Math.random() * pool.length)];
+      packBtn.querySelector("img").src = hit.img;
+      packBtn.querySelector("strong").textContent = "GOT!";
+      setTimeout(() => { packBtn.querySelector("strong").textContent = "PULL"; }, 900);
+    }
+    btn.addEventListener("click", pull);
+    packBtn.addEventListener("click", pull);
+  </script>
+</body>
+</html>

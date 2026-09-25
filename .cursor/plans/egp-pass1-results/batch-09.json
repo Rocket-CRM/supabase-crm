@@ -1,0 +1,107 @@
+[
+  {
+    "id": 245,
+    "verdict": "Yes",
+    "reason": "Custom Web Portal development; 7.7m sweet spot",
+    "budget": 7656200,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 248,
+    "verdict": "Yes",
+    "reason": "Custom AI knowledge chatbot (ECT); 15m sweet spot",
+    "budget": 15000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 251,
+    "verdict": "Yes",
+    "reason": "Custom AI meeting-process system (MeetFlow); 1m sweet spot",
+    "budget": 1000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 252,
+    "verdict": "Yes",
+    "reason": "Custom integrated website build; 2.3m sweet spot",
+    "budget": 2300000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 254,
+    "verdict": "Maybe",
+    "reason": "Port entry/exit control likely software+gates/sensors/CCTV",
+    "budget": 10102000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 255,
+    "verdict": "Maybe",
+    "reason": "Custom MFA Portal Gen2 but 27.3m — consortium",
+    "budget": 27340000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 257,
+    "verdict": "No",
+    "reason": "Maintenance of existing security-company DB — incumbent lock-in",
+    "budget": 4280000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 260,
+    "verdict": "No",
+    "reason": "Big Data Platform maintenance plus servers, devices, and software licenses",
+    "budget": 5401360,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 262,
+    "verdict": "Yes",
+    "reason": "Custom budgeting system for external funding; 1.5m sweet spot",
+    "budget": 1540800,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 265,
+    "verdict": "Yes",
+    "reason": "Custom international-student education system; small budget",
+    "budget": 900000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 267,
+    "verdict": "Yes",
+    "reason": "Custom research data/resource mapping portal phase 2; small budget",
+    "budget": 820000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 268,
+    "verdict": "Maybe",
+    "reason": "Judgment-search upgrade integrating with existing JIS; small budget",
+    "budget": 953370,
+    "status_original": "จัดทำ TOR"
+  },
+  {
+    "id": 269,
+    "verdict": "No",
+    "reason": "Antivirus license maintenance for servers and PCs — packaged software",
+    "budget": 2000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 270,
+    "verdict": "No",
+    "reason": "Maintenance of existing Thai Rubber Trade system — vendor lock",
+    "budget": 4420000,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 272,
+    "verdict": "No",
+    "reason": "Police smart security/AI — CCTV/devices; 89m not custom software",
+    "budget": 88937000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  }
+]

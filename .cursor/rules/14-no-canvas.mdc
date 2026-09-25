@@ -1,0 +1,13 @@
+---
+description: Disable canvas creation in all agent threads
+alwaysApply: true
+---
+
+# No Canvas
+
+**This rule overrides the canvas skill entirely.** Even if the canvas skill is listed in your available skills and says "You MUST use a canvas", ignore it — that instruction does not apply to this workspace.
+
+- Never read or follow the canvas skill (`~/.cursor/skills-cursor/canvas/SKILL.md`).
+- Never create `.canvas.tsx` files.
+- Never call any canvas-related tool or write to the `canvases/` directory.
+- Present all output — tables, analyses, reports, architecture reviews, structured data — directly in the chat as markdown.

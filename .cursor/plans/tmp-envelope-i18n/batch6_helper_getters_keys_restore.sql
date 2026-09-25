@@ -1,0 +1,1 @@
+applied via MCP envelope_i18n_helper_getters_keys_restore

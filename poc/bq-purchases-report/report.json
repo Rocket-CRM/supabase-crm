@@ -1,0 +1,342 @@
+{
+  "merchant": {
+    "id": "10de947e-ff05-4e2b-88ff-c853e5a69cb3",
+    "name": "Futurepark"
+  },
+  "window": {
+    "from": "2026-06-01",
+    "to": "2026-07-01",
+    "timezone": "Asia/Bangkok",
+    "frequency": "day"
+  },
+  "source": "BigQuery rocket-prod-analytics.raw_supabase_prod",
+  "parity_vs_postgres": {
+    "net_sales": 331140024.17,
+    "orders": 300,
+    "buyers": 34299,
+    "total_count": 174761,
+    "matched": true
+  },
+  "supabase_rpcs": [
+    "bff_report_purchases",
+    "bff_report_purchases_rows"
+  ],
+  "report": {
+    "by_channel": [],
+    "by_store": [
+      {
+        "net_sales": 28817723,
+        "orders": 2,
+        "store_id": "0f7b9dd9-3712-4401-bbdd-3c1da6fbc20e",
+        "store_name": "ห้างทองแม่ทองสุก / PLZ.1.SHP026C,PLZ.1.SHP027B"
+      },
+      {
+        "net_sales": 19135561,
+        "orders": 0,
+        "store_id": "cebea4f2-37d0-44ff-90c8-5e9518c68e0e",
+        "store_name": "Studio 7 / PLZ.2.SHP035C"
+      },
+      {
+        "net_sales": 13022487,
+        "orders": 0,
+        "store_id": "11200f62-518e-435d-b14c-ba3504cce871",
+        "store_name": "Aurora / PLZ.G.SHP075B"
+      },
+      {
+        "net_sales": 7851672,
+        "orders": 0,
+        "store_id": "70d36a1d-669d-46e0-8016-9b7b0358e8b5",
+        "store_name": "Uniqlo / PL2.G.SHP038"
+      },
+      {
+        "net_sales": 7266538,
+        "orders": 0,
+        "store_id": "7c984d24-11e0-464d-9099-b73737f065fb",
+        "store_name": "AIS / PLZ.2.SHP005A/1,005B"
+      },
+      {
+        "net_sales": 6932841,
+        "orders": 0,
+        "store_id": "62095657-c72e-4946-9ff7-3cc8fd3f1bf7",
+        "store_name": "ออโรร่า โกลด์ แอนด์ เจมส์ / PLZ.G.SHP069B"
+      },
+      {
+        "net_sales": 4914523.06,
+        "orders": 5,
+        "store_id": "3847ebec-0a64-4628-aa7a-67e706255289",
+        "store_name": "JASPAL / PL2.G.SHP029-031"
+      },
+      {
+        "net_sales": 4672666,
+        "orders": 0,
+        "store_id": "46694a07-a8a8-44f0-9730-d66bed1d35f9",
+        "store_name": "EVE and BOY / PL2.1.SHP014-017"
+      },
+      {
+        "net_sales": 4325120,
+        "orders": 0,
+        "store_id": "9ae09380-9512-4269-a52b-c09843c5b4bb",
+        "store_name": "FITNESS FIRST / MIN.3.FIT004"
+      },
+      {
+        "net_sales": 4251290,
+        "orders": 1,
+        "store_id": "d3742b5a-ef1a-40cb-b80e-abadda48aa69",
+        "store_name": "True / PLZ.2.SHP009A-B"
+      }
+    ],
+    "series": [
+      {
+        "aov": 2978531.5,
+        "bucket": "2026-06-01",
+        "gross": 11914126,
+        "net": 11914126,
+        "orders": 4,
+        "refunds": 0
+      },
+      {
+        "aov": 2844281.67,
+        "bucket": "2026-06-02",
+        "gross": 8532845,
+        "net": 8532845,
+        "orders": 3,
+        "refunds": 0
+      },
+      {
+        "aov": 4829520,
+        "bucket": "2026-06-03",
+        "gross": 14488560,
+        "net": 14488560,
+        "orders": 3,
+        "refunds": 0
+      },
+      {
+        "aov": 285890.61,
+        "bucket": "2026-06-04",
+        "gross": 6003702.88,
+        "net": 6003702.88,
+        "orders": 21,
+        "refunds": 0
+      },
+      {
+        "aov": 1405499.73,
+        "bucket": "2026-06-05",
+        "gross": 15460497,
+        "net": 15460497,
+        "orders": 11,
+        "refunds": 0
+      },
+      {
+        "aov": 11157593,
+        "bucket": "2026-06-06",
+        "gross": 22315186,
+        "net": 22315186,
+        "orders": 2,
+        "refunds": 0
+      },
+      {
+        "aov": 15875627,
+        "bucket": "2026-06-07",
+        "gross": 15875627,
+        "net": 15875627,
+        "orders": 1,
+        "refunds": 0
+      },
+      {
+        "aov": 167300.72,
+        "bucket": "2026-06-08",
+        "gross": 8699637.36,
+        "net": 8699637.36,
+        "orders": 52,
+        "refunds": 0
+      },
+      {
+        "aov": 301189.17,
+        "bucket": "2026-06-09",
+        "gross": 7228540,
+        "net": 7228540,
+        "orders": 24,
+        "refunds": 0
+      },
+      {
+        "aov": 1928589.75,
+        "bucket": "2026-06-10",
+        "gross": 11571538.5,
+        "net": 11571538.5,
+        "orders": 6,
+        "refunds": 0
+      },
+      {
+        "aov": 1950105.25,
+        "bucket": "2026-06-11",
+        "gross": 7800421,
+        "net": 7800421,
+        "orders": 4,
+        "refunds": 0
+      },
+      {
+        "aov": 660089.56,
+        "bucket": "2026-06-12",
+        "gross": 9241253.81,
+        "net": 9241253.81,
+        "orders": 14,
+        "refunds": 0
+      },
+      {
+        "aov": 2501042.29,
+        "bucket": "2026-06-13",
+        "gross": 17507296,
+        "net": 17507296,
+        "orders": 7,
+        "refunds": 0
+      },
+      {
+        "aov": 15086196,
+        "bucket": "2026-06-14",
+        "gross": 15086196,
+        "net": 15086196,
+        "orders": 1,
+        "refunds": 0
+      },
+      {
+        "aov": 2816744,
+        "bucket": "2026-06-15",
+        "gross": 8450232,
+        "net": 8450232,
+        "orders": 3,
+        "refunds": 0
+      },
+      {
+        "aov": 1076503.32,
+        "bucket": "2026-06-16",
+        "gross": 7535523.25,
+        "net": 7535523.25,
+        "orders": 7,
+        "refunds": 0
+      },
+      {
+        "aov": 1844000.25,
+        "bucket": "2026-06-17",
+        "gross": 7376001,
+        "net": 7376001,
+        "orders": 4,
+        "refunds": 0
+      },
+      {
+        "aov": 2500569.33,
+        "bucket": "2026-06-18",
+        "gross": 7501708,
+        "net": 7501708,
+        "orders": 3,
+        "refunds": 0
+      },
+      {
+        "aov": 1382842.5,
+        "bucket": "2026-06-19",
+        "gross": 11062740,
+        "net": 11062740,
+        "orders": 8,
+        "refunds": 0
+      },
+      {
+        "aov": 1714841.57,
+        "bucket": "2026-06-20",
+        "gross": 17148415.65,
+        "net": 17148415.65,
+        "orders": 10,
+        "refunds": 0
+      },
+      {
+        "aov": 1979776.5,
+        "bucket": "2026-06-21",
+        "gross": 15838212,
+        "net": 15838212,
+        "orders": 8,
+        "refunds": 0
+      },
+      {
+        "aov": 667.98,
+        "bucket": "2026-06-22",
+        "gross": 8015.7,
+        "net": 8015.7,
+        "orders": 12,
+        "refunds": 0
+      },
+      {
+        "aov": 675713.94,
+        "bucket": "2026-06-23",
+        "gross": 12162851,
+        "net": 12162851,
+        "orders": 18,
+        "refunds": 0
+      },
+      {
+        "aov": 624435.88,
+        "bucket": "2026-06-24",
+        "gross": 10615410,
+        "net": 10615410,
+        "orders": 17,
+        "refunds": 0
+      },
+      {
+        "aov": 2849926.25,
+        "bucket": "2026-06-25",
+        "gross": 11399705,
+        "net": 11399705,
+        "orders": 4,
+        "refunds": 0
+      },
+      {
+        "aov": 842737.63,
+        "bucket": "2026-06-26",
+        "gross": 13483802,
+        "net": 13483802,
+        "orders": 16,
+        "refunds": 0
+      },
+      {
+        "aov": 6005945.11,
+        "bucket": "2026-06-27",
+        "gross": 18017835.32,
+        "net": 18017835.32,
+        "orders": 3,
+        "refunds": 0
+      },
+      {
+        "aov": 6199923.67,
+        "bucket": "2026-06-28",
+        "gross": 18599771,
+        "net": 18599771,
+        "orders": 3,
+        "refunds": 0
+      },
+      {
+        "aov": 10010.91,
+        "bucket": "2026-06-29",
+        "gross": 210229.1,
+        "net": 210229.1,
+        "orders": 21,
+        "refunds": 0
+      },
+      {
+        "aov": 296.19,
+        "bucket": "2026-06-30",
+        "gross": 4146.6,
+        "net": 4146.6,
+        "orders": 14,
+        "refunds": 0
+      }
+    ],
+    "summary": {
+      "aov": 1103800.08,
+      "buyers": 34299,
+      "earn_eligible_pct": 0.0,
+      "gross_sales": 331140024.17,
+      "net_sales": 331140024.17,
+      "new_buyers": 5141,
+      "orders": 300,
+      "refunds": 0,
+      "returning_buyers": 29158
+    }
+  }
+}

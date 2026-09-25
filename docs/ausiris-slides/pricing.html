@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ausiris — Pricing</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #ddd;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #111;
+  }
+  .slide {
+    width: 1920px;
+    height: 1080px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 56px 72px 48px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 36px;
+  }
+  .top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: end;
+    border-bottom: 1px solid #111;
+    padding-bottom: 20px;
+  }
+  h1 {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .meta {
+    text-align: right;
+    font-size: 15px;
+    line-height: 1.45;
+    color: #444;
+  }
+  .body {
+    display: grid;
+    grid-template-columns: 1.25fr 0.95fr;
+    gap: 56px;
+    min-height: 0;
+  }
+  h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+    color: #111;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+  }
+  tr + tr td,
+  tr + tr th {
+    border-top: 1px solid #e0e0e0;
+  }
+  th, td {
+    padding: 11px 0;
+    vertical-align: top;
+    text-align: left;
+  }
+  th {
+    font-weight: 500;
+    width: 70%;
+  }
+  td {
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .note {
+    display: block;
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #666;
+    line-height: 1.35;
+  }
+  .usage {
+    font-weight: 500;
+    color: #444;
+  }
+  .future {
+    color: #d0d0d0;
+  }
+  .future th,
+  .future td,
+  .future .note,
+  .future .usage,
+  .future h2,
+  .future h3,
+  .future ul,
+  .future .fee-line,
+  .future .total-label,
+  .future .total-num,
+  .future .total-sub {
+    color: #d0d0d0;
+  }
+  .future .note {
+    color: #dcdcdc;
+  }
+  .future tr + tr td,
+  .future tr + tr th {
+    border-top-color: #f0f0f0;
+  }
+  .future .fee-line {
+    border-top-color: #ebebeb;
+  }
+  .tag {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #d0d0d0;
+    border: 1px solid #e5e5e5;
+    padding: 1px 6px;
+    vertical-align: middle;
+  }
+  .future td,
+  .future .fee-line strong,
+  .future .total-num {
+    font-weight: 500;
+  }
+  .block + .block { margin-top: 36px; }
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 8px;
+  }
+  .split h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .split ul {
+    list-style: none;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #333;
+  }
+  .split li + li { margin-top: 2px; }
+  .fee-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid #111;
+    margin-top: 16px;
+    padding-top: 12px;
+    font-size: 16px;
+  }
+  .fee-line strong {
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+  }
+  .totals {
+    border-top: 1px solid #111;
+    padding-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+  .total-label {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .total-num {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .total-num span {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  .total-sub {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+  }
+  .foot {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.45;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 14px;
+  }
+</style>
+</head>
+<body>
+  <div class="slide">
+    <div class="top">
+      <h1>Ausiris pricing</h1>
+      <div class="meta">
+        THB · excl. VAT · billed annually<br>
+        Phase 1 scope in black · Future items grayed
+      </div>
+    </div>
+
+    <div class="body">
+      <div>
+        <div class="block">
+          <h2>Monthly — Loyalty</h2>
+          <table>
+            <tr>
+              <th>
+                Loyalty Core
+                <span class="note">Points, tiers, wallet, rewards, CDP. OpenAPI included.</span>
+              </th>
+              <td>45,000</td>
+            </tr>
+            <tr>
+              <th>
+                Marketing Automation
+                <span class="note">15 workflows. Extra workflow: 1,500 / mo</span>
+              </th>
+              <td>15,000</td>
+            </tr>
+            <tr class="future">
+              <th>
+                AI Decisioning <span class="tag">Future</span>
+                <span class="note">Inside workflows · token-based</span>
+              </th>
+              <td class="usage">TBC</td>
+            </tr>
+            <tr class="future">
+              <th>
+                Campaign <span class="tag">Future</span>
+                <span class="note">Campaign setup, attribution, ROI</span>
+              </th>
+              <td>TBC</td>
+            </tr>
+            <tr class="future">
+              <th>
+                Integration maintenance <span class="tag">Future</span>
+                <span class="note">SDK + custom privilege flows</span>
+              </th>
+              <td>TBC</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="block future">
+          <h2>Monthly — Customer service <span class="tag">Future</span></h2>
+          <table>
+            <tr>
+              <th>CS seat</th>
+              <td>TBC</td>
+            </tr>
+            <tr>
+              <th>
+                AI CS agent
+                <span class="note">Per resolved case</span>
+              </th>
+              <td class="usage">TBC</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="block future">
+          <h2>One-time — Custom integration <span class="tag">Future</span></h2>
+          <div class="split">
+            <div>
+              <h3>Billable</h3>
+              <ul>
+                <li>Fee-discount redeem contract</li>
+                <li>Custom webhook / push if needed</li>
+                <li>UAT &amp; go-live (custom paths)</li>
+              </ul>
+            </div>
+            <div>
+              <h3>No charge (OpenAPI)</h3>
+              <ul>
+                <li>Behavioural SDK (app + web)</li>
+                <li>Member sync</li>
+                <li>Purchase / refund</li>
+                <li>Wallet read</li>
+                <li>Activity log</li>
+                <li>LINE OA connectors</li>
+              </ul>
+            </div>
+          </div>
+          <div class="fee-line">
+            <span>Scope TBC</span>
+            <strong>TBC</strong>
+          </div>
+        </div>
+
+        <div class="totals">
+          <div class="future">
+            <div class="total-label">One-time <span class="tag">Future</span></div>
+            <div class="total-num">TBC</div>
+            <div class="total-sub">Not in Phase 1. Pricing to be confirmed.</div>
+          </div>
+          <div>
+            <div class="total-label">Ongoing base</div>
+            <div class="total-num">60,000 <span>/ mo</span></div>
+            <div class="total-sub">Core 45k + MA 15k. Future lines not included.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      Phase 1 = Loyalty Core + Marketing Automation (15 workflows), billed annually. Loyalty Core includes OpenAPI — member sync, purchase, wallet, activity log, and behavioural SDK are not billed as mandays.
+      Campaign, AI decisioning, customer service, custom integration build, and integration maintenance are future scope.
+    </div>
+  </div>
+</body>
+</html>

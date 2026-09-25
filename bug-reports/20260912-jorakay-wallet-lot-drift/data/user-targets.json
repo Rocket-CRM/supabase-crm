@@ -1,0 +1,23 @@
+{
+  "merchant_id": "7522af2c-a7f6-4ab8-8493-6875a3b19544",
+  "mongo_merchant_ref": "649e9524f43a5fc2f9705850",
+  "supabase_project": "wkevmsedchftztoolkmi",
+  "exported_at": "2026-09-12",
+  "users": [
+    {"n": 1, "mongo_id": "65413f78d6b1732a1ec616f1", "user_id": "465dae9a-01fa-49ca-b3f1-957deb899d5d", "wallet_target": 43361, "lots_target": 43361, "wallet_update": null, "fix_class": "zero_consumed_givens_sync_open_mongo_then_trim_5470_on_migrated", "mongo_point_balance": 35313, "mongo_open_given_sum": 40783, "native_earn_total": 8048, "migrated_deductible_target": 35313},
+    {"n": 2, "mongo_id": "6811e84c6fc1032760808710", "user_id": "6cce9025-1504-49f5-a51a-02c0aefd576b", "wallet_target": 9859, "lots_target": 9859, "wallet_update": null, "fix_class": "migrated_sync_live_mongo"},
+    {"n": 3, "mongo_id": "65e992956fdff6649db70844", "user_id": "2e9794f1-5f7b-4e41-ab8d-43e6b2c03779", "wallet_target": 3415, "lots_target": 3415, "wallet_update": null, "fix_class": "allocate_deductible_after_ttl_repair"},
+    {"n": 4, "mongo_id": "65413f89d6b1732a1ec6255d", "user_id": "d093dcaf-0507-4d3f-a899-4ab57adf5444", "wallet_target": 12544, "lots_target": 12544, "wallet_update": null, "fix_class": "migrated_sync_live_mongo"},
+    {"n": 5, "mongo_id": "67cd2a13865b399021ce9895", "user_id": "6d60ddf9-c4b2-4186-9714-6cfe86aca1d4", "wallet_target": 7469, "lots_target": 7469, "wallet_update": null, "fix_class": "migrated_plus_expiry_fifo_on_earns"},
+    {"n": 6, "mongo_id": "67510f45a33a4dc033969a91", "user_id": "ff511b13-f049-40fd-925f-0ef12ee595cb", "wallet_target": 128882, "lots_target": 128882, "wallet_update": 10710, "fix_class": "user_wallet_only"},
+    {"n": 7, "mongo_id": "699efc2f2ec2d76e1eae0dd6", "user_id": "75b78f9f-5219-4021-9364-c24009c8264a", "wallet_target": 13694, "lots_target": 13694, "wallet_update": null, "fix_class": "migrated_sync_plus_native_fifo", "native_fifo_burn_total": 168400},
+    {"n": 8, "mongo_id": "65e54b99d3d42fdf0cf61c93", "user_id": "509d2ec8-bc6f-4e8b-b69b-a130363090d8", "wallet_target": 9428, "lots_target": 9428, "wallet_update": null, "fix_class": "migrated_sync_plus_native_fifo", "native_fifo_burn_total": 3000},
+    {"n": 9, "mongo_id": "681421cab1e202f9103ec1a0", "user_id": "41ffe054-bc16-4d3a-9120-bc551b76991c", "wallet_target": 157, "lots_target": 157, "wallet_update": null, "fix_class": "migrated_sync_plus_native_fifo", "native_fifo_burn_total": 94300},
+    {"n": 10, "mongo_id": "669f3ec760ab0274d8e31ed4", "user_id": "a8b16c7b-9930-4e67-8ae3-f8a219ca51c6", "wallet_target": 13063, "lots_target": 13063, "wallet_update": null, "fix_class": "restore_migrated_plus_native_fifo", "native_fifo_burn_total": 10500},
+    {"n": 11, "mongo_id": "67c917a2c336839338cc12a8", "user_id": "6ac3a95a-0f78-4603-800d-3354c9a2b345", "wallet_target": 2436, "lots_target": 2436, "wallet_update": null, "fix_class": "migrated_sync_plus_native_fifo", "native_fifo_burn_total": 16500},
+    {"n": 12, "mongo_id": "6a4869e18a5ea7b763b65992", "user_id": "07313983-05d3-46a1-8549-75fc6d087ec5", "wallet_target": 510, "lots_target": 510, "wallet_update": null, "fix_class": "native_redemption_fifo", "burn_ledger_id": "5fd6c5ad-8660-413c-a1a8-b7bac8836614", "burn_amount": 5600},
+    {"n": 13, "mongo_id": "66aa305cddfe1420692eff91", "user_id": "e5961962-0b82-404b-8aee-e7e793d4ec3a", "wallet_target": 105230, "lots_target": 105230, "wallet_update": null, "fix_class": "migrated_sync_plus_native_fifo", "native_fifo_burn_total": 26500},
+    {"n": 14, "mongo_id": "65413f4fd6b1732a1ec5f415", "user_id": "7e16a591-c38f-4c79-904a-bc99e2b1eab1", "wallet_target": 57280, "lots_target": 57280, "wallet_update": null, "fix_class": "migrated_sync_plus_native_burns_and_expiry", "native_burn_total": 62962, "expiry_burn_total": 8962},
+    {"n": 15, "mongo_id": "6787827bb0d6038e49a36ed6", "user_id": "8e9f72fb-b005-492d-8f90-dc9b81aca7bf", "wallet_target": 16514, "lots_target": 16514, "wallet_update": null, "fix_class": "migrated_sync_plus_expiry_fifo_on_earns", "expiry_burn_total": 4082}
+  ]
+}

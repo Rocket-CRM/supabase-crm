@@ -1,0 +1,245 @@
+/* Merchant Open API PDF — print stylesheet. No decorative gradients. */
+
+:root {
+  --ink: #111111;
+  --muted: #4a4a4a;
+  --rule: #d4d4d4;
+  --cover: #0b1f33;
+  --paper: #ffffff;
+  --code-bg: #f4f4f2;
+  --get: #0f6b4c;
+  --post: #1a4f8b;
+  --patch: #8a5a00;
+  --delete: #8b1e1e;
+}
+
+html {
+  font-size: 10.5pt;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.45;
+}
+
+.cover {
+  page-break-after: always;
+  min-height: 240mm;
+  padding: 28mm 8mm 16mm;
+  box-sizing: border-box;
+}
+
+.cover-kicker {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 9pt;
+  color: var(--muted);
+  margin: 0 0 18mm;
+}
+
+.cover h1 {
+  font-size: 28pt;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 6mm;
+  border: 0;
+  padding: 0;
+}
+
+.cover .subtitle {
+  font-size: 13pt;
+  color: var(--muted);
+  margin: 0 0 18mm;
+}
+
+.cover-meta {
+  width: 100%;
+  border-collapse: collapse;
+  max-width: 130mm;
+}
+
+.cover-meta th,
+.cover-meta td {
+  text-align: left;
+  padding: 3.5mm 4mm 3.5mm 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 10pt;
+  vertical-align: top;
+}
+
+.cover-meta th {
+  color: var(--muted);
+  font-weight: 500;
+  width: 42mm;
+}
+
+.cover-url {
+  margin: 8mm 0 0;
+  font-size: 10pt;
+  color: var(--muted);
+}
+
+.cover-url code {
+  display: block;
+  margin-top: 1.5mm;
+  font-size: 10pt;
+  color: var(--ink);
+  hyphens: none;
+  -webkit-hyphens: none;
+  word-break: break-all;
+}
+
+.cover-note {
+  margin-top: 22mm;
+  font-size: 9pt;
+  color: var(--muted);
+  max-width: 140mm;
+}
+
+header#title-block-header {
+  display: none;
+}
+
+h1 {
+  font-size: 16pt;
+  margin: 0 0 6mm;
+  padding-bottom: 2mm;
+  border-bottom: 1.5px solid var(--cover);
+}
+
+h2 {
+  font-size: 13pt;
+  margin: 10mm 0 3.5mm;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 11pt;
+  margin: 7mm 0 2.5mm;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 10.5pt;
+  margin: 5mm 0 2mm;
+  page-break-after: avoid;
+}
+
+p,
+ul,
+ol {
+  margin: 0 0 3.5mm;
+}
+
+li {
+  margin-bottom: 1mm;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 8.6pt;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  padding: 3mm 3.5mm;
+  overflow-x: auto;
+  font-size: 7.8pt;
+  line-height: 1.4;
+  page-break-inside: avoid;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+blockquote {
+  margin: 0 0 4mm;
+  padding: 2mm 0 2mm 3.5mm;
+  border-left: 2px solid var(--cover);
+  color: var(--muted);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 5mm;
+  font-size: 8.6pt;
+  page-break-inside: auto;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+th,
+td {
+  border: 1px solid var(--rule);
+  padding: 1.6mm 2.2mm;
+  text-align: left;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+th {
+  background: #f0f2f4;
+  font-weight: 600;
+}
+
+.endpoint-index td:first-child,
+.endpoint-index th:first-child {
+  width: 18mm;
+  white-space: nowrap;
+}
+
+.method {
+  display: inline-block;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.method-get { color: var(--get); }
+.method-post { color: var(--post); }
+.method-patch { color: var(--patch); }
+.method-delete { color: var(--delete); }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 8mm 0;
+}
+
+@page {
+  size: A4;
+  margin: 14mm 12mm 16mm;
+}
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}

@@ -1,0 +1,107 @@
+[
+  {
+    "id": 155,
+    "verdict": "Maybe",
+    "reason": "MMS/AMS maintenance plus CR on existing EGAT system — likely incumbent lock-in",
+    "budget": 12305000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 158,
+    "verdict": "No",
+    "reason": "Licensed Microsoft Dynamics AX 2009 maintenance, เฉพาะเจาะจง",
+    "budget": 1148593,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 159,
+    "verdict": "Yes",
+    "reason": "Custom SSO / user-account management phase 2, 2.3m sweet spot",
+    "budget": 2300000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 161,
+    "verdict": "Maybe",
+    "reason": "Custom e-Document but 75m — consortium scale",
+    "budget": 75000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 163,
+    "verdict": "Maybe",
+    "reason": "Custom IT resource-management system but 176m — consortium",
+    "budget": 176000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 166,
+    "verdict": "Yes",
+    "reason": "Custom AI for legal/border document analysis, 10m",
+    "budget": 10000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 167,
+    "verdict": "No",
+    "reason": "ซื้อขายและอนุญาตให้ใช้สิทธิ์ licensed CRM package, 117.7m",
+    "budget": 117700000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 170,
+    "verdict": "Maybe",
+    "reason": "Improve existing hospital patient-service program — incumbent HIS, เฉพาะเจาะจง",
+    "budget": 2587500,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 175,
+    "verdict": "Maybe",
+    "reason": "Water-meter reading system plus software maintenance — hardware+software",
+    "budget": 4109977,
+    "status_original": "จัดทำ TOR"
+  },
+  {
+    "id": 180,
+    "verdict": "Maybe",
+    "reason": "NBMS enhancement phase 2, 27m consortium and เฉพาะเจาะจง incumbent",
+    "budget": 27000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 181,
+    "verdict": "Yes",
+    "reason": "Custom online school registry and academic-results system, 3m",
+    "budget": 3025000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 182,
+    "verdict": "Yes",
+    "reason": "Custom electronic workflow system, 5m",
+    "budget": 5000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 183,
+    "verdict": "Maybe",
+    "reason": "M&E system phase 2 with ERP disbursement integration",
+    "budget": 5000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 184,
+    "verdict": "Maybe",
+    "reason": "Core business system upgrade, 21.1m — consortium",
+    "budget": 21141300,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 185,
+    "verdict": "Yes",
+    "reason": "Custom AI portal for search/transcription, 9.5m",
+    "budget": 9500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  }
+]

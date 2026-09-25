@@ -1,0 +1,90 @@
+[
+  {
+    "id": 248,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบตอบกลับอัตโนมัติคลังความรู้ปัญญาประดิษฐ์ (ECT AI Chatbot) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059140896)",
+    "budget": 15000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX188bQ9gplNhXdKIu84zUICoEkno5oYfgWJo36x6FFkIHSaqpSjrniui",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69059140896/TOR-69059140896.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 251,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบบริหารจัดการกระบวนการประชุมแบบครบวงจร โดยใช้เทคโนโลยีปัญญาประดิษฐ์ (MeetFlow AI) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079279667)",
+    "budget": 1000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18ubpZ71B3hN0WhgcRsDcDDJ%252Byc5eA87V27vK3Yx9arcelHRHuB2uRe",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079279667/TOR-69079279667.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 252,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาและจัดหาระบบเว็บไซต์แบบบูรณาการ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089112468)",
+    "budget": 2300000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BcdBrrTeYgsMSporvOvNjqikz3d6hZ3URO%252BaJVDiF1GPbB8iFHcMnD",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089112468/TOR-69089112468.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 254,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบควบคุมการเข้าออกท่าเทียบเรือประมง (Fishing Vessel Entry And Exit Control System) แขวงลาดยาว เขตจตุจักร กรุงเทพมหานคร ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089197770)",
+    "budget": 10102000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252B67w0f7rR9U%252BONThcFbnfU3Qb2Gd%252BDvc%252F6DXbne9KJpIu6hvJPxYSF",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089197770/TOR-69089197770.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 255,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบสารสนเทศแบบรวมศูนย์ MFA Portal Gen ๒ ระยะที่ ๑ จำนวน ๑ โครงกาาร ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049472497)",
+    "budget": 27340000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252F7B2lfhHgnw%252B%252B6Qdgfq2ehDbQOYy9XucnUbaKsocCfUHC2n8CS6RiH",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69049472497/TOR-69049472497(1).pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 262,
+    "project_name": "จ้างพัฒนาระบบ Budgeting Process for External Funding Sources จำนวน ๑ ระบบ โดยวิธีคัดเลือก (เลขที่โครงการ : 69089233723)",
+    "budget": 1540800,
+    "pass1": "Yes",
+    "status_original": "รายงานขอซื้อขอจ้าง",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19jJpb137Mg%252FoVPYJUsDrN8%252B%252FBdwEbcZzKXtVo86yPLDoIGy0w6AxgX",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 265,
+    "project_name": "ประกวดราคาจ้างจัดทำครุภัณฑ์ระบบสนับสนุนการจัดการศึกษานักศึกษาต่างชาติ จำนวน 1 ระบบ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089140052)",
+    "budget": 900000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FaIFsO7FtkXaAxFZ3Ai3c1uIqYsf9mPtcj7vypoVru1RTyEr7zdnFf",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089140052/TOR-69089140052.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 267,
+    "project_name": "ประกวดราคาจ้างจ้างพัฒนาและปรับปรุงศูนย์รวมข้อมูลบริการงานวิจัยและเครื่องมือวิจัย (Research Ecology and Resource Mapping) ระยะที่ 2 จำนวน 1 ระบบ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079477134)",
+    "budget": 820000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FgGA6De3PIk1dyT9lwK3%252BZZWcasTk8lNmsqJLvcTJhotwyZGYJAQbE",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079477134/TOR-69079477134.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

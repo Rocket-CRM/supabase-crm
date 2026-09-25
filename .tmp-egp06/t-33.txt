@@ -1,0 +1,33 @@
+-33-
+6.13.2.1 บ ุ ค ล า ก ร ท ี ่ ม ี ค ว า ม เช ี ่ ย ว ชา ญ ด ้ า น ป ร ะ เม ิ น แล ะ ม า ต ร ก า ร ร ั ก ษา ค ว า ม ม ั ่ น ค ง ป ล อ ด ภั ย
+ขอ ง ร ะ บ บ ได ้ ร ั บ ป ร ะ ก า ศ น ี ย บ ั ต ร ร ั บ ร อ ง ค ว า ม ร ู ้ ค ว า ม ส า ม า ร ถ ท า ง ด ้ า น ค ว า ม ม ั ่ น ค ง ป ล อ ด ภั ย ไซ เบ อ ร ์ ด ั ง น ี ้
+1) ป ร ะ ก า ศ น ี ย บ ั ต ร Certified Information System Security Professional
+(CISSP) แล ะ
+2) ป ร ะ ก า ศ น ี ย บ ั ต ร Offensive Security Certified Professional (CSCP) ห ร ื อ
+3) ป ร ะ ก า ศ น ี ย บ ั ต ร GCCC (GIAC Critical Controls Certification) ห ร ื อ
+Certification GIAC: GPEN (Penetration Testing Certification) ห ร ื อ GWAPT (Web aoplication
+penetration tester certification) ห ร ื อ GXPN (GIAC Exploit Researcher and Advanced Penetration Tester)
+6.13.2.2 บ ุ ค ล า ก ร ด ้ า น ก า ร ท ด ส อ บ เจ า ะ ร ะ บ บ ต ้ อ ง ต ้ อ ง ได ้ ร ั บ ป ร ะ ก า ศ น ี ย บ ั ต ร ร ั บ ร อ ง
+ค ว า ม ร ู ้ ค ว า ม ส า ม า ร ถ ท า ง ด ้ า น ค ว า ม ม ั ่ น ค ง ป ล อ ด ภั ย ไข เบ อ ร ์ ด ั ง น ี ้
+1) ป ร ะ ก า ศ น ี ย บ ั ต ร Certified Ethical Hacker (CEH) ห ร ื อ
+2) ป ร ะ ก า ศ น ี ย บ ั ต ร Offensive Security Certified Professional (OSCP) ห ร ื อ
+3) ป ร ะ ก า ศ น ี ย บ ั ต ร GCCC (GIAC Critical Controls Certification) ห ร ื อ
+Certification GIAC: GPEN (Penetration Testing Certification) ห ร ื อ GWAPT (Web ล ว ด น ์ ๕ น ์ อ ก
+penetration tester certification) ห ร ื อ GXPN (GIAC Exploit Researcher and Advanced Penetration Tester)
+6.13.23 ก า ร เป ล ี ่ ย น แป ล ง ต ั ว บ ุ ค ล า ก ร ท ี ่ ร ั บ ผิ ด ชอบ ด ั ง ก ล ่ า ว ข้ า ง ต ้ น ใน ภา ย ห ล ั ง จ ะ ท ํ า ได ้
+ก ็ ต ่ อ เม ื ่ อ ได ้ แจ ้ ง ให ้ ก ร ม ฯ ท ร า บ เป ็ น ห น ั ง ส ื อ แล ะ ได ้ ร ั บ ค ว า ม เห ็ น ขอ บ จ า ก ก ร ม ฯ แล ้ ว โด ย ผู ้ เข ้ า ม า แท น ท ี ่ จ ะ ต ้ อ ง
+ม ี ค ุ ณ ส ม บ ั ต ิ ไม ่ น ้ อ ย ก ว ่ า ผู ้ ท ี ่ ต น จ ะ เข ้ า ม า แท น ท ี ่ ด ้ ว ย
+6.13.3 ต ้ อ ง ด ํ า เน ิ น ก า ร เจ า ะ ร ะ บ บ จ า ก เค ร ื อ ข่ า ย ผ่ า น เค ร ื อ ข่ า ย ภา ย ใน แล ะ เค ร ื อ ข่ า ย ภา ย น อ ก
+เพ ื ่ อ น ํ า เอ า ข้ อ ม ู ล ส ํ า ค ั ญ เช ่ น บ ั ญ ชี ผู ้ ด ู แล ร ะ บ บ พ ร ้ อ ม ท ั ้ ง ร ห ั ส ผ่ า น ห ร ื อ บ ั ญ ชี ผู ้ ใช ้ พ ร ้ อ ม ร ห ั ส ผ่ า น ห ร ื อ ข้ อ ม ู ล อ ื ่ น ๆ
+ท ี ่ ม ี ค ว า ม ส ํ า ค ั ญ ร ว ม ถึ ง ก า ร ก ร ะ ท บ ใด ๆ ท ี ่ อ า จ ท ํ า ให ้ ก ร ม ฯ ได ้ ท ร า บ ถึ ง ค ว า ม เส ี ่ ย ง จ า ก ก า ร ถู ก เจ า ะ ร ะ บ บ
+โด ย ใน ก า ร ท ด ส อ บ เจ า ะ ร ะ บ บ จ ะ ด ํ า เน ิ น ก า ร เห ม ื อ น ก ั บ ก า ร เจ า ะ ร ะ บ บ ขอ ง ไว ร ั ส ห ร ื อ แฮ ก เก อ ร ์ ท ี ่ ป ฏิ บ ั ต ิ ก า ร จ ร ิ ง
+ซึ ่ ง จ ะ ด ํ า เน ิ น ก า ร ห า ซ่ อ ง ท า ง ใน ก า ร เข ้ า ถึ ง ร ะ บ บ (Exploit) ผ่า น จ ุ ด อ ่ อ น ห ร ื อ ข่ อ ง โห ว ่ ต ่ า ง ๆ ขอ ง เว ็ บ ไซ ต ์ ห ร ื อ โม บ า ย
+แอ ป พ ล ิ เค ชั น (ซ่ อ ง โห ว ่ ท ี ่ พ บ อ า จ เป ็ น zero-day ท ี ่ ย ั ง ไม ่ พ บ ก า ร แจ ้ ง เต ื อ น จ า ก ผู ้ ให ้ บ ร ิ ก า ร (Vendor)
+6.13.4 ก า ร ด ํ า เน ิ น ก า ร ท ด ส อ บ ก า ร เจ า ะ ร ะ บ บ ใน ร ู ป แบ บ Black-Box จ ะ ต ้ อ ง เล ื อ ก ใช ้ ว ิ ธี ก า ร
+ท ี ่ เป ็ น ไป ด า ม ม า ต ร ฐา น อ ย ่ า ง น ้ อ ย โต ้ น ก ๋
+6.13.4.1 Open Source Security Testing Methodology (OSSTM) ห ร ื อ
+6.13.4.2 NIST SP800-115 Guideline on Network Security Testing ห ร ื อ
+6.13.4.3 Open Web Application Security Project (OWASP) TOP 10 ห ร ื อ
+6.13.4.4 Penetration Testing Framework (PTF)
+=~ ซู
+PE rl. OL Oe

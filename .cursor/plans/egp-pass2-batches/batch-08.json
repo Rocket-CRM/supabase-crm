@@ -1,0 +1,90 @@
+[
+  {
+    "id": 161,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบเอกสารอิเล็กทรอนิกส์ (e-Document) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069431622)",
+    "budget": 75000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BDy9fClyHDe0i2RZEm1VteKIkA72KPKWpduD3YFmsNEU2Ub3039anK",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069431622/TOR-69069431622.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 163,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบบริหารจัดการทรัพยากรสารสนเทศ ขสมก. ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069347492)",
+    "budget": 176000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19Rxn6v6dvAk5TqKIrsC5q3TU9O12suwjBxLiy%252BhKo5Wp44UpSseuP%252F",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069347492/TOR-69069347492.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 166,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบปัญญาประดิษฐ์เพื่อการวิเคราะห์ข้อมูล กฎหมาย และเอกสารงานเขตแดน ประจำปีงบประมาณ ๒๕๖๙ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059071027)",
+    "budget": 10000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18Qevxyfnd%252FfsNWc0mKAKERfwlxBD%252FmqBHvyl8pfWMmsXbcMf3ICZ%252Fd",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69059071027/TOR-69059071027.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 170,
+    "project_name": "จ้างเหมาบริการปรับปรุงระบบโปรแกรมการให้บริการผู้ป่วยโรงพยาบาลองค์การบริหารส่วนจังหวัดภูเก็ต ตามโครงการโรงพยาบาลองค์การบริหารส่วนจังหวัดภูเก็ต โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69079509304)",
+    "budget": 2587500,
+    "pass1": "Maybe",
+    "status_original": "รายงานขอซื้อขอจ้าง",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BaUYOmPESmG4MylzSOmr1lOjdqcYEDsH%252B4Ll8YmDPd276e6V6dILA5",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 175,
+    "project_name": "จ้างบำรุงรักษาระบบอ่านมาตรวัดน้ำ พร้อมโปรแกรม ปีงบประมาณ 2570 เลขที่ จท.18-2570 (ครั้งที่ 2) โดยวิธีคัดเลือก (เลขที่โครงการ : 69079443321)",
+    "budget": 4109977,
+    "pass1": "Maybe",
+    "status_original": "จัดทำ TOR",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19hiYFRZVvxA%252B5jIlfVQtEeGULPjbcw9Ac2iNl20fapH1VfteYXObOC",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 180,
+    "project_name": "จ้างโครงการเพิ่มประสิทธิภาพระบบบริหารจัดการเงินนอกงบประมาณ (Non-Budgetary Management System NBMS) อย่างครบวงจร ระยะที่ 2 โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69079208207)",
+    "budget": 27000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18BAWuFchvXyXeNOZ07IS2FQDhdvKwwn4Q880Fl%252BS8esaZigAAm8Q5R",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 181,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบงานทะเบียนและงานวัดผลการศึกษาแบบออนไลน์ของโรงเรียนในสังกัดเมืองพัทยา ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059517714)",
+    "budget": 3025000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252B8ddDfNOzvGpMZeSPsjdPLChR7iNDKH6EEAqun33Bw1mrGohlGTEDD",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69059517714/TOR-69059517714.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 182,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบบริหารจัดการกระบวนงานในรูปแบบอิเล็กทรอนิกส์ (Workflow System) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079102312)",
+    "budget": 5000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BGrisMlt%252B7g%252FjDPIQmvGR5V%252F%252FTKHRSh7E2vfU6j1QP6dvRUfBEGEFK",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079102312/TOR-69079102312.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

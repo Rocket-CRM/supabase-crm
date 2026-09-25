@@ -1,0 +1,90 @@
+[
+  {
+    "id": 268,
+    "project_name": "จ้างโครงการพัฒนาและปรับปรุงระบบสืบค้นคำพิพากษา คำสั่งคำร้อง และคำวินิจฉัยศาลฎีกา เพื่อเชื่อมโยงกับระบบสารสนเทศสำหรับผู้พิพากษา (JIS) โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69089192265)",
+    "budget": 953370,
+    "pass1": "Maybe",
+    "status_original": "จัดทำ TOR",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FsJNJqUL8fwbZsG9IPrChgx79nmCuqi%252BwGG5WkHTNLE2NHkgG3r2Tm",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 273,
+    "project_name": "ประกวดราคาจ้างโครงการจัดทำธรรมาภิบาลข้อมูลและจัดทำระบบบัญชีข้อมูล ของกองกองทุนและส่งเสริมความเสมอภาคคนพิการภายใต้กรมส่งเสริมและพัฒนาคุณภาพชีวิตคนพิการ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059292256)",
+    "budget": 19650000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252B6FNAbGLCWQLaUrPLlLBzt19qTiZlxJKeNEC5VZq5xMwKFJcFy5DFZ",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69059292256/TOR-69059292256.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 274,
+    "project_name": "จ้างการพัฒนาและการใช้นวัตกรรมระบบสารสนเทศ เพื่อส่งเสริมฐานข้อมูลสุขภาพสัตว์เลี้ยงและการเพิ่มศักยภาพด้านการผลิตปศุสัตว์อย่างยั่งยืน จำนวน 1 งาน โดยวิธีคัดเลือก (เลขที่โครงการ : 69089247265)",
+    "budget": 4159000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19d0tUoaFLZkQRDUw%252FUiEgGgrifGoxsaSDcfWaQIrTOSaXOcgWb3uXs",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 275,
+    "project_name": "ประกวดราคาจ้างปรับปรุงระบบแผนที่ภาษีและทะเบียนทรัพย์สิน เทศบาลตำบลทับมา ประจำปีงบประมาณ 2569 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089261964)",
+    "budget": 4500000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19moyYN7Oz6eHrmc3VJcvTjHbJU0%252FsjvTdfJ4sSTfo7VvDJjtLtjulo",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089261964/TOR-69089261964.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 276,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบผู้ช่วยอัจฉริยะเพื่อให้บริการข้อมูลประชาชนของกรมการกงสุล ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089043840)",
+    "budget": 5500000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19Vsld96fawz0nnvc1KyOdU9nQdtwdQw%252Bwo0HZgQs16sHRrjAucQW91",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089043840/TOR-69089043840.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 278,
+    "project_name": "ประกวดราคาจ้างงานจ้างเหมาบริหารจัดการระบบควบคุมการอำนวยการจราจรด้านความปลอดภัยศูนย์บริหารจัดการจราจรกลางมอเตอร์เวย์ (Traffic Management Center) ลาดกระบังและพัทยา พร้อมปรับปรุงโปรแกรมระบบเพื่อรองรับความต้องการของผู้ใช้งานเพิ่มเติม ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079594570)",
+    "budget": 18500000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BNALAPr2RciUfdxaDrJAfD9IuJYsl8kbuSwqd%252B2Sk6tqrbX%252FTjOLpG",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079594570/TOR-69079594570.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 279,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบผู้ช่วยด้านคดีรัฐธรรมนูญอัจฉริยะ (Intelligent Case Analysis and Assistant) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089152509)",
+    "budget": 7000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252F5tBoq4qsTUpwNlYI02CDQH2K1WHDatKbBOEE66HpRDOco9KBwVeUD",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089152509/TOR-69089152509.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 280,
+    "project_name": "ประกวดราคาจ้างโครงการเพิ่มประสิทธิภาพระบบดิจิทัลแหล่งบริการจัดหางานอิสระ เพื่อพัฒนาระบบแพลตฟอร์ม คนทำงานอิสระ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089307019)",
+    "budget": 853100,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19lUvilZ%252FYmrKT7BwudKTQNDSMvYR12sca7979sVKZeVyHz3aZWsdpg",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089307019/TOR-69089307019.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

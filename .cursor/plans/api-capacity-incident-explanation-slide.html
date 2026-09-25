@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>28 June incident summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    background: #fff;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .slide {
+    width: min(920px, 92vw);
+    padding: 48px 40px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 36px;
+    line-height: 1.25;
+  }
+  ol {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  li {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    padding-top: 2px;
+  }
+  .body {
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+  @media (max-width: 640px) {
+    li { grid-template-columns: 1fr; gap: 4px; }
+    .slide { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+  <main class="slide">
+    <h1>28 June incident summary</h1>
+    <ol>
+      <li>
+        <div class="label">Methodology</div>
+        <div class="body">API capacity is protected two ways: autoscaling with traffic, and pre-provisioning higher minimum servers when a large campaign is planned with us.</div>
+      </li>
+      <li>
+        <div class="label">What happened</div>
+        <div class="body">A client ran a surprise nationwide campaign — hundreds of thousands of registrations and coupon claims in a short window — without prior notice.</div>
+      </li>
+      <li>
+        <div class="label">Why it failed</div>
+        <div class="body">No pre-provisioning was in place. Usually that alone is fine — the system can still autoscale. In this case the surge volume exceeded our AWS maximum allocated server capacity, so scaling could not go beyond that hard limit until AWS raised it.</div>
+      </li>
+      <li>
+        <div class="label">What we did</div>
+        <div class="body">Urgently increased the AWS capacity ceiling, and optimized the coupon-claim path that was compute-heavy under extreme load.</div>
+      </li>
+      <li>
+        <div class="label">Why not again</div>
+        <div class="body">Maximum allocated capacity is now ~5× higher, and the claim path is optimized — a surprise surge of that scale should no longer require an emergency limit increase.</div>
+      </li>
+    </ol>
+  </main>
+</body>
+</html>

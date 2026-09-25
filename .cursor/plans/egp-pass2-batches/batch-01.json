@@ -1,0 +1,90 @@
+[
+  {
+    "id": 7,
+    "project_name": "ประกวดราคาจ้างพัฒนาโปรแกรม AI ผู้ช่วยอัจฉริยะด้านการสร้างเสริมสุขภาพของ สสส. ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059307875)",
+    "budget": 2640000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BQNtkKPXzZ8lXA16TDfJ5bqkhhR2%252BK4UnHL%252B7t5xrP2ouOF%252F5sG9sJ",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 10,
+    "project_name": "จ้างพัฒนาโปรแกรมระบบ Refill ยา จำนวน ๑ งาน ให้กับโรงพยาบาลมหาราชนครราชสีมา โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69069529625)",
+    "budget": 500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18xI2U58cxBogIdDfSoH%252BrqRsHAW6KXKKRtr4Cub3%252FEdBLTlfXLzl4c",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 11,
+    "project_name": "ซื้อสิทธิการใช้งานโปรแกรมพร้อมพัฒนาระบบ IT Service Management และ CMDB โดยวิธีคัดเลือก (เลขที่โครงการ : 69039082005)",
+    "budget": 88000000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252B8pB9o6Qy2%252FcoRAIJXq9pLBG7527mRy2RCPT6Qfj8TOpQB%252BHZozSAu",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 13,
+    "project_name": "จ้างบริการบำรุงรักษา ซ่อมแซม และปรับปรุงประสิทธิภาพซอฟต์แวร์และฮาร์ดแวร์ ระบบบริหารคลังพัสดุ แบบ Modern Warehouse (ระยะเวลา 2 ปี) เลขที่ กจพ2-ไอที-005-2569 โดยวิธีคัดเลือก (เลขที่โครงการ : 69079131433)",
+    "budget": 45543060,
+    "pass1": "Maybe",
+    "status_original": "รายงานขอซื้อขอจ้าง",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FhD43t1mkMVqmaqp0%252BLQLbYTV43%252B1DfaDiL4oNpbmPIw4mpPdr95Q%252F",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 30,
+    "project_name": "จ้างเหมาสร้างระบบการให้บริการทางการแพทย์และการฟื้นฟูสมรรถภาพเพื่อประเมินความเสี่ยงการหกล้มและโปรแกรมฟื้นฟูเฉพาะบุคคลสำหรับผู้สูงอายุ จำนวน 1 งาน โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69069306745)",
+    "budget": 2500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252BNWSfZ0G%252Fp5sKqE6lnOtLiz9GVM1hjBUf2virgXvVLXI4SZzfsYuJ%252F",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 35,
+    "project_name": "ประกวดราคาจ้างพัฒนาโปรแกรมเครื่องมือวางแผนทางการเงิน ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059257198)",
+    "budget": 1000000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252B1y6nUKeJGa%252BSQ1COVbxev27wCxkzz2BeMlSVQBaszUXFd5SZTkiLY",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 36,
+    "project_name": "ประกวดราคาจ้างเหมาปรับปรุงฐานข้อมูลแผนที่ภาษีและทะเบียนทรัพย์สินในระบบโปรแกรมแผนที่ภาษี ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049234655)",
+    "budget": 6500000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252B%252B%252FtZgwYlUBaXxQNL3KUch4P%252BrClSVbeZH0ko84bDyScKAnMTrCAwP",
+    "docs": null,
+    "has_docs": true,
+    "mode": "status_only"
+  },
+  {
+    "id": 39,
+    "project_name": "ซื้อครุภัณฑ์คอมพิวเตอร์ รายการโปรแกรมระบบจัดการตู้ KIOSK จำนวน ๑ โปรแกรม ของโรงพยาบาลมหาราชนครราชสีมา โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69069367051)",
+    "budget": 500000,
+    "pass1": "Maybe",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18TdPY5VcIt6ZTp985jQdTvMp8l6f7q1EzXApmK42JbAbfF3%252BG9IoJE",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  }
+]

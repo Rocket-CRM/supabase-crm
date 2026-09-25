@@ -1,0 +1,90 @@
+[
+  {
+    "id": 231,
+    "project_name": "ประกวดราคาจ้างจัดทำโครงการศึกษาเพื่อเพิ่มประสิทธิภาพระบบใบทะเบียน ใบอนุญาต และใบรับรองแบบอิเล็กทรอนิกส์ ภายใต้กฎหมายการกำกับดูแลของกรมวิชาการเกษตรและการแลกเปลี่ยนข้อมูลผ่านระบบ National Single Window NSW ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049391740)",
+    "budget": 27179491,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18NcXXBWoVqQSo74hT30dkd00aN5AaQYAefFKdAjUEEdqVIbDBfHJxs",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69049391740/TOR-69049391740.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 232,
+    "project_name": "จ้างพัฒนาระบบฐานข้อมูลเทคโนโลยีสารสนเทศทางกีฬามวยเพื่อส่งเสริมศักยภาพทางอาชีพด้วยเทคโนโลยีเพื่อพัฒนาวงการกีฬามวยของสำนักงานคณะกรรมการกีฬามวย ระยะสอง ประจำปีงบประมาณ พ.ศ. ๒๕๖๙ โดยวิธีคัดเลือก (เลขที่โครงการ : 69089044670)",
+    "budget": 1000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19FqS18C9mY7jghx25pwtMsXKYF0PQL0bNaDsR8O90TpWEBcF3zGNBC",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 234,
+    "project_name": "ประกวดราคาจ้างจัดจ้างพัฒนาระบบข้อมูลสารสนเทศเพื่อการจัดการด้านอาหารภายใต้แผนปฏิบัติการด้านการจัดการด้านอาหารของประเทศไทย ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049330998)",
+    "budget": 5987700,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX184U8XqPsT7zgGlEZ5S%252BC4VRuRrbhrYNI%252Fj4Ft3y59KOoBe9Nc2U93f",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69049330998/TOR-69049330998.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 235,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบสารสนเทศเพื่อรองรับการแต่งตั้งอาจารย์พิเศษ ระยะที่ ๓ (CU Adjunct phase ๓) จำนวน ๑ ระบบ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069188751)",
+    "budget": 2000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19hB7PRMIKvnpuRW1bWxZ7ScOrwwaqJCWJpfCecdSICFzc30iAQ66sU",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069188751/TOR-69069188751.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 236,
+    "project_name": "ประกวดราคาจ้างจ้างพัฒนาระบบ I-EA-T Real Estate Management ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089079087)",
+    "budget": 70000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252Bokkmb1k3vuMyZrE4jRNH9u16Z6pD21vXYeGjKpHx%252BaGD7Gp%252Fzvqq6",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089079087/TOR-69089079087.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 239,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบสารสนเทศเพื่อสนับสนุนการพิจารณาการรวมธุรกิจ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069339067)",
+    "budget": 2200000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FVs%252BWXN3xTdow0azFki1qRBtXmCZaEOj3YNgs%252BRdDg6aIYjED4UAAW",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069339067/TOR-69069339067.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 244,
+    "project_name": "จ้างพัฒนาปรับปรุงระบบบริหารจัดการองค์กร (Enterprise Resource Plan (ERP)) โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69089137407)",
+    "budget": 1865000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FnjKWtCUU%252BH7m35Pe97HFzL6rZvc2blz%252B4yNGAkmDpM2VOMWSqRAWZ",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 245,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบสารสนเทศกลาง (Web Portal) กรมอุทยานแห่งชาติ สัตว์ป่า และพันธุ์พืช (ครั้งที่ 2) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69059517571)",
+    "budget": 7656200,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FQZ16oup7u7RUGlJk%252BFUcLbrmbSodRoHHWBG6OgelU5TlhnarTkpQR",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69059517571/TOR-69059517571.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

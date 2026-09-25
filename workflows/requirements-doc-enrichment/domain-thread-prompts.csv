@@ -1,0 +1,607 @@
+"priority","priority_name","domain_label","requirements_path","shopify_reference_md","prompt"
+"1","Shopify reference MD cluster","Referral","requirements/Referral.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Referral.md
+
+Shopify reference MD (mandatory): Read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md — Part 1 (referrals on Shopify). Sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer. Reference MD wins over stale requirement text unless live code contradicts (then note in Known gaps).
+
+Fold the existing ""technical reference"" section into spine System/Rules; delete duplicate H1. Verify referral_program, claim, member_code, SMART attribution, campaign reward slots, embedded admin gating against loyalty-admin, rewarding-shopify, Supabase MCP.
+
+Docs only; CHANGELOG when done."
+"1","Shopify reference MD cluster","Display_Settings","requirements/Display_Settings.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Display_Settings.md
+
+Shopify reference MD (mandatory): Read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md — Part 2 (on-site content on Shopify). Sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer.
+
+Merge legacy ""System design"" / tables blocks into spine; map touchpoints (Hub, product points, landing, wishlist, banners) to Journeys and System. Verify loyalty-admin routes and shopify-extension-api / rewarding-shopify per reference MD.
+
+Docs only; CHANGELOG when done."
+"1","Shopify reference MD cluster","Shopify (hub)","requirements/Shopify.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Shopify.md
+
+Shopify reference MD (mandatory): Read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md — all parts for routing context; keep platform plumbing here, feature behaviour as hub → feature doc pointers only. Sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer.
+
+Convert SECTION: headings to ## / ### where feasible; trim feature-level prose moved to Referral, Display_Settings, Third_Party, Outbound. Top routing table: feature → doc › section.
+
+Docs only; CHANGELOG when done."
+"1","Shopify reference MD cluster","Third_Party_Integrations","requirements/Third_Party_Integrations.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Third_Party_Integrations.md
+
+Shopify reference MD (mandatory): Read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md — Part 3 (integrations). Sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer.
+
+Cover Judge.me, Gorgias, connect flows, merchant_credentials; fold legacy into spine. Verify edge fns and admin /integrations paths.
+
+Docs only; CHANGELOG when done."
+"1","Shopify reference MD cluster","Outbound_Integrations","requirements/Outbound_Integrations.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Outbound_Integrations.md
+
+Shopify reference MD (mandatory): Read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md — Part 3 (Klaviyo outbound, shared outbox). Sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer.
+
+Align chokepoint_event_outbox / crm-event-processors paths with live registry. Fold legacy into spine.
+
+Docs only; CHANGELOG when done."
+"1","Shopify reference MD cluster","Earn_Channel","requirements/Earn_Channel.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Earn_Channel.md
+
+Shopify reference MD (mandatory): Read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md — Part 1 (campaign:referral vs program gate) and Part 2 (earn surfaces on storefront). Sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer.
+
+Consolidate Earn_Channel / Earn_Channel_Canonical / FE guide pointers if split across files — one canonical spine in Earn_Channel.md; cross-ref siblings only.
+
+Docs only; CHANGELOG when done."
+"1","Shopify reference MD cluster","Platform_Plan_Feature_Registry","requirements/Platform_Plan_Feature_Registry.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Platform_Plan_Feature_Registry.md
+
+Shopify reference MD (mandatory): Read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md — embedded gating / entitlement keys (e.g. referral sections, tier earn UI). Sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer.
+
+Keep OpenAPI/registry detail in System; Concept stays plan/entitlement model without dump. Fold technical reference into spine.
+
+Docs only; CHANGELOG when done."
+"2","Wave 2 commerce / identity","Currency","requirements/Currency.md","optional","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Currency.md
+
+No Shopify reference MD unless documenting storefront earn UI — then read Part 2 of requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md for earn display only.
+
+File still has exec summary + TOC — full restructure to spine; remove duplicate structure. Verify chokepoint wallet, expiry, Inngest award path via registry + MCP.
+
+Docs only; CHANGELOG when done."
+"2","Wave 2 commerce / identity","Tier","requirements/Tier.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Tier.md
+
+Shopify reference MD: Part 2 (tier landing, hub, widget, per-tier earn/burn entitlements) — requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md; sync Downloads if newer.
+
+Spine exists but ~2k lines legacy below — fold accurate legacy into spine; drop only duplicate scaffolding (TOC, second Overview) and verified-obsolete prose. Verify tier evaluation, entry rewards, Shopify deltas.
+
+Docs only; CHANGELOG when done."
+"2","Wave 2 commerce / identity","Signup_Login","requirements/Signup_Login.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Signup_Login.md
+
+Shopify reference MD: Part 2 identity/gateway sections — requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md; sync Downloads if newer. Use ### Shopify under Journeys/System where storefront signup differs.
+
+Fold legacy; verify profile steps, OTP, LINE, Shopify member session cross-ref Authentication.md.
+
+Docs only; CHANGELOG when done."
+"2","Wave 2 commerce / identity","Authentication","requirements/Authentication.md","yes","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Authentication.md
+
+Shopify reference MD: Part 2 identity and member session on storefront — requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md; sync Downloads if newer.
+
+Document admin JWT vs member session vs API key; ### Shopify for issueMemberSession / proxy paths. Fold legacy into spine.
+
+Docs only; CHANGELOG when done."
+"2","Wave 2 commerce / identity","Purchase_Transaction","requirements/Purchase_Transaction.md","optional","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Purchase_Transaction.md
+
+No Shopify reference MD unless referral attribution on orders — then reference MD Part 1 § purchase settle only.
+
+Build spine from current Overview/Technical sections; verify dual ledger, earn triggers, marketplace claim. Docs only; CHANGELOG when done."
+"2","Wave 2 commerce / identity","Marketplace","requirements/Marketplace.md","optional","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Marketplace.md
+
+No Shopify reference MD (marketplace is Shopee/Lazada/TikTok). Absorb still-true bits from Ecommerce_Marketplace_Integration.md as Related only.
+
+Verify Inngest ingest, credentials, claim flows. Docs only; CHANGELOG when done."
+"3","Exemplars + engagement","Reward (consolidation pass)","requirements/Reward.md","optional","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Reward.md
+
+Batch 1 merge done — accuracy + strip any remaining legacy tail below Related. Verify campaign reward slots (referral/tier/lifecycle), Shopify discount types. Optional reference MD Part 1 campaign reward pattern only.
+
+Docs only; CHANGELOG when done."
+"3","Exemplars + engagement","Checkin (accuracy pass)","requirements/Checkin.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Checkin.md
+
+Exemplar doc — accuracy pass against registry + MCP; fill Known gaps if loyalty-user routes found. No structural rewrite unless drift found.
+
+Docs only; CHANGELOG if material fixes."
+"3","Exemplars + engagement","Mission","requirements/Mission.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Mission.md
+
+No spine today — restructure from Architecture/Overview; verify post-Confluent progress path (not Kafka). Docs only; CHANGELOG when done."
+"3","Exemplars + engagement","Forms","requirements/Forms.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Forms.md
+
+Verify field systems, form_submissions, profile linkage. Docs only; CHANGELOG when done."
+"3","Exemplars + engagement","Notification_Service","requirements/Notification_Service.md","optional","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Notification_Service.md
+
+Verify NotificationConsumer, flex templates, referral notification keys per reference MD Part 1 if applicable. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Feature_Spec","requirements/CS_Feature_Spec.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Feature_Spec.md
+
+Umbrella — keep routing to modular CS_*.md; spine summarizes module map; demote spec dump to folded System or delete duplicated module text now in CS_Conversations etc.
+
+Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Conversations","requirements/CS_Conversations.md","optional","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Conversations.md
+
+Merge technical reference tables into System; expand Rules/Journeys from live schema + loyalty-admin inbox. No Shopify reference MD.
+
+Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Knowledge_Base","requirements/CS_Knowledge_Base.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Knowledge_Base.md
+
+Merge technical reference into spine; verify embeddings pipeline. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Procedures","requirements/CS_Procedures.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Procedures.md
+
+Merge technical reference into spine; AOP modes and procedure_state. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Channels","requirements/CS_Channels.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Channels.md
+
+Merge technical reference; credentials, contact resolution. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_AI_System","requirements/CS_AI_System.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_AI_System.md
+
+Merge technical reference; distinguish deployed vs planned. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_AI_Pipeline","requirements/CS_AI_Pipeline.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_AI_Pipeline.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Unified_Inbox","requirements/CS_Unified_Inbox.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Unified_Inbox.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Actions","requirements/CS_Actions.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Actions.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Rules_Engine","requirements/CS_Rules_Engine.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Rules_Engine.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_SLA","requirements/CS_SLA.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_SLA.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Live_Assist","requirements/CS_Live_Assist.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Live_Assist.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Analytics","requirements/CS_Analytics.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Analytics.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Platform_Features","requirements/CS_Platform_Features.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Platform_Features.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Channel_Connectors","requirements/CS_Channel_Connectors.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Channel_Connectors.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Phone_Number_Purchasing","requirements/CS_Phone_Number_Purchasing.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Phone_Number_Purchasing.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"4","CS (one thread per module)","CS_Voice","requirements/CS_Voice.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CS_Voice.md
+
+Fold prepend + reference into single spine. Docs only; CHANGELOG when done."
+"5","Imports, ops, loyalty satellites","Customer_Import_System","requirements/Customer_Import_System.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Customer_Import_System.md
+
+Merge ~1.5k technical reference into System/Flows. Verify Inngest + crm-bulk-import. Docs only; CHANGELOG when done."
+"5","Imports, ops, loyalty satellites","Bulk_Import_Currency","requirements/Bulk_Import_Currency.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Bulk_Import_Currency.md
+
+Merge technical reference into spine. Docs only; CHANGELOG when done."
+"5","Imports, ops, loyalty satellites","Purchase_Import_System","requirements/Purchase_Import_System.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Purchase_Import_System.md
+
+Merge technical reference into spine. Docs only; CHANGELOG when done."
+"5","Imports, ops, loyalty satellites","Open_API","requirements/Open_API.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Open_API.md
+
+Spine exists; fold openapi bodies under System or keep appendix with clear single H1 — prefer folding. Verify gateway project + api_* RPCs. Docs only; CHANGELOG when done."
+"5","Imports, ops, loyalty satellites","Analytics","requirements/Analytics.md","no","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Analytics.md
+
+Verify analytics-query edge + BQ serving layer. Fold legacy. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Analytics","requirements/DOMAIN_FILE.md","optional","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/DOMAIN_FILE.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Activity_Based_Earning","requirements/Activity_Based_Earning.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Activity_Based_Earning.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Activity_Attribution","requirements/Activity_Attribution.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Activity_Attribution.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Admin_Panel","requirements/Admin_Panel.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Admin_Panel.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","AMP_Workflows","requirements/AMP_Workflows.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/AMP_Workflows.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Asset","requirements/Asset.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Asset.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Campaign_Activity_Grouping","requirements/Campaign_Activity_Grouping.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Campaign_Activity_Grouping.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Central_Outcome_Dispatcher","requirements/Central_Outcome_Dispatcher.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Central_Outcome_Dispatcher.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Consent","requirements/Consent.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Consent.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Custom_Webhooks","requirements/Custom_Webhooks.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Custom_Webhooks.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Event_Promotion","requirements/Event_Promotion.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Event_Promotion.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Funnel","requirements/Funnel.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Funnel.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","FuturePark","requirements/FuturePark.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/FuturePark.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Leaderboard","requirements/Leaderboard.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Leaderboard.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Member_Freeze","requirements/Member_Freeze.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Member_Freeze.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Order_Booking","requirements/Order_Booking.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Order_Booking.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Package","requirements/Package.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Package.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Persona_Entitlement","requirements/Persona_Entitlement.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Persona_Entitlement.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Receipt_Upload_Earning","requirements/Receipt_Upload_Earning.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Receipt_Upload_Earning.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Resource_Content","requirements/Resource_Content.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Resource_Content.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","RFM_Scoring","requirements/RFM_Scoring.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/RFM_Scoring.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Spin_Wheel","requirements/Spin_Wheel.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Spin_Wheel.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Store_Attribute_Classification","requirements/Store_Attribute_Classification.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Store_Attribute_Classification.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Store_Credit","requirements/Store_Credit.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Store_Credit.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Stored_Value_Cards","requirements/Stored_Value_Cards.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Stored_Value_Cards.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Syngenta_Events","requirements/Syngenta_Events.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Syngenta_Events.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Tag_and_Persona","requirements/Tag_and_Persona.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Tag_and_Persona.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Translation_System","requirements/Translation_System.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Translation_System.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","Action_Macro","requirements/Action_Macro.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/Action_Macro.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."
+"6","Remaining domains (generic prompt)","CRM_Event_Driven_Architecture","requirements/CRM_Event_Driven_Architecture.md","if applicable","Enrich requirements domain to full spine + verified truth.
+
+Attach and follow: workflows/requirements-doc-enrichment/REFERENCE.md
+
+Domain: requirements/CRM_Event_Driven_Architecture.md
+
+If this domain touches Shopify referrals, on-site loyalty content, or Shopify integrations (Judge.me, Klaviyo, Gorgias), read requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md (sync from /Users/rangwan/Downloads/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md if newer) and apply the matching reference MD part per REFERENCE § Shopify reference MD scope.
+
+Grep requirements/domains/_index.md for keywords. Fold any technical reference into spine. Docs only; CHANGELOG when done."

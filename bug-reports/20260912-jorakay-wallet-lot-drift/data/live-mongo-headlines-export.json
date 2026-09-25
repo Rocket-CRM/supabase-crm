@@ -1,0 +1,1071 @@
+[
+  {
+    "_id": {
+      "$oid": "65413f29d6b1732a1ec5d591"
+    },
+    "userId": "65413f29d6b1732a1ec5d591",
+    "pointBalance": 7945
+  },
+  {
+    "_id": {
+      "$oid": "65413f44d6b1732a1ec5eafd"
+    },
+    "userId": "65413f44d6b1732a1ec5eafd",
+    "pointBalance": 6555
+  },
+  {
+    "_id": {
+      "$oid": "65413f4ad6b1732a1ec5efdd"
+    },
+    "userId": "65413f4ad6b1732a1ec5efdd",
+    "pointBalance": 975
+  },
+  {
+    "_id": {
+      "$oid": "65413f4fd6b1732a1ec5f415"
+    },
+    "userId": "65413f4fd6b1732a1ec5f415",
+    "pointBalance": 41365
+  },
+  {
+    "_id": {
+      "$oid": "65413f51d6b1732a1ec5f601"
+    },
+    "userId": "65413f51d6b1732a1ec5f601",
+    "pointBalance": 3101
+  },
+  {
+    "_id": {
+      "$oid": "65413f54d6b1732a1ec5f909"
+    },
+    "userId": "65413f54d6b1732a1ec5f909",
+    "pointBalance": 42668
+  },
+  {
+    "_id": {
+      "$oid": "65413f57d6b1732a1ec5fbcd"
+    },
+    "userId": "65413f57d6b1732a1ec5fbcd",
+    "pointBalance": 8736
+  },
+  {
+    "_id": {
+      "$oid": "65413f58d6b1732a1ec5fbf9"
+    },
+    "userId": "65413f58d6b1732a1ec5fbf9",
+    "pointBalance": 2494
+  },
+  {
+    "_id": {
+      "$oid": "65413f5bd6b1732a1ec5fefd"
+    },
+    "userId": "65413f5bd6b1732a1ec5fefd",
+    "pointBalance": 2367
+  },
+  {
+    "_id": {
+      "$oid": "65413f65d6b1732a1ec60795"
+    },
+    "userId": "65413f65d6b1732a1ec60795",
+    "pointBalance": 3433
+  },
+  {
+    "_id": {
+      "$oid": "65413f67d6b1732a1ec608d1"
+    },
+    "userId": "65413f67d6b1732a1ec608d1",
+    "pointBalance": 1136
+  },
+  {
+    "_id": {
+      "$oid": "65413f68d6b1732a1ec60995"
+    },
+    "userId": "65413f68d6b1732a1ec60995",
+    "pointBalance": 383
+  },
+  {
+    "_id": {
+      "$oid": "65413f68d6b1732a1ec609a1"
+    },
+    "userId": "65413f68d6b1732a1ec609a1",
+    "pointBalance": 6081
+  },
+  {
+    "_id": {
+      "$oid": "65413f68d6b1732a1ec609b1"
+    },
+    "userId": "65413f68d6b1732a1ec609b1",
+    "pointBalance": 157434
+  },
+  {
+    "_id": {
+      "$oid": "65413f6bd6b1732a1ec60c81"
+    },
+    "userId": "65413f6bd6b1732a1ec60c81",
+    "pointBalance": 2674
+  },
+  {
+    "_id": {
+      "$oid": "65413f78d6b1732a1ec616f1"
+    },
+    "userId": "65413f78d6b1732a1ec616f1",
+    "pointBalance": 35313
+  },
+  {
+    "_id": {
+      "$oid": "65413f80d6b1732a1ec61d79"
+    },
+    "userId": "65413f80d6b1732a1ec61d79",
+    "pointBalance": 289
+  },
+  {
+    "_id": {
+      "$oid": "65413f86d6b1732a1ec621e5"
+    },
+    "userId": "65413f86d6b1732a1ec621e5",
+    "pointBalance": 1468
+  },
+  {
+    "_id": {
+      "$oid": "65413f89d6b1732a1ec6255d"
+    },
+    "userId": "65413f89d6b1732a1ec6255d",
+    "pointBalance": 12544
+  },
+  {
+    "_id": {
+      "$oid": "65413f8ad6b1732a1ec625e5"
+    },
+    "userId": "65413f8ad6b1732a1ec625e5",
+    "pointBalance": 4840
+  },
+  {
+    "_id": {
+      "$oid": "65413f8bd6b1732a1ec62910"
+    },
+    "userId": "65413f8bd6b1732a1ec62910",
+    "pointBalance": 66
+  },
+  {
+    "_id": {
+      "$oid": "65487e3f4dc5c2da5fdc9855"
+    },
+    "userId": "65487e3f4dc5c2da5fdc9855",
+    "pointBalance": 635
+  },
+  {
+    "_id": {
+      "$oid": "654885704dc5c2da5fdd2cd3"
+    },
+    "userId": "654885704dc5c2da5fdd2cd3",
+    "pointBalance": 166
+  },
+  {
+    "_id": {
+      "$oid": "654af99f3be528ce10ea0372"
+    },
+    "userId": "654af99f3be528ce10ea0372",
+    "pointBalance": 1824
+  },
+  {
+    "_id": {
+      "$oid": "654b14d13be528ce10f2fa31"
+    },
+    "userId": "654b14d13be528ce10f2fa31",
+    "pointBalance": 10135
+  },
+  {
+    "_id": {
+      "$oid": "654c675bbc8d51bf6ae05367"
+    },
+    "userId": "654c675bbc8d51bf6ae05367",
+    "pointBalance": 4119
+  },
+  {
+    "_id": {
+      "$oid": "654dce53110214afb09b3401"
+    },
+    "userId": "654dce53110214afb09b3401",
+    "pointBalance": 2782
+  },
+  {
+    "_id": {
+      "$oid": "65532a96a5707806f44a54d4"
+    },
+    "userId": "65532a96a5707806f44a54d4",
+    "pointBalance": 532
+  },
+  {
+    "_id": {
+      "$oid": "65532d4ba5707806f44c1983"
+    },
+    "userId": "65532d4ba5707806f44c1983",
+    "pointBalance": 32
+  },
+  {
+    "_id": {
+      "$oid": "65536c55375eb91adad56a57"
+    },
+    "userId": "65536c55375eb91adad56a57",
+    "pointBalance": 327
+  },
+  {
+    "_id": {
+      "$oid": "655426826178c8b865836a89"
+    },
+    "userId": "655426826178c8b865836a89",
+    "pointBalance": 3200
+  },
+  {
+    "_id": {
+      "$oid": "65544f2be53fa9ae2a404290"
+    },
+    "userId": "65544f2be53fa9ae2a404290",
+    "pointBalance": 7
+  },
+  {
+    "_id": {
+      "$oid": "65545654415a5d9aa75e39dc"
+    },
+    "userId": "65545654415a5d9aa75e39dc",
+    "pointBalance": 445
+  },
+  {
+    "_id": {
+      "$oid": "65547dae0b5cd6c7b1a56d44"
+    },
+    "userId": "65547dae0b5cd6c7b1a56d44",
+    "pointBalance": 5003
+  },
+  {
+    "_id": {
+      "$oid": "6554a5904673598ef1a8fc17"
+    },
+    "userId": "6554a5904673598ef1a8fc17",
+    "pointBalance": 524
+  },
+  {
+    "_id": {
+      "$oid": "6555a54238a9666a9c3c4203"
+    },
+    "userId": "6555a54238a9666a9c3c4203",
+    "pointBalance": 4202
+  },
+  {
+    "_id": {
+      "$oid": "6556c87483ce8659fd3f8d58"
+    },
+    "userId": "6556c87483ce8659fd3f8d58",
+    "pointBalance": 268
+  },
+  {
+    "_id": {
+      "$oid": "6556ee6383ce8659fd4b9a2f"
+    },
+    "userId": "6556ee6383ce8659fd4b9a2f",
+    "pointBalance": 1878
+  },
+  {
+    "_id": {
+      "$oid": "655dc0bf53039f6a991d9b9c"
+    },
+    "userId": "655dc0bf53039f6a991d9b9c",
+    "pointBalance": 4738
+  },
+  {
+    "_id": {
+      "$oid": "655f0bd2d16c226c47351b37"
+    },
+    "userId": "655f0bd2d16c226c47351b37",
+    "pointBalance": 778
+  },
+  {
+    "_id": {
+      "$oid": "6563f123ffd7efcec974f172"
+    },
+    "userId": "6563f123ffd7efcec974f172",
+    "pointBalance": 400
+  },
+  {
+    "_id": {
+      "$oid": "6566b316285bf1f861c02126"
+    },
+    "userId": "6566b316285bf1f861c02126",
+    "pointBalance": 28620
+  },
+  {
+    "_id": {
+      "$oid": "6566d5a7285bf1f861d3b2db"
+    },
+    "userId": "6566d5a7285bf1f861d3b2db",
+    "pointBalance": 850
+  },
+  {
+    "_id": {
+      "$oid": "6567f73b53be67b4b161520c"
+    },
+    "userId": "6567f73b53be67b4b161520c",
+    "pointBalance": 3262
+  },
+  {
+    "_id": {
+      "$oid": "65680575b188295efca43586"
+    },
+    "userId": "65680575b188295efca43586",
+    "pointBalance": 709
+  },
+  {
+    "_id": {
+      "$oid": "6568533da4927a9361aedf69"
+    },
+    "userId": "6568533da4927a9361aedf69",
+    "pointBalance": 1948
+  },
+  {
+    "_id": {
+      "$oid": "65695159ce749ea73f049894"
+    },
+    "userId": "65695159ce749ea73f049894",
+    "pointBalance": 1584
+  },
+  {
+    "_id": {
+      "$oid": "656b0189a7379d24b92816f4"
+    },
+    "userId": "656b0189a7379d24b92816f4",
+    "pointBalance": 1215
+  },
+  {
+    "_id": {
+      "$oid": "656b052ea7379d24b928fa54"
+    },
+    "userId": "656b052ea7379d24b928fa54",
+    "pointBalance": 3221
+  },
+  {
+    "_id": {
+      "$oid": "657c1bc9288d451e5bfaae8a"
+    },
+    "userId": "657c1bc9288d451e5bfaae8a",
+    "pointBalance": 6973
+  },
+  {
+    "_id": {
+      "$oid": "657ff668288d451e5b231ec7"
+    },
+    "userId": "657ff668288d451e5b231ec7",
+    "pointBalance": 3673
+  },
+  {
+    "_id": {
+      "$oid": "6583b8aaf8e9301fa214d75e"
+    },
+    "userId": "6583b8aaf8e9301fa214d75e",
+    "pointBalance": 2044
+  },
+  {
+    "_id": {
+      "$oid": "65ab53d9f597943cdd10266f"
+    },
+    "userId": "65ab53d9f597943cdd10266f",
+    "pointBalance": 2407
+  },
+  {
+    "_id": {
+      "$oid": "65b1be9912e71882a7271072"
+    },
+    "userId": "65b1be9912e71882a7271072",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c02512e71882a727eb8c"
+    },
+    "userId": "65b1c02512e71882a727eb8c",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c02912e71882a727ec85"
+    },
+    "userId": "65b1c02912e71882a727ec85",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c0c612e71882a72856c8"
+    },
+    "userId": "65b1c0c612e71882a72856c8",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c10712e71882a7288863"
+    },
+    "userId": "65b1c10712e71882a7288863",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c15b12e71882a728dda6"
+    },
+    "userId": "65b1c15b12e71882a728dda6",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c1fd12e71882a7296505"
+    },
+    "userId": "65b1c1fd12e71882a7296505",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c2c812e71882a72a4356"
+    },
+    "userId": "65b1c2c812e71882a72a4356",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65b1c32412e71882a72ae409"
+    },
+    "userId": "65b1c32412e71882a72ae409",
+    "pointBalance": 50
+  },
+  {
+    "_id": {
+      "$oid": "65cb5a027ff1cec9ff05ab00"
+    },
+    "userId": "65cb5a027ff1cec9ff05ab00",
+    "pointBalance": 38431
+  },
+  {
+    "_id": {
+      "$oid": "65d012eb7ff1cec9ffdbc8b0"
+    },
+    "userId": "65d012eb7ff1cec9ffdbc8b0",
+    "pointBalance": 9405
+  },
+  {
+    "_id": {
+      "$oid": "65e042bef594d02b1127f645"
+    },
+    "userId": "65e042bef594d02b1127f645",
+    "pointBalance": 5483
+  },
+  {
+    "_id": {
+      "$oid": "65e288ce2460cb673aa8532b"
+    },
+    "userId": "65e288ce2460cb673aa8532b",
+    "pointBalance": 8064
+  },
+  {
+    "_id": {
+      "$oid": "65e54b99d3d42fdf0cf61c93"
+    },
+    "userId": "65e54b99d3d42fdf0cf61c93",
+    "pointBalance": 3775
+  },
+  {
+    "_id": {
+      "$oid": "65e810a3a09d42f469aad503"
+    },
+    "userId": "65e810a3a09d42f469aad503",
+    "pointBalance": 8353
+  },
+  {
+    "_id": {
+      "$oid": "65e992956fdff6649db70844"
+    },
+    "userId": "65e992956fdff6649db70844",
+    "pointBalance": 3733
+  },
+  {
+    "_id": {
+      "$oid": "65ea71c4db4b00146286eee9"
+    },
+    "userId": "65ea71c4db4b00146286eee9",
+    "pointBalance": 9120
+  },
+  {
+    "_id": {
+      "$oid": "65f418434aaafb5d9c6567bc"
+    },
+    "userId": "65f418434aaafb5d9c6567bc",
+    "pointBalance": 1216
+  },
+  {
+    "_id": {
+      "$oid": "660bbc6eb8ce99920eecda4b"
+    },
+    "userId": "660bbc6eb8ce99920eecda4b",
+    "pointBalance": 15293
+  },
+  {
+    "_id": {
+      "$oid": "662790b4d3a4a27e432a02bf"
+    },
+    "userId": "662790b4d3a4a27e432a02bf",
+    "pointBalance": 12014
+  },
+  {
+    "_id": {
+      "$oid": "662a2cdb57324743e39d2330"
+    },
+    "userId": "662a2cdb57324743e39d2330",
+    "pointBalance": 6579
+  },
+  {
+    "_id": {
+      "$oid": "662b506678f244ead7feee7c"
+    },
+    "userId": "662b506678f244ead7feee7c",
+    "pointBalance": 6074
+  },
+  {
+    "_id": {
+      "$oid": "662df862ee82cdf5e3bb2d9e"
+    },
+    "userId": "662df862ee82cdf5e3bb2d9e",
+    "pointBalance": 9190
+  },
+  {
+    "_id": {
+      "$oid": "6655976829a6894914448584"
+    },
+    "userId": "6655976829a6894914448584",
+    "pointBalance": 1032
+  },
+  {
+    "_id": {
+      "$oid": "665839237cb088a4d63dea7f"
+    },
+    "userId": "665839237cb088a4d63dea7f",
+    "pointBalance": 1543
+  },
+  {
+    "_id": {
+      "$oid": "667ccc63d0a18ca2e8bbf91a"
+    },
+    "userId": "667ccc63d0a18ca2e8bbf91a",
+    "pointBalance": 3138
+  },
+  {
+    "_id": {
+      "$oid": "668cfd9c52d5e255f01ac520"
+    },
+    "userId": "668cfd9c52d5e255f01ac520",
+    "pointBalance": 7938
+  },
+  {
+    "_id": {
+      "$oid": "668d09de43dfd583f3c68b6c"
+    },
+    "userId": "668d09de43dfd583f3c68b6c",
+    "pointBalance": 12178
+  },
+  {
+    "_id": {
+      "$oid": "668f8106a94421ad6a72c699"
+    },
+    "userId": "668f8106a94421ad6a72c699",
+    "pointBalance": 3111
+  },
+  {
+    "_id": {
+      "$oid": "6691fe1b40a462c93790e9eb"
+    },
+    "userId": "6691fe1b40a462c93790e9eb",
+    "pointBalance": 4775
+  },
+  {
+    "_id": {
+      "$oid": "6694e1d330baa5401765db0a"
+    },
+    "userId": "6694e1d330baa5401765db0a",
+    "pointBalance": 79
+  },
+  {
+    "_id": {
+      "$oid": "66976add542efa4fb60e9039"
+    },
+    "userId": "66976add542efa4fb60e9039",
+    "pointBalance": 1494
+  },
+  {
+    "_id": {
+      "$oid": "669c9b25da59ebf0fbd0048b"
+    },
+    "userId": "669c9b25da59ebf0fbd0048b",
+    "pointBalance": 14541
+  },
+  {
+    "_id": {
+      "$oid": "669f3ec760ab0274d8e31ed4"
+    },
+    "userId": "669f3ec760ab0274d8e31ed4",
+    "pointBalance": 15647
+  },
+  {
+    "_id": {
+      "$oid": "66a719f56376f16e91adc8bc"
+    },
+    "userId": "66a719f56376f16e91adc8bc",
+    "pointBalance": 3190
+  },
+  {
+    "_id": {
+      "$oid": "66aa305cddfe1420692eff91"
+    },
+    "userId": "66aa305cddfe1420692eff91",
+    "pointBalance": 66533
+  },
+  {
+    "_id": {
+      "$oid": "66ac500e1cee7e255d491885"
+    },
+    "userId": "66ac500e1cee7e255d491885",
+    "pointBalance": 3657
+  },
+  {
+    "_id": {
+      "$oid": "66b4296299028b6d1f439f42"
+    },
+    "userId": "66b4296299028b6d1f439f42",
+    "pointBalance": 19143
+  },
+  {
+    "_id": {
+      "$oid": "66b82b009fd57c76f203deb0"
+    },
+    "userId": "66b82b009fd57c76f203deb0",
+    "pointBalance": 4373
+  },
+  {
+    "_id": {
+      "$oid": "66bee1cd1a75105cebc22890"
+    },
+    "userId": "66bee1cd1a75105cebc22890",
+    "pointBalance": 13866
+  },
+  {
+    "_id": {
+      "$oid": "66c2e14d7366c9ef91127a82"
+    },
+    "userId": "66c2e14d7366c9ef91127a82",
+    "pointBalance": 2120
+  },
+  {
+    "_id": {
+      "$oid": "66c81110b6ea3aa94e56e4ea"
+    },
+    "userId": "66c81110b6ea3aa94e56e4ea",
+    "pointBalance": 4630
+  },
+  {
+    "_id": {
+      "$oid": "66cfe07ec806008d7e3348d1"
+    },
+    "userId": "66cfe07ec806008d7e3348d1",
+    "pointBalance": 5441
+  },
+  {
+    "_id": {
+      "$oid": "66d669b0e1ab924c761d301b"
+    },
+    "userId": "66d669b0e1ab924c761d301b",
+    "pointBalance": 1495
+  },
+  {
+    "_id": {
+      "$oid": "66e3b213c3678f0895f04e7b"
+    },
+    "userId": "66e3b213c3678f0895f04e7b",
+    "pointBalance": 2629
+  },
+  {
+    "_id": {
+      "$oid": "66ee90d62e0828fb9cd311bc"
+    },
+    "userId": "66ee90d62e0828fb9cd311bc",
+    "pointBalance": 9943
+  },
+  {
+    "_id": {
+      "$oid": "66fd4bbfaff5db31b4185117"
+    },
+    "userId": "66fd4bbfaff5db31b4185117",
+    "pointBalance": 24164
+  },
+  {
+    "_id": {
+      "$oid": "66fe3ba60dc50ec6c8529257"
+    },
+    "userId": "66fe3ba60dc50ec6c8529257",
+    "pointBalance": 1778
+  },
+  {
+    "_id": {
+      "$oid": "67026fc7ecd4c2068ffcbe57"
+    },
+    "userId": "67026fc7ecd4c2068ffcbe57",
+    "pointBalance": 3057
+  },
+  {
+    "_id": {
+      "$oid": "670b6c2cd2a0ec55f4141dd6"
+    },
+    "userId": "670b6c2cd2a0ec55f4141dd6",
+    "pointBalance": 621
+  },
+  {
+    "_id": {
+      "$oid": "671660f9a61d7e6999c72b2a"
+    },
+    "userId": "671660f9a61d7e6999c72b2a",
+    "pointBalance": 18582
+  },
+  {
+    "_id": {
+      "$oid": "671ca9bc91c0eac90144ba37"
+    },
+    "userId": "671ca9bc91c0eac90144ba37",
+    "pointBalance": 6213
+  },
+  {
+    "_id": {
+      "$oid": "671f32f259c9218cf9166937"
+    },
+    "userId": "671f32f259c9218cf9166937",
+    "pointBalance": 3392
+  },
+  {
+    "_id": {
+      "$oid": "6731d7ddcdf216fb22f543ba"
+    },
+    "userId": "6731d7ddcdf216fb22f543ba",
+    "pointBalance": 795
+  },
+  {
+    "_id": {
+      "$oid": "674adaf9c6a1827801bb37ba"
+    },
+    "userId": "674adaf9c6a1827801bb37ba",
+    "pointBalance": 763
+  },
+  {
+    "_id": {
+      "$oid": "67510f45a33a4dc033969a91"
+    },
+    "userId": "67510f45a33a4dc033969a91",
+    "pointBalance": 87572
+  },
+  {
+    "_id": {
+      "$oid": "6774cdd4543dd36f206e8597"
+    },
+    "userId": "6774cdd4543dd36f206e8597",
+    "pointBalance": 2063
+  },
+  {
+    "_id": {
+      "$oid": "677dd6c88cb32551667d8b87"
+    },
+    "userId": "677dd6c88cb32551667d8b87",
+    "pointBalance": 4644
+  },
+  {
+    "_id": {
+      "$oid": "677f4e3d6478b7ccfc76b13a"
+    },
+    "userId": "677f4e3d6478b7ccfc76b13a",
+    "pointBalance": 456
+  },
+  {
+    "_id": {
+      "$oid": "6787827bb0d6038e49a36ed6"
+    },
+    "userId": "6787827bb0d6038e49a36ed6",
+    "pointBalance": 20234
+  },
+  {
+    "_id": {
+      "$oid": "679b5621738c06b72462eb29"
+    },
+    "userId": "679b5621738c06b72462eb29",
+    "pointBalance": 2449
+  },
+  {
+    "_id": {
+      "$oid": "67a1cdf3a3e44df46372046d"
+    },
+    "userId": "67a1cdf3a3e44df46372046d",
+    "pointBalance": 158
+  },
+  {
+    "_id": {
+      "$oid": "67a581dfd41bf7c429d14296"
+    },
+    "userId": "67a581dfd41bf7c429d14296",
+    "pointBalance": 18978
+  },
+  {
+    "_id": {
+      "$oid": "67a842bf29f632d514add01f"
+    },
+    "userId": "67a842bf29f632d514add01f",
+    "pointBalance": 3000
+  },
+  {
+    "_id": {
+      "$oid": "67b549f6fb42c672d834fbc5"
+    },
+    "userId": "67b549f6fb42c672d834fbc5",
+    "pointBalance": 2244
+  },
+  {
+    "_id": {
+      "$oid": "67c55c9505e9d1d86e1ad419"
+    },
+    "userId": "67c55c9505e9d1d86e1ad419",
+    "pointBalance": 324
+  },
+  {
+    "_id": {
+      "$oid": "67c917a2c336839338cc12a8"
+    },
+    "userId": "67c917a2c336839338cc12a8",
+    "pointBalance": 6010
+  },
+  {
+    "_id": {
+      "$oid": "67cd2a13865b399021ce9895"
+    },
+    "userId": "67cd2a13865b399021ce9895",
+    "pointBalance": 7226
+  },
+  {
+    "_id": {
+      "$oid": "67cea723cabb8eb04372b3f0"
+    },
+    "userId": "67cea723cabb8eb04372b3f0",
+    "pointBalance": 137
+  },
+  {
+    "_id": {
+      "$oid": "67d156965cc4f811778f0732"
+    },
+    "userId": "67d156965cc4f811778f0732",
+    "pointBalance": 19473
+  },
+  {
+    "_id": {
+      "$oid": "67dbac23b90f211f7353d9ad"
+    },
+    "userId": "67dbac23b90f211f7353d9ad",
+    "pointBalance": 641
+  },
+  {
+    "_id": {
+      "$oid": "67dcfddf78a2fd161ddcde00"
+    },
+    "userId": "67dcfddf78a2fd161ddcde00",
+    "pointBalance": 1539
+  },
+  {
+    "_id": {
+      "$oid": "67ee3ff130ef9ae2d669cb58"
+    },
+    "userId": "67ee3ff130ef9ae2d669cb58",
+    "pointBalance": 60
+  },
+  {
+    "_id": {
+      "$oid": "67f221e748b413a962c0baa1"
+    },
+    "userId": "67f221e748b413a962c0baa1",
+    "pointBalance": 4169
+  },
+  {
+    "_id": {
+      "$oid": "67f7af73010f8f84df859ca7"
+    },
+    "userId": "67f7af73010f8f84df859ca7",
+    "pointBalance": 7462
+  },
+  {
+    "_id": {
+      "$oid": "6805c2ca234f173997c1367c"
+    },
+    "userId": "6805c2ca234f173997c1367c",
+    "pointBalance": 10674
+  },
+  {
+    "_id": {
+      "$oid": "6806003a5f7ddb1be79a08ab"
+    },
+    "userId": "6806003a5f7ddb1be79a08ab",
+    "pointBalance": 562
+  },
+  {
+    "_id": {
+      "$oid": "6811e84c6fc1032760808710"
+    },
+    "userId": "6811e84c6fc1032760808710",
+    "pointBalance": 9259
+  },
+  {
+    "_id": {
+      "$oid": "681421cab1e202f9103ec1a0"
+    },
+    "userId": "681421cab1e202f9103ec1a0",
+    "pointBalance": 31653
+  },
+  {
+    "_id": {
+      "$oid": "68303e00d4294a954e1f5d42"
+    },
+    "userId": "68303e00d4294a954e1f5d42",
+    "pointBalance": 15474
+  },
+  {
+    "_id": {
+      "$oid": "683ae0e6a7a1f5cb4b9b3e4d"
+    },
+    "userId": "683ae0e6a7a1f5cb4b9b3e4d",
+    "pointBalance": 500
+  },
+  {
+    "_id": {
+      "$oid": "683c0a2382116f7196e91782"
+    },
+    "userId": "683c0a2382116f7196e91782",
+    "pointBalance": 13117
+  },
+  {
+    "_id": {
+      "$oid": "683da331ffc927fc29b8510d"
+    },
+    "userId": "683da331ffc927fc29b8510d",
+    "pointBalance": 2402
+  },
+  {
+    "_id": {
+      "$oid": "6893026c544880a06e454431"
+    },
+    "userId": "6893026c544880a06e454431",
+    "pointBalance": 4799
+  },
+  {
+    "_id": {
+      "$oid": "6899fb7578eaa295468ddc49"
+    },
+    "userId": "6899fb7578eaa295468ddc49",
+    "pointBalance": 8116
+  },
+  {
+    "_id": {
+      "$oid": "68a82a6c87848cbc6c651792"
+    },
+    "userId": "68a82a6c87848cbc6c651792",
+    "pointBalance": 6330
+  },
+  {
+    "_id": {
+      "$oid": "68dbfe9263e4b4136140fa46"
+    },
+    "userId": "68dbfe9263e4b4136140fa46",
+    "pointBalance": 4987
+  },
+  {
+    "_id": {
+      "$oid": "68ddf023234c171c8f55fa45"
+    },
+    "userId": "68ddf023234c171c8f55fa45",
+    "pointBalance": 288
+  },
+  {
+    "_id": {
+      "$oid": "69990eb58fed8f405589ea22"
+    },
+    "userId": "69990eb58fed8f405589ea22",
+    "pointBalance": 3890
+  },
+  {
+    "_id": {
+      "$oid": "699efc2f2ec2d76e1eae0dd6"
+    },
+    "userId": "699efc2f2ec2d76e1eae0dd6",
+    "pointBalance": 36104
+  },
+  {
+    "_id": {
+      "$oid": "69a141e528fa02e24cb7f910"
+    },
+    "userId": "69a141e528fa02e24cb7f910",
+    "pointBalance": 1594
+  },
+  {
+    "_id": {
+      "$oid": "69d8b96e141e0efff212f3a3"
+    },
+    "userId": "69d8b96e141e0efff212f3a3",
+    "pointBalance": 664
+  },
+  {
+    "_id": {
+      "$oid": "69e5ea9143c778fca7e327a5"
+    },
+    "userId": "69e5ea9143c778fca7e327a5",
+    "pointBalance": 7725
+  },
+  {
+    "_id": {
+      "$oid": "69f580122c7cc9555b88fbef"
+    },
+    "userId": "69f580122c7cc9555b88fbef",
+    "pointBalance": 4766
+  },
+  {
+    "_id": {
+      "$oid": "6a151548654c118a1ed3b445"
+    },
+    "userId": "6a151548654c118a1ed3b445",
+    "pointBalance": 204
+  },
+  {
+    "_id": {
+      "$oid": "6a44b8fbf1e35578153d6b0e"
+    },
+    "userId": "6a44b8fbf1e35578153d6b0e",
+    "pointBalance": 1992
+  },
+  {
+    "_id": {
+      "$oid": "6a4869e18a5ea7b763b65992"
+    },
+    "userId": "6a4869e18a5ea7b763b65992",
+    "pointBalance": 6110
+  },
+  {
+    "_id": {
+      "$oid": "6a4ba2e4e7aba5deb5eaea47"
+    },
+    "userId": "6a4ba2e4e7aba5deb5eaea47",
+    "pointBalance": 113
+  },
+  {
+    "_id": {
+      "$oid": "6a4dd4dbe7aba5deb5edde98"
+    },
+    "userId": "6a4dd4dbe7aba5deb5edde98",
+    "pointBalance": 1979
+  },
+  {
+    "userId": "6569add96be01478736755f5",
+    "pointBalance": 988,
+    "_note": "exception: no users doc; pointBalance from prior live pull + matches wallet_ledger headline 988"
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "id": 50,
+    "project_name": "จ้างเหมาบริการพัฒนาและปรับปรุงระบบสารสนเทศบุคลากรขององค์การบริหารส่วนจังหวัดเชียงใหม่ โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69079357496)",
+    "budget": 500000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18cgrd8INiS6J41lTMd69wjdRIm8f6BkFEYjTBlSRclXYA5adZ3zui7",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 51,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบบริหารจัดการทุน กทปส. ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079268300)",
+    "budget": 12000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18QSN9fRUemfDPiyZU6%252BL2R%252BYaJwo11lMk4CGi6kGiDJrOwmydhiS0B",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079268300/TOR-69079268300.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 56,
+    "project_name": "ประกวดราคาจ้างโครงการปรับปรุงและเพิ่มประสิทธิภาพระบบควบคุมการจัดเก็บภาษีและการขนส่งสำหรับสินค้าเอทานอล ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069041697)",
+    "budget": 30000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19l%252FzNugQK2Ynnch%252FXOH9p4YBK3QHK7arFzRbEOmd9J8e9vLEw3qyDt",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069041697/TOR-69069041697.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 57,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบวิเคราะห์ข้อมูลและปัญญาประดิษฐ์เพื่อยกระดับการป้องกันและปราบปรามการฟอกเงิน (Project AMLO AI-Enhanced Analytics) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69019529847)",
+    "budget": 25997700,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19%252Bp09VyC4%252B9LcxxuZjTll18n2uF4roTV%252Fw19x3XTbEjqhdUrdCT9Nn",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69019529847/TOR-69019529847.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 61,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบสารสนเทศเพื่อบริหารจัดการข้อมูลและคืนทรัพย์สินแก่ผู้เสียหายจากอาชญากรรมทางเทคโนโลยีของสำนักงานป้องกันและปราบปราม การฟอกเงิน (AMLO Cybercrime Management Platform) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69019550258)",
+    "budget": 80957300,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18p%252FrO0KXG6tOYWcc5n8nD7%252Bov2FSRa5%252FN6Or%252BtdcqCCgTNCGQYIRal",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69019550258/TOR-69019550258.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 63,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบศูนย์กลางข้อมูลสารสนเทศดิจิทัลด้านคุณธรรม ในปีงบประมาณ 2569 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069427929)",
+    "budget": 14572500,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FAOi2tANlhOf6N7OJIhYc5DK1FRORlzoHF3ajqb52iyKsZSH%252BnF6ni",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069427929/TOR-69069427929.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 64,
+    "project_name": "จ้างปรับเปลี่ยนระบบทะเบียนและประเมินผล เพื่อประสิทธิภาพความปลอดภัย ของข้อมูล และรองรับการศึกษาตามช่วงวัย (Lifelong Learning) โดยวิธีเฉพาะเจาะจง (เลขที่โครงการ : 69069370437)",
+    "budget": 2800000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18v0dpZLHG9%252Bkkl46BSF23lTaaejdzcoTd%252Bzyhx0sfLHB8zPOMABmOg",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 68,
+    "project_name": "จ้างออกแบบและพัฒนาระบบสาธิต ที่แสดงการใช้งาน Document Wallet ในรูปแบบของ Verifiable Credential (VC) และ Verifiable Presentation (VP) รหัสโครงการ ๔๖๙๐๒๒ โดยวิธีคัดเลือก (เลขที่โครงการ : 69049459556)",
+    "budget": 3560000,
+    "pass1": "Yes",
+    "status_original": "จัดทำสัญญา/บริหารสัญญา",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19Orbd%252FrJLR52UOKd1e0KBirnOSC2Jz9Uv39Kx6YZb2pNCeoHpl21hm",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  }
+]

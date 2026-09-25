@@ -1,0 +1,69 @@
+tel,fullname,wallet_before,wallet_reduction,wallet_after,fix_expired_lots_only,fix_lot_fifo_only,what_to_do
++66835080949,ดรุณี สุธาอรรถ,125985,70720,55265,0,0,Remove expired points from wallet only
++66816563883,เจียม ฉันทวิลาศวงศ์,40442,16206,24236,0,0,Remove expired points from wallet only
++66804401795,เตือนใจ เหลาคำ,10698,8147,2551,8147,0,Close expired lots + remove 8147 pts from wallet
++66826966196,ชวภณ อรรถธนวาณิช,28395,4384,24011,9168,0,Close expired lots + remove 4384 pts from wallet
++66994658809,วรรณา น้ำเพชร,5754,3866,1888,0,0,Remove expired points from wallet only
++66866545042,นางวิลาวัลย์   คำเหล๋ก,6189,3766,2423,4021,0,Close expired lots + remove 3766 pts from wallet
++66885476842,ณัฐทวี สมพิศ,79291,3272,76019,9809,0,Close expired lots + remove 3272 pts from wallet
++66816262092,อนุชา ธานี,8190,3067,5123,6565,0,Close expired lots + remove 3067 pts from wallet
++66815448599,นภาภรณ์ ตณวร,28779,2536,26243,15080,166,Fix lots + remove 2536 pts from wallet
++66828371561,มงคลชัย ดวงแสงทอง,16884,2532,14352,45493,0,Close expired lots + remove 2532 pts from wallet
++66814484737,ณิชชา ทัพพอาภา,45733,2520,43213,11549,0,Close expired lots + remove 2520 pts from wallet
++66991100003,ศุภมิตร วงศ์เหลืองบุญ,16878,2481,14397,0,0,Remove expired points from wallet only
++66962254926,กรทอง พ่วงสวัสดิ์,1864,1864,0,0,0,Remove expired points from wallet only
++66635216881,ชลิดา อยู่เย็น,7350,1695,5655,5164,0,Close expired lots + remove 1695 pts from wallet
++66983514594,อุดมพล พานทอง,3514,1602,1912,1602,0,Close expired lots + remove 1602 pts from wallet
++66928282900,ศิริพร คุ้ยจุ่น,1563,1563,0,1563,0,Close expired lots + remove 1563 pts from wallet
++66628617805,นาย.มานิตย์ ทนันชัย,5205,1221,3984,4254,0,Close expired lots + remove 1221 pts from wallet
++66897209775,Danai กะบะซิ่ง,3769,1144,2625,2956,0,Close expired lots + remove 1144 pts from wallet
++66931538119,ปรียาภรณ์ แผ่นสุวรรณ์,10442,1027,9415,0,0,Remove expired points from wallet only
++66898994347,สายสุนีย์  ศรีชาติ,6295,1022,5273,8276,0,Close expired lots + remove 1022 pts from wallet
++66817623353,อัศนันต์ ศิริพงศ์วัฒนา,10883,982,9901,6000,982,Fix lots + remove 982 pts from wallet
++66908003966,ธรรมรัตน์ ตุ้มโท,898,810,88,0,0,Remove expired points from wallet only
++66928955918,อัษฎาวุธ  พิยะกูล,5040,780,4260,3311,0,Close expired lots + remove 780 pts from wallet
++66618740060,วงศ์  ลุงหย่า,3503,704,2799,1202,1035,Fix lots + remove 704 pts from wallet
++66898881673,ธิดารัตน์ พยับบรรณางกูร,8559,675,7884,540,0,Close expired lots + remove 675 pts from wallet
++66940235921,กุ๊กกิ๊ก🐷,3883,674,3209,3751,0,Close expired lots + remove 674 pts from wallet
++66894628895,ฮายาตี ละมะโต,15903,624,15279,6989,141,Fix lots + remove 624 pts from wallet
++66890635724,ปรียาพร แผนคู้,4953,582,4371,0,0,Remove expired points from wallet only
++66897519366,พัชรินทร์ ธรรมประเสริฐ,4327,550,3777,6324,0,Close expired lots + remove 550 pts from wallet
++66825925445,วรพรต พึ่งเมือง,4374,506,3868,0,0,Remove expired points from wallet only
++66989506309,ศศิวิมล ฉิมเพชร,26708,504,26204,0,0,Remove expired points from wallet only
++66944788066,สกุลรัตน์ มหัธนันท์,1572,477,1095,887,0,Close expired lots + remove 477 pts from wallet
++66917291435,นิตยา ผ่องใส,4946,451,4495,3074,0,Close expired lots + remove 451 pts from wallet
++66918324650,ธีรวรรณ บุญคำ,3085,398,2687,996,0,Close expired lots + remove 398 pts from wallet
++66807339899,Oak Thanawat,979,384,595,2539,0,Close expired lots + remove 384 pts from wallet
++66819048848,Pitcha🌻,45883,357,45526,6984,0,Close expired lots + remove 357 pts from wallet
++66931617764,เกวลิน สุทธมาต,13940,281,13659,0,0,Remove expired points from wallet only
++66829144272,รัชฎาภรณ์ ทวีโคตร,3263,260,3003,337,0,Close expired lots + remove 260 pts from wallet
++66876522578,จำรัส ที่อุปมา,6737,248,6489,248,0,Close expired lots + remove 248 pts from wallet
++66933262600,สมชาย จอกโคกสูง,808,220,588,1170,0,Close expired lots + remove 220 pts from wallet
++66802579821,สรินยา ฝั่งไธสง,4091,210,3881,0,0,Remove expired points from wallet only
++66901991656,อรรถพล เมฆาพร,1394,205,1189,1771,0,Close expired lots + remove 205 pts from wallet
++66621094155,เมธาวี ดวงเพชร,666,200,466,1272,0,Close expired lots + remove 200 pts from wallet
++66855426654,โสรยา ประสพสุข,3526,197,3329,753,0,Close expired lots + remove 197 pts from wallet
++66813685049,กะละห์ปูกระเบื้อง🤍,3053,181,2872,3464,0,Close expired lots + remove 181 pts from wallet
++66933893317,มนัส พระสว่าง,1600,159,1441,2558,0,Close expired lots + remove 159 pts from wallet
++66937398686,สุมาลี ขวัญศรี,4999,140,4859,0,469,Fix lots + remove 140 pts from wallet
++66949070716,ตอเต่า ตาหวาน,6294,136,6158,0,0,Remove expired points from wallet only
++66910508716,รวิวรรณ จันทโคตร,713,135,578,3558,0,Close expired lots + remove 135 pts from wallet
++66610720396,ศรัญญา ศรีสะอาด,2893,124,2769,4261,18,Fix lots + remove 124 pts from wallet
++66829913885,สลักจิตต์ เสียงเสนาะ,1880,119,1761,1372,0,Close expired lots + remove 119 pts from wallet
++66632091337,ธนากร อุตโรกุล,572,118,454,210,0,Close expired lots + remove 118 pts from wallet
++66648916582,ชนัญญา จันสอน,5567,118,5449,0,0,Remove expired points from wallet only
++66989141926,วิทวัส ทวิสุวรรณ,301,110,191,609,0,Close expired lots + remove 110 pts from wallet
++66878322002,ปุ๊กลุ๊ค,685,100,585,3114,0,Close expired lots + remove 100 pts from wallet
++66833742420,กัญญารัตน์ ยงคง,3090,89,3001,0,0,Remove expired points from wallet only
++66612704829,ดวงพร คุณกุล,3129,81,3048,907,0,Close expired lots + remove 81 pts from wallet
++66642825674,ภัทร​พล วังคะฮาด,1035,81,954,1176,0,Close expired lots + remove 81 pts from wallet
++66640546518,เอกพงษ์ ชมพูพื้น,3086,77,3009,969,191,Fix lots + remove 77 pts from wallet
++66812949082,อนุรักษ์ กล่อมสุวรรณ์,3672,75,3597,467,16,Fix lots + remove 75 pts from wallet
++66895563811,นภัสสร กัลยา,75,75,0,75,0,Close expired lots + remove 75 pts from wallet
++66984901938,สุทธิชัย  แก้วคำ,693,64,629,1623,103,Fix lots + remove 64 pts from wallet
++66815891429,นันทวัน ท่าหาด,307,63,244,0,0,Remove expired points from wallet only
++66929594282,ชาญชัย มงคลฤทธา,62,62,0,62,0,Close expired lots + remove 62 pts from wallet
++66629538217,พงศ์เพชร เพชรรัตน์,157,54,103,0,0,Remove expired points from wallet only
++66611928035,ปิยะวรรณ จั่นเพ็ชร,5003,47,4956,0,0,Remove expired points from wallet only
++66847097705,ปิยะพงษ์ ทองจันทร์,1211,23,1188,1700,0,Close expired lots + remove 23 pts from wallet
++66801726141,ไชยวัฒน์ สะตะ,139,8,131,339,0,Close expired lots + remove 8 pts from wallet

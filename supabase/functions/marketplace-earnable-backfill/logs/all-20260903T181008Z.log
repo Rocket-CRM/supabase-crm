@@ -1,0 +1,11 @@
+=== marketplace-earnable-backfill ALL start 2026-09-03T18:10:08Z ===
+since_date=2026-08-10
+--- platform=shopee start 2026-09-03T18:10:08Z ---
+curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to wkevmsedchftztoolkmi.supabase.co:443 
+--- platform=shopee end 2026-09-03T19:15:03Z ---
+--- platform=tiktok start 2026-09-03T19:15:03Z ---
+curl: (35) LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to wkevmsedchftztoolkmi.supabase.co:443 
+--- platform=tiktok end 2026-09-03T21:03:39Z ---
+--- platform=lazada start 2026-09-03T21:03:39Z ---
+--- platform=lazada end 2026-09-03T21:40:14Z ---
+=== marketplace-earnable-backfill ALL done 2026-09-03T21:40:14Z ===

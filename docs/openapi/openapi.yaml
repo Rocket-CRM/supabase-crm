@@ -1,0 +1,605 @@
+openapi: 3.1.0
+info:
+  title: Rocket Loyalty Open API
+  version: "1.0.0"
+  description: |
+    Platform Open API for all merchants. Authenticate with `x-api-key`.
+    Canonical human guide: `docs/Rocket Loyalty Open API Documentation.md`
+    Compact inventory: `docs/openapi/PLATFORM_API_REFERENCE.md`
+servers:
+  - url: https://open-api.rocket-loyalty.com/functions/v1
+    description: Canonical custom domain
+  - url: https://mabioklchbkanhjwgibj.supabase.co/functions/v1
+    description: Direct Supabase gateway (fallback)
+security:
+  - ApiKeyAuth: []
+paths:
+  /api-users:
+    post:
+      summary: Create or update user
+      operationId: createOrUpdateUser
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserWrite"
+      responses:
+        "200":
+          description: Upserted existing user
+        "201":
+          description: Created
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: User exists and upsert was false
+  /api-users/{identifier}:
+    get:
+      summary: Get user by user_id
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathIdentifier"
+        - $ref: "#/components/parameters/IncludeTier"
+      responses:
+        "200":
+          description: User payload including member_status, tier block, points_balance, and ticket_balances
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReadEnvelope"
+        "404":
+          description: Not found
+    patch:
+      summary: Update user by user_id
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathIdentifier"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserWrite"
+      responses:
+        "200":
+          description: Updated
+  /api-users/by-external-id/{value}:
+    get:
+      summary: Get user by external_user_id
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+        - $ref: "#/components/parameters/IncludeTier"
+      responses:
+        "200":
+          description: User payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReadEnvelope"
+    patch:
+      summary: Update user by external_user_id
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Updated
+  /api-users/by-email/{value}:
+    get:
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+        - $ref: "#/components/parameters/IncludeTier"
+      responses:
+        "200":
+          description: User payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReadEnvelope"
+    patch:
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Updated
+  /api-users/by-tel/{value}:
+    get:
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+        - $ref: "#/components/parameters/IncludeTier"
+      responses:
+        "200":
+          description: User payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReadEnvelope"
+    patch:
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Updated
+  /api-users/by-line-id/{value}:
+    get:
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+        - $ref: "#/components/parameters/IncludeTier"
+      responses:
+        "200":
+          description: User payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserReadEnvelope"
+    patch:
+      tags: [Users]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Updated
+  /api-assets:
+    post:
+      summary: Create or update asset
+      tags: [Assets]
+      responses:
+        "200":
+          description: Updated
+        "201":
+          description: Created
+  /api-assets/{identifier}:
+    get:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathIdentifier"
+      responses:
+        "200":
+          description: Asset
+    patch:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathIdentifier"
+      responses:
+        "200":
+          description: Updated
+  /api-assets/by-external-id/{value}:
+    get:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Asset
+    patch:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Updated
+  /api-assets/by-asset-code/{value}:
+    get:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Asset
+    patch:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Updated
+  /api-assets/by-serial-number/{value}:
+    get:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Asset
+    patch:
+      tags: [Assets]
+      parameters:
+        - $ref: "#/components/parameters/PathValue"
+      responses:
+        "200":
+          description: Updated
+  /api-purchases:
+    post:
+      summary: Create purchase
+      tags: [Purchases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseWrite"
+      responses:
+        "200":
+          description: Created
+        "201":
+          description: Created
+  /api-purchases/{transaction_number}:
+    get:
+      tags: [Purchases]
+      parameters:
+        - name: transaction_number
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Purchase
+    patch:
+      tags: [Purchases]
+      parameters:
+        - name: transaction_number
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated
+  /api-redemptions:
+    post:
+      summary: Redeem reward with points
+      tags: [Redemptions]
+      responses:
+        "200":
+          description: Redeemed
+  /api-redemptions/{redemption_code}:
+    get:
+      tags: [Redemptions]
+      parameters:
+        - name: redemption_code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Redemption
+  /api-redemptions/{redemption_code}/cancel:
+    post:
+      tags: [Redemptions]
+      parameters:
+        - name: redemption_code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cancelled
+  /api-redemptions/{redemption_code}/mark-used:
+    post:
+      tags: [Redemptions]
+      parameters:
+        - name: redemption_code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Marked used
+  /api-wallet/transactions:
+    post:
+      summary: Post points or ticket earn or burn ledger delta
+      operationId: postWalletTransaction
+      tags: [Wallet]
+      description: |
+        Ledger delta only (no absolute balance SET). `currency` defaults to points.
+        Ticket posts require `ticket_type_id` or `ticket_code`. Credit ticket types are rejected.
+        Idempotent on `dedup_key` per merchant. Balance read remains on GET /api-users.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletPost"
+      responses:
+        "201":
+          description: New ledger row
+        "200":
+          description: Idempotent replay (same key + payload)
+        "400":
+          description: Validation or insufficient balance
+        "404":
+          description: User not found
+        "409":
+          description: Same dedup_key with different payload
+    get:
+      summary: List wallet ledger history
+      operationId: getWalletTransactions
+      tags: [Wallet]
+      parameters:
+        - name: user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: external_user_id
+          in: query
+          schema:
+            type: string
+        - name: tel
+          in: query
+          schema:
+            type: string
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: line_id
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: transaction_type
+          in: query
+          schema:
+            type: string
+            enum: [earn, burn]
+        - name: currency
+          in: query
+          schema:
+            type: string
+            enum: [points, ticket]
+            default: points
+        - name: ticket_type_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: ticket_code
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: History page
+        "404":
+          description: User not found
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+  parameters:
+    PathIdentifier:
+      name: identifier
+      in: path
+      required: true
+      schema:
+        type: string
+    PathValue:
+      name: value
+      in: path
+      required: true
+      schema:
+        type: string
+    IncludeTier:
+      name: include_tier
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: true
+      description: |
+        When false, omits member_status and tier from GET /api-users responses.
+        Alternative: include query with comma-separated values; tier must be listed.
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key
+  schemas:
+    UserTierThreshold:
+      type: object
+      properties:
+        metric:
+          type: string
+          enum: [points, sales, orders, ticket]
+        amount:
+          type: number
+    UserTierProgress:
+      type: object
+      properties:
+        metric:
+          type: string
+        current_amount:
+          type: number
+        percent:
+          type: number
+        next_tier_id:
+          type: string
+          format: uuid
+        next_tier_name:
+          type: string
+        next_tier_threshold_amount:
+          type: number
+    UserTier:
+      type: object
+      nullable: true
+      properties:
+        tier_id:
+          type: string
+          format: uuid
+        tier_code:
+          type: string
+          format: uuid
+          description: Canonical tier identifier (UUID)
+        tier_name:
+          type: string
+        effective_at:
+          type: string
+          format: date-time
+        current_tier_threshold:
+          $ref: "#/components/schemas/UserTierThreshold"
+        progress:
+          $ref: "#/components/schemas/UserTierProgress"
+    UserRead:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+        tel:
+          type: string
+        line_id:
+          type: string
+        user_stage:
+          type: string
+        member_status:
+          type: string
+          enum: [active, inactive, suspended]
+        tier_id:
+          type: string
+          format: uuid
+        tier:
+          $ref: "#/components/schemas/UserTier"
+        points_balance:
+          type: number
+        ticket_balances:
+          type: array
+          items:
+            type: object
+    UserReadEnvelope:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/UserRead"
+        meta:
+          type: object
+          properties:
+            request_id:
+              type: string
+            response_time_ms:
+              type: integer
+    UserWrite:
+      type: object
+      properties:
+        tel:
+          type: string
+        external_user_id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        line_id:
+          type: string
+        upsert:
+          type: boolean
+    PurchaseWrite:
+      type: object
+      required: [final_amount]
+      properties:
+        final_amount:
+          type: number
+        transaction_number:
+          type: string
+        transaction_date:
+          type: string
+          description: ISO-8601 / timestamptz text; persisted on create
+        external_user_id:
+          type: string
+        user_id:
+          type: string
+          format: uuid
+        payment_method:
+          type: string
+        metadata:
+          type: object
+        items:
+          type: array
+          items:
+            type: object
+    WalletPost:
+      type: object
+      required: [transaction_type, amount, dedup_key]
+      properties:
+        transaction_type:
+          type: string
+          enum: [earn, burn]
+        amount:
+          type: integer
+          minimum: 1
+        dedup_key:
+          type: string
+          minLength: 1
+          maxLength: 200
+        currency:
+          type: string
+          enum: [points, ticket]
+          default: points
+        ticket_type_id:
+          type: string
+          format: uuid
+        ticket_code:
+          type: string
+        description:
+          type: string
+        metadata:
+          type: object
+          description: Partner metadata; keys beginning with _ are reserved
+        user_id:
+          type: string
+          format: uuid
+        external_user_id:
+          type: string
+        tel:
+          type: string
+        email:
+          type: string
+        line_id:
+          type: string
+tags:
+  - name: Users
+  - name: Assets
+  - name: Purchases
+  - name: Redemptions
+  - name: Wallet

@@ -1,0 +1,385 @@
+                            Rocket Innovation Company Limited
+
+
+
+
+                                   Eco grower data and engagement platform
+
+
+
+                                                 January 1st, 2025
+
+
+
+
+                                                                                     INITIALS
+                                                      PAGE 1
+20140822 SUPPLY AGREEMENT      < Eco grower data and engagement platform nd Rocket
+                                          Innovation Company Limited >
+                                                                                               <Insert ECM reference>
+    This Agreement     Agreement        Contract    for the provision of Eco grower data and engagement platform is
+    between
+
+    Syngenta Crop Protection Limited and Syngenta Seeds (Thailand) Limited, a corporation organized under the laws
+    of Thailand with registered office at 25th Floor, Tower A, CW Tower, 90 Ratchadapisek Road, Huai Khwang Sub-
+    District Huai Khwang District, Bangkok, Thailand. ("Syngenta", which term shall include its successors and
+    permitted assigns)
+
+    And
+
+    Rocket Innovation Company Limited, a corporation organized under the laws of Thailandwith offices at 5th Floor,
+    Mobicom 3 Building, 101 Soi Phrapinit, Naradhiwas Road, Sathorn, Bangkok 10120, Thailand ("Supplier", which
+    term shall include its successors and permitted assigns).
+
+    1.      Definitions and Interpretation
+            In this Agreement the following definitions apply:
+
+                         means acceptance by Syngenta of the Service and/or Products in accordance with the
+            Acceptance Procedure;
+
+                          shall mean, with respect to a Party to this Agreement, another legal entity controlling, con-
+            trolled by or under ultimate common control with such Party. Control shall mean, in this context, that the
+            controlling entity has the power, directly or indirectly by means of voting power, contract or otherwise, to
+            govern the operating and financial policies of the controlled entity;
+
+                         shall mean this supply agreement including any and all exhibits and any and all the
+            concluded under this supply agreement;
+
+                                      shall mean the provision by Supplier of staff / employees / personnel resources
+
+
+                       means the Fees and Expenses;
+
+                                         shall have the meaning assigned to it in Section 8 and Exhibit C;
+
+                             shall have the meaning assigned to it in Section 6.2;
+
+                       means travel, accommodation and out of pocket expenses set out in more detail in the SOW
+            and any other expenses agreed in advance and in written by the Supplier and Syngenta;
+
+                    means the fees referred to in clause 4.1;
+
+                                           shall mean all intellectual property rights, including patents, utility models,
+            trade and service marks, trade or business names, domain names, rights in designs, copyrights, moral rights,
+
+
+
+                                                                                                                   INITIALS
+                                                               PAGE 2
+20140822 SUPPLY AGREEMENT               < Eco grower data and engagement platform nd Rocket
+                                                   Innovation Company Limited >
+            topography rights, database rights, trade secrets and rights of confidence, know-how, in all cases whether
+            or not registered or registrable in any country, for the full term of such rights including any extension to or
+            renewal of the terms of such rights, rights to apply for the same and all rights and forms of protection of a
+            similar nature or having equivalent or similar effect to any of these anywhere in the world;
+
+                                   shall have the meaning assigned to it in Section 14.1;
+
+                    and              shall mean Syngenta or/and Supplier;
+
+                         , with respect to an entity, the employees, agents, contractors, and representatives of such
+            entity and its subcontractors, whether or not Affiliates of such entity;
+
+                     s shall mean such Products as described in the relevant SOW, but in any case all materials and
+            products resulting from or in relation to the Products and/or Services to be provided or developed under
+            this Agreement, or otherwise provided by Supplier under this Agreement;
+
+                 -existing M           shall have the meaning assigned to it in Section 5.5;
+
+                      shall have the meaning assigned to it in Section 5.2;
+
+                            shall mean any of the Services as described in the relevant SOW;
+
+                    shall mean any statement of works between Supplier and Syngenta or a Syngenta Affiliate based
+            on the template set out in Exhibit A or any other format and which includes the terms and conditions of
+            this Agreement by reference;
+
+                    shall mean Value Added Tax, Goods and Services Tax or any other similar Sales Tax.
+
+                                    shall mean amounts which Syngenta is legally required to deduct from the payment
+            and pay directly to the government.
+
+    2.      Components of this Agreement
+            The following documents form integral parts of this Agreement:
+
+            This Agreement and its exhibits, including:
+
+                    Exhibit A:         Statement(s) of Work and / or Local Agreement(s)
+                    Exhibit B:         The Charge and Payment
+                    Exhibit C:         KPI
+                    Exhibit D:         Project Timeline
+                    Exhibit E:
+                    Exhibit F:         Non-Disclosure Agreement
+                    Exhibit G:         Data Protection
+
+            In the case of any discrepancies, the following order of precedence in descending order shall apply in the
+            interpretation of this Agreement and any Statement of Work under it:
+
+                    The relevant SOW
+                    Exhibits to the relevant SOW
+
+
+                                                                                                                   INITIALS
+                                                                 PAGE 3
+20140822 SUPPLY AGREEMENT                 < Eco grower data and engagement platform nd Rocket
+                                                     Innovation Company Limited >
+                    This Agreement
+                    Exhibits to this Agreement
+
+            Conditions which differ from, or are additional to, this Agreement - in particular the general terms and
+            conditions of the Supplier or of Supplier Affiliate(s) or of any other contracting party - are applicable only
+            to the extent that they have been explicitly agreed in writing by Syngenta.
+
+    3.      Provision of Products and/or Services
+    3.1.    Supplier shall provide the Products and/or Services as described in the relevant SOW and in line with the
+            provisions of this Agreement and the Exhibits and as instructed in writing by Syngenta. Where so agreed in
+            the respective SOW, the Acceptance Procedure as described in the respective SOW shall apply to the
+            Services and/or Products.
+
+    3.2.    This Agreement does not grant to Supplier any exclusivity with respect to the provision of any Products
+            and/or Services and Supplier agrees and acknowledges that Syngenta may, in its sole discretion, appoint
+            third parties to provide similar Products and/or Services.
+
+    3.3.    The Parties shall closely cooperate in order to enable the Supplier to provide the Products and/or Services
+            and each Party shall appoint a Project Manager in the SOW as relevant. Supplier shall periodically inform
+            Syngenta on ways to improve the Products and/or Services. Syngenta shall have the right to periodically
+            audit and or benchmark the Products and/or Services of the Supplier as agreed in this Agreement and/or a
+            SOW.
+
+    3.4.    Supplier shall not act on behalf of Syngenta or any of its Affiliates or in any way bind Syngenta or its
+            Affiliates, nor do anything likely to cause Supplier to be taken by third parties as acting as an agent or on
+            behalf of Syngenta or its Affiliates, except with the specific prior written authorization of Syngenta.
+
+    3.5.    Supplier agrees not to assign such employees of the Supplier who are currently engaged in the provision of
+            particular Products and/or Services to Syngenta or its Affiliates to work in the same field for any direct
+            competitor of Syngenta at the same time as they are providing Products and/or Services for Syngenta or its
+            Affiliates.
+
+    4.      Remuneration
+    4.1.    For the provision of all Services and/or Products in connection with the relevant SOW, Syngenta shall pay
+            to the Supplier the Fees agreed in the relevant SOW.
+
+    4.2.    In addition to the agreed Fees, Syngenta shall reimburse Supplier for the Expenses as the Parties have
+            agreed in advance and which Supplier reasonably has to incur in order to properly provide the Products
+            and/or Services. Such Expenses shall be incurred in line with the principles of Syngenta's travel policy as
+            outlined in a respective SOW. Supplier shall always seek the prior written approval from Syngenta of such
+            Expenses.
+
+    4.3.    Supplier shall be responsible for all taxes, contributions, charges and other public dues levied upon Supplier
+            in connection with the provision of the Products and/or Services under an SOW hereunder, including but
+            not limited any of the following in relation to the workforce of the Supplier:
+
+
+
+
+                                                                                                                  INITIALS
+                                                               PAGE 4
+20140822 SUPPLY AGREEMENT               < Eco grower data and engagement platform nd Rocket
+                                                   Innovation Company Limited >
+                    Statutory employment benefits and allowances etc.,
+                    Payments for holidays and public holidays,
+                    Payments for absences due to sickness, accident, pregnancy, motherhood, military services, etc.
+
+            For the avoidance of doubt, Withholding Taxes related to invoices of the Supplier and paid by Syngenta and
+            its Affiliates to the government                                              s Section 4.3.
+
+    4.4.    The Charges (Fees and the Expenses) shall be invoiced by Supplier at such dates as the Parties have agreed
+            in the relevant SOW. All amounts mentioned in this Agreement are exclusive of any VAT, which if applicable,
+            will be added on top of the Charges stipulated in this Agreement and/or the relevant SOW.
+
+    4.5.    Any invoice for Expenses shall be invoiced at cost (net of VAT if such VAT is recoverable by the Supplier),
+            accompanied by such receipts (or copies of receipts, if originals are required to remain with the Supplier
+            due to local in-country accounting requirements) and further details as Syngenta may reasonably request.
+
+    4.6.    All undisputed invoices shall be payable by Syngenta within 45 (forty-five) days after receipt of the
+            respective invoice.
+
+    5.      Ownership of Results
+    5.1.    Except as expressly stated in this Agreement nothing contained herein shall be construed as Syngenta
+            granting Supplier, either expressly or implied, any right or license in Intellectual Property rights belonging
+            to Syngenta or its respective Affiliate.
+
+    5.2.    Subject to clause 5.5, unless otherwise explicitly agreed in a SOW, any and all studies, analyses, creative
+            materials, reports, inventions, improvements, documents, and any other work product generated by
+            Supplier in connection with the provision of the Services and/or Products under a particular SOW, and all
+            Intellectual Property Rights therein (collectively, the "Results"), shall be the exclusive property of Syngenta.
+            Upon request of Syngenta, Supplier shall transfer all such Results to Syngenta free of charge.
+
+    5.3.    To the extent any mandatory legal rules under national or international legal order should provide that any
+            Results made by Supplier belong to Supplier, its employees, agents, contractors or subcontractors, Supplier
+            undertakes to assign or have assigned and transfer ownership to all such Results exclusively to Syngenta,
+            at no cost to Syngenta, and to execute or have executed such documents and do or have done such other
+            acts as are required therefore.
+
+    5.4.    To the extent an assignment of the Results in accordance with clause 5.3 should not be feasible, Supplier
+            grants Syngenta a royalty-free, perpetual, exclusive, transferable, sub-licensable, irrevocable and world-
+            wide license to use, copy, modify, distribute, display, broadcast and create derivative works of such Results.
+            Such derivative works will be owned by Syngenta. To the extent necessary for the usage of such derivative
+            works, Supplier hereby grants to Syngenta a royalty-free, perpetual, exclusive, transferable, sub-licensable,
+            irrevocable and world-wide license to use, copy, modify, distribute, display or broadcast such derivative
+            works.
+
+    5.5.    For the avoidance of doubt, the Parties understand that all Intellectual Property Rights of Supplier existing
+            as of the date of this Agreement as well as all amendments to these during the term of this Agreement (e.g.
+            methodologies, concepts or know-how of Supplier), which do not constitute Results (collectively, the "Pre-
+            existing Material"), shall be and remain the sole property of Supplier. To the extent the Pre-existing
+
+
+
+                                                                                                                    INITIALS
+                                                               PAGE 5
+20140822 SUPPLY AGREEMENT               < Eco grower data and engagement platform nd Rocket
+                                                   Innovation Company Limited >
+            with the term of this Agreement, Supplier grants to Syngenta and Syngenta Affiliate(s) a royalty-free,
+            perpetual, exclusive, transferable, sub-licensable, irrevocable and world-wide license to use, copy, modify,
+            distribute, display, broadcast and create derivative works of such Pre-existing Material, including the right
+            to have third parties do any of the foregoing.
+
+    6.      Warranty and Indemnity
+    6.1.    The Supplier warrants and represents that the Products will meet good industry standards and/or the
+            specifications agreed in a SOW and that the Services will be provided with all due care, skill, judgment and
+            diligence and in a professional manner and in accordance with good industry standards and practices at the
+                                                                                                                       y
+            additional standards and practices or instructions by Syngenta as explicitly agreed in a SOW.
+
+    6.2.    Syngenta evaluates the Products and/or Services in relation to each SOW and Supplier agrees to correct
+            free of charge and in a reasonable timeline as defined by Syngenta, any defects in the Products and/or
+            Services notified by Syngenta within 2 (two) years from the Delivery Date any defects of the Product and/or
+            in the provision of the Services respectively and which either become apparent to Supplier or which are
+            notified to the Supplier by Syngenta or its respective Affiliate. Delivery Date            be (i) the date of
+            acceptance of the respective Product and/or Service, or (ii) if the acceptance procedure was not applicable,
+
+            are required to provide/deliver a respective Product and/or Service, the last SOW shall be relevant to
+            determine the respective date).
+
+    6.3.    After the expiry of the warranty period, Supplier shall continue to be liable for hidden defects. Syngenta
+            shall notify Supplier of any hidden defects promptly after they have been detected. The rights of Syngenta
+            in respect of hidden defects shall become time-barred 5 (five) years after the Delivery Date.
+
+    6.4.    If Supplier is unable to cure any defect in accordance with Section 6.2, Syngenta shall have at its sole
+            discretion the option, by giving Supplier written notice (including e-mail, Fax etc.), notwithstanding any
+            other rights or remedies that may be available to Syngenta under the SOW or otherwise, to apply one or
+            more of the following remedies as appropriate:
+
+                a) require the Supplier, at Supplier
+                   to re-perform or re-deliver the Services and/or the Products giving rise to the breach in an
+                   additional deadline;
+
+                b)                           remedy any defect or perform any non-conforming Services itself or to
+                     have them remedied or performed by a third party;
+
+                c) to request adequate reduction of the remuneration or refund of part of the payments made in
+                   consideration of the reduced value of the Services and/or Products due to their defectiveness or to
+                   the undue performance of the relating Services and/or Products to be provided under the
+                   respective SOW.
+
+                d) In case of material defects: rescind the respective SOW on written notice to the Supplier, as a result
+                   of which Supplier shall be obliged to promptly reimburse all remuneration already paid by Syngenta
+                   relating to such SOW.
+
+
+                                                                                                                  INITIALS
+                                                              PAGE 6
+20140822 SUPPLY AGREEMENT              < Eco grower data and engagement platform nd Rocket
+                                                  Innovation Company Limited >
+    6.5.    Supplier warrants that the Results and the Products and/or Services (rendered by the Supplier to Syngenta
+            under this Agreement) are free of third party rights which might exclude or impact their use by Syngenta.
+
+    6.6.    Supplier shall indemnify and hold harmless, including payment of all damages, costs, expenses (including
+            reasonable court charges and attorney fees) and losses, howsoever arising incurred by Syngenta to the
+            extent any third party alleges that any of the Products and/or Services used by Syngenta in accordance with
+            this Agreement
+            provided that: (i) Supplier is given written notice of the Claim by Syngenta, (ii) Supplier is given all
+            reasonable information and assistance from Syngenta, which Supplier may require to defend the Claim, (iii)
+            Supplier is, to the extent permissible by law, given sole control of the defence of the Claim, and all
+            negotiations for its settlement or compromise thereof; and (iv) the alleged infringement does not result
+            exclusively from any non-permitted uses, alterations, modifications or enhancements carried out by
+            Syngenta or on its behalf by a third party. If such Claim has occurred, or in Supplier
+
+            Syngenta the right to continue using the Services and/or Products or to replace or modify the same so that
+            it becomes non-infringing without loss of functionality, or if none of the foregoing alternatives is reasonably
+            available, refund to Syngenta any Charges paid by Syngenta to the Supplier in respect of the respective
+            Services and/or Products. For avoidance of doubt, the Parties
+            potential liability is uncapped.
+
+    7.      Liability
+    7.1.    Supplier is liable for damages based on wilful misconduct or gross negligence without limitation.
+
+    7.2.    In case of light and medium negligence, Supplier shall be liable for any damages up to two times the
+            aggregate of all Charges due under the respective SOW (or SOWs if there is a functional relation between
+
+            regarding confidentiality and data privacy shall be unlimited.
+
+    8.      Confidentiality
+    8.1.    The Parties undertake to comply with their respective duties as set forth in Exhibit C hereto.
+
+    9.      Data Protection
+    9.1.    The Parties undertake to comply with their respective duties as set forth in Exhibit D hereto.
+
+    10. Insurance
+    10.1.   Supplier shall be obliged to conclude, procure and maintain with a duly licensed insurance company a
+            professional indemnity and product liability insurance policy as well as all other insurances that may be
+            relevant for providing the Products and/or Services provided under a respective SOW.
+
+            Syngenta may demand at any time a proof of this insurance coverage, including an indication of the amount
+            insured.
+
+
+
+
+                                                                                                                   INITIALS
+                                                               PAGE 7
+20140822 SUPPLY AGREEMENT               < Eco grower data and engagement platform nd Rocket
+                                                   Innovation Company Limited >
+    11. Taxes
+    11.1.   Notwithstanding anything to the contrary herein, if there should be any Withholding Tax imposed by the
+            applicable jurisdictions on Supplier with respect to any payments to be made by Syngenta to the Supplier
+            under or in connection with this Agreement, Syngenta is allowed to deduct such Withholding Taxes from
+            the payments to the Supplier and pay such Withholding Taxes to the appropriate tax authorities on behalf
+            of the Supplier. Regarding the discharged Withholding Tax, Syngenta will submit to the Supplier the
+            corresponding original tax certificates or original tax receipts stamped by the receiving local tax authority
+            within 30 days after such withholding obligation is discharged. Notwithstanding the foregoing, upon
+            presentation by the Supplier to Syngenta of the relevant tax documentation indicating a reduction in or
+            exemption from Withholding Tax for the Supplier in such taxing jurisdiction pursuant to the provisions of
+            the relevant double taxation treaty, Syngenta shall withhold such tax at the reduced rate (or not withhold
+            any tax if there is an exemption).
+
+    12. Term & Termination
+    12.1.   This Agreement shall become effective from the date stipulated on the front page of this Agreement or in
+            a respective SOW (Effective Date) and shall expire [1] year after the Effective date unless extended in
+            writing or unless due to the nature of the product provided (e.g. one time purchase) such term is not
+            meaningful or unless it is terminated prior to such term in accordance with this section 12.
+
+    12.2.   If either Party is in material or persistent non-material breach of its obligations under the Agreement and/or
+            any SOW and shall fail to remedy the same after receiving a 30                    from the non-breaching Party
+            specifying the breach and requiring its remedy, then the non-breaching Party shall be entitled to terminate
+            the Agreement and/or SOW with immediate effect. This right includes but is not limited to a termination
+            as per 6.4.
+
+    12.3.   Syngenta may terminate this Agreement by giving 3 (three) months and/or any SOW by giving 1 (one)
+                                   the end of any month.
+
+    12.4.   Non-
+
+    12.5.   The following provisions will survive any termination or expiration of this Agreement: 4 (
+            5                             6                               7              ,8                      9
+            Protection) and 21
+
+    13. Force Majeure
+    13.1.   Neither Party to this Agreement or to an SOW shall be deemed to be in breach or otherwise liable as a
+            result of any delay or failure in the performance of its obligations if and to the extent that such delay or
+            failure is caused by Force Majeure (any unavoidable circumstance that is beyond the reasonable control of
+            the Party) and the time for performance of the relevant obligation(s) shall be extended accordingly.
+
+    13.2.   A Party whose performance of its obligations under this Agreement or any SOW is delayed or prevented by
+            Force Majeure:
+
+                a) shall notify in writing the other Party and keep the other Party at all times informed of the nature,
+                   extent, effect and likely duration of the circumstances constituting the Force Majeure;
+
+
+                                                                                                                     INITIALS
+                                                               PAGE 8
+20140822 SUPPLY AGREEMENT               < Eco grower data and engagement platform nd Rocket
+                                                   Innovation Company Limited >
+

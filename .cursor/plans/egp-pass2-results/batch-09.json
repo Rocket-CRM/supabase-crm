@@ -1,0 +1,74 @@
+[
+  {
+    "id": 183,
+    "fit": "Yes",
+    "fit_reason": "Custom M&E/AI-OCR software plus ERP payment tracking; stack is open (Java/JS/TS, PostgreSQL/MySQL/Oracle/SQL Server/MariaDB examples).",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_and_tor; scanned TOR (OCR); no bid-close calendar (only boilerplate ยื่นข้อเสนอ); e-GP AES URL expired/wrong project (E1530)."
+  },
+  {
+    "id": 184,
+    "fit": "Maybe",
+    "fit_reason": "Custom AMLO Core Business case-system enhancement plus specified Windows Server 2025 infrastructure, not a locked application vendor.",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_and_tor; scanned TOR (OCR); no bid-close calendar; e-GP AES URL expired/wrong project."
+  },
+  {
+    "id": 185,
+    "fit": "Yes",
+    "fit_reason": "Pass1 custom AI Portal software; TOR skipped (status_only).",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_only; no TOR; e-GP AES URL expired (E1530/wrong project)."
+  },
+  {
+    "id": 192,
+    "fit": "Yes",
+    "fit_reason": "Pass1 custom ERP build; TOR skipped (status_only).",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_only; no TOR; e-GP AES URL expired (E1530/wrong project)."
+  },
+  {
+    "id": 194,
+    "fit": "Yes",
+    "fit_reason": "Pass1 custom e-Saraban software; TOR skipped (status_only).",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_only; no TOR; e-GP AES URL expired (E1530/wrong project)."
+  },
+  {
+    "id": 195,
+    "fit": "Yes",
+    "fit_reason": "Pass1 custom innovation/knowledge system; TOR skipped (status_only).",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_only; no TOR; e-GP AES URL expired (E1530/wrong project)."
+  },
+  {
+    "id": 203,
+    "fit": "No",
+    "fit_reason": "Maintenance of data-center HVAC and existing disaster IT/DB, plus hardware replacement—not a custom software build.",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_and_tor; scanned TOR (OCR); no bid-close calendar; e-GP AES URL expired/wrong project."
+  },
+  {
+    "id": 204,
+    "fit": "Maybe",
+    "fit_reason": "Custom CMS/websites/chatbot plus mandatory 3-node HCI hosts and hypervisor software—not a named app lock.",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "status_and_tor; scanned TOR (OCR); no bid-close calendar; e-GP AES URL expired/wrong project."
+  }
+]

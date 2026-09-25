@@ -1,0 +1,72 @@
+[
+  {
+    "id": 292,
+    "verdict": "Yes",
+    "reason": "Custom HR self-service + insurance Single View; small budget (500k)",
+    "budget": 500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 293,
+    "verdict": "Maybe",
+    "reason": "Building energy-control system likely software+meters/IoT; small budget",
+    "budget": 800000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 299,
+    "verdict": "Maybe",
+    "reason": "Custom welfare-disbursement system but 34.6m — consortium scale",
+    "budget": 34600000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 301,
+    "verdict": "Maybe",
+    "reason": "Enhance existing named APS AML screening — likely incumbent/integration, not greenfield",
+    "budget": 5000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 302,
+    "verdict": "No",
+    "reason": "Buy/license Backup software — packaged product, not custom build",
+    "budget": 2140000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 303,
+    "verdict": "No",
+    "reason": "2-year MA/repair of existing warehouse SW+HW — vendor lock, not new custom software",
+    "budget": 45543060,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 304,
+    "verdict": "Yes",
+    "reason": "Custom credit-qualification review system (BOT), 1.5m sweet spot",
+    "budget": 1500000,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 306,
+    "verdict": "Yes",
+    "reason": "Custom Housing Knowledge Center, 2.2m",
+    "budget": 2200000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 307,
+    "verdict": "Yes",
+    "reason": "Custom ECT complaint-management system, 5m",
+    "budget": 5000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 308,
+    "verdict": "Yes",
+    "reason": "Custom RAG enterprise document assistant, 2m",
+    "budget": 2000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeReadFile": [
+      {
+        "command": ".cursor/hooks/block-large-doc-read.sh",
+        "matcher": "Read",
+        "failClosed": false
+      }
+    ]
+  }
+}

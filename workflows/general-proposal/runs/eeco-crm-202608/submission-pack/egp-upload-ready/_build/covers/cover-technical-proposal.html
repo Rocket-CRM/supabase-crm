@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<title>ข้อเสนอทางเทคนิค — แนวคิดและสถาปัตยกรรมระบบ</title>
+<style>
+  @font-face {
+    font-family: "Sarabun";
+    src: url("fonts/SarabunRegular.ttf") format("truetype");
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: "Sarabun";
+    src: url("fonts/SarabunBold.ttf") format("truetype");
+    font-weight: 700;
+  }
+  @page { size: A4; margin: 14mm 14mm; }
+  *, *::before, *::after { box-sizing: border-box; letter-spacing: 0 !important; }
+  body, body * {
+    font-family: "Sarabun", "TH SarabunPSK", sans-serif !important;
+    letter-spacing: 0 !important;
+  }
+  body {
+    color: #000;
+    font-size: 12px;
+    line-height: 1.45;
+    margin: 0;
+    max-width: 100%;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #000;
+  }
+  .logo { height: 36px; width: auto; }
+  .doc-meta { text-align: right; font-size: 12px; }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 28px 0 10px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+  .center { text-align: center; margin: 3px 0; }
+  .slot {
+    text-align: center;
+    margin: 14px 0 16px;
+    font-weight: 700;
+  }
+  h2 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 16px 0 6px;
+  }
+  p { margin: 6px 0; text-align: justify; }
+  table {
+    width: calc(100% - 2px);
+    max-width: calc(100% - 2px);
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    margin-top: 8px;
+    border: none;
+  }
+  th, td {
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    border-top: 0;
+    border-left: 0;
+    padding: 6px 8px;
+    vertical-align: top;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  tr:first-child > th,
+  tr:first-child > td { border-top: 1px solid #000; }
+  th:first-child, td:first-child { border-left: 1px solid #000; }
+  th {
+    font-weight: 700;
+    text-align: center;
+    background: #fff;
+  }
+  td.num { text-align: center; width: 8%; }
+  .note { margin-top: 14px; font-size: 12px; }
+  .attach { margin-top: 10px; font-size: 12px; }
+  .attach ol { margin: 4px 0 0 20px; padding: 0; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <img class="logo" src="rocket-logo-full.svg" alt="Rocket" />
+    <div class="doc-meta">
+      เอกสารประกอบการยื่นข้อเสนอ<br />
+      เลขที่โครงการ 69079202016<br />
+      เอกสารประกวดราคาอิเล็กทรอนิกส์ เลขที่ ๐๑๘/๒๕๖๙<br />
+      วันเสนอราคา ๗ สิงหาคม ๒๕๖๙
+    </div>
+  </div>
+
+  <h1>ข้อเสนอทางเทคนิค</h1>
+  <div class="subtitle">
+    แนวคิดและแนวทางการดำเนินงาน · System Workflow / System Architecture<br />
+    และเครื่องมือที่ใช้สำหรับการพัฒนาระบบ
+  </div>
+  <div class="center">
+    โครงการพัฒนาระบบบริหารจัดการความสัมพันธ์นักลงทุนและฐานข้อมูลกลาง<br />
+    (CRM &amp; Database Management System)
+  </div>
+  <div class="center">หน่วยงานผู้ว่าจ้าง: สำนักงานคณะกรรมการนโยบายเขตพัฒนาพิเศษภาคตะวันออก (สกพอ.)</div>
+  <div class="center">ผู้ยื่นข้อเสนอ: บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด</div>
+  <div class="slot">
+    ใช้ยื่นเป็นเอกสารส่วนที่ ๒ — เอกสารที่หน่วยงานกำหนดเพิ่มเติม<br />
+    ตามเอกสารประกวดราคา ข้อ (๔) และเกณฑ์คะแนน ภาคผนวก ก ข้อ ๒.๑
+  </div>
+
+  <h2>ขอบเขตเอกสารฉบับนี้</h2>
+  <p>
+    เอกสารฉบับนี้นำเสนอแนวคิด แนวทางการดำเนินงานแต่ละขั้นตอน เทคนิคของวิธีการพัฒนาระบบ
+    สถาปัตยกรรมระบบ (System Architecture) กระบวนการทำงานของระบบ (System Workflow)
+    เครื่องมือที่ใช้สำหรับการพัฒนา แผนการส่งมอบ และการปฏิบัติการสนับสนุน
+    สำหรับโครงการระบบบริหารจัดการความสัมพันธ์นักลงทุนและฐานข้อมูลกลางของ สกพอ.
+  </p>
+
+  <h2>สารบัญโดยสังเขป</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ลำดับ</th>
+        <th>หัวข้อ</th>
+        <th>เนื้อหาหลัก</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num">1</td>
+        <td>แนะนำบริษัทและสรุปผู้บริหาร</td>
+        <td>ความเหมาะสมของผู้ยื่นข้อเสนอ และภาพรวมจากสถานะปัจจุบันสู่ระบบที่เสนอ</td>
+      </tr>
+      <tr>
+        <td class="num">2</td>
+        <td>บริบทการปฏิบัติงานและรูปแบบการส่งมอบ</td>
+        <td>Centralized Intelligence · โมเดล Hybrid · ขั้นตอนดำเนินงาน</td>
+      </tr>
+      <tr>
+        <td class="num">3</td>
+        <td>สถาปัตยกรรมและการออกแบบทางเทคนิค</td>
+        <td>Logical / Deployment Architecture · ฐานข้อมูล · ความมั่นคงของ Stack</td>
+      </tr>
+      <tr>
+        <td class="num">4</td>
+        <td>ความสามารถหลักของระบบ (Core features)</td>
+        <td>Master Data · งานภาคสนาม · Investment Journey · Dashboard · SSO/OSS · ความมั่นคง · การโอนย้ายข้อมูล</td>
+      </tr>
+      <tr>
+        <td class="num">5</td>
+        <td>แผนการส่งมอบและการปฏิบัติการ</td>
+        <td>ไทม์ไลน์ ๒๑๐ วัน · UAT / Security · อบรม · การรับประกันและการสนับสนุน</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>หมายเหตุ</strong>
+    ตารางเปรียบเทียบคุณสมบัติตามข้อ ๑๐.๒ (๖) และเอกสารบุคลากรตามภาคผนวก ข
+    ยื่นเป็นเอกสารแยกต่างหากในส่วนที่ ๒
+  </div>
+
+  <div class="attach">
+    <strong>เอกสารแนบต่อท้าย</strong>
+    <ol>
+      <li>ข้อเสนอทางเทคนิคฉบับเต็ม (เนื้อหาต่อจากหน้าปกนี้)</li>
+    </ol>
+  </div>
+</body>
+</html>

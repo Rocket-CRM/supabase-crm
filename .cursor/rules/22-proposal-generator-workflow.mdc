@@ -1,0 +1,29 @@
+---
+description: Rocket CRM / loyalty proposal workflow — Input / Resource / Output / Review. Not for custom government bids.
+alwaysApply: false
+---
+
+# Proposal generator workflow (Rocket CRM)
+
+When this rule applies, follow `workflows/proposal-generator/REFERENCE.md` as the durable contract and `workflows/proposal-generator/SCAFFOLDS.md` as the mandatory section grammar. Do not invent phases, schemas, or intake forms beyond those two files.
+
+For **custom / government / non-productized** project proposals (e.g. EECO), use `23-general-proposal-workflow.mdc` and `workflows/general-proposal/` instead.
+
+## Trigger phrases
+
+- "Rocket proposal", "loyalty proposal", "CRM product proposal"
+- "run the Rocket proposal workflow", "proposal generator" (Rocket)
+- "resume proposal run", "continue proposal in runs/" when under `workflows/proposal-generator/`
+- User points at `workflows/proposal-generator/runs/<slug>/`
+
+Bare "write a proposal" is ambiguous — ask whether this is a **Rocket loyalty** proposal or a **custom project** submission (`workflows/general-proposal/`).
+
+## Immediate actions
+
+1. Read `workflows/proposal-generator/REFERENCE.md` **and** `SCAFFOLDS.md`.
+2. Use or create `runs/<customer>-<yyyymm>/` — that folder is the only state.
+3. Four stages: Understand → **Plan (`outline.md`)** → **Write one section per turn** → Polish. Never draft the whole document in one pass.
+4. Before writing any section, open its reading list — narrative anchors in `docs/PRODUCT_NARRATIVE.md` **and** the source-brief sections carrying its requirements. Drafting from the dossier summary instead of the sources is what produced the thin first attempt.
+5. `dossier.md` is an index over `sources/`, not a replacement for them. Point at source sections; never compress requirement detail away.
+6. Product facts: catalogue for section fuel, CRM Knowledge MCP for specific claims; SQL on `internal_knowledge_blocks` + `internal_knowledge_feature_items` (`is_active` only) as fallback.
+7. Never block on missing input — write a Reviewable `dossier.md` with `[GAP: …]` markers.

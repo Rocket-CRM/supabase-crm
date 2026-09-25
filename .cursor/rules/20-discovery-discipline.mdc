@@ -1,0 +1,74 @@
+---
+description: Task classification, discovery stop conditions, scope literalism, and forbidden retrieval paths. Always-applied because discovery overreach is the largest avoidable token cost — one unnecessary pg_get_functiondef or 19-turn forensic audit replays through cache on every subsequent turn.
+alwaysApply: true
+---
+
+# Discovery Discipline — Classify, Converge, Stop
+
+Principle: **discovery exists to answer the user's question or unblock a change — not to eliminate all uncertainty.** Each discovery turn replays the full thread through cache. Premature consolidation is cheaper than perfect certainty.
+
+Full layer reference: `docs/PROJECT_CONTEXT_STRUCTURE.md`.
+
+## Step 0 — Classify the task (before any tool call)
+
+| Class | Signals | Max discovery turns | Function bodies? |
+|---|---|---|---|
+| **Product Q&A** | "Do we have…", "Does X support…", "Is there a feature for…" | **2** (then answer) | No |
+| **Explain / analyze** | "How does X work?", "What happens when…" | **3** (then present) | Only if a named function is already identified |
+| **Schema-only change** | "Add column", "Add field to table", "for now" | **1** (verify table, apply migration) | No |
+| **Build / fix / modify** | Bug, new RPC, wiring, behavior change | Per `08-context-lookup.mdc` | Yes — after registry + contract pin the target |
+
+If class is ambiguous, default to the **cheaper** class and ask before escalating.
+
+## Product Q&A path (2 turns max)
+
+**Turn 1 (batched):** CRM Knowledge MCP per `15-crm-knowledge-mcp.mdc` + grep `REGISTRY_SUPABASE.md` (+ `REGISTRY_RENDER.md` if edge/cron shaped).
+
+**Turn 2 (optional, batched):** One targeted live check — e.g. column exists on named table, or one function **signature** (not body).
+
+**Then answer.** State yes/no, what exists instead, and gaps. Do not fetch function bodies to confirm absence.
+
+## Schema-only path
+
+When the user asks to add a column or field **without** asking to wire read/write paths:
+
+1. `apply_migration` with `ALTER TABLE … ADD COLUMN` (+ `COMMENT ON COLUMN` if useful).
+2. Verify column via one `information_schema` query.
+3. Stop. Note separately if nothing writes to the column yet — do **not** auto-wire BFFs, chokepoints, or overlays.
+
+Scope signals: **"for now"**, **"just the column"**, **"add field to table"** = schema-only unless the user also names a write path.
+
+## Forbidden in discovery (unless build/fix and target is named)
+
+| Forbidden | Use instead |
+|---|---|
+| `pg_get_functiondef` / full function bodies | Registry grep → signature query → body only when editing that function |
+| `pg_get_functiondef` ILIKE scans across all functions | Grep `REGISTRY_SUPABASE.md` first |
+| `get_feature_tree` / typed knowledge blocks | `search_docs` / `get_section` on requirements chunks |
+| Grep/read `generated/internal-knowledge/**` | CRM Knowledge MCP `search_docs` |
+| Full-table column dumps when one column is asked | `WHERE column_name = '<name>'` or `ILIKE '%keyword%'` on one table |
+| Broad `ILIKE '%keyword%'` across all tables/columns | Registry grep → named table introspection |
+| Invented feature paths | `search_docs` then cite returned `requirements/...` paths only |
+
+## Stop conditions (hard)
+
+Stop and present when **any** applies:
+
+- Task-class turn budget reached (table above).
+- Same hypothesis, no new evidence on a turn.
+- CRM Knowledge + registry + one schema check already answer the question.
+- User correction narrows scope ("just a migration") — abandon prior discovery plan immediately.
+
+On stop: hypothesis, evidence (3–5 bullets), unknowns, proposed next step. Ask before more discovery.
+
+## MCP result hygiene (mandatory)
+
+After any MCP result >~2KB, the **next assistant message** must extract findings to 1–3 sentences in prose. Do not re-fetch the same data. Do not `Read` agent-tools dump files to grep them — extract at receipt or don't pull large payloads.
+
+Details: `16-tool-batching.mdc`.
+
+## Thread phase separation
+
+When a thread moves from **discovery/Q&A** to **implementation** (especially after >5 discovery tool calls), recommend a fresh thread. Discovery payloads replay into implementation turns and multiply cost.
+
+Checkpoint handoff: `17-thread-checkpoint.mdc`.

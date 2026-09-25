@@ -1,0 +1,62 @@
+---
+alwaysApply: true
+---
+
+# CX Platform — Supabase Backend
+
+Two modules on one Supabase project:
+- **Loyalty** — points, tiers, rewards, missions, marketing automation
+- **CS (Customer Service)** — conversations, knowledge base, AI procedures, omnichannel
+
+**Project ID:** `wkevmsedchftztoolkmi`. All DB work via Supabase MCP (`execute_sql`, `apply_migration`, `deploy_edge_function`). Do NOT write Edge Function or migration code to local files — deploy directly via MCP. Requirement docs live in `/requirements/`; CS docs prefixed with `CS_`.
+
+## Hard Laws
+
+- **Read-only by default.** SELECTs, schema introspection, requirement mapping = allowed. Anything else needs explicit approval. Destructive changes (delete/rename/breaking) require impact + dependencies first, then explicit "approved."
+- **Scope literalism.** Match the change to what the user asked — not what would make the feature "complete." "Add a column **for now**" = `ALTER TABLE` only; do not auto-wire BFFs, chokepoints, or overlays unless explicitly requested.
+- **Prohibited without approval:** schema changes (CREATE/ALTER/DROP, migrations, RLS, triggers), scaffolding, auth boilerplate, terminal/package managers, renames, type changes, API response shape changes, cache key/TTL changes.
+- **Fix root causes.** Never wrap symptoms in defensive code around values that should already be correct. If the root cause is outside our control, say so.
+- **Abstraction check.** Before adding parallel `cs_*` / `amp_*` tables or new cross-module dependencies, propose consolidation first (`07-abstraction-principles.mdc`).
+- **`receipt-preview-v2`** must deploy via CLI with `--no-verify-jwt` (`supabase functions deploy receipt-preview-v2 --project-ref wkevmsedchftztoolkmi --no-verify-jwt`) — MCP-only deploy silently re-enables JWT.
+- **When in doubt, ask.**
+
+## Output Style
+
+Reply structure and writing principles: `24-output-principles.mdc` (always applied). **Answer first** — verdict in 1–2 sentences, then plain-language frame, then drill-down.
+
+
+## Discovery Imperatives (apply on every DB / function / business-rule task)
+
+1. **Grep the registry first.** `requirements/REGISTRY_SUPABASE.md` lists tables / functions / triggers per domain — grep it before MCP `LIKE` discovery. `requirements/REGISTRY_RENDER.md` lists edge fns / queues / crons.
+2. **Grep authoritative docs, never full-read.** See `12-doc-search.mdc` (always-applied) for the protocol and the hook-enforced ban list.
+3. **Batch independent tool calls. Extract findings from large MCP results to text.** See `16-tool-batching.mdc` (always-applied) for batching rules, MCP result hygiene, and identifier hygiene.
+4. **Verify via Supabase MCP** — docs can be stale; `pg_proc` / `information_schema` is live truth.
+5. **Classify and stop.** See `20-discovery-discipline.mdc` (always-applied) — task type sets the discovery turn budget; answer Product Q&A in ≤2 turns, do not run forensic audits to confirm absence.
+6. **Checkpoint long threads.** See `17-thread-checkpoint.mdc` (always-applied) — at 15 user turns or 80 tool calls, stop and hand off to a fresh thread.
+
+Context layer reference: `docs/PROJECT_CONTEXT_STRUCTURE.md`.
+
+## Cost-aware model routing
+
+Default model is set per session. For **discovery-only phases** (initial grep / registry / MCP lookup before any code change is planned), spawn a `Task` subagent with `subagent_type: "explore"` (and `model: "gpt-5.5-medium"` if the user has not pinned a model). The subagent returns a summary; the raw tool results never enter the parent thread's cache. This is the only sanctioned way to reduce model cost without changing the default model.
+
+## Routing Map
+
+| Phase / signal | Load |
+|---|---|
+| Any task (classify first) | `20-discovery-discipline.mdc` |
+| DB / function / business-rule task (any) | `08-context-lookup.mdc` |
+| Project context layers / retrieval order | `docs/PROJECT_CONTEXT_STRUCTURE.md` |
+| Writing a `bff_*` / `api_*` / `fn_*` / `trigger_*` | `10-function-conventions.mdc` |
+| Creating / altering tables or columns | `09-db-conventions.mdc` |
+| Auth involved (admin / user / API key / superadmin) | `11-auth-conventions.mdc` |
+| Cross-module or new shared structure | `07-abstraction-principles.mdc` |
+| Analyzing fns / triggers / queues / edge fns / crons | `02-functions-queues-triggers.mdc` |
+| CS module cross-domain / view naming / MV anon | `05-function-database-implementation.mdc` |
+| Writing or editing a requirement doc | `13-requirements-writing.mdc` |
+| Closing a task with changes | `06-update-docs.mdc` |
+| CRM Knowledge retrieval (requirements doc-index) | `15-crm-knowledge-mcp.mdc` |
+| Writing / proposal copy / marketing craft (not product facts) | `19-writing-principles-mcp.mdc` |
+| Regenerating `REGISTRY_SUPABASE.md` | `.cursor/skills/registry-regenerate/SKILL.md` |
+
+(Always-applied: `12-doc-search`, `14-no-canvas`, `15-crm-knowledge-mcp`, `16-tool-batching`, `17-thread-checkpoint`, `18-image-handling`, `20-discovery-discipline`, `24-output-principles`. Not in this table because they're already in context.)

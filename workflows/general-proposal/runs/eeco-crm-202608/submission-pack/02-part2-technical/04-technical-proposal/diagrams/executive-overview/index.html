@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Executive overview — pillar matrix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #202223;
+      --muted: #6d7175;
+      --line: #c9cccf;
+      --paper: #ffffff;
+      --accent: #2c6ecb;
+      --accent-soft: #e8f0fe;
+      --tint-0: #eef3fb;
+      --tint-1: #eef6f0;
+      --tint-2: #f7f1ea;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background: transparent;
+      color: var(--ink);
+      font-family: "Sarabun", "Noto Sans Thai", sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .wrap {
+      padding: 0.25rem 0 0.5rem;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .pillar-caption {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 0.65rem;
+    }
+    .pillar-scroll {
+      overflow-x: visible;
+      width: 100%;
+    }
+    .pillar-grid {
+      display: grid;
+      gap: 0.4rem 0.4rem;
+      width: 100%;
+      min-width: 0;
+      align-items: stretch;
+      grid-template-columns: 1.05fr 1.35fr 1rem 1.35fr 1.25fr;
+    }
+    .pillar-head {
+      border-radius: 6px 6px 0 0;
+      padding: 0.45rem 0.5rem;
+      text-align: center;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .pillar-head--primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .pillar-head--secondary {
+      background: #1a1c1d;
+      color: #fff;
+    }
+    .pillar-spacer { background: transparent; }
+    .pillar-objective {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.55rem 0.65rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pillar-cell {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+    }
+    .pillar-impact { border-color: #b5c4db; }
+    .tint-0 { background: var(--tint-0); }
+    .tint-1 { background: var(--tint-1); }
+    .tint-2 { background: var(--tint-2); }
+    .pillar-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    .pillar-bullets {
+      list-style: none;
+      margin: 0;
+      padding: 0.5rem 0.65rem;
+    }
+    .pillar-bullets li {
+      display: flex;
+      gap: 0.4rem;
+      margin: 0.2rem 0;
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+    .pillar-bullets li > span:last-child {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .pillar-dot {
+      width: 4px;
+      height: 4px;
+      margin-top: 0.4rem;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .err {
+      color: #8a1f11;
+      padding: 1rem;
+      border: 1px solid #e0b4b0;
+      border-radius: 6px;
+      background: #fbeae9;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="root">
+    <p class="err">Loading diagram…</p>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const lang = params.get("lang") === "th" ? "th" : "en";
+    document.documentElement.lang = lang;
+
+    const labels = {
+      en: {
+        objectives: "Objectives",
+        current: "Current state",
+        future: "Future state",
+        impact: "Impact",
+      },
+      th: {
+        objectives: "วัตถุประสงค์",
+        current: "สถานะปัจจุบัน",
+        future: "สถานะในอนาคต",
+        impact: "ผลกระทบ",
+      },
+    }[lang];
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function bullets(items) {
+      return (
+        '<ul class="pillar-bullets">' +
+        items
+          .map(
+            (item) =>
+              `<li><span class="pillar-dot" aria-hidden="true"></span><span>${esc(item)}</span></li>`,
+          )
+          .join("") +
+        "</ul>"
+      );
+    }
+
+    fetch(`./data.${lang}.json`, { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error("Missing data." + lang + ".json");
+        return r.json();
+      })
+      .then((data) => {
+        const rows = (data.pillars || [])
+          .map((p, idx) => {
+            const tint = `tint-${idx % 3}`;
+            return [
+              `<div class="pillar-objective ${tint}">${esc(p.objective)}</div>`,
+              `<div class="pillar-cell">${bullets(p.current || [])}</div>`,
+              `<div class="pillar-arrow" aria-hidden="true">→</div>`,
+              `<div class="pillar-cell">${bullets(p.future || [])}</div>`,
+              `<div class="pillar-cell pillar-impact ${tint}">${bullets(p.impact || [])}</div>`,
+            ].join("");
+          })
+          .join("");
+
+        document.getElementById("root").innerHTML = [
+          data.title ? `<div class="pillar-caption">${esc(data.title)}</div>` : "",
+          `<div class="pillar-scroll"><div class="pillar-grid">`,
+          `<div class="pillar-head pillar-head--primary">${esc(labels.objectives)}</div>`,
+          `<div class="pillar-head pillar-head--primary">${esc(labels.current)}</div>`,
+          `<div class="pillar-spacer" aria-hidden="true"></div>`,
+          `<div class="pillar-head pillar-head--primary">${esc(labels.future)}</div>`,
+          `<div class="pillar-head pillar-head--secondary">${esc(labels.impact)}</div>`,
+          rows,
+          `</div></div>`,
+        ].join("");
+
+        // Tell parent viewer our height for iframe sizing
+        const h = Math.ceil(document.documentElement.scrollHeight);
+        if (window.parent !== window) {
+          window.parent.postMessage(
+            { type: "proposal-diagram-height", id: "executive-overview", height: h },
+            "*",
+          );
+        }
+      })
+      .catch((e) => {
+        document.getElementById("root").innerHTML =
+          `<p class="err">${esc(e.message || String(e))}</p>`;
+      });
+  </script>
+</body>
+</html>

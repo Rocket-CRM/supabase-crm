@@ -1,0 +1,2 @@
+batch=1 {"success":true,"platform":"shopee","merchant_id":"ffe8519e-49a2-467b-a0ec-57d28ba8be49","shop_id":"224882570","processed":1,"updated":0,"errors":1,"api_error":null,"upsert_errors":[{"order_sn":"2608101KUAV8E8","error":"ON CONFLICT DO UPDATE command cannot affect row a second time"}],"next_after_id":"4faf18ad-6575-48a5-9942-189730c5c5ca","has_more":false,"dry_run":false}
+done platform=shopee updated=0 batches=1

@@ -1,0 +1,2 @@
+-- custom_internal_demo_config (deployed via apply_migration custom_internal_demo_config)
+-- kinds: settings|archetype|given_name|surname|product|campaign|member_state|run_log

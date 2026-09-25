@@ -1,0 +1,90 @@
+[
+  {
+    "id": 207,
+    "project_name": "จ้างพัฒนาระบบงานโครงการระบบอัจฉริยะเพื่อการบริหารจัดการข้อมูลทางการเงิน (Asset Liability Insight System ALIS) โดยวิธีคัดเลือก (เลขที่โครงการ : 69079287500)",
+    "budget": 15000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19JfDYHKdfHmgtv28EvNz3N9j16ILGghoIX11gh61J6FgHd5SrfzBaM",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 212,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบจัดซื้อจัดจ้างและการบริหารสัญญา ระยะที่ 2 (I-EA-T Smart Procurement Phase 2) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079453631)",
+    "budget": 37000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18WHO1%252Bd5c8wjTVNZ%252FuhmSNEClgRfMtSdovEwvMw%252Fj0NhsjiTO7Pcib",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079453631/TOR-69079453631.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 216,
+    "project_name": "ประกวดราคาจ้างบำรุงรักษาและปรับปรุงระบบสารสนเทศภูมิศาสตร์เพื่อการวิจัยและกำหนดนโยบายของสำนักงานประกันสังคมพร้อมสิทธิ์การใช้งานซอฟต์แวร์ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079335541)",
+    "budget": 20000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18UVk4qNzrN6QrW%252BNrENYmaTsFkvLyGdM07DFiLU8aO%252BKGirquXjP9T",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079335541/TOR-69079335541.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 220,
+    "project_name": "ประกวดราคาจ้างพัฒนาโครงการระบบบริหารจัดการตลาดในความรับผิดชอบของสำนักงานตลาดกรุงเทพมหานคร ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079505143)",
+    "budget": 12400000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252Fxzq%252BikV1X2cslyybc1EzQHFfpCP2OweupiuYh3Ke4YOsxyy23C6pm",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079505143/TOR-69079505143.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 225,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบฐานข้อมูล Project Proposal and Budget Allocation PPBA ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69049107495)",
+    "budget": 14750000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252F2o41ZaOSmv4hhH3TT55%252FDgz%252B%252Bp3m43mYZ3p0a3hkQBJAtJ%252F1J1lGS",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69049107495/TOR-69049107495.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 226,
+    "project_name": "ประกวดราคาจ้างการปรับปรุงระบบสารสนเทศเพื่อจัดเก็บข้อมูลการปลูกหญ้าแฝกระดับนานาชาติ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089063248)",
+    "budget": 836842,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19ovYw1de8u6YCIjX0S0T8TeAunBnTKK%252FeRCAq6kcJUZEolZEV0uNTB",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089063248/TOR-69089063248.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 228,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบ PSM e-Service ประจำปีงบประมาณ 2569-2570 ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079589183)",
+    "budget": 7000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18n9Z2frz81NHWRqn2%252FmEav1q9wGu33zTdFloOjhUpZRrJDydi4Q9JY",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079589183/TOR-69079589183.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 229,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบฐานข้อมูลคลังเอกสารดิจิทัล ๑ โครงการ ประจำปีงบประมาณ พ.ศ. ๒๕๖๙ ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69079411536)",
+    "budget": 1300000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FAhMAE0K9ycE8%252B%252BWXiQkdpGT7IcJYYt3tZ4j%252Fh0xvrvzKaKdjEHusV",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69079411536/TOR-69079411536.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

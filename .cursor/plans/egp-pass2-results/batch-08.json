@@ -1,0 +1,74 @@
+[
+  {
+    "id": 161,
+    "fit": "Yes",
+    "fit_reason": "จ้างพัฒนา e-Document ขสมก. งบพัฒนา ~69 ลบ. ไม่มีฮาร์ดแวร์; VMware เป็นใบรับรองบุคลากรไม่ล็อกยี่ห้อสินค้า",
+    "status_latest": "อนุมัติสั่งซื้อสั่งจ้างและประกาศผู้ชนะการเสนอราคา",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "TOR searchable; วันยื่นข้อเสนอ เป็นคุณสมบัติทั่วไป ไม่มีปฏิทินปิดรับซอง; ประกาศผู้ชนะแล้ว"
+  },
+  {
+    "id": 163,
+    "fit": "Maybe",
+    "fit_reason": "จ้างพัฒนาระบบบริหารทรัพยากรสารสนเทศ/ERP ขสมก. งบพัฒนา 120 ลบ. แต่มีค่าซอฟต์แวร์ 20 ลบ. และต้องมี certificate ของผลิตภัณฑ์ที่เสนอ",
+    "status_latest": "อนุมัติสั่งซื้อสั่งจ้างและประกาศผู้ชนะการเสนอราคา",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "TOR สแกน; ระบุไม่เจาะจงผู้ผลิต แต่ต้องการใบรับรองผลิตภัณฑ์ ERP; ไม่พบวันปิดรับซอง; ประกาศผู้ชนะแล้ว"
+  },
+  {
+    "id": 166,
+    "fit": "Yes",
+    "fit_reason": "จ้างพัฒนา AI วิเคราะห์กฎหมาย/สนธิสัญญาและคลังความรู้ กรมสนธิสัญญาฯ ไม่ล็อกยี่ห้อ",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "TOR สแกน ไม่มีปฏิทินยื่นซอง; หน้า e-GP redirect; API ได้ project 69059071027 stepId=Z01/projectStatus=D ยังไม่ยืนยันข้อความสถานะไทย"
+  },
+  {
+    "id": 170,
+    "fit": "No",
+    "fit_reason": "ปรับปรุงระบบโปรแกรมโรงพยาบาลเดิม วิธีเฉพาะเจาะจงผู้มีคุณสมบัติรายเดียว",
+    "status_latest": "รายงานขอซื้อขอจ้าง",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "no TOR; status only"
+  },
+  {
+    "id": 175,
+    "fit": "No",
+    "fit_reason": "จ้างบำรุงรักษาระบบอ่านมาตรวัดน้ำพร้อมโปรแกรม ไม่ใช่งานพัฒนาซอฟต์แวร์ใหม่",
+    "status_latest": "จัดทำ TOR",
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "no TOR; status only"
+  },
+  {
+    "id": 180,
+    "fit": "Maybe",
+    "fit_reason": "เพิ่มประสิทธิภาพ NBMS ระยะที่ 2 ของระบบเดิม วิธีเฉพาะเจาะจง ยังไม่มี TOR ยืนยัน",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "no TOR; e-GP token หมดอายุ/หน้าแสดงโครงการอื่น"
+  },
+  {
+    "id": 181,
+    "fit": "Yes",
+    "fit_reason": "จ้างพัฒนาระบบทะเบียนและวัดผลออนไลน์ 11 โรงเรียนเมืองพัทยา ระบุ customization ไม่ล็อกยี่ห้อ",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "TOR สแกน ไม่พบวันปิดรับซอง; e-GP แสดงโครงการผิดหลัง token หมดอายุ"
+  },
+  {
+    "id": 182,
+    "fit": "Yes",
+    "fit_reason": "จ้างพัฒนาระบบ Workflow/BPM ธ.อิสลามฯ รวมวิเคราะห์ความต้องการและออกแบบ ไม่ระบุแพ็กเกจล็อกยี่ห้อ",
+    "status_latest": null,
+    "submission_date": null,
+    "date_confidence": "missing",
+    "notes": "TOR สแกน 56 หน้า ไม่พบปฏิทินยื่นซอง; e-GP token หมดอายุ/หน้าโครงการไม่ตรง"
+  }
+]

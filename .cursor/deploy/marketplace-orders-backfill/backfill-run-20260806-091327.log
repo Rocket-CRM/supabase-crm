@@ -1,0 +1,21 @@
+######## SleepingCloud tiktok ########
+==> tiktok shop=7496054762932308455 window_days≈7 ge=1767225600 lt=1767830400 dry_run=false
+{
+    "success": true,
+    "dry_run": false,
+    "platform": "tiktok",
+    "shop_id": "7496054762932308455",
+    "merchant_id": "8c6a1c5a-478c-4e62-b272-842ed8e918cb",
+    "window": {
+        "create_time_ge": 1767225600,
+        "create_time_lt": 1767830400
+    },
+    "orders_listed": 1,
+    "already_in_ledger": 1,
+    "detail_fetched_target": 0,
+    "staged": 0,
+    "stage_errors": 0,
+    "error_samples": [],
+    "duration_ms": 327,
+    "next_step": "Call RPC fn_promote_marketplace_backfill(p_batch_size, merchant_id, platform) until drained"
+}

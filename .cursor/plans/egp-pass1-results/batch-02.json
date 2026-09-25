@@ -1,0 +1,107 @@
+[
+  {
+    "id": 29,
+    "verdict": "No",
+    "reason": "MA of named EMR Soft product — vendor lock, not custom build",
+    "budget": 1465258,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 30,
+    "verdict": "Yes",
+    "reason": "Custom build of fall-risk + personalized rehab software (not equipment)",
+    "budget": 2500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 33,
+    "verdict": "No",
+    "reason": "12-month MA of existing TV/radio ad-sales program — incumbent lock",
+    "budget": 2118600,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 34,
+    "verdict": "No",
+    "reason": "ซื้อโปรแกรมบริการทางการแพทย์ 1 โปรแกรม — licensed medical package buy, not custom",
+    "budget": 3700000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 35,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาโปรแกรมวางแผนทางการเงิน — custom financial-planning software",
+    "budget": 1000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 36,
+    "verdict": "Maybe",
+    "reason": "Improve tax-map DB inside existing GIS/tax program — data/GIS + incumbent system",
+    "budget": 6500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 39,
+    "verdict": "Maybe",
+    "reason": "Kiosk management software as computer equipment — software+hardware; small budget",
+    "budget": 500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 40,
+    "verdict": "No",
+    "reason": "MA of existing education SIS — vendor lock; small budget",
+    "budget": 920000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 42,
+    "verdict": "No",
+    "reason": "Duplicate MCOT ad-sales program MA — incumbent lock",
+    "budget": 2118600,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 43,
+    "verdict": "No",
+    "reason": "PACS/RIS MA — proprietary medical imaging stack; small budget",
+    "budget": 750000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 50,
+    "verdict": "Yes",
+    "reason": "Develop/improve personnel IS — custom software; small budget",
+    "budget": 500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 51,
+    "verdict": "Yes",
+    "reason": "Custom NBTC fund-management system; 12m sweet spot",
+    "budget": 12000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 56,
+    "verdict": "Maybe",
+    "reason": "Ethanol tax/transport control upgrade; 30m consortium + likely existing-system integration",
+    "budget": 30000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 57,
+    "verdict": "Maybe",
+    "reason": "Custom AMLO AI analytics but 26m — consortium scale",
+    "budget": 25997700,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 61,
+    "verdict": "Maybe",
+    "reason": "Custom AMLO cybercrime platform but 81m — consortium",
+    "budget": 80957300,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  }
+]

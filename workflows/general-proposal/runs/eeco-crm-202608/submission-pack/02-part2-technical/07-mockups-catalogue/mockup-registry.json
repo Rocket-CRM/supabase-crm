@@ -1,0 +1,218 @@
+{
+  "version": 1,
+  "run": "eeco-crm-202608",
+  "runKey": "eeco",
+  "origin": "loyalty-admin",
+  "defaultOriginUrl": "http://localhost:3001",
+  "branding": {
+    "agencyName": "สกพอ.",
+    "agencyNameEn": "Eastern Economic Corridor Office (EECO)",
+    "logo": {
+      "runAsset": "assets/agency-logo.png",
+      "url": null,
+      "notes": "Use only the official สกพอ./EECO mark. Place the real file at runs/eeco-crm-202608/assets/agency-logo.png before FE generation. Do not invent a crest."
+    },
+    "mustAvoid": "Invented government crest or seal; Rocket logo as agency mark; generic placeholder emblem"
+  },
+  "mustAvoid": "Inventing real investor PII; inventing EEC OSS field names; implying public self-registration (internal named users only).",
+  "pages": [
+    {
+      "id": "M01",
+      "section": "A9",
+      "path": "/proposal-mockups/eeco/M01",
+      "title": "Login / SSO entry",
+      "aliases": ["Login / SSO entry"],
+      "user": "EECO named user",
+      "tor": "5.7.1; POC 2",
+      "brief": "SSO entry for named EECO users only. Show agency branding, SSO button, and a clear note that access is for authorized staff (no public self-registration).",
+      "mustShow": ["SSO CTA", "no signup link", "Thai labels preferred"]
+    },
+    {
+      "id": "M02",
+      "section": "A8",
+      "path": "/proposal-mockups/eeco/M02",
+      "title": "Executive heat map / dashboard",
+      "aliases": ["Executive heat map / dashboard (post-login)"],
+      "user": "EECO manager / director",
+      "tor": "5.6; POC 2",
+      "brief": "Post-login executive dashboard: heat-map style workload / SLA visibility, พ.ศ. or fiscal period filter, drill toward units or officers. Fake aggregates only.",
+      "mustShow": ["heat map or workload grid", "period filter", "SLA / escalation signals"]
+    },
+    {
+      "id": "M03",
+      "section": "A5",
+      "path": "/proposal-mockups/eeco/M03",
+      "title": "Customer 360",
+      "aliases": ["Customer 360 (person + juristic)"],
+      "user": "EECO staff",
+      "tor": "5.5.2",
+      "brief": "Single customer 360 for person and juristic profiles: identity summary, related activities, journey stage, consent status. Use fictional company names.",
+      "mustShow": ["person vs juristic", "linked activities", "consent badge"]
+    },
+    {
+      "id": "M04",
+      "section": "A5",
+      "path": "/proposal-mockups/eeco/M04",
+      "title": "Bulk CSV / Excel import",
+      "aliases": ["Bulk CSV / Excel import"],
+      "user": "EECO staff / data steward",
+      "tor": "5.5.1",
+      "brief": "Bulk import wizard: upload CSV/Excel, column mapping, validation errors, commit summary.",
+      "mustShow": ["upload", "validation errors table", "commit summary"]
+    },
+    {
+      "id": "M05",
+      "section": "A5",
+      "path": "/proposal-mockups/eeco/M05",
+      "title": "Consent capture and history",
+      "aliases": ["Consent capture and history"],
+      "user": "EECO staff",
+      "tor": "5.5.2, 5.8.3",
+      "brief": "Consent capture form plus chronological consent history for PDPA-aligned operations.",
+      "mustShow": ["consent purpose", "history timeline"]
+    },
+    {
+      "id": "M06",
+      "section": "A5",
+      "path": "/proposal-mockups/eeco/M06",
+      "title": "Master data admin",
+      "aliases": ["Master data admin (industry / country)"],
+      "user": "EECO admin",
+      "tor": "5.5.2",
+      "brief": "Admin lists for industry / country (and similar reference data) with active flags.",
+      "mustShow": ["reference table", "add/edit"]
+    },
+    {
+      "id": "M07",
+      "section": "A6",
+      "path": "/proposal-mockups/eeco/M07",
+      "title": "Activity create / edit (desktop)",
+      "aliases": ["Activity create / edit (desktop)"],
+      "user": "EECO staff",
+      "tor": "5.5.3; POC 4",
+      "brief": "Desktop activity create/edit: customer link, type, datetime, notes, attachments, save.",
+      "mustShow": ["customer picker", "activity fields", "attachments"]
+    },
+    {
+      "id": "M08",
+      "section": "A6",
+      "path": "/proposal-mockups/eeco/M08",
+      "title": "Activity capture (mobile/tablet)",
+      "aliases": ["Activity capture on tablet / phone"],
+      "user": "EECO field officer",
+      "tor": "5.5.3, 3.2",
+      "brief": "Mobile/tablet-friendly activity capture: large tap targets, photo attach, offline-ready cue (demo).",
+      "mustShow": ["compact form", "photo attach"]
+    },
+    {
+      "id": "M09",
+      "section": "A6",
+      "path": "/proposal-mockups/eeco/M09",
+      "title": "Task and team calendar",
+      "aliases": ["Task and team calendar"],
+      "user": "EECO staff / team lead",
+      "tor": "5.5.3",
+      "brief": "Team calendar / task board with due dates and assignees (fake names).",
+      "mustShow": ["calendar or agenda", "assignee"]
+    },
+    {
+      "id": "M10",
+      "section": "A6",
+      "path": "/proposal-mockups/eeco/M10",
+      "title": "Ticket create / route / SLA",
+      "aliases": ["Ticket create / route / SLA"],
+      "user": "EECO staff",
+      "tor": "5.5.3",
+      "brief": "Ticket create with routing unit, SLA clock, escalation state.",
+      "mustShow": ["route / unit", "SLA indicator"]
+    },
+    {
+      "id": "M11",
+      "section": "A6",
+      "path": "/proposal-mockups/eeco/M11",
+      "title": "Activity A4/PDF print preview",
+      "aliases": ["Activity report — A4 / PDF print preview"],
+      "user": "EECO staff",
+      "tor": "POC 4.2",
+      "brief": "Print preview of an activity report laid out for A4 / PDF.",
+      "mustShow": ["A4-like layout", "print/export affordance"]
+    },
+    {
+      "id": "M12",
+      "section": "A7",
+      "path": "/proposal-mockups/eeco/M12",
+      "title": "Investment Journey pipeline board",
+      "aliases": ["Investment Journey — pipeline board"],
+      "user": "EECO promotion officer / manager",
+      "tor": "5.5.4",
+      "brief": "Kanban / pipeline board for Investment Journey stages with card counts and SLA coloring.",
+      "mustShow": ["stages as columns", "case cards"]
+    },
+    {
+      "id": "M13",
+      "section": "A7",
+      "path": "/proposal-mockups/eeco/M13",
+      "title": "Investment case workspace",
+      "aliases": ["Investment case workspace"],
+      "user": "EECO staff",
+      "tor": "5.5.3–5.5.4, 5.7",
+      "brief": "Single investment case workspace: summary, timeline, documents, linked activities, OSS panel slot.",
+      "mustShow": ["case header", "tabs or sections for timeline/docs"]
+    },
+    {
+      "id": "M14",
+      "section": "A7",
+      "path": "/proposal-mockups/eeco/M14",
+      "title": "Move stage / readiness checklist",
+      "aliases": ["Move stage / pre-incentive readiness checklist"],
+      "user": "EECO staff / approver",
+      "tor": "5.5.4",
+      "brief": "Move-stage dialog with pre-incentive readiness checklist (required items checked).",
+      "mustShow": ["checklist", "confirm move"]
+    },
+    {
+      "id": "M15",
+      "section": "A7",
+      "path": "/proposal-mockups/eeco/M15",
+      "title": "EEC OSS status panel",
+      "aliases": ["EEC OSS status panel on investment case"],
+      "user": "EECO staff",
+      "tor": "5.7",
+      "brief": "Read-only OSS status panel on a case: last sync time, high-level status chips. Do not invent specific OSS API field names — use generic labels (Status, Last synced, Reference).",
+      "mustShow": ["last synced", "generic status"]
+    },
+    {
+      "id": "M16",
+      "section": "A10",
+      "path": "/proposal-mockups/eeco/M16",
+      "title": "RBAC difference (3 roles)",
+      "aliases": ["RBAC difference — same case, three roles"],
+      "user": "Staff / Manager / Director",
+      "tor": "5.8; POC 3",
+      "brief": "Same investment case shown under three role tabs (Staff / Manager / Director) with visibly different actions or masked fields.",
+      "mustShow": ["three role switch", "different actions or fields"]
+    },
+    {
+      "id": "M17",
+      "section": "A10",
+      "path": "/proposal-mockups/eeco/M17",
+      "title": "Sensitive doc + watermark",
+      "aliases": ["Sensitive document viewer with dynamic watermark"],
+      "user": "Director / project owner",
+      "tor": "5.8.2",
+      "brief": "Document viewer with dynamic watermark (user + timestamp overlay).",
+      "mustShow": ["watermark overlay", "document canvas"]
+    },
+    {
+      "id": "M18",
+      "section": "A10",
+      "path": "/proposal-mockups/eeco/M18",
+      "title": "Audit / change-history report",
+      "aliases": ["Audit / data-change history report"],
+      "user": "Manager / admin",
+      "tor": "5.8.2; POC 5",
+      "brief": "Audit / change-history report table: who, when, object, field, old → new (fake rows).",
+      "mustShow": ["filterable table", "before/after"]
+    }
+  ]
+}

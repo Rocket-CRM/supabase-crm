@@ -1,0 +1,51 @@
+---
+description: Image-attachment handling — extract to text, then proceed. Always-applied because images are a per-turn signal the agent often misses; image replay is one of the highest per-turn costs in long threads.
+alwaysApply: true
+---
+
+# Image Handling — Extract to Text, Don't Carry
+
+Images attached to a conversation are replayed on every subsequent turn. A single screenshot can cost more per-turn than thousands of tokens of code. Most of that cost is wasted because the relevant *facts* in the image are a few sentences of text.
+
+## The protocol
+
+The FIRST tool call on a turn that has a new image attached must be a text extraction. Do it before anything else.
+
+1. **Identify what the user is asking about the image.**
+2. **Extract the relevant facts to text.** Examples:
+   - Error screenshot → quote the error message, stack frame summary, URL, timestamp.
+   - UI mockup → describe the layout in 5–10 bullets: top bar, columns, fields, CTAs.
+   - Architecture diagram → list the boxes and arrows in text.
+   - Photo of whiteboard / paper → transcribe.
+   - Code screenshot → transcribe the visible code, line-by-line if short.
+3. **Restate the question in light of the extracted text.** Confirm to the user what you saw and what you'll do.
+4. **Proceed with the actual task using the text representation.**
+
+Once the facts are in text, the image's per-turn cost still applies, but the image's *information* is now portable across turns and into context summaries.
+
+## Recommend a fresh thread for downstream work
+
+If the image is just a setup signal (e.g. "here's a mockup, build me X") and the actual work is large, **explicitly recommend the user start a new thread**:
+
+> I've extracted the key details from the screenshot above. To keep per-turn cost down, I'd recommend starting a fresh thread for the implementation work — copy/paste these bullets into the new thread and we'll proceed from there.
+
+The user can then drop the image and proceed with a clean slate.
+
+## When NOT to recommend a fresh thread
+
+- The task is small (one quick code change).
+- The image is the *deliverable* (e.g. "compare this design to mine" — we need to look at both).
+- The user explicitly says "stay in this thread."
+
+## When images stack up
+
+If a user has attached more than 2 images in the same thread, proactively suggest a checkpoint:
+
+> We've accumulated several images. Per-turn cost from image replay is now significant. I'll summarize the relevant facts so far, and recommend continuing in a fresh thread with this summary as the seed.
+
+## What NOT to do
+
+- Don't ignore the image and answer purely from the question text.
+- Don't say "I can see the image but…" without extracting facts.
+- Don't extract everything in the image — only what's relevant to the user's question.
+- Don't burn a turn just to acknowledge the image without making progress.

@@ -1,0 +1,68 @@
+[
+  {
+    "id": 299,
+    "project_name": "จ้างดำเนินโครงการพัฒนาระบบการเบิกจ่ายเงินสวัสดิการของบุคลากรภาครัฐ โดยวิธีคัดเลือก (เลขที่โครงการ : 69089095286)",
+    "budget": 34600000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19XxHaK%252Fbw1VbT%252F%252FObN%252B9Ta6b89PrH%252FdG6L7y4XAE3JZ6zApijE2%252BLt",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 301,
+    "project_name": "ประกวดราคาจ้างครงการเพิ่มประสิทธิภาพระบบตรวจสอบรายชื่อบุคคลที่มีความเสี่ยงสูงด้านการฟอกเงินและรายชื่อบุคคลผู้ถูกกำหนด (AMLO Person Screening System APS) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 68119554762)",
+    "budget": 5000000,
+    "pass1": "Maybe",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX19W5%252BBZgCSjZy4B7a5FJM9J6Xa4aMFr7020Xrk1OD0ajMzECl31DCb0",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/68119554762/TOR-68119554762.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 304,
+    "project_name": "จ้างพัฒนาระบบงานคอมพิวเตอร์ปี 2569-2570 สำหรับแผนระบบงานสอบทานคุณสมบัติสินเชื่อ list 3 โดยวิธีคัดเลือก (เลขที่โครงการ : 69089492435)",
+    "budget": 1500000,
+    "pass1": "Yes",
+    "status_original": "รายงานขอซื้อขอจ้าง",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FeHiTr8YLzjyjpxM%252F0fIh1RswQSyTqiieI%252B%252BI9Kz2KUZGgXbRtyFfr",
+    "docs": null,
+    "has_docs": false,
+    "mode": "status_only"
+  },
+  {
+    "id": 306,
+    "project_name": "ประกวดราคาจ้างโครงการพัฒนาระบบศูนย์กลางองค์ความรู้ด้านการพัฒนาที่อยู่อาศัย (Housing Knowledge Center) (ครั้งที่ 2) ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089404637)",
+    "budget": 2200000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX1%252FDzFxh0Tp%252B6Sc%252FTUcg9lzk1K2XY%252Bng3Acq22tFw4OE4tbWtaQ6WjNQ",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089404637/TOR-69089404637.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 307,
+    "project_name": "ประกวดราคาจ้างพัฒนาเทคโนโลยีสารสนเทศชาญฉลาดในระบบการเลือกตั้ง กิจกรรมหลักที่ 2 พัฒนาระบบบริหารจัดการเรื่องร้องเรียนของสำนักงานคณะกรรมการการเลือกตั้ง ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69069286211)",
+    "budget": 5000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18UmBhauwxpfVIeKIu1vv%252BA6kZDQU4Iq2c%252FncEyv5fznzNA1rzz9Umy",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69069286211/TOR-69069286211.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  },
+  {
+    "id": 308,
+    "project_name": "ประกวดราคาจ้างพัฒนาระบบผู้ช่วยปัญญาประดิษฐ์เพื่อการสืบค้น วิเคราะห์ และสังเคราะห์เอกสารขององค์กร (Enterprise AI Document Assistant using Retrieval-Augmented Generation RAG) สกสว. ด้วยวิธีประกวดราคาอิเล็กทรอนิกส์ (e-bidding) (เลขที่โครงการ : 69089476193)",
+    "budget": 2000000,
+    "pass1": "Yes",
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน",
+    "link": "https://process5.gprocurement.go.th/egp-agpc01-web/announcement/procurement/U2FsdGVkX18MKl87npfjcXDxJRZn465pDfFLVjS%252FVJv2M8biWxh09FmwZv3%252FE5QE",
+    "docs": "https://uzebtdlhoptnuqwgdnor.supabase.co/storage/v1/object/public/govt%20bidding%20docs/69089476193/TOR-69089476193.pdf",
+    "has_docs": true,
+    "mode": "status_and_tor"
+  }
+]

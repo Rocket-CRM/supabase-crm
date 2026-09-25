@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Proposal viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css?v=20260807b" />
+    <!-- UMD build — more reliable than ESM CDN import in local viewers -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+      (function () {
+        if (!window.mermaid) {
+          console.error("Mermaid failed to load from CDN");
+          return;
+        }
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: "neutral",
+          securityLevel: "loose",
+          fontFamily: "Sarabun, sans-serif",
+        });
+        window.__mermaid = window.mermaid;
+        window.dispatchEvent(new Event("mermaid-ready"));
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="meta">
+        <strong id="run-label">Proposal viewer</strong>
+        · admin <code id="origin-label">…</code>
+        · <span id="mode-label">live mockups</span>
+      </div>
+      <div class="actions">
+        <label class="view-switch">
+          Language
+          <select id="lang-select">
+            <option value="en">English</option>
+            <option value="th">ไทย</option>
+          </select>
+        </label>
+        <label class="view-switch">
+          View
+          <select id="view-select">
+            <option value="proposal">Proposal only</option>
+            <option value="combined">All documents</option>
+          </select>
+        </label>
+        <button type="button" id="btn-reload" class="secondary">Reload</button>
+        <button type="button" id="btn-download-html">Download HTML</button>
+        <button type="button" id="btn-print">Print / PDF</button>
+      </div>
+    </header>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2 id="toc-heading">Contents</h2>
+        <ol id="doc-toc" class="toc-list"></ol>
+        <h2>Screens</h2>
+        <ol id="mockup-toc" class="toc-list"></ol>
+        <p class="hint">
+          Click any item to jump to that part. <strong>All documents</strong> includes Part 1 files, proposal, comparison table, and Appendix B.
+        </p>
+      </aside>
+      <main class="doc" id="doc">
+        <p class="hint">Loading…</p>
+      </main>
+    </div>
+    <script type="module" src="/app.js?v=20260807b"></script>
+  </body>
+</html>

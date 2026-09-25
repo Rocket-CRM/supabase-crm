@@ -1,0 +1,107 @@
+[
+  {
+    "id": 63,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบศูนย์กลางข้อมูลดิจิทัล — custom software, budget in sweet spot",
+    "budget": 14572500,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 64,
+    "verdict": "Yes",
+    "reason": "ปรับระบบทะเบียนและประเมินผล Lifelong Learning — custom software, 2.8m",
+    "budget": 2800000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 68,
+    "verdict": "Yes",
+    "reason": "ออกแบบ-พัฒนาระบบสาธิต Document Wallet (VC/VP) — custom software",
+    "budget": 3560000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 69,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบจัดเก็บเอกสารอิเล็กทรอนิกส์ — custom DMS",
+    "budget": 3000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 70,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบ ERP ใหม่ งบ 3m — custom build ไม่ใช่ติดตั้งแพ็กเกจใหญ่",
+    "budget": 3000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 73,
+    "verdict": "No",
+    "reason": "บำรุงรักษาระบบ Back Office ระยะที่ 5 — AMS ของระบบเดิม/vendor lock",
+    "budget": 2500000,
+    "status_original": "รายงานขอซื้อขอจ้าง"
+  },
+  {
+    "id": 76,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบ Supplier Sourcing Platform — custom platform, ~10m",
+    "budget": 10317475,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 78,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบ CRM/ฐานข้อมูลนักลงทุน — custom software, 4m",
+    "budget": 4000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 79,
+    "verdict": "Maybe",
+    "reason": "ยกระดับระบบวิเคราะห์ Big Data บริหารน้ำประปา — software แต่มักผูก SCADA/ระบบปฏิบัติการ",
+    "budget": 9000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 80,
+    "verdict": "Maybe",
+    "reason": "พัฒนาและปรับปรุง ERP กรมการค้าภายใน ครั้งที่ 2 — มักเป็นแพ็กเกจ/incumbent",
+    "budget": 10000000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 84,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบติดตามกระแสเงินสดโครงการวิจัย realtime — custom software",
+    "budget": 2200000,
+    "status_original": null
+  },
+  {
+    "id": 87,
+    "verdict": "Yes",
+    "reason": "ทำระบบคำของบประมาณกองทัพเรือ (BPS) — custom software",
+    "budget": 2500000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 89,
+    "verdict": "Maybe",
+    "reason": "พัฒนาระบบบูรณาการสารสนเทศทรัพยากร ทร. ระยะ 1 — integration",
+    "budget": 2465295,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 90,
+    "verdict": "No",
+    "reason": "บำรุงรักษาระบบและฐานข้อมูล Oracle ERP — licensed package / vendor lock",
+    "budget": 2600000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 91,
+    "verdict": "Yes",
+    "reason": "ปรับปรุงระบบ E-Learning สารต้องห้ามทางการกีฬา — custom software, 1m",
+    "budget": 1000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  }
+]

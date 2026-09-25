@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Purchases report POC — BigQuery</title>
+  <style>
+    :root {
+      --ink: #14201c;
+      --muted: #5c6b64;
+      --line: #d7e0db;
+      --bg: #f3f6f4;
+      --panel: #ffffff;
+      --accent: #0f6b4c;
+      --accent-soft: #d9efe6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 420px at 10% -10%, #e7f3ee 0%, transparent 60%),
+        var(--bg);
+    }
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 20px 64px; }
+    header { margin-bottom: 28px; }
+    .eyebrow {
+      font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--accent); font-weight: 600; margin: 0 0 8px;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: -0.02em; }
+    .meta { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .badge {
+      display: inline-block; margin-top: 10px; padding: 4px 10px;
+      border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+      font-size: 12px; font-weight: 600;
+    }
+    .kpis {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px; margin: 24px 0;
+    }
+    .kpi {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 12px; padding: 16px;
+    }
+    .kpi .label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .kpi .value { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
+    section {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 14px; padding: 18px; margin-bottom: 16px;
+    }
+    section h2 { margin: 0 0 14px; font-size: 16px; }
+    .chart {
+      display: grid; grid-auto-flow: column; grid-auto-columns: minmax(18px, 1fr);
+      align-items: end; gap: 4px; height: 180px; padding-top: 8px;
+    }
+    .bar {
+      background: linear-gradient(180deg, #1a8f66, #0f6b4c);
+      border-radius: 4px 4px 0 0; min-height: 2px; position: relative;
+    }
+    .bar:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: #fff; font-size: 11px; padding: 4px 6px;
+      border-radius: 4px; white-space: nowrap; pointer-events: none;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .notes { color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .notes code { font-size: 12px; background: #eef2f0; padding: 1px 5px; border-radius: 4px; }
+    @media (max-width: 800px) {
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">POC · BigQuery raw_supabase_prod</p>
+      <h1 id="title">Purchases report</h1>
+      <p class="meta" id="subtitle">Loading…</p>
+      <span class="badge" id="parity">Checking parity…</span>
+    </header>
+
+    <div class="kpis" id="kpis"></div>
+
+    <section>
+      <h2>Net sales by day</h2>
+      <div class="chart" id="chart"></div>
+    </section>
+
+    <section>
+      <h2>Top stores</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Store</th>
+            <th class="num">Net sales</th>
+            <th class="num">Orders*</th>
+          </tr>
+        </thead>
+        <tbody id="stores"></tbody>
+      </table>
+      <p class="notes">* <code>orders</code> uses <code>COUNT(DISTINCT transaction_number)</code> — same as <code>bff_report_purchases</code>.</p>
+    </section>
+
+    <section>
+      <h2>What this mirrors</h2>
+      <div class="notes" id="notes"></div>
+    </section>
+  </main>
+  <script>
+    const fmt = (n) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(n || 0));
+    const money = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "THB", maximumFractionDigits: 0 }).format(Number(n || 0));
+
+    fetch("./report.json")
+      .then((r) => r.json())
+      .then((payload) => {
+        const s = payload.report.summary;
+        document.getElementById("title").textContent = `Purchases · ${payload.merchant.name}`;
+        document.getElementById("subtitle").textContent =
+          `${payload.window.from} → ${payload.window.to} (${payload.window.timezone}) · source: ${payload.source}`;
+        document.getElementById("parity").textContent = payload.parity_vs_postgres.matched
+          ? "Parity OK vs Postgres (net_sales / orders / buyers / total_count)"
+          : "Parity mismatch";
+
+        const kpis = [
+          ["Net sales", money(s.net_sales)],
+          ["Orders", fmt(s.orders)],
+          ["Buyers", fmt(s.buyers)],
+          ["AOV", money(s.aov)],
+          ["New buyers", fmt(s.new_buyers)],
+          ["Returning", fmt(s.returning_buyers)],
+          ["Refunds", money(s.refunds)],
+          ["Earn eligible", `${(Number(s.earn_eligible_pct) * 100).toFixed(1)}%`],
+        ];
+        document.getElementById("kpis").innerHTML = kpis.map(([label, value]) =>
+          `<div class="kpi"><div class="label">${label}</div><div class="value">${value}</div></div>`
+        ).join("");
+
+        const series = payload.report.series || [];
+        const max = Math.max(...series.map((d) => Number(d.net) || 0), 1);
+        document.getElementById("chart").innerHTML = series.map((d) => {
+          const h = Math.max(2, Math.round((Number(d.net) / max) * 100));
+          return `<div class="bar" style="height:${h}%" data-tip="${d.bucket}: ${money(d.net)}"></div>`;
+        }).join("");
+
+        document.getElementById("stores").innerHTML = (payload.report.by_store || []).map((r) =>
+          `<tr><td>${r.store_name || "—"}</td><td class="num">${money(r.net_sales)}</td><td class="num">${fmt(r.orders)}</td></tr>`
+        ).join("") || `<tr><td colspan="3">No store breakdown</td></tr>`;
+
+        document.getElementById("notes").innerHTML = `
+          <p>Portal page <code>/reports/purchases</code> calls:</p>
+          <ul>
+            <li><code>bff_report_purchases</code> — KPIs, daily series, by_store / by_channel / by_category / by_brand / by_sku</li>
+            <li><code>bff_report_purchases_rows</code> — paginated drill table (not loaded in this POC)</li>
+          </ul>
+          <p>This POC re-runs the same default filters (<code>status=completed</code>, <code>record_type=credit</code>) on BigQuery <code>raw_supabase_prod</code>.</p>
+          <p>Not in BQ raw yet (skipped): <code>mkt_purchase_attribution</code>, <code>mkt_config</code>, <code>mkt_campaign</code> — campaign / attribution columns on the live page.</p>
+          <p>FE entry: <code>loyalty-admin/src/app/(admin)/reports/purchases/actions.ts</code></p>
+        `;
+      })
+      .catch((err) => {
+        document.getElementById("subtitle").textContent = String(err);
+      });
+  </script>
+</body>
+</html>

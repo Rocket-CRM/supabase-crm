@@ -1,0 +1,521 @@
+######## SleepingCloud tiktok 2026-08-06T02:16:07Z ########
+02:16:07 ==> tiktok shop=7496054762932308455 days≈7 ge=1767225600 lt=1767830400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 1, "already_in_ledger": 1, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 343}
+
+02:16:18 ==> tiktok shop=7496054762932308455 days≈7 ge=1767830400 lt=1768435200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 1904}
+
+02:16:30 ==> tiktok shop=7496054762932308455 days≈7 ge=1768435200 lt=1769040000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 4, "already_in_ledger": 0, "staged": 4, "stage_errors": 0, "detail_fetched_target": 4, "error": null, "duration_ms": 1948}
+
+02:16:42 ==> tiktok shop=7496054762932308455 days≈7 ge=1769040000 lt=1769644800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 1507}
+
+02:16:54 ==> tiktok shop=7496054762932308455 days≈7 ge=1769644800 lt=1770249600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 4, "already_in_ledger": 0, "staged": 4, "stage_errors": 0, "detail_fetched_target": 4, "error": null, "duration_ms": 2036}
+
+02:17:06 ==> tiktok shop=7496054762932308455 days≈7 ge=1770249600 lt=1770854400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 4, "already_in_ledger": 0, "staged": 4, "stage_errors": 0, "detail_fetched_target": 4, "error": null, "duration_ms": 1920}
+
+02:17:19 ==> tiktok shop=7496054762932308455 days≈7 ge=1770854400 lt=1771459200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 1, "already_in_ledger": 0, "staged": 1, "stage_errors": 0, "detail_fetched_target": 1, "error": null, "duration_ms": 1882}
+
+02:17:31 ==> tiktok shop=7496054762932308455 days≈7 ge=1771459200 lt=1772064000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 1876}
+
+02:17:43 ==> tiktok shop=7496054762932308455 days≈7 ge=1772064000 lt=1772668800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 2, "already_in_ledger": 0, "staged": 2, "stage_errors": 0, "detail_fetched_target": 2, "error": null, "duration_ms": 1648}
+
+02:17:55 ==> tiktok shop=7496054762932308455 days≈7 ge=1772668800 lt=1773273600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 2150}
+
+02:18:07 ==> tiktok shop=7496054762932308455 days≈7 ge=1773273600 lt=1773878400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 2, "already_in_ledger": 0, "staged": 2, "stage_errors": 0, "detail_fetched_target": 2, "error": null, "duration_ms": 1598}
+
+02:18:19 ==> tiktok shop=7496054762932308455 days≈7 ge=1773878400 lt=1774483200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 7, "already_in_ledger": 0, "staged": 7, "stage_errors": 0, "detail_fetched_target": 7, "error": null, "duration_ms": 2726}
+
+02:18:32 ==> tiktok shop=7496054762932308455 days≈7 ge=1774483200 lt=1775088000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 1380}
+
+02:18:44 ==> tiktok shop=7496054762932308455 days≈7 ge=1775088000 lt=1775692800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 7, "already_in_ledger": 0, "staged": 7, "stage_errors": 0, "detail_fetched_target": 7, "error": null, "duration_ms": 1784}
+
+02:18:56 ==> tiktok shop=7496054762932308455 days≈7 ge=1775692800 lt=1776297600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 0, "already_in_ledger": 0, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 135}
+
+02:19:06 ==> tiktok shop=7496054762932308455 days≈7 ge=1776297600 lt=1776902400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 7, "already_in_ledger": 0, "staged": 7, "stage_errors": 0, "detail_fetched_target": 7, "error": null, "duration_ms": 1928}
+
+02:19:18 ==> tiktok shop=7496054762932308455 days≈7 ge=1776902400 lt=1777507200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 10, "already_in_ledger": 0, "staged": 10, "stage_errors": 0, "detail_fetched_target": 10, "error": null, "duration_ms": 2247}
+
+02:19:31 ==> tiktok shop=7496054762932308455 days≈7 ge=1777507200 lt=1778112000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 8, "already_in_ledger": 0, "staged": 8, "stage_errors": 0, "detail_fetched_target": 8, "error": null, "duration_ms": 2270}
+
+02:19:43 ==> tiktok shop=7496054762932308455 days≈7 ge=1778112000 lt=1778716800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 17, "already_in_ledger": 0, "staged": 17, "stage_errors": 0, "detail_fetched_target": 17, "error": null, "duration_ms": 2363}
+
+02:19:56 ==> tiktok shop=7496054762932308455 days≈7 ge=1778716800 lt=1779321600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 5, "already_in_ledger": 0, "staged": 5, "stage_errors": 0, "detail_fetched_target": 5, "error": null, "duration_ms": 2178}
+
+02:20:08 ==> tiktok shop=7496054762932308455 days≈7 ge=1779321600 lt=1779926400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 9, "already_in_ledger": 0, "staged": 9, "stage_errors": 0, "detail_fetched_target": 9, "error": null, "duration_ms": 2247}
+
+02:20:21 ==> tiktok shop=7496054762932308455 days≈7 ge=1779926400 lt=1780531200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 10, "already_in_ledger": 0, "staged": 10, "stage_errors": 0, "detail_fetched_target": 10, "error": null, "duration_ms": 2236}
+
+02:20:33 ==> tiktok shop=7496054762932308455 days≈7 ge=1780531200 lt=1781136000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 16, "already_in_ledger": 0, "staged": 16, "stage_errors": 0, "detail_fetched_target": 16, "error": null, "duration_ms": 2659}
+
+02:20:46 ==> tiktok shop=7496054762932308455 days≈7 ge=1781136000 lt=1781740800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 6, "already_in_ledger": 0, "staged": 6, "stage_errors": 0, "detail_fetched_target": 6, "error": null, "duration_ms": 1752}
+
+02:20:58 ==> tiktok shop=7496054762932308455 days≈7 ge=1781740800 lt=1782345600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 6, "already_in_ledger": 0, "staged": 6, "stage_errors": 0, "detail_fetched_target": 6, "error": null, "duration_ms": 1910}
+
+02:21:10 ==> tiktok shop=7496054762932308455 days≈7 ge=1782345600 lt=1782950400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 8, "already_in_ledger": 3, "staged": 5, "stage_errors": 0, "detail_fetched_target": 5, "error": null, "duration_ms": 1960}
+
+02:21:23 ==> tiktok shop=7496054762932308455 days≈7 ge=1782950400 lt=1783555200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 8, "already_in_ledger": 7, "staged": 1, "stage_errors": 0, "detail_fetched_target": 1, "error": null, "duration_ms": 1974}
+
+02:21:35 ==> tiktok shop=7496054762932308455 days≈7 ge=1783555200 lt=1784160000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 7, "already_in_ledger": 7, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 2187}
+
+02:21:47 ==> tiktok shop=7496054762932308455 days≈7 ge=1784160000 lt=1784764800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 7, "already_in_ledger": 7, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 1094}
+
+02:21:59 ==> tiktok shop=7496054762932308455 days≈7 ge=1784764800 lt=1785369600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 7, "already_in_ledger": 7, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 704}
+
+02:22:10 ==> tiktok shop=7496054762932308455 days≈7 ge=1785369600 lt=1785974400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 8, "already_in_ledger": 8, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 569}
+
+02:22:20 ==> tiktok shop=7496054762932308455 days≈1 ge=1785974400 lt=1785982567 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 0, "already_in_ledger": 0, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 263}
+
+02:22:31 ==> promote drain SleepingCloud tiktok
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 146, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 0, "batch_size": 500, "skipped_exists": 0}
+promote idle after 2 round(s)
+######## SleepingCloud shopee 2026-08-06T02:22:34Z ########
+02:22:34 ==> shopee shop=1420214577 days≈15 ge=1767225600 lt=1768521600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 142, "already_in_ledger": 0, "staged": 142, "stage_errors": 0, "detail_fetched_target": 142, "error": null, "duration_ms": 21790}
+
+02:23:07 ==> shopee shop=1420214577 days≈15 ge=1768521600 lt=1769817600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 142, "already_in_ledger": 0, "staged": 142, "stage_errors": 0, "detail_fetched_target": 142, "error": null, "duration_ms": 22821}
+
+02:23:41 ==> shopee shop=1420214577 days≈15 ge=1769817600 lt=1771113600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 137, "already_in_ledger": 0, "staged": 137, "stage_errors": 0, "detail_fetched_target": 137, "error": null, "duration_ms": 20809}
+
+02:24:12 ==> shopee shop=1420214577 days≈15 ge=1771113600 lt=1772409600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 161, "already_in_ledger": 0, "staged": 161, "stage_errors": 0, "detail_fetched_target": 161, "error": null, "duration_ms": 24982}
+
+02:24:47 ==> shopee shop=1420214577 days≈15 ge=1772409600 lt=1773705600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 163, "already_in_ledger": 0, "staged": 163, "stage_errors": 0, "detail_fetched_target": 163, "error": null, "duration_ms": 25124}
+
+02:25:22 ==> shopee shop=1420214577 days≈15 ge=1773705600 lt=1775001600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 143, "already_in_ledger": 0, "staged": 143, "stage_errors": 0, "detail_fetched_target": 143, "error": null, "duration_ms": 21552}
+
+02:25:54 ==> shopee shop=1420214577 days≈15 ge=1775001600 lt=1776297600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 173, "already_in_ledger": 0, "staged": 173, "stage_errors": 0, "detail_fetched_target": 173, "error": null, "duration_ms": 27418}
+
+02:26:32 ==> shopee shop=1420214577 days≈15 ge=1776297600 lt=1777593600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 168, "already_in_ledger": 0, "staged": 168, "stage_errors": 0, "detail_fetched_target": 168, "error": null, "duration_ms": 26418}
+
+02:27:08 ==> shopee shop=1420214577 days≈15 ge=1777593600 lt=1778889600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 269, "already_in_ledger": 0, "staged": 269, "stage_errors": 0, "detail_fetched_target": 269, "error": null, "duration_ms": 41158}
+
+02:28:00 ==> shopee shop=1420214577 days≈15 ge=1778889600 lt=1780185600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 227, "already_in_ledger": 0, "staged": 227, "stage_errors": 0, "detail_fetched_target": 227, "error": null, "duration_ms": 33686}
+
+02:28:44 ==> shopee shop=1420214577 days≈15 ge=1780185600 lt=1781481600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 277, "already_in_ledger": 0, "staged": 277, "stage_errors": 0, "detail_fetched_target": 277, "error": null, "duration_ms": 42813}
+
+02:29:37 ==> shopee shop=1420214577 days≈15 ge=1781481600 lt=1782777600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 233, "already_in_ledger": 0, "staged": 233, "stage_errors": 0, "detail_fetched_target": 233, "error": null, "duration_ms": 35598}
+
+02:30:23 ==> shopee shop=1420214577 days≈15 ge=1782777600 lt=1784073600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 265, "already_in_ledger": 0, "staged": 265, "stage_errors": 0, "detail_fetched_target": 265, "error": null, "duration_ms": 40881}
+
+02:31:15 ==> shopee shop=1420214577 days≈15 ge=1784073600 lt=1785369600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 328, "already_in_ledger": 4, "staged": 324, "stage_errors": 0, "detail_fetched_target": 324, "error": null, "duration_ms": 47872}
+
+02:32:13 ==> shopee shop=1420214577 days≈8 ge=1785369600 lt=1785982567 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 132, "already_in_ledger": 81, "staged": 51, "stage_errors": 0, "detail_fetched_target": 51, "error": null, "duration_ms": 13854}
+
+02:32:37 ==> promote drain SleepingCloud shopee
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 375, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 0, "batch_size": 500, "skipped_exists": 0}
+promote idle after 7 round(s)
+######## SleepingCloud lazada 2026-08-06T02:33:05Z ########
+02:33:05 ==> lazada shop=101014448309 days≈7 ge=1767225600 lt=1767830400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 27, "already_in_ledger": 0, "staged": 27, "stage_errors": 0, "detail_fetched_target": 27, "error": null, "duration_ms": 27889}
+
+02:33:43 ==> lazada shop=101014448309 days≈7 ge=1767830400 lt=1768435200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 23, "already_in_ledger": 0, "staged": 23, "stage_errors": 0, "detail_fetched_target": 23, "error": null, "duration_ms": 23865}
+
+02:34:17 ==> lazada shop=101014448309 days≈7 ge=1768435200 lt=1769040000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 24, "already_in_ledger": 0, "staged": 24, "stage_errors": 0, "detail_fetched_target": 24, "error": null, "duration_ms": 24220}
+
+02:34:52 ==> lazada shop=101014448309 days≈7 ge=1769040000 lt=1769644800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 19, "already_in_ledger": 0, "staged": 19, "stage_errors": 0, "detail_fetched_target": 19, "error": null, "duration_ms": 19364}
+
+02:35:21 ==> lazada shop=101014448309 days≈7 ge=1769644800 lt=1770249600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 30, "already_in_ledger": 0, "staged": 30, "stage_errors": 0, "detail_fetched_target": 30, "error": null, "duration_ms": 34527}
+
+02:36:06 ==> lazada shop=101014448309 days≈7 ge=1770249600 lt=1770854400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 19, "already_in_ledger": 0, "staged": 19, "stage_errors": 0, "detail_fetched_target": 19, "error": null, "duration_ms": 19260}
+
+02:36:36 ==> lazada shop=101014448309 days≈7 ge=1770854400 lt=1771459200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 32, "already_in_ledger": 0, "staged": 32, "stage_errors": 0, "detail_fetched_target": 32, "error": null, "duration_ms": 32560}
+
+02:37:19 ==> lazada shop=101014448309 days≈7 ge=1771459200 lt=1772064000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 30, "already_in_ledger": 0, "staged": 30, "stage_errors": 0, "detail_fetched_target": 30, "error": null, "duration_ms": 30167}
+
+02:37:59 ==> lazada shop=101014448309 days≈7 ge=1772064000 lt=1772668800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 66, "already_in_ledger": 0, "staged": 66, "stage_errors": 0, "detail_fetched_target": 66, "error": null, "duration_ms": 66672}
+
+02:39:16 ==> lazada shop=101014448309 days≈7 ge=1772668800 lt=1773273600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 49, "already_in_ledger": 0, "staged": 49, "stage_errors": 0, "detail_fetched_target": 49, "error": null, "duration_ms": 48687}
+
+02:40:15 ==> lazada shop=101014448309 days≈7 ge=1773273600 lt=1773878400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 33, "already_in_ledger": 0, "staged": 33, "stage_errors": 0, "detail_fetched_target": 33, "error": null, "duration_ms": 33367}
+
+02:40:59 ==> lazada shop=101014448309 days≈7 ge=1773878400 lt=1774483200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 31, "already_in_ledger": 0, "staged": 31, "stage_errors": 0, "detail_fetched_target": 31, "error": null, "duration_ms": 31918}
+
+02:41:41 ==> lazada shop=101014448309 days≈7 ge=1774483200 lt=1775088000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 39, "already_in_ledger": 0, "staged": 39, "stage_errors": 0, "detail_fetched_target": 39, "error": null, "duration_ms": 39412}
+
+02:42:30 ==> lazada shop=101014448309 days≈7 ge=1775088000 lt=1775692800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 41, "already_in_ledger": 0, "staged": 41, "stage_errors": 0, "detail_fetched_target": 41, "error": null, "duration_ms": 41784}
+
+02:43:23 ==> lazada shop=101014448309 days≈7 ge=1775692800 lt=1776297600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 40, "already_in_ledger": 0, "staged": 40, "stage_errors": 0, "detail_fetched_target": 40, "error": null, "duration_ms": 42427}
+
+02:44:15 ==> lazada shop=101014448309 days≈7 ge=1776297600 lt=1776902400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 35, "already_in_ledger": 0, "staged": 35, "stage_errors": 0, "detail_fetched_target": 35, "error": null, "duration_ms": 34866}
+
+02:45:00 ==> lazada shop=101014448309 days≈7 ge=1776902400 lt=1777507200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 39, "already_in_ledger": 0, "staged": 39, "stage_errors": 0, "detail_fetched_target": 39, "error": null, "duration_ms": 39024}
+
+02:45:50 ==> lazada shop=101014448309 days≈7 ge=1777507200 lt=1778112000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 48, "already_in_ledger": 0, "staged": 48, "stage_errors": 0, "detail_fetched_target": 48, "error": null, "duration_ms": 49672}
+
+02:46:50 ==> lazada shop=101014448309 days≈7 ge=1778112000 lt=1778716800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 47, "already_in_ledger": 0, "staged": 47, "stage_errors": 0, "detail_fetched_target": 47, "error": null, "duration_ms": 46794}
+
+02:47:47 ==> lazada shop=101014448309 days≈7 ge=1778716800 lt=1779321600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 51, "already_in_ledger": 0, "staged": 51, "stage_errors": 0, "detail_fetched_target": 51, "error": null, "duration_ms": 51986}
+
+02:48:49 ==> lazada shop=101014448309 days≈7 ge=1779321600 lt=1779926400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 29, "already_in_ledger": 0, "staged": 29, "stage_errors": 0, "detail_fetched_target": 29, "error": null, "duration_ms": 29634}
+
+02:49:29 ==> lazada shop=101014448309 days≈7 ge=1779926400 lt=1780531200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 53, "already_in_ledger": 0, "staged": 53, "stage_errors": 0, "detail_fetched_target": 53, "error": null, "duration_ms": 53726}
+
+02:50:33 ==> lazada shop=101014448309 days≈7 ge=1780531200 lt=1781136000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 81, "already_in_ledger": 0, "staged": 81, "stage_errors": 0, "detail_fetched_target": 81, "error": null, "duration_ms": 80574}
+
+02:52:04 ==> lazada shop=101014448309 days≈7 ge=1781136000 lt=1781740800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 31, "already_in_ledger": 0, "staged": 31, "stage_errors": 0, "detail_fetched_target": 31, "error": null, "duration_ms": 31584}
+
+02:52:46 ==> lazada shop=101014448309 days≈7 ge=1781740800 lt=1782345600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 42, "already_in_ledger": 0, "staged": 42, "stage_errors": 0, "detail_fetched_target": 42, "error": null, "duration_ms": 42185}
+
+02:53:39 ==> lazada shop=101014448309 days≈7 ge=1782345600 lt=1782950400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 28, "already_in_ledger": 0, "staged": 28, "stage_errors": 0, "detail_fetched_target": 28, "error": null, "duration_ms": 28612}
+
+02:54:18 ==> lazada shop=101014448309 days≈7 ge=1782950400 lt=1783555200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 63, "already_in_ledger": 0, "staged": 63, "stage_errors": 0, "detail_fetched_target": 63, "error": null, "duration_ms": 66302}
+
+02:55:34 ==> lazada shop=101014448309 days≈7 ge=1783555200 lt=1784160000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 46, "already_in_ledger": 0, "staged": 46, "stage_errors": 0, "detail_fetched_target": 46, "error": null, "duration_ms": 46574}
+
+02:56:31 ==> lazada shop=101014448309 days≈7 ge=1784160000 lt=1784764800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 38, "already_in_ledger": 0, "staged": 38, "stage_errors": 0, "detail_fetched_target": 38, "error": null, "duration_ms": 38248}
+
+02:57:19 ==> lazada shop=101014448309 days≈7 ge=1784764800 lt=1785369600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 53, "already_in_ledger": 0, "staged": 53, "stage_errors": 0, "detail_fetched_target": 53, "error": null, "duration_ms": 55726}
+
+02:58:25 ==> lazada shop=101014448309 days≈7 ge=1785369600 lt=1785974400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 64, "already_in_ledger": 23, "staged": 41, "stage_errors": 0, "detail_fetched_target": 41, "error": null, "duration_ms": 41756}
+
+02:59:17 ==> lazada shop=101014448309 days≈1 ge=1785974400 lt=1785982567 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 0, "already_in_ledger": 0, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 167}
+
+02:59:28 ==> promote drain SleepingCloud lazada
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 228, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 0, "batch_size": 500, "skipped_exists": 0}
+promote idle after 4 round(s)
+######## GrandCru tiktok 2026-08-06T02:59:41Z ########
+02:59:41 ==> tiktok shop=7495742491657210722 days≈7 ge=1767225600 lt=1767830400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 21, "already_in_ledger": 0, "staged": 21, "stage_errors": 0, "detail_fetched_target": 21, "error": null, "duration_ms": 2410}
+
+02:59:54 ==> tiktok shop=7495742491657210722 days≈7 ge=1767830400 lt=1768435200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 36, "already_in_ledger": 0, "staged": 36, "stage_errors": 0, "detail_fetched_target": 36, "error": null, "duration_ms": 4453}
+
+03:00:08 ==> tiktok shop=7495742491657210722 days≈7 ge=1768435200 lt=1769040000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 28, "already_in_ledger": 0, "staged": 28, "stage_errors": 0, "detail_fetched_target": 28, "error": null, "duration_ms": 3571}
+
+03:00:22 ==> tiktok shop=7495742491657210722 days≈7 ge=1769040000 lt=1769644800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 27, "already_in_ledger": 0, "staged": 27, "stage_errors": 0, "detail_fetched_target": 27, "error": null, "duration_ms": 4128}
+
+03:00:37 ==> tiktok shop=7495742491657210722 days≈7 ge=1769644800 lt=1770249600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 33, "already_in_ledger": 0, "staged": 33, "stage_errors": 0, "detail_fetched_target": 33, "error": null, "duration_ms": 3013}
+
+03:00:50 ==> tiktok shop=7495742491657210722 days≈7 ge=1770249600 lt=1770854400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 42, "already_in_ledger": 0, "staged": 42, "stage_errors": 0, "detail_fetched_target": 42, "error": null, "duration_ms": 4219}
+
+03:01:04 ==> tiktok shop=7495742491657210722 days≈7 ge=1770854400 lt=1771459200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 28, "already_in_ledger": 0, "staged": 28, "stage_errors": 0, "detail_fetched_target": 28, "error": null, "duration_ms": 2863}
+
+03:01:17 ==> tiktok shop=7495742491657210722 days≈7 ge=1771459200 lt=1772064000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 80, "already_in_ledger": 0, "staged": 80, "stage_errors": 0, "detail_fetched_target": 80, "error": null, "duration_ms": 8480}
+
+03:01:36 ==> tiktok shop=7495742491657210722 days≈7 ge=1772064000 lt=1772668800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 94, "already_in_ledger": 0, "staged": 94, "stage_errors": 0, "detail_fetched_target": 94, "error": null, "duration_ms": 8006}
+
+03:01:54 ==> tiktok shop=7495742491657210722 days≈7 ge=1772668800 lt=1773273600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 85, "already_in_ledger": 0, "staged": 85, "stage_errors": 0, "detail_fetched_target": 85, "error": null, "duration_ms": 8499}
+
+03:02:13 ==> tiktok shop=7495742491657210722 days≈7 ge=1773273600 lt=1773878400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 47, "already_in_ledger": 0, "staged": 47, "stage_errors": 0, "detail_fetched_target": 47, "error": null, "duration_ms": 4662}
+
+03:02:28 ==> tiktok shop=7495742491657210722 days≈7 ge=1773878400 lt=1774483200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 122, "already_in_ledger": 0, "staged": 122, "stage_errors": 0, "detail_fetched_target": 122, "error": null, "duration_ms": 13834}
+
+03:02:52 ==> tiktok shop=7495742491657210722 days≈7 ge=1774483200 lt=1775088000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 128, "already_in_ledger": 0, "staged": 128, "stage_errors": 0, "detail_fetched_target": 128, "error": null, "duration_ms": 12410}
+
+03:03:15 ==> tiktok shop=7495742491657210722 days≈7 ge=1775088000 lt=1775692800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 211, "already_in_ledger": 0, "staged": 211, "stage_errors": 0, "detail_fetched_target": 211, "error": null, "duration_ms": 21196}
+
+03:03:46 ==> tiktok shop=7495742491657210722 days≈7 ge=1775692800 lt=1776297600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 113, "already_in_ledger": 0, "staged": 113, "stage_errors": 0, "detail_fetched_target": 113, "error": null, "duration_ms": 12126}
+
+03:04:09 ==> tiktok shop=7495742491657210722 days≈7 ge=1776297600 lt=1776902400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 128, "already_in_ledger": 0, "staged": 128, "stage_errors": 0, "detail_fetched_target": 128, "error": null, "duration_ms": 13847}
+
+03:04:33 ==> tiktok shop=7495742491657210722 days≈7 ge=1776902400 lt=1777507200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 83, "already_in_ledger": 0, "staged": 83, "stage_errors": 0, "detail_fetched_target": 83, "error": null, "duration_ms": 9041}
+
+03:04:52 ==> tiktok shop=7495742491657210722 days≈7 ge=1777507200 lt=1778112000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 45, "already_in_ledger": 0, "staged": 45, "stage_errors": 0, "detail_fetched_target": 45, "error": null, "duration_ms": 3486}
+
+03:05:06 ==> tiktok shop=7495742491657210722 days≈7 ge=1778112000 lt=1778716800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 46, "already_in_ledger": 0, "staged": 46, "stage_errors": 0, "detail_fetched_target": 46, "error": null, "duration_ms": 4735}
+
+03:05:21 ==> tiktok shop=7495742491657210722 days≈7 ge=1778716800 lt=1779321600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 37, "already_in_ledger": 0, "staged": 37, "stage_errors": 0, "detail_fetched_target": 37, "error": null, "duration_ms": 3532}
+
+03:05:34 ==> tiktok shop=7495742491657210722 days≈7 ge=1779321600 lt=1779926400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 33, "already_in_ledger": 0, "staged": 33, "stage_errors": 0, "detail_fetched_target": 33, "error": null, "duration_ms": 3525}
+
+03:05:48 ==> tiktok shop=7495742491657210722 days≈7 ge=1779926400 lt=1780531200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 33, "already_in_ledger": 0, "staged": 33, "stage_errors": 0, "detail_fetched_target": 33, "error": null, "duration_ms": 3637}
+
+03:06:02 ==> tiktok shop=7495742491657210722 days≈7 ge=1780531200 lt=1781136000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 36, "already_in_ledger": 0, "staged": 36, "stage_errors": 0, "detail_fetched_target": 36, "error": null, "duration_ms": 3969}
+
+03:06:16 ==> tiktok shop=7495742491657210722 days≈7 ge=1781136000 lt=1781740800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 31, "already_in_ledger": 0, "staged": 31, "stage_errors": 0, "detail_fetched_target": 31, "error": null, "duration_ms": 2874}
+
+03:06:30 ==> tiktok shop=7495742491657210722 days≈7 ge=1781740800 lt=1782345600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 32, "already_in_ledger": 0, "staged": 32, "stage_errors": 0, "detail_fetched_target": 32, "error": null, "duration_ms": 3826}
+
+03:06:44 ==> tiktok shop=7495742491657210722 days≈7 ge=1782345600 lt=1782950400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 13, "already_in_ledger": 0, "staged": 13, "stage_errors": 0, "detail_fetched_target": 13, "error": null, "duration_ms": 2131}
+
+03:06:56 ==> tiktok shop=7495742491657210722 days≈7 ge=1782950400 lt=1783555200 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 23, "already_in_ledger": 0, "staged": 23, "stage_errors": 0, "detail_fetched_target": 23, "error": null, "duration_ms": 2961}
+
+03:07:09 ==> tiktok shop=7495742491657210722 days≈7 ge=1783555200 lt=1784160000 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 14, "already_in_ledger": 0, "staged": 14, "stage_errors": 0, "detail_fetched_target": 14, "error": null, "duration_ms": 2360}
+
+03:07:22 ==> tiktok shop=7495742491657210722 days≈7 ge=1784160000 lt=1784764800 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 10, "already_in_ledger": 0, "staged": 10, "stage_errors": 0, "detail_fetched_target": 10, "error": null, "duration_ms": 1954}
+
+03:07:34 ==> tiktok shop=7495742491657210722 days≈7 ge=1784764800 lt=1785369600 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 16, "already_in_ledger": 7, "staged": 9, "stage_errors": 0, "detail_fetched_target": 9, "error": null, "duration_ms": 2027}
+
+03:07:46 ==> tiktok shop=7495742491657210722 days≈7 ge=1785369600 lt=1785974400 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 16, "already_in_ledger": 7, "staged": 9, "stage_errors": 0, "detail_fetched_target": 9, "error": null, "duration_ms": 2327}
+
+03:07:59 ==> tiktok shop=7495742491657210722 days≈1 ge=1785974400 lt=1785982567 dry_run=false
+{"success": true, "platform": "tiktok", "orders_listed": 0, "already_in_ledger": 0, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 295}
+
+03:08:10 ==> promote drain GrandCru tiktok
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 177, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 0, "batch_size": 500, "skipped_exists": 0}
+promote idle after 5 round(s)
+######## GrandCru shopee 2026-08-06T03:08:28Z ########
+03:08:28 ==> shopee shop=364905051 days≈15 ge=1767225600 lt=1768521600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 127, "already_in_ledger": 0, "staged": 127, "stage_errors": 0, "detail_fetched_target": 127, "error": null, "duration_ms": 21317}
+
+03:09:00 ==> shopee shop=364905051 days≈15 ge=1768521600 lt=1769817600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 122, "already_in_ledger": 0, "staged": 122, "stage_errors": 0, "detail_fetched_target": 122, "error": null, "duration_ms": 20154}
+
+03:09:30 ==> shopee shop=364905051 days≈15 ge=1769817600 lt=1771113600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 165, "already_in_ledger": 0, "staged": 165, "stage_errors": 0, "detail_fetched_target": 165, "error": null, "duration_ms": 27438}
+
+03:10:08 ==> shopee shop=364905051 days≈15 ge=1771113600 lt=1772409600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 212, "already_in_ledger": 0, "staged": 212, "stage_errors": 0, "detail_fetched_target": 212, "error": null, "duration_ms": 38024}
+
+03:10:56 ==> shopee shop=364905051 days≈15 ge=1772409600 lt=1773705600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 278, "already_in_ledger": 0, "staged": 278, "stage_errors": 0, "detail_fetched_target": 278, "error": null, "duration_ms": 42697}
+
+03:11:49 ==> shopee shop=364905051 days≈15 ge=1773705600 lt=1775001600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 229, "already_in_ledger": 0, "staged": 229, "stage_errors": 0, "detail_fetched_target": 229, "error": null, "duration_ms": 36288}
+
+03:12:36 ==> shopee shop=364905051 days≈15 ge=1775001600 lt=1776297600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 354, "already_in_ledger": 0, "staged": 354, "stage_errors": 0, "detail_fetched_target": 354, "error": null, "duration_ms": 56481}
+
+03:13:43 ==> shopee shop=364905051 days≈15 ge=1776297600 lt=1777593600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 233, "already_in_ledger": 0, "staged": 233, "stage_errors": 0, "detail_fetched_target": 233, "error": null, "duration_ms": 39354}
+
+03:14:32 ==> shopee shop=364905051 days≈15 ge=1777593600 lt=1778889600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 155, "already_in_ledger": 0, "staged": 155, "stage_errors": 0, "detail_fetched_target": 155, "error": null, "duration_ms": 26499}
+
+03:15:09 ==> shopee shop=364905051 days≈15 ge=1778889600 lt=1780185600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 144, "already_in_ledger": 0, "staged": 144, "stage_errors": 0, "detail_fetched_target": 144, "error": null, "duration_ms": 22445}
+
+03:15:42 ==> shopee shop=364905051 days≈15 ge=1780185600 lt=1781481600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 233, "already_in_ledger": 0, "staged": 233, "stage_errors": 0, "detail_fetched_target": 233, "error": null, "duration_ms": 36458}
+
+03:16:29 ==> shopee shop=364905051 days≈15 ge=1781481600 lt=1782777600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 287, "already_in_ledger": 0, "staged": 287, "stage_errors": 0, "detail_fetched_target": 287, "error": null, "duration_ms": 44354}
+
+03:17:24 ==> shopee shop=364905051 days≈15 ge=1782777600 lt=1784073600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 272, "already_in_ledger": 0, "staged": 272, "stage_errors": 0, "detail_fetched_target": 272, "error": null, "duration_ms": 45733}
+
+03:18:20 ==> shopee shop=364905051 days≈15 ge=1784073600 lt=1785369600 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 214, "already_in_ledger": 0, "staged": 214, "stage_errors": 0, "detail_fetched_target": 214, "error": null, "duration_ms": 33451}
+
+03:19:03 ==> shopee shop=364905051 days≈8 ge=1785369600 lt=1785982567 dry_run=false
+{"success": true, "platform": "shopee", "orders_listed": 90, "already_in_ledger": 34, "staged": 56, "stage_errors": 0, "detail_fetched_target": 56, "error": null, "duration_ms": 10826}
+
+03:19:25 ==> promote drain GrandCru shopee
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 500, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 81, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 0, "batch_size": 500, "skipped_exists": 0}
+promote idle after 8 round(s)
+######## GrandCru lazada 2026-08-06T03:19:52Z ########
+03:19:52 ==> lazada shop=100128462 days≈7 ge=1767225600 lt=1767830400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 8, "already_in_ledger": 0, "staged": 8, "stage_errors": 0, "detail_fetched_target": 8, "error": null, "duration_ms": 8493}
+
+03:20:11 ==> lazada shop=100128462 days≈7 ge=1767830400 lt=1768435200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 3596}
+
+03:20:25 ==> lazada shop=100128462 days≈7 ge=1768435200 lt=1769040000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 3613}
+
+03:20:39 ==> lazada shop=100128462 days≈7 ge=1769040000 lt=1769644800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 6, "already_in_ledger": 0, "staged": 6, "stage_errors": 0, "detail_fetched_target": 6, "error": null, "duration_ms": 7043}
+
+03:20:56 ==> lazada shop=100128462 days≈7 ge=1769644800 lt=1770249600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 6, "already_in_ledger": 0, "staged": 6, "stage_errors": 0, "detail_fetched_target": 6, "error": null, "duration_ms": 6951}
+
+03:21:13 ==> lazada shop=100128462 days≈7 ge=1770249600 lt=1770854400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 10, "already_in_ledger": 0, "staged": 10, "stage_errors": 0, "detail_fetched_target": 10, "error": null, "duration_ms": 10248}
+
+03:21:34 ==> lazada shop=100128462 days≈7 ge=1770854400 lt=1771459200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 3693}
+
+03:21:48 ==> lazada shop=100128462 days≈7 ge=1771459200 lt=1772064000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 8, "already_in_ledger": 0, "staged": 8, "stage_errors": 0, "detail_fetched_target": 8, "error": null, "duration_ms": 8654}
+
+03:22:07 ==> lazada shop=100128462 days≈7 ge=1772064000 lt=1772668800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 16, "already_in_ledger": 0, "staged": 16, "stage_errors": 0, "detail_fetched_target": 16, "error": null, "duration_ms": 16609}
+
+03:22:34 ==> lazada shop=100128462 days≈7 ge=1772668800 lt=1773273600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 15, "already_in_ledger": 0, "staged": 15, "stage_errors": 0, "detail_fetched_target": 15, "error": null, "duration_ms": 15038}
+
+03:22:59 ==> lazada shop=100128462 days≈7 ge=1773273600 lt=1773878400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 4, "already_in_ledger": 0, "staged": 4, "stage_errors": 0, "detail_fetched_target": 4, "error": null, "duration_ms": 4404}
+
+03:23:14 ==> lazada shop=100128462 days≈7 ge=1773878400 lt=1774483200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 17, "already_in_ledger": 0, "staged": 17, "stage_errors": 0, "detail_fetched_target": 17, "error": null, "duration_ms": 17725}
+
+03:23:42 ==> lazada shop=100128462 days≈7 ge=1774483200 lt=1775088000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 11, "already_in_ledger": 0, "staged": 11, "stage_errors": 0, "detail_fetched_target": 11, "error": null, "duration_ms": 11872}
+
+03:24:04 ==> lazada shop=100128462 days≈7 ge=1775088000 lt=1775692800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 17, "already_in_ledger": 0, "staged": 17, "stage_errors": 0, "detail_fetched_target": 17, "error": null, "duration_ms": 17620}
+
+03:24:32 ==> lazada shop=100128462 days≈7 ge=1775692800 lt=1776297600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 7, "already_in_ledger": 0, "staged": 7, "stage_errors": 0, "detail_fetched_target": 7, "error": null, "duration_ms": 7729}
+
+03:24:50 ==> lazada shop=100128462 days≈7 ge=1776297600 lt=1776902400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 10, "already_in_ledger": 0, "staged": 10, "stage_errors": 0, "detail_fetched_target": 10, "error": null, "duration_ms": 10269}
+
+03:25:10 ==> lazada shop=100128462 days≈7 ge=1776902400 lt=1777507200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 7, "already_in_ledger": 0, "staged": 7, "stage_errors": 0, "detail_fetched_target": 7, "error": null, "duration_ms": 7686}
+
+03:25:28 ==> lazada shop=100128462 days≈7 ge=1777507200 lt=1778112000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 6, "already_in_ledger": 0, "staged": 6, "stage_errors": 0, "detail_fetched_target": 6, "error": null, "duration_ms": 6969}
+
+03:25:45 ==> lazada shop=100128462 days≈7 ge=1778112000 lt=1778716800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 0, "already_in_ledger": 0, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 360}
+
+03:25:56 ==> lazada shop=100128462 days≈7 ge=1778716800 lt=1779321600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 2, "already_in_ledger": 0, "staged": 2, "stage_errors": 0, "detail_fetched_target": 2, "error": null, "duration_ms": 2972}
+
+03:26:09 ==> lazada shop=100128462 days≈7 ge=1779321600 lt=1779926400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 7, "already_in_ledger": 0, "staged": 7, "stage_errors": 0, "detail_fetched_target": 7, "error": null, "duration_ms": 7850}
+
+03:26:27 ==> lazada shop=100128462 days≈7 ge=1779926400 lt=1780531200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 3792}
+
+03:26:41 ==> lazada shop=100128462 days≈7 ge=1780531200 lt=1781136000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 9, "already_in_ledger": 0, "staged": 9, "stage_errors": 0, "detail_fetched_target": 9, "error": null, "duration_ms": 9342}
+
+03:27:01 ==> lazada shop=100128462 days≈7 ge=1781136000 lt=1781740800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 7, "already_in_ledger": 0, "staged": 7, "stage_errors": 0, "detail_fetched_target": 7, "error": null, "duration_ms": 7749}
+
+03:27:19 ==> lazada shop=100128462 days≈7 ge=1781740800 lt=1782345600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 3, "already_in_ledger": 0, "staged": 3, "stage_errors": 0, "detail_fetched_target": 3, "error": null, "duration_ms": 3691}
+
+03:27:33 ==> lazada shop=100128462 days≈7 ge=1782345600 lt=1782950400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 8, "already_in_ledger": 0, "staged": 8, "stage_errors": 0, "detail_fetched_target": 8, "error": null, "duration_ms": 8450}
+
+03:27:52 ==> lazada shop=100128462 days≈7 ge=1782950400 lt=1783555200 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 6, "already_in_ledger": 0, "staged": 6, "stage_errors": 0, "detail_fetched_target": 6, "error": null, "duration_ms": 6837}
+
+03:28:09 ==> lazada shop=100128462 days≈7 ge=1783555200 lt=1784160000 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 1, "already_in_ledger": 0, "staged": 1, "stage_errors": 0, "detail_fetched_target": 1, "error": null, "duration_ms": 2101}
+
+03:28:21 ==> lazada shop=100128462 days≈7 ge=1784160000 lt=1784764800 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 2, "already_in_ledger": 0, "staged": 2, "stage_errors": 0, "detail_fetched_target": 2, "error": null, "duration_ms": 2775}
+
+03:28:34 ==> lazada shop=100128462 days≈7 ge=1784764800 lt=1785369600 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 4, "already_in_ledger": 0, "staged": 4, "stage_errors": 0, "detail_fetched_target": 4, "error": null, "duration_ms": 4269}
+
+03:28:49 ==> lazada shop=100128462 days≈7 ge=1785369600 lt=1785974400 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 3, "already_in_ledger": 2, "staged": 1, "stage_errors": 0, "detail_fetched_target": 1, "error": null, "duration_ms": 2014}
+
+03:29:01 ==> lazada shop=100128462 days≈1 ge=1785974400 lt=1785982567 dry_run=false
+{"success": true, "platform": "lazada", "orders_listed": 0, "already_in_ledger": 0, "staged": 0, "stage_errors": 0, "detail_fetched_target": 0, "error": null, "duration_ms": 149}
+
+03:29:11 ==> promote drain GrandCru lazada
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 210, "batch_size": 500, "skipped_exists": 0}
+{"code": "PROMOTE_BATCH", "errors": 0, "success": true, "inserted": 0, "batch_size": 500, "skipped_exists": 0}
+promote idle after 2 round(s)
+DONE 2026-08-06T03:29:14Z

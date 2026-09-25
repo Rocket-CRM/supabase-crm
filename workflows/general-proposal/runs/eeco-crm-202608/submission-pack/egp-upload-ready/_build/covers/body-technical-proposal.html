@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ข้อเสนอทางเทคนิค — บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด</title>
+<style>
+  @font-face {
+    font-family: "Sarabun";
+    src: url("file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/fonts/SarabunRegular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "Sarabun";
+    src: url("file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/fonts/SarabunItalic.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+  }
+  @font-face {
+    font-family: "Sarabun";
+    src: url("file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/fonts/SarabunSemiBold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: "Sarabun";
+    src: url("file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/fonts/SarabunBold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    /* Do NOT use overflow-x:hidden — Chromium PDF clips table right borders */
+    overflow-x: visible;
+    background: #fff;
+    color: #111;
+    font-family: "Sarabun", "TH SarabunPSK", sans-serif !important;
+    font-size: 10pt;
+    line-height: 1.4;
+    letter-spacing: 0 !important;
+  }
+  body, body * {
+    font-family: "Sarabun", "TH SarabunPSK", sans-serif !important;
+    letter-spacing: 0 !important;
+  }
+  main.doc {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 1px 0 0; /* keep 1px border of tables inside the page box */
+    overflow-x: visible;
+  }
+  h1 { font-size: 14pt; font-weight: 700; margin: 0.75rem 0 0.35rem; line-height: 1.25; }
+  h2 { font-size: 12pt; font-weight: 700; margin: 0.7rem 0 0.3rem; line-height: 1.25; }
+  h3 { font-size: 10.5pt; font-weight: 700; margin: 0.55rem 0 0.25rem; line-height: 1.25; }
+  h4 { font-size: 10pt; font-weight: 700; margin: 0.45rem 0 0.2rem; }
+  p, li { font-size: 10pt; margin: 0.22rem 0; }
+  ul, ol { margin: 0.3rem 0 0.3rem 1.05rem; padding: 0; }
+  strong, b { font-weight: 700; }
+
+  .table-wrap {
+    width: calc(100% - 2px);
+    max-width: calc(100% - 2px);
+    margin: 0.45rem 1px 0.65rem 0;
+    overflow: visible;
+  }
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 8.5pt;
+    border: none;
+  }
+  /* Every cell paints its own edges — keep last-column right border
+     (dropping it looked like “cut off at right” when outer stroke clipped). */
+  th, td {
+    border-right: 1px solid #333;
+    border-bottom: 1px solid #333;
+    border-top: 0;
+    border-left: 0;
+    padding: 0.22rem 0.4rem;
+    vertical-align: top;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  tr:first-child > th,
+  tr:first-child > td { border-top: 1px solid #333; }
+  th:first-child, td:first-child { border-left: 1px solid #333; }
+  th { font-weight: 700; background: #f3f3f3; }
+
+  img {
+    display: block;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0.45rem auto 0.65rem;
+    border: 0;
+    background: #fff;
+  }
+  .shot-frame {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0.5rem 0 0.75rem;
+    text-align: center;
+    overflow: visible;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  /* Full capture, scaled to page — never clip with overflow */
+  img.shot {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 200mm;
+    object-fit: contain;
+    object-position: top center;
+    margin: 0 auto;
+    border: 1px solid #e6e7e8;
+    border-radius: 4px;
+    background: #fafbfb;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  figure {
+    margin: 0.45rem 0 0.65rem;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    border: 0;
+  }
+  figure.photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  figure.photo-grid img { margin: 0; width: 100% !important; }
+  figure.exec-diagram {
+    border: 0 !important;
+    background: transparent;
+    box-shadow: none;
+  }
+  figure.exec-diagram img {
+    margin: 0.35rem 0 0.55rem;
+    width: 100% !important;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .mermaid-wrap {
+    margin: 0.55rem 0;
+    padding: 0.25rem 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    text-align: center;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .mermaid-wrap .mermaid {
+    display: inline-block;
+    max-width: 100%;
+  }
+  .mermaid-wrap svg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100% !important;
+    max-height: 200mm !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  pre { font-size: 8.5pt; max-width: 100%; overflow: visible; white-space: pre-wrap; }
+  hr { border: 0; border-top: 1px solid #ddd; margin: 0.7rem 0; }
+
+  @page { size: A4 portrait; }
+  @media print {
+    h1 { break-before: page; break-after: avoid; }
+    main.doc > h1:first-child { break-before: auto; }
+    h2, h3, h4 { break-after: avoid; }
+    figure, .mermaid-wrap, .shot-frame, img.shot { break-inside: avoid; page-break-inside: avoid; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<main class="doc"><h1>ข้อเสนอทางเทคนิค</h1>
+<p><strong>โครงการ:</strong> การพัฒนาระบบบริหารจัดการความสัมพันธ์นักลงทุนและฐานข้อมูลกลาง (CRM &amp; Database Management System)</p>
+<p><strong>หน่วยงานผู้ว่าจ้าง:</strong> สำนักงานคณะกรรมการนโยบายเขตพัฒนาพิเศษภาคตะวันออก (สกพอ.)</p>
+<p><strong>ผู้ยื่นข้อเสนอ:</strong> บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด</p>
+<p><strong>เอกสาร:</strong> ส่วนที่ 2  —  แนวทางเทคนิค การออกแบบระบบ และแผนการส่งมอบ</p>
+<h1>แนะนำบริษัท</h1>
+<p><strong>ผู้ยื่นข้อเสนอ:</strong> บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด</p>
+<p>บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด เป็นผู้ให้บริการซอฟต์แวร์ CRM และระบบบริหารความสัมพันธ์ลูกค้าในประเทศไทย ให้บริการลูกค้าองค์กรมากกว่า <strong>100</strong> ราย และมีทีมเทคนิคมากกว่า <strong>30</strong> คน ขอบเขตงานหลักครอบคลุม CRM แพลตฟอร์มบริการลูกค้า B2C และ B2B ระบบสมาชิก (loyalty) และการตลาดอัตโนมัติ</p>
+<p>บริษัทฯ มีผลงานด้านข้อมูลลูกค้า CRM ระบบสมาชิก และเทคโนโลยีการตลาด ซึ่งแสดงไว้ในหลักฐานประกอบคุณสมบัติและบทคัดจาก MarTech Report ปี 2025 ที่แนบมากับข้อเสนอ</p>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/company-industry-leadership.png" alt="บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด industry leadership and presentations" /></div>
+<figure class="photo-grid">
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/company-office-workspace.png" alt="บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด team at work in the open workspace" /></div>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/company-office-logo-wall.png" alt="บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด office — brand wall and delivery floor" /></div>
+</figure>
+<h2>ความเหมาะสมกับโครงการ CRM ของ สกพอ.</h2>
+<p>บริษัทฯ นำประสบการณ์ด้าน CRM และระบบบริการลูกค้ามาใช้กับโครงการนี้ผ่านองค์ประกอบ 3 ส่วน</p>
+<ul><li><strong>แกน CRM ที่ตั้งค่าได้</strong> รองรับข้อมูลองค์กร บุคคล Activity, Task, Ticket, Pipeline, สิทธิ์ผู้ใช้ และ Audit Trail โดยผู้ดูแลปรับ Stage และ Workflow ตามนโยบายที่เปลี่ยนแปลงได้</li><li><strong>การพัฒนาเฉพาะสำหรับ สกพอ.</strong> ครอบคลุม Investment Journey การส่งต่อข้ามสำนัก SSO EECO การเชื่อมต่อ EEC OSS การควบคุมเอกสารลับ และการโอนย้ายข้อมูลจาก Excel</li><li><strong>ทีมส่งมอบที่ระบุชื่อและความรับผิดชอบ</strong> ครอบคลุมการวิเคราะห์ ออกแบบ พัฒนา ทดสอบ โอนย้าย อบรม และสนับสนุน รายชื่ออยู่ในข้อ 6 และหลักฐานคุณสมบัติอยู่ในภาคผนวก ข</li></ul>
+<h2>หลักฐานประกอบคุณสมบัติผู้ยื่นข้อเสนอ</h2>
+<p>เอกสารประกอบต่อไปนี้ใช้ยืนยันคุณสมบัติของบริษัทฯ และบุคลากรที่เสนอในโครงการ</p>
+<ul><li>เอกสารจดทะเบียน เอกสารการเงิน และเอกสาร e-GP ตาม TOR ข้อ 4.1-4.12</li><li>สัญญา ขอบเขตงาน และหนังสือรับรองผลงาน CRM / การบริหารงาน ที่เข้าข่ายตาม TOR ข้อ 4.13 และภาคผนวก ง</li><li>บทคัดจาก MarTech Report ปี 2025 และหลักฐานขนาดองค์กรที่ได้รับอนุมัติ</li><li>แบบฟอร์มภาคผนวก ข ที่ลงนาม พร้อมหลักฐานวุฒิและประสบการณ์ตาม TOR ข้อ 4.14 และ 5.12</li></ul>
+<h1>1. สรุปผู้บริหาร</h1>
+<p>บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด จะส่งมอบ<strong>ระบบบริหารจัดการความสัมพันธ์นักลงทุนและฐานข้อมูลกลาง (CRM &amp; Database Management System)</strong> ให้ สกพอ. เพื่อให้เจ้าหน้าที่ส่งเสริมการลงทุนดำเนิน <strong>Investment Journey</strong> ในที่เดียว ได้แก่ สร้างและจับคู่ข้อมูลนักลงทุน บันทึกงานภาคสนาม เลื่อน Case ตาม <strong>Stage ก่อนขอรับสิทธิประโยชน์ (Pre-incentive)</strong> ส่งต่อเมื่อเกิน SLA คุ้มครองเอกสาร LOI/NDA/งบการเงิน และดูสถานะ <strong>EEC OSS</strong> โดยไม่ต้องพึ่งสเปรดชีตแยก</p>
+<p>บริษัทฯ เสนอการส่งมอบแบบ<strong>ผสม (Hybrid)</strong> โดยใช้แกน CRM ที่ตั้งค่าได้สำหรับข้อมูลองค์กร บุคคล Case Activity Task Ticket Pipeline สิทธิ์ผู้ใช้ และ Audit Trail ควบคู่กับการพัฒนาเฉพาะสำหรับกฎของ Investment Journey การส่งต่อ Case ข้ามสำนัก การเชื่อมต่อ SSO EECO และ EEC OSS การประทับลายน้ำ และการโอนย้ายข้อมูลจาก Excel</p>
+<h2>จากสถานะปัจจุบันสู่ CRM ที่เสนอ</h2>
+<figure class="exec-diagram"><img src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/diagram-executive-overview-th.png" alt="สรุปผู้บริหาร — จากสถานะปัจจุบันสู่ระบบที่เสนอ" /></figure>
+<h3>Investment Journey</h3>
+<p><strong>สถานะปัจจุบัน</strong> ประวัติการติดต่อและบันทึก Case อยู่ในไฟล์ Excel ของแต่ละสำนักและติดตัวเจ้าหน้าที่ เมื่อมีการโยกย้ายบุคลากร การสืบว่าใครพบใครและสัญญาอะไรไว้จึงยาก ไม่มีโมเดล Stage ร่วมสำหรับงานก่อนขอรับสิทธิประโยชน์</p>
+<p><strong>สถานะในอนาคต</strong> เจ้าหน้าที่เปิด <strong>Investment Case</strong> เดียว บันทึก Activity และเอกสารต่อ Case นั้น และเลื่อน <strong>Stage Pre-incentive</strong> ที่ตั้งค่าได้เมื่อหลักฐานครบ Case เดียวกันเก็บเอกสารลับและสถานะ OSS</p>
+<p><strong>ผลกระทบ</strong> ประวัติการส่งเสริมยังคงอยู่เมื่อเปลี่ยนผู้รับผิดชอบ เจ้าหน้าที่เห็นงานถัดไปของแต่ละ Case และส่งต่องานสู่ <strong>EEC OSS</strong> ได้โดยไม่ต้องรวบรวมข้อมูลจากสเปรดชีตหลายชุด</p>
+<h3>การมองเห็นของผู้บริหาร</h3>
+<p><strong>สถานะปัจจุบัน</strong> ผู้บริหารมองเห็นได้ยากว่า Case ใดล่าช้า งานใดเสี่ยงเกิน SLA และสำนักใดรับผิดชอบประเด็นที่ติดขัด จนกว่าจะมีการประชุมรายสัปดาห์</p>
+<p><strong>สถานะในอนาคต</strong> <strong>Heat Map</strong> แสดง Case และ Ticket ที่ค้างหรือเสี่ยงเกิน SLA พร้อมเส้นทางส่งต่อไปยังผู้รับผิดชอบ Dashboard กรองข้อมูลตาม พ.ศ. และปีงบประมาณจากข้อมูล Case ชุดเดียวกัน</p>
+<p><strong>ผลกระทบ</strong> ผู้บริหารเข้าดำเนินการได้ก่อนงานเกินกำหนด SLA เห็นสำนักที่รับผิดชอบชัดเจน และใช้ข้อมูลจาก CRM จัดทำเอกสารประกอบการประชุมแทนการรวบรวมจากตัวติดตามสถานะแยกต่างหาก</p>
+<h3>การเชื่อมต่อและข้อมูลหลัก</h3>
+<p><strong>สถานะปัจจุบัน</strong> บริษัทเดียวกันปรากฏภายใต้ชื่อใกล้เคียงในหลายสเปรดชีต เจ้าหน้าที่คีย์สถานะบริการแบบเบ็ดเสร็จด้วยมือ ยังไม่มีไดเรกทอรี Named User ที่ออกแบบรองรับไม่น้อยกว่า 100 บัญชีและขยายได้พร้อมการเข้าถึงระยะไกลที่เข้มงวด</p>
+<p><strong>สถานะในอนาคต</strong> <strong>SSO EECO</strong> ใช้ยืนยันตัวตนของ Named Users สถานะ <strong>EEC OSS</strong> แสดงบน Case และการโอนย้ายทำให้ได้ฐานข้อมูลที่จัดโครงสร้างและลดข้อมูลซ้ำแล้ว พร้อมความสัมพันธ์ผู้ติดต่อแบบ 1:N</p>
+<p><strong>ผลกระทบ</strong> เจ้าหน้าที่ใช้บัญชีเดียวในการเข้าถึงระบบ ไม่ต้องมีคลังรหัสผ่านอีกชุด และได้รับข้อมูลที่มีโครงสร้างพร้อมใช้งานต่อหลังการส่งมอบ</p>
+<p><strong>Application stack:</strong> Next.js · Node.js · PostgreSQL โดย สกพอ. จัดหาโฮสต์ <strong>Production</strong> ผ่านผู้ให้บริการคลาวด์ เช่น GDCC บริษัทฯ จะจัดทำ<strong>คุณสมบัติโครงสร้างพื้นฐานขั้นต่ำแบบไม่ผูก Vendor</strong> และติดตั้งระบบบนโฮสต์ที่ สกพอ. จัดเตรียม สกพอ. หรือ MSP ของหน่วยงานรับผิดชอบการป้องกันทางเข้าระบบและการเฝ้าระวัง Production ส่วนบริษัทฯ จัดส่ง Application Log และ Audit Log ให้หน่วยงานนำไปจัดเก็บหรือติดตาม สภาพแวดล้อม<strong>พัฒนา ทดสอบ และ POC</strong> อยู่ภายใต้การบริหารของบริษัทฯ</p>
+<p>เจ้าหน้าที่ได้รับเครื่องมือแบบฟอร์มที่ใช้งานบนอุปกรณ์เคลื่อนที่ได้ สำหรับผู้ใช้งานแบบระบุตัวตน (Named Users) ไม่น้อยกว่า <strong>100</strong> บัญชี Rocket ส่งมอบภายใน <strong>210</strong> วัน โดยชุดส่งมอบหลักที่วัน <strong>60</strong> <strong>180</strong> และ <strong>210</strong> (ข้อ 6) พร้อมสิทธิ์ขาด (Perpetual License) ซอร์สโค้ด (Source Code) หลักสูตร Train The Trainer และการรับประกัน 1 ปี พร้อมรับแจ้งตลอด 24 ชั่วโมง (ข้อ 7)</p>
+<p>ระบบที่เสนอเก็บข้อมูลนักลงทุน กิจกรรมการส่งเสริม ความคืบหน้าตาม Stage เอกสาร และรายงานผู้บริหารไว้ใน Case เดียวกัน บริษัทฯ ยังเสนอส่วนเสริมเกินข้อกำหนดขั้นต่ำ 5 รายการ ได้แก่ หน้าจอรวมข้อมูลซ้ำแบบมีผู้ใช้ตรวจสอบ คิวบันทึกงานภาคสนามเมื่อออฟไลน์ หน้าจอกำหนดเส้นทางการส่งต่อรายสำนัก คลังเทมเพลต Journey และรายงานสรุปสำหรับผู้บริหารตามรอบเวลา</p>
+<h1>2. บริบทการปฏิบัติงานของ สกพอ.</h1>
+<p>สกพอ. ส่งเสริมการลงทุนในพื้นที่ฉะเชิงเทรา ชลบุรี และระยอง ปัจจุบันประวัติการติดต่อและ Case ยังกระจัดกระจายในไฟล์ Excel และอยู่ในความดูแลของเจ้าหน้าที่แต่ละคน เมื่อมีการโยกย้ายบุคลากร ความต่อเนื่องของบันทึกจึงขาดหาย ผู้บริหารมองเห็นได้ยากว่า Case ใดล่าช้า SLA ใดเสี่ยง และสำนักใดเป็นเจ้าของงานถัดไป</p>
+<p>สอดคล้องกับนโยบาย <strong>Centralized Intelligence</strong> ของหน่วยงาน CRM ที่เสนอจัดให้มีฐานข้อมูลร่วม โดยใช้<strong>กิจกรรม / Case การลงทุน</strong>เป็นบันทึกหลักของการปฏิบัติงาน เจ้าหน้าที่ข้ามหน่วยทำงานจาก Case เดียวกันและเห็นผู้มีส่วนได้ส่วนเสียที่เกี่ยวข้องโดยไม่ต้องเก็บรายชื่อติดต่อซ้อนกัน</p>
+<h2>สิ่งที่เจ้าหน้าที่และผู้บริหารจะทำได้</h2>
+<p>1. <strong>ดำเนิน Investment Journey ในระยะ Pre-incentive</strong>  —  ตั้งแต่การแนะนำครั้งแรกจนถึงความพร้อมสำหรับบริการภาครัฐที่เกี่ยวกับสิทธิประโยชน์ พร้อมประวัติ Stage ทุกครั้งที่ย้าย จากนั้นเชื่อมกับ <strong>EEC OSS</strong> โดยไม่ต้องคีย์ซ้ำ<br>2. <strong>ทำงานประจำวันบน Journey เดียวกัน</strong>  —  บันทึกการประชุม จัดการ Task และ Ticket และจัดเก็บเอกสาร รวมถึงใช้งานผ่านแท็บเล็ตนอกสำนักงาน<br>3. <strong>เห็นงานค้างและความเสี่ยงก่อนเกิน SLA</strong>  —  Heat Map แสดง Case หรือ Ticket ที่ใกล้หรือเกินเวลาตามนโยบาย พร้อมเส้นทางส่งต่อ<br>4. <strong>รักษาความรู้จากการปฏิบัติงาน</strong>  —  ใครพบใคร ที่ไหน เมื่อใด และผลเป็นอย่างไร  —  ยังคงอยู่ในระบบหลังมีการสับเปลี่ยนบุคลากร</p>
+<h2>ผู้ใช้งาน</h2>
+<p>ใช้งานภายในองค์กรเท่านั้น: เจ้าหน้าที่และผู้บริหาร <strong>ไม่น้อยกว่า 100 บัญชี</strong> และขยายได้ เข้าถึงจากสำนักงาน จากที่อื่นในประเทศ หรือจากต่างประเทศผ่าน HTTPS ภายใต้การควบคุมการเข้าถึงที่เข้มงวด</p>
+<h2>คำที่ใช้ในข้อเสนอนี้</h2>
+<p>คำต่อไปนี้ใช้ตามถ้อยคำที่ปรากฏใน TOR โดยตารางอธิบายว่าบริษัทฯ จะนำแต่ละคำมาใช้ในการปฏิบัติงานของระบบอย่างไร</p>
+<div class="table-wrap"><table><thead><tr><th>คำตาม TOR (ตามที่เผยแพร่)</th><th>ความหมายในผลิตภัณฑ์</th></tr></thead><tbody><tr><td>Centralized Intelligence (TOR 1)</td><td>ฐานข้อมูลร่วมและรูปแบบทำงานข้ามสายงาน แทน Excel ที่ยึดติดบุคคล</td></tr><tr><td>Investment Journey / Pre-incentive (TOR 2.1)</td><td>Stage ที่ตั้งค่าได้ซึ่ง Case เคลื่อนผ่านก่อนบริการภาครัฐที่เกี่ยวกับสิทธิประโยชน์</td></tr><tr><td>Activity (TOR 1; 5.5)</td><td>การประชุม โทรศัพท์ ลงพื้นที่ หรือกิจกรรมส่งเสริมบน Timeline  —  แกนกลางการทำงานของ CRM</td></tr><tr><td>Heat Map / Escalation / SLA (TOR 2.2)</td><td>มุมมองผู้บริหารด้านภาระงานและความค้าง; แจ้งเตือนและส่งต่อเมื่องานเกินเวลานโยบาย</td></tr><tr><td>SSO EECO (TOR 5.5.6; 5.7.1)</td><td>วิธีเข้าสู่ระบบและดึง Master Profile ของเจ้าหน้าที่</td></tr><tr><td>EEC OSS (TOR 2.1; 5.7.2)</td><td>สถานะที่ดึงมาแสดงบน Case จากระบบบริการแบบเบ็ดเสร็จ</td></tr><tr><td>Named Users (TOR 3.1)</td><td>บัญชีเจ้าหน้าที่/ผู้บริหารที่ระบุตัวตน  —  ไม่น้อยกว่า 100 บัญชี และขยายได้</td></tr></tbody></table></div>
+<p>อ้างอิง: TOR 1, 2, 3.</p>
+<h1>3. รูปแบบการส่งมอบและวิธีการดำเนินงาน</h1>
+<h2>สิ่งที่ Rocket ส่งมอบ</h2>
+<div class="table-wrap"><table><thead><tr><th>ชั้น</th><th>สิ่งที่ Rocket ส่งมอบ</th></tr></thead><tbody><tr><td>แกนผลิตภัณฑ์ที่ตั้งค่าได้</td><td>ข้อมูลองค์กร บุคคล Case Activity Task Ticket Pipeline สิทธิ์ผู้ใช้ Audit Trail และ Dashboard ผู้ดูแลระบบปรับ Stage Checklist และเส้นทางการมอบหมายได้โดยไม่ต้องแก้ไขโค้ดทุกครั้งที่นโยบายเปลี่ยน</td></tr><tr><td>การพัฒนาเฉพาะสำหรับ สกพอ.</td><td>กฎของ Investment Journey ระยะ Pre-incentive การส่งต่อข้ามสำนัก การเข้าสู่ระบบด้วย SSO EECO การดึงสถานะ EEC OSS การประทับลายน้ำบนไฟล์ลับ และการโอนย้ายข้อมูลจาก Excel ของแต่ละสำนัก</td></tr><tr><td>การส่งมอบ</td><td>สิทธิ์ขาด (Perpetual License) ซอร์สโค้ด การอบรม และฐานข้อมูลที่จัดโครงสร้างและปรับปรุงคุณภาพแล้ว</td></tr></tbody></table></div>
+<h2>ลำดับการดำเนินงาน</h2>
+<div class="table-wrap"><table><thead><tr><th>ขั้น</th><th>งานและผลส่งมอบของบริษัทฯ</th><th>TOR</th></tr></thead><tbody><tr><td>วางแผน</td><td>กำหนดการโครงการและการจัดสรรบุคลากรครบตามตำแหน่ง</td><td>5.1</td></tr><tr><td>BA</td><td>BRD; Workflow ของ Journey และ Ticket</td><td>5.2</td></tr><tr><td>ออกแบบ</td><td>SDD, ERD, ออกแบบ UI, คุณสมบัติ Infra ขั้นต่ำแบบไม่ผูก Vendor, ขอบเขต API Interface ของ OSS</td><td>5.3</td></tr><tr><td>ความเสี่ยง</td><td>บันทึกผลกระทบต่อ OSS และระบบที่เกี่ยวข้อง</td><td>5.4</td></tr><tr><td>พัฒนา</td><td>โมดูล CRM ที่ทำงานตามข้อ 5.1-5.7</td><td>5.5-5.7</td></tr><tr><td>ความมั่นคง / โอนย้าย</td><td>Watermark Audit RBAC; Staging → Clean DB</td><td>5.8-5.9</td></tr><tr><td>ทดสอบและยืนยันผล</td><td>UAT ร่วมกับ สกพอ. การทดสอบความมั่นคงปลอดภัยตามแนวทาง OWASP และการใช้ SSL Certificate ของ สกพอ.</td><td>5.10</td></tr><tr><td>ส่งมอบ</td><td>Train the Trainer สำหรับผู้ดูแลและผู้ใช้ คู่มือ เอกสารสิทธิ์ใช้งาน ซอร์สโค้ด และเอกสาร Backup/DR</td><td>5.11, 7.3</td></tr></tbody></table></div>
+<p>อ้างอิง: TOR 5.1-5.4, 10.2(4); ภาคผนวก ก 2.1.</p>
+<h1>4. สถาปัตยกรรมระบบและการออกแบบทางเทคนิค</h1>
+<p>เจ้าหน้าที่ใช้งานระบบผ่านเบราว์เซอร์บนเดสก์ท็อปหรือแท็บเล็ต ส่วนติดต่อผู้ใช้เชื่อมต่อกับ API บน Node.js ซึ่งควบคุมกฎของ Journey การนับ SLA สิทธิ์ตามบทบาท และการเชื่อมต่อระบบภายนอก โดยใช้ PostgreSQL เป็นฐานข้อมูลหลักและยืนยันตัวตนผ่าน <strong>SSO EECO</strong></p>
+<p><strong>Production</strong> ทำงานบนโฮสต์ที่<strong>สกพอ. จัดหา</strong>ผ่านผู้ให้บริการคลาวด์ (TOR ยกตัวอย่าง GDCC) Rocket จัดทำ<strong>คุณสมบัติโครงสร้างพื้นฐานขั้นต่ำ</strong>แบบไม่ผูก Vendor จากนั้นติดตั้งและตั้งค่าแอปพลิเคชันบนสภาพแวดล้อมที่ สกพอ. จัดให้ สภาพแวดล้อม<strong>พัฒนา ทดสอบ และ POC</strong> บริหารโดย Rocket สำหรับการสร้างและสาธิต</p>
+<h2>4.1 สถาปัตยกรรมเชิงตรรกะ</h2>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  subgraph clients [Clients]
+    DESK[เบราว์เซอร์เดสก์ท็อป]
+    TAB[เบราว์เซอร์แท็บเล็ต / มือถือ]
+  end
+  subgraph presentation [Next.js]
+    UI[Case Pipeline Activity Ticket Dashboard]
+  end
+  subgraph services [Node.js]
+    CRM[บริการ CRM]
+    WF[Pipeline engine]
+    SLA[SLA และการส่งต่อ]
+    SEC[RBAC Watermark Audit]
+    INT[อะแดปเตอร์ SSO และ OSS]
+    JOBS[Application jobs]
+    MIG[งานโอนย้าย]
+  end
+  subgraph data [PostgreSQL]
+    OLTP[(CRM schema)]
+    AUD[(Audit)]
+    STG[(Staging)]
+  end
+  subgraph external [แพลตฟอร์ม สกพอ.]
+    SSO[SSO EECO]
+    OSS[EEC OSS]
+  end
+  DESK --&gt; UI
+  TAB --&gt; UI
+  UI --&gt; CRM
+  UI --&gt; WF
+  UI --&gt; SLA
+  CRM --&gt; OLTP
+  WF --&gt; OLTP
+  SLA --&gt; OLTP
+  SEC --&gt; OLTP
+  SEC --&gt; AUD
+  JOBS --&gt; OLTP
+  MIG --&gt; STG
+  MIG --&gt; OLTP
+  INT --&gt; SSO
+  INT --&gt; OSS
+  CRM --&gt; SEC
+  UI --&gt; INT</pre></div>
+<div class="table-wrap"><table><thead><tr><th>ชั้น</th><th>รองรับความสามารถเหล่านี้</th></tr></thead><tbody><tr><td>Next.js</td><td>Customer 360 บอร์ด Pipeline แบบฟอร์ม Activity/Task/Ticket Heat Map หน้าจอตามบทบาท</td></tr><tr><td>Node.js API</td><td>ควบคุมการย้าย Stage การนับ SLA การมอบหมาย Watermark, Audit Trail, Bulk Import และการดึงข้อมูล OSS โดย API เดียวรองรับหน้าจอทุกช่องทาง ทำให้ทุกช่องทางใช้กฎธุรกิจชุดเดียวกัน</td></tr><tr><td>Application jobs</td><td>นาฬิกา SLA สรุปตามรอบเวลา แบตช์โอนย้าย  —  อยู่ในแอปพลิเคชัน/ฐานข้อมูล โดยไม่ต้องมีคลัสเตอร์ Message Broker แยก</td></tr><tr><td>PostgreSQL</td><td>ความสัมพันธ์ 1:N ประวัติ Stage Consent เอกสารลับ Audit แบบต่อท้าย</td></tr><tr><td>SSO EECO</td><td>เข้าสู่ระบบและโปรไฟล์พื้นฐานสำหรับ Named Users</td></tr><tr><td>อะแดปเตอร์ EEC OSS</td><td>แผงสถานะบน Investment Case (Endpoint ตกลงในขั้น BA)</td></tr></tbody></table></div>
+<p>นาฬิกา SLA สรุปตามรอบเวลา และแบตช์โอนย้ายทำงานเป็นงานแอปพลิเคชันและฐานข้อมูลภายใน Stack ที่ติดตั้ง เพื่อหลีกเลี่ยงคลัสเตอร์ข้อความแยกบนโครงสร้างพื้นฐานของ สกพอ.</p>
+<h2>4.2 สถาปัตยกรรมการติดตั้งและสภาพแวดล้อม</h2>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart LR
+  subgraph prod [Production  —  คลาวด์ที่ สกพอ. จัดหา]
+    EDGE[ขอบเขตผู้ว่าจ้าง / TLS]
+    LB[HTTPS entry]
+    APP[โหนดแอป]
+    DB[(PostgreSQL)]
+    BAK[Backup]
+    EDGE --&gt; LB --&gt; APP --&gt; DB --&gt; BAK
+  end
+  subgraph nonprod [Non-production ที่ Rocket บริหาร]
+    DEV[Dev / test]
+    POC[สาธิต POC]
+  end
+  USER[Named Users ของ EECO] --&gt;|SSL ของ สกพอ.| EDGE
+  SSO[SSO EECO] -.-&gt; APP
+  OSS[EEC OSS] -.-&gt; APP</pre></div>
+<div class="table-wrap"><table><thead><tr><th>สภาพแวดล้อม</th><th>ผู้จัดหาโฮสต์</th><th>วัตถุประสงค์</th></tr></thead><tbody><tr><td>Production</td><td>สกพอ. ผ่าน Cloud (เช่น GDCC)</td><td>CRM เต็มรูปแบบหลัง Go-Live</td></tr><tr><td>Non-production</td><td>บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด</td><td>พัฒนาและซ้อม UAT</td></tr><tr><td>สาธิต POC</td><td>บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด</td><td>สาธิตต่อคณะกรรมการ</td></tr></tbody></table></div>
+<p>ชื่อผู้ให้บริการคลาวด์ในข้อเสนอนี้เป็น<strong>ตัวอย่าง</strong> การออกแบบ Production <strong>ไม่ผูก Vendor</strong>: ระบุความจุและโทโพโลยีเพื่อให้ สกพอ. จัดหาโฮสต์เทียบเท่าจากผู้ให้บริการที่เลือก</p>
+<p><strong>ความรับผิดชอบด้านการปฏิบัติการ</strong> สกพอ. หรือ MSP ของหน่วยงานรับผิดชอบ WAF/DDoS หากบริการคลาวด์รองรับ การแพตช์โฮสต์ ตาราง Backup บนแพลตฟอร์ม และระบบ SIEM/SOC บริษัทฯ รับผิดชอบการติดตั้งและตั้งค่าแอปพลิเคชันบนโฮสต์ที่จัดเตรียม พร้อมส่งออก Application Log และ Audit Log แบบมีโครงสร้างให้หน่วยงานจัดเก็บหรือส่งต่อไปยังระบบเฝ้าระวัง</p>
+<h3>4.2.1 คุณสมบัติโครงสร้างพื้นฐานขั้นต่ำ (ไม่ผูก Vendor)</h3>
+<p>ตาม TOR ข้อ 5.3.7 บริษัทฯ จะส่งเอกสารโครงสร้างพื้นฐานโดยละเอียดด้านฐานข้อมูล เครือข่าย และสถาปัตยกรรมระบบในเฟสที่ 1 ตัวเลขด้านล่างเป็น<strong>ค่าเบื้องต้น</strong>สำหรับ Production ที่รองรับ Named Users ไม่น้อยกว่า 100 บัญชี และจะปรับร่วมกับ สกพอ. หลังยืนยัน BRD และปริมาณการใช้งานที่คาดการณ์ ตัวเลขดังกล่าวเป็นเป้าหมายด้านความจุและไม่ผูกกับ SKU ของผู้ให้บริการคลาวด์รายใด</p>
+<div class="table-wrap"><table><thead><tr><th>ส่วนประกอบ</th><th>ค่าขั้นต่ำเบื้องต้น (Production)</th><th>หมายเหตุ</th></tr></thead><tbody><tr><td>Application tier</td><td>2 instance · ≥4 vCPU · ≥8 GB RAM ต่อเครื่อง</td><td>หลัง Load Balancer แบบ HTTPS; รีสตาร์ทแบบหมุนเวียนโดยไม่หยุดทั้งระบบเป็นที่พึงประสงค์</td></tr><tr><td>Database</td><td>เข้ากันได้กับ PostgreSQL · ≥4 vCPU · ≥16 GB RAM · ≥200 GB SSD</td><td>Backup อัตโนมัติรายวัน; Point-in-time recovery หากแพลตฟอร์มรองรับ</td></tr><tr><td>Object / file storage</td><td>≥200 GB เข้ารหัส</td><td>LOI NDA งบการเงิน ไฟล์แนบ Activity</td></tr><tr><td>Network</td><td>TLS 1.2+ ผ่าน HTTPS ฐานข้อมูลอยู่ในเครือข่ายส่วนตัว และอนุญาตการเชื่อมต่อขาออกไปยัง SSO EECO และ EEC OSS ตาม Allowlist</td><td>ใบรับรอง SSL ของ สกพอ. ที่ทางเข้าสาธารณะ (TOR 5.10.2)</td></tr><tr><td>Availability</td><td>เป้าหมาย ≥99.5% ต่อเดือนที่ทางเข้าแอป (ขึ้นกับ SLA คลาวด์ของผู้ว่าจ้าง)</td><td>หน้าต่างบำรุงรักษาตกลงใน Runbook การปฏิบัติการ</td></tr><tr><td>Backup / DR</td><td>Backup รายวันเก็บอย่างน้อย 30 วัน; ซ้อมกู้คืนมีเอกสาร</td><td>แนวทาง DR จัดทำเอกสารตอน Go-Live (TOR 5.9.3)</td></tr><tr><td>ข้อมูลสำหรับการเฝ้าระวังระบบ</td><td>Application Log และ Audit Log แบบรวมศูนย์ โดยเก็บ Audit Log ระดับแอปพลิเคชันอย่างน้อย 180 วัน</td><td>ส่งออกไปยังเครื่องมือเฝ้าระวังของ สกพอ. ได้</td></tr></tbody></table></div>
+<p>การติดตั้งและตั้งค่าบนโฮสต์ที่ สกพอ. จัดให้อยู่ในขอบเขตผู้รับจ้าง (TOR 7.3.2 ร่วมกับ 5.3.7)</p>
+<h2>4.3 การออกแบบฐานข้อมูล</h2>
+<p>โมเดลยึด <strong>Investment Case</strong> เป็นศูนย์กลาง จึงให้บุคคลหนึ่งเป็นตัวแทนของหลายองค์กรได้โดยไม่สร้างแถวบุคคลซ้ำ</p>
+<p>รูปแบบออกแบบ 3 แบบทำให้ข้อมูลปฏิบัติการน่าเชื่อถือภายใต้การทำงานพร้อมกันของเจ้าหน้าที่:</p>
+<div class="table-wrap"><table><thead><tr><th>รูปแบบ</th><th>บทบาทใน CRM นี้</th><th>ตัวอย่าง</th></tr></thead><tbody><tr><td><strong>ประวัติแบบต่อท้าย</strong></td><td>พิสูจน์สิ่งที่เกิดขึ้นโดยไม่เขียนทับอดีต</td><td>ประวัติ Stage ของ Pipeline; เหตุการณ์ Audit ของแอป (เปิดดู/แก้ไข/ดาวน์โหลด)</td></tr><tr><td><strong>สถานะปัจจุบันที่เปลี่ยนแปลงได้</strong></td><td>อ่านเร็วว่า “Case นี้อยู่ตรงไหน”</td><td>Stage ปัจจุบันของ Pipeline; สถานะ Ticket; ผู้รับมอบหมาย</td></tr><tr><td><strong>Staging / คิวงาน</strong></td><td>Cutover ที่ปลอดภัยและงานพื้นหลัง</td><td>ตาราง Staging ของการโอนย้าย Excel; งาน SLA และสรุปตามรอบ</td></tr></tbody></table></div>
+<div class="mermaid-wrap"><pre class="mermaid">erDiagram
+  ORGANIZATION ||--o{ ORG_CONTACT : represented_by
+  PERSON ||--o{ ORG_CONTACT : represents
+  ORGANIZATION ||--o{ INVESTMENT_CASE : subject_of
+  INVESTMENT_CASE ||--o{ ACTIVITY : has
+  INVESTMENT_CASE ||--o{ TASK : has
+  INVESTMENT_CASE ||--o{ TICKET : has
+  INVESTMENT_CASE ||--|| PIPELINE_INSTANCE : tracked_as
+  PIPELINE_DEFINITION ||--o{ PIPELINE_STAGE : defines
+  PIPELINE_INSTANCE }o--|| PIPELINE_STAGE : current
+  PIPELINE_INSTANCE ||--o{ STAGE_HISTORY : moved_through
+  PERSON ||--o{ CONSENT : gives
+  INVESTMENT_CASE ||--o{ DOCUMENT : files
+  USER_ACCOUNT ||--o{ AUDIT_EVENT : performs
+  ROLE ||--o{ USER_ACCOUNT : granted</pre></div>
+<div class="table-wrap"><table><thead><tr><th>ตาราง</th><th>ความสามารถที่รองรับ</th></tr></thead><tbody><tr><td><code>organization</code> / <code>person</code> / <code>org_contact</code></td><td>สร้าง/จับคู่นักลงทุน; ผู้ติดต่อหนึ่งคนกับหลายบริษัท</td></tr><tr><td><code>investment_case</code></td><td>เปิดและดูแลบันทึก Journey หลัก</td></tr><tr><td><code>activity</code> / <code>task</code> / <code>ticket</code></td><td>บันทึกงานภาคสนาม; ปฏิทิน; คำขอที่มี SLA</td></tr><tr><td><code>pipeline_*</code> / <code>stage_history</code></td><td>ย้าย Stage; พิสูจน์ว่าใครย้ายเมื่อใด</td></tr><tr><td><code>consent</code> / <code>document</code></td><td>Consent ตาม PDPA; LOI/NDA/งบการเงินพร้อมชั้นความลับ</td></tr><tr><td><code>user_account</code> / <code>role</code> / <code>permission</code></td><td>Named Users; Need-to-know</td></tr><tr><td><code>audit_event</code></td><td>ใครเปิดดู/แก้ไข/ดาวน์โหลดอะไร</td></tr><tr><td><code>staging_*</code></td><td>โอนย้าย Excel อย่างปลอดภัยก่อนโหลด Production</td></tr></tbody></table></div>
+<p><strong>กฎความถูกต้องของข้อมูล:</strong> ระบบไม่สร้างข้อมูลบุคคลซ้ำเมื่อติดต่อกับหลายองค์กร ตรวจสอบองค์กรซ้ำด้วย Tax ID และชื่อนิติบุคคล ย้าย Stage ได้เฉพาะตามเส้นทางที่กำหนด การเข้าถึงข้อมูลลับต้องผ่านการอนุญาตและบันทึกทุกครั้ง Audit Trail ระดับแอปพลิเคชันเก็บเหตุการณ์แบบต่อท้าย และการนำเข้าข้อมูลซ้ำในแบตช์เดียวกันต้องไม่สร้างรายการใหม่ซ้ำ</p>
+<h3>4.3.1 งานธุรกรรมเทียบกับการรายงาน</h3>
+<p>การอัปเดต Case, Stage, Activity และ Ticket เป็นงานธุรกรรมบน PostgreSQL ส่วน Dashboard และ Heat Map อ่านข้อมูลเฉพาะขอบเขตที่ผู้ใช้เลือกจากฐานข้อมูลเดียวกัน สำหรับ Named Users ไม่น้อยกว่า 100 บัญชี ระบบจึงไม่จำเป็นต้องมีคลังข้อมูลแยกในวัน Go-Live งานสรุปที่ใช้เวลาประมวลผลมากหรือทำตามรอบเวลาจะทำเป็น Application Job เบื้องหลัง เพื่อไม่ให้กระทบการบันทึกงานของเจ้าหน้าที่ หาก สกพอ. ต้องการคลังข้อมูลสำหรับการวิเคราะห์เฉพาะทางในอนาคต สามารถพิจารณาเพิ่มเติมผ่านกระบวนการควบคุมการเปลี่ยนแปลง</p>
+<h2>4.4 การวางมาตรการความมั่นคงของ Stack (ป้องกันหลายชั้น)</h2>
+<p>บริษัทฯ แบ่งมาตรการความมั่นคงปลอดภัยออกเป็นหลายชั้น โดยติดตั้งการควบคุมสิทธิ์ Watermark และ Audit Trail ในแอปพลิเคชัน ส่วน สกพอ. หรือ MSP ของหน่วยงานรับผิดชอบการป้องกันทางเข้าระบบและการเฝ้าระวัง Production</p>
+<div class="table-wrap"><table><thead><tr><th>ชั้น</th><th>มาตรการ</th><th>ผู้ปฏิบัติการใน Production</th></tr></thead><tbody><tr><td>ขอบเขต</td><td>ทางเข้า HTTPS ใบรับรอง SSL ของผู้ว่าจ้าง WAF/DDoS ของคลาวด์หากมี</td><td>สกพอ. / MSP คลาวด์</td></tr><tr><td>แอปพลิเคชัน</td><td>Authentication ผ่าน SSO EECO; RBAC และ Need-to-know บนทุกเส้นทาง API; ตรวจสอบอินพุต; คิวรีแบบมีพารามิเตอร์</td><td>ซอฟต์แวร์ที่ Rocket สร้าง ตั้งค่าร่วมกับ สกพอ.</td></tr><tr><td>ข้อมูล</td><td>ส่วน DB ส่วนตัว; เข้ารหัสขณะพักหากแพลตฟอร์มรองรับ; ความลับผ่านที่เก็บความลับที่ สกพอ. อนุมัติ / กลไกแพลตฟอร์ม (ไม่ฝังในซอร์ส)</td><td>แพลตฟอร์ม + ติดตั้งร่วม; คีย์อยู่บน Infra ของผู้ว่าจ้าง</td></tr><tr><td>หลักฐาน</td><td>Application Audit Trail ≥180 วัน; App Log แบบมีโครงสร้าง</td><td>Rocket ส่งออก; สกพอ. เก็บ / ส่งต่อไป SIEM หากมี</td></tr></tbody></table></div>
+<p>Rocket และ สกพอ. ตรวจสอบมาตรการเหล่านี้ผ่าน UAT ร่วมและการทดสอบความมั่นคงก่อนการตรวจรับ</p>
+<h2>4.5 เอกสารออกแบบในเฟสที่ 1</h2>
+<p>ชุดออกแบบอย่างเป็นทางการตาม TOR ข้อ 5.3 ภายใน 60 วันแรกประกอบด้วยผลสำรวจ Schema เดิม SDD, ERD ฉบับละเอียด แบบ UI/UX <strong>คุณสมบัติโครงสร้างพื้นฐานขั้นต่ำแบบไม่ผูก Vendor</strong> สำหรับการจัดหาคลาวด์ของ สกพอ. เอกสาร API Interface ของ OSS บันทึกความเสี่ยงและผลกระทบ และเอกสารแนวทางส่งมอบ Application Log, Audit Log, Backup และ DR ให้สอดคล้องกับมาตรฐาน IT ของ สกพอ.</p>
+<p>อ้างอิง: TOR 5.3, 5.3.5-5.3.7, 5.7, 5.10.</p>
+<h1>5. ฟังก์ชันหลักของระบบ</h1>
+<p>ระบบใช้ Investment Case เป็นบันทึกหลักของงานส่งเสริมการลงทุน ข้อมูลนักลงทุนระบุบุคคลและองค์กรที่เกี่ยวข้อง Activity, Task และ Ticket เก็บงานที่ดำเนินการแล้ว ส่วน Investment Journey แสดง Stage ปัจจุบันและงานที่ต้องทำต่อ Dashboard สรุปภาระงานและความล่าช้า ขณะที่ SSO EECO และ EEC OSS เชื่อม Case เข้ากับบริการเดิมของ สกพอ. ภายใต้มาตรการควบคุมข้อมูลลับและแผนโอนย้ายประวัติจาก Excel</p>
+<h2>5.1 สร้างนักลงทุน นำเข้ารายการ และรักษา Master ที่สะอาด</h2>
+<p>บริษัทฯ จะจัดข้อมูลนักลงทุนจากทุกสำนักให้อยู่ใน Master Data ชุดเดียว เจ้าหน้าที่ค้นหาและจับคู่องค์กรกับบุคคลก่อนเปิด Case ตรวจสอบรายการจากโรดโชว์ก่อนนำเข้า และใช้ <strong>Customer 360</strong> เป็นข้อมูลอ้างอิงร่วมแม้มีการเปลี่ยนผู้รับผิดชอบ</p>
+<h3>การรับนักลงทุนและการควบคุมคุณภาพข้อมูล</h3>
+<div class="table-wrap"><table><thead><tr><th>ความสามารถ</th><th>สิ่งที่เจ้าหน้าที่หรือผู้ดูแลทำ</th><th>ข้อมูลและการตรวจสอบ</th></tr></thead><tbody><tr><td>สร้าง / จับคู่องค์กร</td><td>ค้นหาก่อนสร้าง เพื่อไม่ให้นิติบุคคลเดียวกันถูกบันทึกซ้ำภายใต้ชื่อต่างเล็กน้อย</td><td>ค้นด้วย Tax ID และชื่อนิติบุคคล; รายการใกล้เคียงพร้อมเปิดรายการเดิม; สร้างหลังยืนยัน; ฟิลด์อุตสาหกรรม ประเทศ สถานะ; ธงไม่ใช้งาน; ประวัติการเปลี่ยนระดับฟิลด์</td></tr><tr><td>สร้าง / จับคู่บุคคล</td><td>เก็บข้อมูลบุคคลเพียงรายการเดียว แล้วเชื่อมเป็นผู้ติดต่อของหนึ่งหรือหลายองค์กร</td><td>ชื่อและตัวระบุที่ตกลงใน BA; บทบาทและสถานะผู้ติดต่อหลักบนความสัมพันธ์ org–contact; แจ้งรายการที่อาจเป็นบุคคลเดียวกันก่อนสร้างข้อมูลใหม่</td></tr><tr><td>รับข้อมูลพร้อมแท็กช่องทาง</td><td>บันทึกว่าความสนใจมาจากช่องทางใด</td><td>ช่องทางรวม LINE OA Facebook Messenger อีเมล Call Center และอื่นที่ตกลงใน BRD; เก็บป้ายช่องทางและเวลาบน Interaction หรือ Lead</td></tr><tr><td>Bulk Import CSV / Excel</td><td>อัปโหลดรายการจากโรดโชว์หรือสำนัก จับคู่คอลัมน์ และยืนยันหลังข้อมูลแต่ละแถวผ่าน Validation</td><td>หน้าจอจับคู่คอลัมน์; ตรวจฟิลด์บังคับและรูปแบบ; ตารางข้อผิดพลาดรายแถวและฟิลด์; แจ้ง Tax ID หรือชื่อที่อาจซ้ำ; แก้ไขหรือปฏิเสธรายการก่อนนำเข้า</td></tr><tr><td>Bulk Export</td><td>ดาวน์โหลดข้อมูลตามขอบเขตสิทธิ์และตัวกรองที่เลือก</td><td>ส่งออกตามตัวกรองปัจจุบัน; ปิดบังคอลัมน์ลับตาม RBAC (ข้อ 5.6); บันทึกเหตุการณ์ส่งออกใน Audit Log</td></tr><tr><td>Customer 360</td><td>เปิดมุมมองรวมของนักลงทุน ตัวตน ลิงก์ Consent และลำดับความสำคัญ</td><td>ส่วนหัวตัวตน; องค์กรที่เชื่อม (1:N); สถานะ Consent; Lead score; Timeline สรุป; นำทางเข้าสู่ Investment Case ที่ใช้งาน (ข้อ 5.3)</td></tr><tr><td>บริหาร Master Data</td><td>ผู้ดูแลรักษารายการอ้างอิง</td><td>อุตสาหกรรม ประเทศ และรายการตาม BRD; เพิ่ม/แก้ไข/ปิดใช้งาน; นับการใช้งาน; เสนอเฉพาะค่าที่ใช้งานบนฟอร์ม</td></tr><tr><td>Lead Scoring</td><td>เจ้าหน้าที่หรือกฎปรับลำดับความสำคัญ</td><td>ปรับด้วยเหตุผล; คำใบ้ตามกฎจาก BRD (ถ้ามี); แสดงคะแนนบน Customer 360 และคิวงาน</td></tr><tr><td>ช่วยตรวจข้อมูลซ้ำอัตโนมัติ</td><td>ระหว่างสร้างและนำเข้า ระบบแจ้งรายการที่อาจซ้ำ</td><td>จับคู่ Tax ID ตรงกัน; ตรวจความคล้ายของชื่อนิติบุคคล; บล็อกหรือเตือนตามนโยบาย; เปิดหน้าจอรวมข้อมูลซ้ำแบบมีผู้ใช้ตรวจสอบ</td></tr><tr><td>บันทึก Consent</td><td>ก่อนใช้ข้อมูลส่วนบุคคลที่อ่อนไหว บันทึก Consent</td><td>วัตถุประสงค์ หลักฐาน/ช่องทาง และเวลา; การถอนต่อท้ายประวัติโดยไม่ลบเหตุการณ์ Consent เดิม</td></tr></tbody></table></div>
+<p>แกน CRM ที่ตั้งค่าได้รองรับการสร้างและจับคู่ Master Data, Lead Scoring และการตรวจสอบข้อมูลซ้ำ ส่วนอะแดปเตอร์ของแต่ละช่องทางและข้อความ Consent เฉพาะ สกพอ. จะพัฒนาเพิ่มตามข้อสรุปใน BRD</p>
+<p>การนำเข้ารายการระหว่างใช้งานใช้กฎตรวจสอบฟิลด์ รูปแบบ และข้อมูลซ้ำชุดเดียวกับ Staging ของการโอนย้ายข้อมูล แต่การตัดย้ายประวัติครั้งแรกยังเป็นกระบวนการควบคุมแยกต่างหากตามข้อ 5.7</p>
+<h3>ส่วนเสริมที่แนะนำ (เกินขั้นต่ำ TOR)</h3>
+<p><strong>หน้าจอรวมข้อมูลซ้ำแบบมีผู้ใช้ตรวจสอบ</strong> เมื่อพบ Tax ID หรือชื่อนิติบุคคลที่อาจซ้ำ เจ้าหน้าที่เปรียบเทียบข้อมูล 2 รายการและเลือกค่าที่ต้องการเก็บในแต่ละฟิลด์ก่อนยืนยันการรวม เพื่อลดความเสี่ยงที่ข้อมูลสูญหายโดยไม่มีการแจ้งเตือน</p>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M04.png" alt="Bulk CSV / Excel import" /></div>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M03.png" alt="Customer 360" /></div>
+<p>อ้างอิง: TOR 5.5.1, 5.5.2.</p>
+<h2>5.2 บันทึกงานภาคสนาม มอบหมายงาน และส่งต่อเมื่อเกิดอุปสรรค</h2>
+<p>บริษัทฯ จะให้เจ้าหน้าที่บันทึกการประชุม การลงพื้นที่ งานติดตาม และประเด็นที่ต้องประสานข้ามสำนักไว้ใน <strong>Activity</strong> <strong>Task</strong> และ <strong>Ticket</strong> ที่เชื่อมกับ Investment Case เดียวกัน</p>
+<h3>การควบคุม Activity, Task และ Ticket</h3>
+<div class="table-wrap"><table><thead><tr><th>ความสามารถ</th><th>สิ่งที่เจ้าหน้าที่ทำ</th><th>รายละเอียดการติดตาม</th></tr></thead><tbody><tr><td>บันทึก Activity</td><td>บันทึกการประชุม โทรศัพท์ ลงพื้นที่ หรือกิจกรรมส่งเสริมต่อ Investment Case (หรือลูกค้า)</td><td>ฟอร์มจับวันที่/เวลาที่บันทึก นัดหมาย สถานที่ ผู้ร่วมเดินทาง/ผู้เข้าร่วม วาระ เจ้าของ และลิงก์ Case/องค์กร/บุคคล การบันทึกต่อท้าย Timeline ของ Case และประวัติลูกค้าเมื่อเกี่ยวข้อง</td></tr><tr><td>แนบหลักฐาน</td><td>แนบรูปหรือไฟล์ ณ จุดปฏิบัติงาน</td><td>อัปโหลดเดสก์ท็อปและกล้องแท็บเล็ต/มือถือ; ประเภทไฟล์และขนาดตาม BRD; เปิดแนบจาก Timeline; รูปแบบควบคุมเดียวกันบน Ticket</td></tr><tr><td>Timeline ของ Case</td><td>ดูลำดับปฏิสัมพันธ์ตามเวลา</td><td>รายการตามเวลาพร้อมตัวกรองประเภท; เปิดแนบจากแถว; ผูกกับช่วง Stage เมื่อบันทึก (ถ้ามี)</td></tr><tr><td>สร้าง Task</td><td>เปลี่ยนการติดตามให้เป็นงานที่มีเจ้าของและวันครบกำหนด</td><td>ผู้รับมอบหมาย วันครบกำหนด เวลานำเตือน; มุมมองปฏิทินบุคคล/ทีม; ลิงก์กับ Case (หรือบุคคล/องค์กรเมื่อเหมาะสม) ได้เสมอ</td></tr><tr><td>ปิด Task</td><td>ปิดเมื่องานเสร็จ</td><td>เวลาและผู้ปิด; บันทึก Activity สั้นกลับ Timeline ได้; ไฮไลต์เกินกำหนดจนกว่าจะปิด</td></tr><tr><td>เปิด Ticket</td><td>เมื่องานติดขัด (มักข้ามสำนัก) เปิดคำขอมีเลขที่ยังผูกกับ Case</td><td>ประเภท ความสำคัญ คำอธิบาย ผู้ร้องขอ และลิงก์บังคับกับ Investment Case</td></tr><tr><td>จัดเส้นทาง Ticket</td><td>ระบบหรือเจ้าหน้าที่ส่งไปสำนัก/บุคคลเจ้าของตามกฎ</td><td>เส้นทางเริ่มต้นตามประเภท/สำนัก; มอบหมายใหม่ด้วยประวัติ; แสดงสำนักเจ้าของและผู้รับมอบหมายปัจจุบัน</td></tr><tr><td>ติดตาม SLA ของ Ticket</td><td>เห็นเวลาที่เหลือก่อนเกิน SLA</td><td>เริ่มนับเวลาเมื่อ Ticket เข้าสถานะที่ติดตาม; ตั้งเกณฑ์แจ้งเตือนได้; บันทึกเวลาเมื่อเกิน SLA; แสดงผลใน Heat Map และรายการงานเสี่ยงตามข้อ 5.4</td></tr><tr><td>ส่งต่อหรือโอน Ticket</td><td>เมื่อ Ticket ติดขัดหรือเกิน SLA ระบบแจ้งผู้จัดการหรือโอนไปยังสำนักอื่น โดย Case ยังคงอยู่ใน Stage เดิม</td><td>แจ้งผู้จัดการ; โอนพร้อมความเห็น; ใช้เส้นทางที่กำหนดในหน้าจอการส่งต่อรายสำนัก; เก็บประวัติผู้รับผิดชอบ</td></tr><tr><td>พิมพ์ Activity (A4/PDF)</td><td>สรุป Activity หนึ่งหน้าสำหรับจัดเก็บหรือส่งต่อ</td><td>เลย์เอาต์ ISO A4; ตัวอักษรอ่านได้ใน PDF; รวมฟิลด์หลักและรายการแนบตาม BRD</td></tr></tbody></table></div>
+<h3>ส่วนเสริมที่แนะนำ (เกินขั้นต่ำ TOR)</h3>
+<p>1. <strong>คิวบันทึกงานภาคสนามเมื่อออฟไลน์</strong> หากการเชื่อมต่อขาดระหว่างลงพื้นที่ แท็บเล็ตจะเก็บ Activity และไฟล์แนบไว้ในคิวและซิงก์เมื่อกลับมาออนไลน์<br>2. <strong>หน้าจอกำหนดเส้นทางการส่งต่อรายสำนัก</strong> ผู้บังคับบัญชากำหนดและปรับเส้นทางการส่งต่อของแต่ละสำนักในระบบได้</p>
+<h3>ขั้นตอนงานภาคสนามและการส่งต่อ</h3>
+<p>ระหว่างลงพื้นที่ เจ้าหน้าที่บันทึก Activity และภาพประกอบผ่านแท็บเล็ตได้ทันที หากประเด็นต้องรอคำตอบจากสำนักอื่น ระบบจะเปิด Ticket มอบหมายผู้รับผิดชอบ เริ่มนับ SLA และส่งต่อเมื่อใกล้หรือเกินกำหนด โดย Investment Case ยังคงอยู่ใน Stage ปัจจุบัน</p>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M08.png" alt="Activity capture (mobile/tablet)" /></div>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M10.png" alt="Ticket create / route / SLA" /></div>
+<p>อ้างอิง: TOR 5.5.3, 5.3.4.</p>
+<h2>5.3 Investment Journey  —  ดำเนิน Case ระยะ Pre-incentive บน Pipeline</h2>
+<p>เจ้าหน้าที่<strong>เปิด Investment Case</strong> บันทึกงานต่อ Case นั้น และเลื่อนผ่าน Stage Pre-incentive ที่ตั้งค่าได้เมื่อหลักฐานครบ Case เดียวกันเก็บเอกสารลับ ประวัติ SLA และสถานะ EEC OSS เพื่อไม่ต้องรวบรวมประวัติการส่งเสริมจากสเปรดชีตหลายชุด</p>
+<p>Master ของผู้ติดต่อและองค์กรบอกว่า*ใคร*เกี่ยวข้อง Journey บันทึกว่า*ความพยายามส่งเสริมอยู่ตรงไหน* และ*ต้องทำอะไรต่อไป*</p>
+<h3>องค์ประกอบของ Investment Journey</h3>
+<div class="table-wrap"><table><thead><tr><th>วัตถุ</th><th>คืออะไร</th><th>เหตุใดจึงสำคัญ</th></tr></thead><tbody><tr><td><strong>Investment case</strong></td><td>บันทึกหลักของความพยายามส่งเสริม/โครงการหนึ่ง; ลิงก์องค์กร ผู้ติดต่อ Pipeline instance Activity Task Ticket เอกสาร</td><td>งานส่งเสริมประจำวันของ Case ที่ใช้งานอยู่บันทึกที่นี่</td></tr><tr><td><strong>Pipeline definition</strong></td><td>เทมเพลตของ Stage การเปลี่ยนผ่าน นโยบาย SLA สำนักเจ้าของ (ถ้ามี) Checklist</td><td>FDI กับขยายในประเทศต่างกันได้โดยไม่ต้องมีผลิตภัณฑ์ที่สอง</td></tr><tr><td><strong>Pipeline stage</strong></td><td>ขั้นที่มีชื่อในเทมเพลต (ลำดับ ป้าย วัน SLA Checklist ที่ต้องมี)</td><td>คอลัมน์บนบอร์ด; คำศัพท์ที่ สกพอ. เปลี่ยนชื่อใน Admin ได้</td></tr><tr><td><strong>Pipeline instance</strong></td><td>สถานะของ Case แต่ละรายการภายใต้ Pipeline ที่เลือก รวม Stage ปัจจุบันและเวลาที่เข้าสู่ Stage</td><td>ข้อมูลที่แสดงบนการ์ดในบอร์ด Pipeline</td></tr><tr><td><strong>Stage history</strong></td><td>Log แบบต่อท้ายของการย้าย (ผู้กระทำ จาก ไป เวลา ความเห็น)</td><td>พิสูจน์ว่าใครเลื่อนหรือส่งกลับ Case</td></tr><tr><td><strong>Exit checklist / gate</strong></td><td>ฟิลด์หรือรายการที่ต้องเป็นจริงก่อนอนุญาตให้ย้าย</td><td>กันการเปลี่ยน Stage โดยไม่มีหลักฐานสนับสนุน</td></tr><tr><td><strong>Stage SLA</strong></td><td>เวลาที่นับตั้งแต่ Case เข้าสู่ Stage พร้อมเกณฑ์แจ้งเตือนและสถานะเกิน SLA</td><td>ใช้แสดงงานเสี่ยงใน Heat Map และกำหนดการส่งต่อ (ข้อ 5.4)</td></tr><tr><td><strong>Case workspace</strong></td><td>UI เดียวสำหรับ Stepper Timeline Task Ticket เอกสาร แผง OSS</td><td>พื้นที่ทำงานหลักของเจ้าของ Case</td></tr><tr><td><strong>เอกสารลับบน Case</strong></td><td>LOI NDA งบการเงินพร้อมชั้นความลับ</td><td>Need-to-know + Watermark (ควบคุมในข้อ 5.6)</td></tr></tbody></table></div>
+<h3>การควบคุม Case และ Pipeline</h3>
+<div class="table-wrap"><table><thead><tr><th>ความสามารถ</th><th>สิ่งที่เจ้าหน้าที่หรือผู้จัดการทำ</th><th>กฎและหลักฐาน</th></tr></thead><tbody><tr><td>เปิด Investment Case</td><td>จากองค์กรที่จับคู่แล้ว เปิด Case เป็นบันทึกทำงานของความพยายามส่งเสริมหนึ่ง และวางบนเทมเพลต Journey ที่เลือก</td><td>เลือกเทมเพลต Pipeline (รวมคลังเทมเพลตที่แนะนำ); ชื่อ/รหัส Case; ผู้ติดต่อหลัก; บริบทอุตสาหกรรม/ประเทศ; เริ่มอัตโนมัติที่ Stage 1 พร้อม Pipeline instance</td></tr><tr><td>มอบหมายเจ้าของ</td><td>ตั้งสำนักและเจ้าหน้าที่ที่มีชื่อเป็นเจ้าของ Case</td><td>สำนักเจ้าของและเจ้าหน้าที่; มอบหมายใหม่พร้อมประวัติ; แสดงบนการ์ดบอร์ดและส่วนหัว Case</td></tr><tr><td>ดูบอร์ด Pipeline</td><td>เห็น Case เป็นคอลัมน์ตาม Stage และกรองตามความรับผิดชอบ</td><td>ตัวกรองอุตสาหกรรม ประเทศ เจ้าของ ความค้าง พ.ศ. และปีงบประมาณ; สีแสดงความค้างบนการ์ด; เปิดพื้นที่ทำงานจากการ์ด</td></tr><tr><td>ย้าย Stage</td><td>เลื่อนหรือส่งกลับ Case เฉพาะตามเส้นทางที่อนุญาต พร้อมบันทึกประวัติ</td><td>ต้องระบุความเห็นเมื่อส่งกลับ; เก็บประวัติ Stage แบบต่อท้าย; กำหนดผู้อนุมัติสำหรับการเปลี่ยน Stage ที่มีความเสี่ยงได้</td></tr><tr><td>Checklist / Exit gate ของ Stage</td><td>ระบบบล็อกการย้ายจนกว่าหลักฐานหรือฟิลด์ที่ต้องมีครบ</td><td>ฟิลด์และรายการ Checklist ต่อ Stage; ข้อความบล็อกที่ระบุสิ่งที่ขาด; ผู้ดูแลตั้งค่าเกต</td></tr><tr><td>Stage SLA</td><td>ติดตามระยะเวลาใน Stage ปัจจุบัน พร้อมแจ้งเตือนและแสดงสถานะเกิน SLA</td><td>เริ่มนับเวลาเมื่อเข้า Stage; ตั้งเกณฑ์แจ้งเตือนได้; แสดงใน Heat Map และรายการงานเสี่ยงตามข้อ 5.4; ใช้กำหนดการส่งต่อ</td></tr><tr><td>พื้นที่ทำงานของ Case</td><td>เจ้าของทำงานจากหน้าจอเดียว</td><td>Stage stepper; Timeline ของ Activity; Task; Ticket; รายการเอกสาร; แผงสถานะ EEC OSS; โมดูลตามบทบาท (ข้อ 5.6)</td></tr><tr><td>อัปโหลดเอกสารลับ</td><td>แนบ LOI NDA หรือชุดงบการเงินภายใต้ Need-to-know</td><td>ชั้นความลับบนไฟล์; RBAC ก่อนเปิดดู/ดาวน์โหลด; Dynamic Watermark และ Audit เมื่อเปิด (ข้อ 5.6)</td></tr><tr><td>แสดงสถานะ EEC OSS</td><td>เห็นสถานะบริการแบบเบ็ดเสร็จบน Case เดียวกันโดยไม่คีย์ซ้ำ</td><td>ดึงเมื่อเปิด/รีเฟรช; เวลาซิงก์ล่าสุด; สถานะว่างและข้อผิดพลาด; Endpoint เฉพาะจากเอกสาร API Interface เฟสที่ 1 (ข้อ 5.5)</td></tr><tr><td>ตั้งค่า Pipeline (Admin)</td><td>ผู้ดูแลปรับ Stage เส้นทางการเปลี่ยน SLA และสำนักเจ้าของได้โดยไม่ต้องแก้ไขโค้ดทุกครั้ง</td><td>เปลี่ยนชื่อหรือเพิ่ม Stage; กำหนดเส้นทางที่อนุญาต; จำนวนวัน SLA; สำนักเจ้าของเริ่มต้น; ผู้อนุมัติสำหรับการเปลี่ยน Stage ที่มีความเสี่ยง; เทมเพลตเริ่มต้น FDI / ในประเทศ / Aftercare</td></tr></tbody></table></div>
+<h3>ส่วนเสริมที่แนะนำ (เกินขั้นต่ำ TOR)</h3>
+<p><strong>คลังเทมเพลต Journey (FDI / ในประเทศ / Aftercare)</strong> ผู้ดูแลเริ่มจากชุด Stage ที่อนุมัติสำหรับรูปแบบส่งเสริมทั่วไป แทนการสร้าง Pipeline ว่างทุกครั้ง ป้ายและ Checklist ยังแก้ได้ตามนโยบาย สกพอ.</p>
+<h3>การเลื่อน Case ผ่าน Investment Journey</h3>
+<p>#### การเปิดและเป็นเจ้าของ Case</p>
+<p>จากองค์กรที่จับคู่แล้ว (ข้อ 5.1) เจ้าหน้าที่เลือก <strong>เปิด Investment Case</strong> เลือก <strong>Pipeline definition</strong> (เทมเพลตเริ่มต้นด้านล่าง; BRD อาจเปลี่ยนชื่อ) ลิงก์ผู้ติดต่อหลัก และมอบหมายสำนัก/เจ้าหน้าที่เจ้าของ ระบบสร้าง <strong>Pipeline instance</strong> ที่ Stage 1 และแสดง Case บน <strong>บอร์ด Pipeline</strong></p>
+<p>#### การทำงานภายใน Stage</p>
+<p>ขณะ Case อยู่ใน Stage เจ้าหน้าที่ใช้ความสามารถข้อ 5.2  —  <strong>บันทึก Activity</strong> <strong>สร้าง Task</strong> <strong>เปิด Ticket</strong>  —  โดยลิงก์กับ Case นี้เสมอ หลักฐาน (รูปสถานที่ แฟ้ม) แนบกับ Activity หรือรายการเอกสารของ Case Stage ไม่เลื่อนอัตโนมัติเมื่อบันทึก Activity; การเลื่อนเป็นการ <strong>ย้าย Stage</strong> อย่างชัดเจน (หรือ Automation ที่ผู้ดูแลตั้งค่าเฉพาะเมื่อ สกพอ. ขอใน BRD ภายหลัง)</p>
+<p>#### การย้าย Stage และ Exit gate</p>
+<p><strong>ย้าย Stage</strong> เสนอเฉพาะ<strong>การเปลี่ยนผ่านที่อนุญาต</strong> หากมี <strong>Exit checklist</strong> (เช่น มี Tax ID มีรายงานลงพื้นที่ Ticket สำคัญปิดหรือยอมรับแล้ว) การย้ายจะถูกบล็อกจนกว่ารายการผ่าน เมื่อสำเร็จ <strong>ประวัติ Stage</strong> บันทึกผู้กระทำ จาก/ไป เวลา และความเห็น; <strong>Stage SLA</strong> ของ Stage ใหม่เริ่มใหม่</p>
+<p>การกระโดดที่อ่อนไหว (เช่น เข้าสู่ *ความพร้อม Pre-incentive* หรือออกจากนั้น) อาจต้องมี<strong>บทบาทผู้อนุมัติ</strong>ก่อนยืนยันการย้าย</p>
+<p>#### SLA การส่งต่อและมุมมองผู้บริหาร</p>
+<p>ระยะเวลาที่ Case อยู่ใน Stage ใช้คำนวณการแจ้งเตือนและสถานะเกิน Stage SLA ส่วน Ticket SLA ใช้กับงานที่ส่งไปยังสำนักหรือผู้รับผิดชอบตามข้อ 5.2 ข้อมูลทั้ง 2 ส่วนแสดงใน <strong>Heat Map</strong> และรายการงานเสี่ยงตามข้อ 5.4 เมื่อจำเป็น ระบบจะแจ้งผู้จัดการหรือส่งต่อไปยังสำนักอื่น โดย Case ยังคงอยู่ในคอลัมน์เดิมจนกว่าจะมีการย้าย Stage</p>
+<p>#### เอกสารและ OSS บน Case เดียวกัน</p>
+<p>LOI, NDA และงบการเงินจะจัดเก็บใน Case พร้อมชั้นความลับ การเปิดดูและดาวน์โหลดอยู่ภายใต้ RBAC, Dynamic Watermark และ Audit Trail ตามข้อ 5.6 พื้นที่ทำงานของ Case จะแสดง <strong>สถานะ EEC OSS</strong> ที่ดึงผ่าน Integration ตามข้อ 5.5 โดยบริษัทฯ จะยืนยัน Endpoint รูปแบบข้อมูล และการจัดการข้อผิดพลาดร่วมกับ สกพอ. ในขั้นวิเคราะห์</p>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  A[ความสนใจ] --&gt; B[จับคู่องค์กร / บุคคล]
+  B --&gt; C[เปิด Investment Case]
+  C --&gt; D[มอบหมายเจ้าของ]
+  D --&gt; E[Stage 1]
+  E --&gt; F{ใน Stage}
+  F --&gt;|ภาคสนาม| G[Activity / Task]
+  F --&gt;|อุปสรรค| H[Ticket + SLA]
+  G --&gt; I{เกณฑ์ออกครบ?}
+  H --&gt; I
+  I --&gt;|ไม่| F
+  I --&gt;|ใช่| J[ย้าย Stage]
+  J --&gt; K{Pre-incentive ครบ?}
+  K --&gt;|ไม่| F
+  K --&gt;|ใช่| L[สถานะ OSS]</pre></div>
+<h3>เส้นทางตัวอย่าง  —  ผู้ผลิตต่างประเทศ จังหวัดชลบุรี</h3>
+<p>ชื่อเป็นตัวอย่างเท่านั้น ป้าย Stage เป็นเทมเพลตเริ่มต้น; BRD อาจเปลี่ยนชื่อ</p>
+<p><strong>ฉาก</strong> หลังโรดโชว์ต่างประเทศ บริษัทวัสดุขั้นสูงจากญี่ปุ่นสอบถามที่ตั้งโรงงานในชลบุรี เจ้าหน้าที่ PSD เป็นเจ้าของ Case สำนักอื่นต้องร่วมเดินดูสถานที่ในภายหลัง การยื่นสิทธิประโยชน์ยังไม่ใช่งานในขั้นนี้  —  เป้าหมายคือประวัติ Pre-incentive ที่ครบและการส่งต่อที่สอดคล้อง OSS</p>
+<div class="table-wrap"><table><thead><tr><th>เมื่อ</th><th>ในภาคสนาม</th><th>ความสามารถ / วัตถุที่ใช้</th></tr></thead><tbody><tr><td>วัน 0</td><td>แนะนำทาง LINE/อีเมล + นามบัตร</td><td>ข้อ 5.1: สร้าง/จับคู่ <strong>องค์กร</strong> และ <strong>บุคคล</strong> · <strong>เปิด Investment Case</strong> · แหล่งช่องทาง · <strong>มอบหมายเจ้าของ</strong> · *Early engagement*</td></tr><tr><td>สัปดาห์ 1</td><td>ประชุมครั้งแรกที่กรุงเทพฯ</td><td>ข้อ 5.2: <strong>บันทึก Activity</strong> · แนบโครงแฟ้ม · <strong>สร้าง Task</strong> “ส่งสรุปภาค” · อัปเดต <strong>Lead score</strong> (ข้อ 5.1)</td></tr><tr><td>สัปดาห์ 2-3</td><td>คำถามที่ดิน / สาธารณูปโภค</td><td>คงอยู่ใน *Qualify and information pack* จนข้อมูลขั้นต่ำครบ · <strong>เปิด Ticket</strong> ไปสำนักสนับสนุนพร้อม <strong>Ticket SLA</strong> หากติดขัด</td></tr><tr><td>สัปดาห์ 5</td><td>เดินดูสถานที่ชลบุรี</td><td><strong>ย้าย Stage</strong> ไป *Deep engagement / site* เมื่อเกตอนุญาต · <strong>Activity + รูป</strong> จากแท็บเล็ต · ปิดหรือยอมรับ Ticket · <strong>Task</strong> หลายสำนักบน Case เดียวกัน</td></tr><tr><td>สัปดาห์ 8</td><td>พร้อมขั้นถัดไปที่เกี่ยวกับสิทธิประโยชน์</td><td>*Pre-incentive readiness* · <strong>เกต Checklist</strong> · <strong>อัปโหลด LOI/NDA</strong> · ผู้อนุมัติยืนยัน <strong>ย้าย Stage</strong></td></tr><tr><td>หลังจากนั้น</td><td>บริการเดินต่อในช่องทาง One-stop</td><td>*OSS-aligned follow-through* · <strong>สถานะ EEC OSS</strong> บน Case (ข้อ 5.5) · บันทึก Activity ใน CRM ต่อเนื่อง</td></tr></tbody></table></div>
+<p>หาก Ticket ด้านสาธารณูปโภคหรือ Checklist ความพร้อมค้างเกิน SLA <strong>บอร์ด Pipeline</strong> และ <strong>Heat Map</strong> จะแสดงความล่าช้า พร้อมแจ้งผู้จัดการหรือส่งต่อไปยังสำนักที่เกี่ยวข้อง ขณะที่ Case ยังคงอยู่ใน Stage ปัจจุบัน</p>
+<p>Case สำหรับการขยายการลงทุนในประเทศสามารถใช้ <strong>Pipeline definition</strong> ที่ต่างออกไป เช่น ลดขั้นตอนเอกสารต่างประเทศ ผู้ดูแลระบบปรับ Stage และ Checklist ได้โดยไม่ต้องแยกระบบอีกชุด</p>
+<h3>โมเดล Stage เริ่มต้น</h3>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  S1[1 Early engagement] --&gt;|มีเจ้าของ| S2[2 Qualify]
+  S2 --&gt;|ข้อมูลครบ| S3[3 Deep engagement]
+  S3 --&gt;|ลงพื้นที่แล้ว| S4[4 Pre-incentive]
+  S4 --&gt;|พร้อมแล้ว| S5[5 OSS follow-through]
+  S2 -.-&gt;|จัดประเภทใหม่| S1
+  S3 -.-&gt;|ข้อมูลไม่ครบ| S2
+  S4 -.-&gt;|ไม่ผ่าน| S3</pre></div>
+<p>เส้นประ = การส่งกลับ Stage: จัดประเภทใหม่ / ข้อมูลยังไม่ครบ / ความพร้อมไม่ผ่าน</p>
+<div class="table-wrap"><table><thead><tr><th>Stage</th><th>เจตนา</th><th>หลักฐานบน Case</th><th>ออกเมื่อ</th></tr></thead><tbody><tr><td>1 Early engagement</td><td>บันทึกความสนใจและกำหนดผู้รับผิดชอบ</td><td>Activity แรก ช่องทาง อุตสาหกรรม/ประเทศโดยประมาณ</td><td>กำหนดเจ้าของ Case และจับคู่หรือสร้างองค์กรแล้ว</td></tr><tr><td>2 Qualify and information pack</td><td>ยืนยันความสนใจและแลกเปลี่ยนเอกสาร</td><td>เอกสารที่ส่งและรับ Activity การถามตอบ และคะแนน</td><td>ชุดข้อมูลขั้นต่ำครบ</td></tr><tr><td>3 Deep engagement / site</td><td>ลงพื้นที่หรือสนทนาเชิงลึก</td><td>ลงพื้นที่ + แนบ; Task หลายสำนัก</td><td>บันทึกลงพื้นที่แล้ว; Ticket สำคัญแก้หรือยอมรับแล้ว</td></tr><tr><td>4 Pre-incentive readiness</td><td>เตรียมข้อมูลสำหรับขั้นถัดไปที่เกี่ยวกับสิทธิประโยชน์</td><td>Checklist; LOI/NDA ภายใต้ RBAC; ไม่มีรายการสำคัญเกิน SLA</td><td>ผู้มีอำนาจตามบทบาทอนุมัติความพร้อม</td></tr><tr><td>5 OSS-aligned follow-through</td><td>ดำเนินการต่อให้สอดคล้องกับกระบวนการของ EEC OSS</td><td>สถานะ OSS ที่ดึงมา; Activity ต่อเนื่อง</td><td>เป็นไปตามกระบวนการที่ตกลงร่วมกับ สกพอ.</td></tr></tbody></table></div>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M12.png" alt="Investment Journey pipeline board" /></div>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M13.png" alt="Investment case workspace" /></div>
+<p>อ้างอิง: TOR 2.1, 5.5.4, 5.7.</p>
+<h2>5.4 เห็นภาระงานและส่งออกรายงาน</h2>
+<p>Dashboard จะแสดง<strong>จุดที่งานกระจุก</strong> และ<strong>Case หรือ Ticket ที่ใกล้หรือเกิน SLA</strong> ทันทีหลังผู้จัดการหรือผู้บริหารเข้าสู่ระบบ โดยใช้ข้อมูล Investment Case, Stage SLA และ Ticket SLA ชุดเดียวกับทีมปฏิบัติการ</p>
+<h3>การควบคุมภาระงาน SLA และการรายงาน</h3>
+<div class="table-wrap"><table><thead><tr><th>ความสามารถ</th><th>สิ่งที่ผู้ใช้ทำ</th><th>ตัวกรองและผลลัพธ์</th></tr></thead><tbody><tr><td>Dashboard หลังเข้าสู่ระบบ</td><td>เปิดหน้าแรกที่เหมาะกับบทบาทของผู้ใช้</td><td>ชุดวิดเจ็ตตามบทบาท; เปิด Case หรือ Ticket จากวิดเจ็ตได้; ใช้ข้อมูลเดียวกับข้อ 5.2-5.3 โดยไม่สร้างคลังสถานะอีกชุด</td></tr><tr><td>Heat Map</td><td>เห็นจุดที่งานเปิดกระจุกข้ามสำนัก/ทีม</td><td>มิติตามสำนัก/ทีม (หรือมิติ BRD อื่น); สีตามภาระ; คลิกไปยังรายการ Case/Ticket ต้นทาง</td></tr><tr><td>รายการเสี่ยง SLA</td><td>ตรวจสอบ Case หรือ Ticket ที่อยู่ในช่วงแจ้งเตือนหรือเกิน SLA</td><td>แยกสถานะเตือนและเกิน SLA; เรียงตามระยะเวลาค้าง; เปิดพื้นที่ทำงานของ Case หรือ Ticket จากรายการ</td></tr><tr><td>กรองตาม พ.ศ.</td><td>จำกัด Heat Map และรายการตามช่วงปฏิทินพุทธศักราช</td><td>เลือกช่วงบนแถบตัวกรองร่วม; ใช้กับ Heat Map รายการ SLA และรายงาน</td></tr><tr><td>กรองตามปีงบประมาณ</td><td>จัดมุมมองเดียวกันให้ตรงปีงบประมาณ</td><td>ตัวควบคุมปีงบประมาณบนแถบเดียวกับ พ.ศ.; คงสำหรับเซสชันหรือมุมมองที่บันทึก</td></tr><tr><td>มุมมองรายงานที่ตั้งค่าได้</td><td>แยกงานส่งเสริมตามประเทศ อุตสาหกรรม หรือมูลค่าการลงทุนเมื่อข้อมูลรองรับ</td><td>มุมมอง ad hoc และที่บันทึก; มิติจากฟิลด์ Case ที่มี; เปิดมุมมองที่บันทึกโดยไม่สร้างตัวกรองใหม่</td></tr><tr><td>ส่งออก Excel / PDF</td><td>ส่งออกมุมมองที่กรองแล้วเพื่อใช้จัดทำรายงานหรือเอกสารประกอบการประชุม</td><td>ใช้ตัวกรองปัจจุบัน; ปิดบังคอลัมน์ลับตาม RBAC (ข้อ 5.6); รองรับไฟล์ Excel และ PDF</td></tr><tr><td>วิดเจ็ตตามบทบาท</td><td>เจ้าหน้าที่ ผู้จัดการ และผู้บริหารไม่เห็นชิ้นส่วนลับเดียวกันของ Case เดียวกัน</td><td>ชุดวิดเจ็ตเริ่มต้นตามบทบาท; ผู้ดูแลปรับได้; ซ่อนวิดเจ็ต LOI/NDA/งบการเงินเมื่อ RBAC ปฏิเสธ</td></tr></tbody></table></div>
+<h3>ส่วนเสริมที่แนะนำ (เกินขั้นต่ำ TOR)</h3>
+<p><strong>รายงานสรุปสำหรับผู้บริหารตามรอบเวลา</strong> ระบบจัดส่งสรุป Heat Map และงานค้างตามรอบ เช่น รายสัปดาห์ เพื่อให้ผู้บริหารเห็นภาระงานและความล่าช้าโดยไม่ต้องเปิด Dashboard ทุกครั้ง ผู้ดูแลระบบกำหนดผู้รับและรอบการส่งได้</p>
+<h3>การรายงานจากข้อมูล Case</h3>
+<p>รายงานมาตรฐานทำงานบน PostgreSQL ตามข้อ 4.3.1 ส่วนรายงานตามรอบเวลาประมวลผลเป็นงานเบื้องหลัง หาก BRD ระบุว่าต้องใช้เครื่องมือ BI ภายนอกสำหรับการเจาะดูรายละเอียดอย่างอิสระ บริษัทฯ จะรับผิดชอบค่า License สำหรับผู้ใช้งานโครงการทั้งหมดตาม TOR ข้อ 5.6.2</p>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M02.png" alt="Executive heat map / dashboard" /></div>
+<p>อ้างอิง: TOR 5.5.5, 5.6, 2.2.</p>
+<h2>5.5 เข้าสู่ระบบด้วย SSO EECO และดู EEC OSS บน Case</h2>
+<p>เจ้าหน้าที่เข้าสู่ระบบผ่าน <strong>SSO EECO</strong> และกระบวนการบริการนักลงทุนดำเนินการผ่าน <strong>EEC OSS</strong> อยู่แล้ว CRM จึงเชื่อมต่อกับระบบทั้ง 2 แห่งแทนการสร้างคลังรหัสผ่านอีกชุดหรือให้เจ้าหน้าที่คีย์สถานะ OSS ซ้ำใน Excel</p>
+<h3>พฤติกรรม SSO และ EEC OSS</h3>
+<div class="table-wrap"><table><thead><tr><th>ความสามารถ</th><th>สิ่งที่เกิดขึ้น</th><th>พฤติกรรมการเชื่อมต่อ</th></tr></thead><tbody><tr><td>เข้าสู่ระบบด้วย SSO EECO</td><td>Named User ยืนยันตัวตนผ่าน Identity Provider ของ สกพอ. และเริ่มเซสชัน CRM โดยไม่ต้องมีฐานรหัสผ่านอีกชุด</td><td>ระบบนำผู้ใช้ไปยัง IdP ของ EECO; เริ่มเซสชันเมื่อยืนยันตัวตนสำเร็จ; รองรับ Logout; ขยายจำนวน Named Users ตามไดเรกทอรีได้</td></tr><tr><td>ซิงก์โปรไฟล์</td><td>บันทึกข้อมูลโปรไฟล์ที่ตกลงจาก SSO ลงในบัญชีผู้ใช้ CRM</td><td>ยืนยันรายการข้อมูล เช่น ชื่อและหน่วยงานในขั้น BA; รีเฟรชเมื่อเข้าสู่ระบบ; ไม่ใช้ฟิลด์นอกชุดที่ตกลง</td></tr><tr><td>เปิด Case → แผง OSS</td><td>การเปิด Investment Case ดึงสถานะบริการ EEC OSS ปัจจุบันมาแสดงในพื้นที่ Journey</td><td>ดึงข้อมูลเมื่อเปิด Case หรือกดรีเฟรช; แสดงเวลาที่ซิงก์ล่าสุดและข้อผิดพลาด; เรียกเฉพาะ Endpoint ที่ระบุในเอกสาร API Interface</td></tr><tr><td>สถานะซิงก์ล่าสุด / ข้อผิดพลาด</td><td>เจ้าหน้าที่เห็นว่าข้อมูล OSS เป็นปัจจุบันหรือการเชื่อมต่อล้มเหลว</td><td>แสดงเวลาที่ซิงก์สำเร็จล่าสุด; แจ้งข้อผิดพลาดเมื่อ Endpoint ใช้งานไม่ได้; ลองใหม่ได้โดยไม่ออกจาก Case</td></tr><tr><td>รูปแบบ Open API</td><td>การเชื่อมต่อใช้ส่วนต่อประสานเปิด</td><td>REST เป็นค่าเริ่มต้น; SOAP เมื่อระบบ สกพอ. ยังต้องการ; เอกสาร API Interface เฟสที่ 1 ระบุ Endpoint วิธี Authentication ฟิลด์ข้อมูล และรูปแบบข้อผิดพลาด</td></tr><tr><td>แยกอะแดปเตอร์</td><td>เมื่อ API ภายนอกเปลี่ยน บริษัทฯ ปรับเฉพาะ Adapter โดยไม่กระทบหน้าจอและกฎธุรกิจ</td><td>Adapter บน Node.js สำหรับ SSO และ OSS; ระบุขอบเขตและสิ่งที่อยู่นอกขอบเขตในเอกสาร API Interface; บันทึกความเสี่ยงและผลกระทบตาม TOR ข้อ 5.4</td></tr></tbody></table></div>
+<h3>การเข้าสู่ระบบและการดึงสถานะ</h3>
+<div class="mermaid-wrap"><pre class="mermaid">sequenceDiagram
+  participant U as เจ้าหน้าที่
+  participant FE as Next.js
+  participant API as Node.js
+  participant SSO as SSO EECO
+  participant OSS as EEC OSS
+  U-&gt;&gt;FE: เปิด CRM
+  FE-&gt;&gt;API: เริ่มเซสชัน
+  API-&gt;&gt;SSO: Authenticate
+  SSO--&gt;&gt;API: ตัวตน + คุณลักษณะที่ตกลง
+  API--&gt;&gt;FE: เซสชัน
+  U-&gt;&gt;FE: เปิด Investment Case
+  FE-&gt;&gt;API: ขอสถานะ OSS
+  API-&gt;&gt;OSS: ดึง Endpoint ที่ตกลง
+  OSS--&gt;&gt;API: สถานะ
+  API--&gt;&gt;FE: แสดงบน Case</pre></div>
+<p>หลังยืนยันตัวตนผ่าน SSO EECO ระบบจะใช้ RBAC ตามข้อ 5.6 กำหนด Case และเอกสารที่ผู้ใช้เข้าถึงได้ เมื่อผู้ใช้เปิด Investment Case ระบบจะดึงสถานะ OSS ผ่าน Adapter ตาม Endpoint ที่ระบุในเอกสาร API Interface หากเชื่อมต่อไม่สำเร็จ ระบบจะแจ้งข้อผิดพลาดและเวลาที่ซิงก์ล่าสุด โดยไม่แสดงข้อมูลเดิมเสมือนเป็นข้อมูลปัจจุบัน</p>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M01.png" alt="Login / SSO entry" /></div>
+<p>อ้างอิง: TOR 5.5.6, 5.7, 5.3.6, 5.4.</p>
+<h2>5.6 ควบคุมผู้เห็น LOI/NDA/งบการเงิน และเก็บ Audit Trail</h2>
+<p>บริษัทฯ จะควบคุมการเข้าถึง LOI, NDA และงบการเงินด้วย <strong>บทบาท</strong>และหลัก <strong>Need-to-know</strong> พร้อมประทับ <strong>Dynamic Watermark</strong> ที่ระบุผู้ใช้และเวลา และบันทึกการเปิดดู แก้ไข และดาวน์โหลดใน <strong>Audit Trail</strong></p>
+<h3>การควบคุมการเข้าถึง Watermark และ Audit</h3>
+<div class="table-wrap"><table><thead><tr><th>ความสามารถ</th><th>สิ่งที่เกิดขึ้น</th><th>มาตรการควบคุม</th></tr></thead><tbody><tr><td>สิทธิ์ตามบทบาท</td><td>Case เดียวกันแสดงโมดูลและฟิลด์ต่างกันตามบทบาทที่เข้าสู่ระบบ</td><td>ชุดเริ่มต้น Staff / Manager / Director; บทบาทเฉพาะ สกพอ. จาก BRD; อนุญาต/ปฏิเสธระดับโมดูลและการกระทำบังคับใน API บนทุกเส้นทางที่อ่อนไหว</td></tr><tr><td>Need-to-know บนเอกสารลับ</td><td>LOI NDA และงบการเงินจำกัดเฉพาะบทบาทอาวุโสและ/หรือเจ้าของโครงการ; Staff ไม่เปิดโดยค่าเริ่มต้น</td><td>ชั้นความลับบนแต่ละไฟล์; รายการปฏิเสธสำหรับ Staff โดยค่าเริ่มต้น; เส้นทางอนุญาตสำหรับเจ้าของโครงการและบทบาทอาวุโสที่ตั้งค่า</td></tr><tr><td>Dynamic Watermark</td><td>เมื่อเปิดดูหรือดาวน์โหลดเอกสารลับ ระบบทับตัวตนบัญชีและเวลา</td><td>ทับชื่อบัญชีและวันเวลา; ใช้กับตัวดูในแอปและเส้นทางดาวน์โหลด/PDF; คู่กับเหตุการณ์ Audit</td></tr><tr><td>Application Audit Trail</td><td>ระบบบันทึกว่าใครเปิดดู แก้ไข หรือดาวน์โหลดบันทึกหรือเอกสารใดเมื่อใด</td><td>เหตุการณ์เปิดดู แก้ไข ดาวน์โหลด; เก็บอย่างน้อย 180 วัน; Export เพื่อสอบสวน; ประวัติแบบต่อท้ายจากมุมมองแอป</td></tr><tr><td>การเข้าถึงที่ผูก Consent</td><td>ประวัติ Consent ตามข้อ 5.1 ใช้ประกอบการควบคุมการใช้ข้อมูลส่วนบุคคลที่อ่อนไหว</td><td>ตรวจวัตถุประสงค์และสถานะการถอนก่อนใช้; แจ้งผู้ใช้เมื่อไม่มี Consent หรือ Consent ถูกถอน</td></tr><tr><td>การคุ้มครองข้อมูลระหว่างส่งและจัดเก็บ</td><td>ข้อมูลสำคัญได้รับการเข้ารหัสทั้งระหว่างส่งและขณะจัดเก็บตามความสามารถของแพลตฟอร์ม</td><td>ใช้ TLS บน HTTPS; จัดเก็บความลับผ่านกลไกที่ สกพอ. อนุมัติ; ลดข้อมูลส่วนบุคคลในสำเนา Non-production ที่ใช้พัฒนาและ UAT</td></tr><tr><td>การพัฒนาตามแนวทาง OWASP</td><td>ใช้แนวทาง OWASP ตลอดการพัฒนาและทบทวนร่วมกับ สกพอ. ก่อน Go-Live</td><td>ตรวจสอบอินพุต; ใช้คิวรีแบบมีพารามิเตอร์; ตรวจสอบช่องโหว่และเวอร์ชันของ Dependencies; จัดการข้อผิดพลาดอย่างปลอดภัย; แก้ไขข้อค้นพบก่อนตรวจรับ</td></tr><tr><td>SSL ของ สกพอ. ใน Production</td><td>HTTPS Production ใช้ใบรับรองที่ สกพอ. จัดให้ตามที่กำหนดสำหรับ Go-Live</td><td>ใบรับรองผู้ว่าจ้างบนทางเข้าสาธารณะ (TOR 5.10.2); TLS บนเส้นทางเข้าถึงของเจ้าหน้าที่</td></tr><tr><td>ข้อมูลสำหรับการเฝ้าระวังระบบ</td><td>แอปส่งออก Application Log และ Audit Log แบบมีโครงสร้างให้ สกพอ. จัดเก็บหรือส่งต่อไปยังเครื่องมือเฝ้าระวัง</td><td>ฟิลด์ Log สอดคล้องกับเหตุการณ์ Audit; ระบุแนวทางการจัดเก็บใน Runbook; ส่งออกข้อมูลเพื่อใช้เฝ้าระวังได้</td></tr><tr><td>UAT ร่วม + Security Scan</td><td>ทดสอบมาตรการร่วมกับเจ้าหน้าที่ สกพอ. ผ่าน UAT และ Security Scan ก่อนตรวจรับ</td><td>สถานการณ์ทดสอบครอบคลุม RBAC, Watermark และ Audit Trail; ติดตามและแก้ไขผลการสแกนก่อนส่งมอบเฟสที่ 2 และ 3</td></tr></tbody></table></div>
+<h3>การเข้าถึงเอกสารลับ</h3>
+<p>เมื่อเจ้าหน้าที่เปิดพื้นที่ทำงานของ Case (ข้อ 5.3) API โหลดโมดูลที่<strong>บทบาท</strong>อนุญาต ผู้ใช้ Staff อาจเห็น Timeline และ Task แต่ไม่เห็นรายการไฟล์ LOI; Director หรือเจ้าของโครงการอาจเปิด PDF  —  ตัวดูใช้ <strong>Dynamic Watermark</strong> และเขียน <strong>Audit event</strong> กฎเดียวกันใช้กับการ Export และดาวน์โหลด การตั้งค่าบทบาทและชั้นความลับทำในพื้นที่ Admin ของผลิตภัณฑ์; ค่าเริ่มต้นตั้งใน BRD ร่วมกับ สกพอ.</p>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M17.png" alt="Sensitive doc + watermark" /></div>
+<div class="shot-frame"><img class="shot shot" src="file:///Users/rangwan/Documents/Supabase%20CRM/workflows/general-proposal/runs/eeco-crm-202608/submission-pack/egp-upload-ready/_build/covers/cropped-assets/M18.png" alt="Audit / change-history report" /></div>
+<p>อ้างอิง: TOR 5.8, 5.10.</p>
+<h2>5.7 นำประวัติ Excel เข้าสู่ฐานข้อมูลโครงสร้างเดียว</h2>
+<p>ก่อนเปิดใช้งานจริง บริษัทฯ จะโอนข้อมูลจากสเปรดชีตของแต่ละสำนักเข้าสู่ CRM ที่จัดโครงสร้างและตรวจสอบคุณภาพแล้ว โดยบุคคลหนึ่งรายเชื่อมโยงกับหลายบริษัทได้ การเตรียมโอนย้ายจะเสร็จก่อนตรวจรับเฟสที่ 2 และโหลดข้อมูลที่ผ่านการกระทบยอดเข้าสู่ Production ในเฟสที่ 3</p>
+<h3>วิธีการโอนย้าย</h3>
+<div class="table-wrap"><table><thead><tr><th>ขั้น</th><th>สิ่งที่บริษัทฯ ดำเนินการ</th><th>วิธีตรวจสอบและผลส่งมอบ</th></tr></thead><tbody><tr><td>สำรวจ</td><td>สำรวจไฟล์ Excel และข้อมูลส่งออกของแต่ละสำนักร่วมกับผู้ดูแลข้อมูล</td><td>รายการแหล่งข้อมูลต่อสำนัก; Checksum; ผู้รับผิดชอบข้อมูล; เก็บข้อมูลแยกไว้จนเริ่มจัดทำ Mapping</td></tr><tr><td>Map</td><td>จับคู่แต่ละไฟล์กับโมเดล CRM เป้าหมาย</td><td>เอกสาร Mapping; รายงานคอลัมน์ที่ยังไม่จับคู่; ลงนามก่อนทำความสะอาดและโหลดข้อมูล</td></tr><tr><td>Cleanse</td><td>ปรับรูปแบบข้อมูลให้พร้อมตรวจซ้ำและจัดทำรายงาน</td><td>รูปแบบวันที่และ Tax ID; ตัดช่องว่างและแก้ Encoding; แยกรายการที่ไม่ผ่านพร้อมรายงานข้อผิดพลาด</td></tr><tr><td>Dedupe องค์กร</td><td>รวมข้อมูลโดยใช้ <strong>Tax ID</strong> เป็นหลัก แล้วตรวจชื่อนิติบุคคล</td><td>รายงานรายการที่อาจซ้ำ; บันทึกการตัดสินใจเก็บหรือรวมของผู้ดูแล; ไม่เขียนทับข้อมูลที่ขัดแย้งโดยไม่มีการแจ้งเตือน</td></tr><tr><td>Dedupe / ลิงก์บุคคล</td><td>เก็บข้อมูลบุคคลเพียงรายการเดียว และเชื่อมกับองค์กรแบบ 1:N</td><td>รายการที่อาจเป็นบุคคลเดียวกัน; ความสัมพันธ์ org–contact; ไม่สร้างข้อมูลบุคคลซ้ำข้ามบริษัท</td></tr><tr><td>กระทบยอดและโหลด</td><td>โหลดเข้าสู่ Production หลังผู้ดูแลลงนามรับรองผลกระทบยอด</td><td>กระทบยอดจำนวน; แผน Rollback; กำหนดช่วง Cutover ร่วมกับ สกพอ.</td></tr><tr><td>คงมาตรการควบคุม</td><td>Audit/RBAC/Watermark เดียวกับข้อมูลใหม่</td><td>Access Log ≥180 วัน; เอกสาร Backup/DR; มาตรการข้อ 5.6 บนไฟล์ลับที่โอนย้าย</td></tr></tbody></table></div>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart LR
+  X[ไฟล์ Excel] --&gt; ST[Staging]
+  ST --&gt; CL[Cleanse และ Map]
+  CL --&gt; DD[Dedupe]
+  DD --&gt; REL[ความสัมพันธ์ 1:N]
+  REL --&gt; RC[กระทบยอด]
+  RC --&gt; LIVE[(PostgreSQL)]</pre></div>
+<p><strong>การตรวจสอบ:</strong> จำนวนองค์กร บุคคล และ Case ต้องตรงกับเอกสารกระทบยอดที่ลงนามก่อน Go-Live รายการที่ไม่ผ่านจะยังคงอยู่ในพื้นที่แยกพร้อมรายงานข้อผิดพลาดและไม่ถูกลบทิ้งโดยไม่มีการแจ้งเตือน</p>
+<p>รายงาน<strong>การเตรียม</strong>โอนย้ายเป็นผลส่งมอบเฟสที่ 2 ส่วน<strong>ฐานข้อมูลที่จัดโครงสร้างและปรับปรุงคุณภาพแล้ว</strong>เป็นผลส่งมอบเฟสที่ 3 ตามข้อ 6</p>
+<p>อ้างอิง: TOR 5.9.</p>
+<h1>6. แผนการส่งมอบและไทม์ไลน์แบบบูรณาการ</h1>
+<p>บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด จะส่งมอบระบบบริหารจัดการความสัมพันธ์นักลงทุนและฐานข้อมูลกลางภายใน <strong>210</strong> วันปฏิทินนับจากวันลงนามในสัญญา โดยนับรวมวันหยุดราชการและวันหยุดนักขัตฤกษ์ ชุดส่งมอบหลักกำหนดไว้ที่<strong>วัน 60</strong> <strong>วัน 180</strong> และ<strong>วัน 210</strong> พร้อมไมล์สโตนย่อยและระยะเวลาสำรอง เพื่อไม่ให้ผล UAT หรือความพร้อมของสภาพแวดล้อมกระทบกำหนดส่งมอบดังกล่าว</p>
+<p>Rocket มอบหมายทีมหลักตามตำแหน่ง TOR ข้อ 5.12 และเพิ่มผู้เชี่ยวชาญด้านวิศวกรรมผลิตภัณฑ์ การพัฒนาแอปพลิเคชัน ประสบการณ์ผู้ใช้ และการประสานงานส่งมอบ แบบฟอร์มภาคผนวก ข ที่ลงนามและหลักฐานวุฒิ/ประสบการณ์ส่งในชุดเอกสารบุคลากร</p>
+<h2>ทีมส่งมอบ</h2>
+<div class="table-wrap"><table><thead><tr><th>ตำแหน่งที่เสนอในโครงการ</th><th>บุคลากรที่มีชื่อ</th><th>ความรับผิดชอบหลัก</th></tr></thead><tbody><tr><td>ผู้จัดการโครงการ</td><td>วราพงศ์ เตชะพานิชกุล</td><td>รับผิดชอบการส่งมอบโดยรวม ไมล์สโตน ทิศทางเทคนิค และการประสานงานกับ สกพอ.</td></tr><tr><td>นักวิเคราะห์ระบบ (Business Analyst)</td><td>เอกสิทธิ์ จตุพรวัฒนา</td><td>รับผิดชอบจัดทำ BRD นิยาม Workflow ติดตามข้อกำหนด และออกแบบแนวทางของระบบ</td></tr><tr><td>นักออกแบบระบบอาวุโส (Senior System Analyst)</td><td>ฐิตวันต์ หิรัณย์อุฬาร</td><td>ออกแบบ UI/UX Journey ของเจ้าหน้าที่ที่รองรับมือถือ ต้นแบบ และการปรับความใช้งานได้</td></tr><tr><td>นักพัฒนาระบบอาวุโส</td><td>ธรรมรงค์ กีเกษมศรี</td><td>รับผิดชอบด้านเทคนิค การพัฒนาแกน CRM การทบทวนโค้ดและ API และคุณภาพการส่งมอบ</td></tr><tr><td>นักพัฒนาระบบ</td><td>รัชพล เฮงมงคลสกุล</td><td>พัฒนาฟีเจอร์ ทดสอบหน่วย แก้ข้อบกพร่อง ติดตั้ง และสนับสนุนการส่งมอบ</td></tr><tr><td>นักทดสอบระบบ</td><td>ณัฐณิชา จิตต์รัตนอรัญ</td><td>วางแผนและดำเนินการทดสอบ รายงานข้อบกพร่อง ทดสอบซ้ำ และหลักฐานคุณภาพ</td></tr><tr><td>นักทดสอบระบบอาวุโส</td><td>กฤษณะ ฐานวิเศษ</td><td>กลยุทธ์ทดสอบ การประกันคุณภาพ การกำกับทดสอบ และความพร้อมตรวจรับ</td></tr><tr><td>ผู้ประสานงานโครงการ</td><td>อัษฎาวุธ อนุกูล</td><td>โลจิสติกส์การประชุม บันทึก ติดตาม Action และการประสานการติดตั้ง</td></tr></tbody></table></div>
+<h2>ผู้เชี่ยวชาญส่งมอบเพิ่มเติม</h2>
+<div class="table-wrap"><table><thead><tr><th>ตำแหน่งผู้เชี่ยวชาญ</th><th>บุคลากรที่มีชื่อ</th><th>บทบาทสนับสนุน</th></tr></thead><tbody><tr><td>Programme Coordinator</td><td>ปราการ พจน์เพียรเลิศ</td><td>กำกับโปรแกรมประจำวัน กำหนดการ ขอบเขต ความเสี่ยง การรายงาน และการประสานกับ สกพอ.</td></tr><tr><td>Support Business Analyst</td><td>ธีรกานต์ บริบูรณ์ทรัพย์</td><td>เวิร์กช็อปผู้มีส่วนได้ส่วนเสีย ประสาน EECO และสนับสนุนเซสชันความต้องการ</td></tr><tr><td>ผู้ประสานงานโครงการ (ปฏิบัติการ)</td><td>วรินทร เอกจีน</td><td>สนับสนุนธุรการ สถานที่และโลจิสติกส์ และการติดตามภายใน</td></tr><tr><td>ผู้ช่วยผู้ประสานงานโครงการ</td><td>นิรภัฎ รักพงษ์</td><td>โลจิสติกส์การประชุม บันทึก การติดตาม และการสนับสนุนการยื่นเอกสาร</td></tr></tbody></table></div>
+<h2>6.1 ข้อผูกพันการส่งมอบ</h2>
+<div class="table-wrap"><table><thead><tr><th>ไมล์สโตน</th><th>ภายใน</th><th>สิ่งที่ Rocket ส่งมอบ</th></tr></thead><tbody><tr><td>แผนรายละเอียดโครงการ</td><td>≤ <strong>15</strong> วัน</td><td>กำหนดการโครงการและการจัดบุคลากรครบตามตำแหน่ง</td></tr><tr><td>BRD และการออกแบบ</td><td>≤ <strong>45</strong> วัน</td><td>ความต้องการทางธุรกิจและ Workflow; การออกแบบระบบรวมสภาพแวดล้อม</td></tr><tr><td>ชุดเฟสที่ 1</td><td>≤ <strong>60</strong> วัน</td><td>สิ่งข้างต้น บวกการประเมินความเสี่ยงและผลกระทบต่อการทำงานกับระบบ EECO</td></tr><tr><td>ชุดเฟสที่ 2</td><td>≤ <strong>180</strong> วัน</td><td>ฟังก์ชันหลักที่ทำงานได้ (ข้อ 5.1-5.7); มาตรการความมั่นคง; รายงานเตรียมโอนย้าย; UAT ร่วม การทดสอบระบบ และ Security Scan</td></tr><tr><td>ชุดเฟสที่ 3</td><td>≤ <strong>210</strong> วัน</td><td>ฐานข้อมูลที่จัดโครงสร้างและปรับปรุงคุณภาพแล้ว; Go-Live บนคลาวด์ที่ สกพอ. จัดหา; สิทธิ์ขาดและซอร์สโค้ด; Train The Trainer สำหรับ Admin และ User พร้อมคู่มือ; เอกสาร Backup และ DR; เอกสาร Licensing ที่ครอบคลุมอย่างน้อย 3 ปีตามที่ใช้บังคับ</td></tr></tbody></table></div>
+<p>นอกจาก Project Plan ตาม TOR ข้อ 7.1.1 ที่ส่งภายใน 15 วัน บริษัทฯ จะจัดทำแผนการทำงานตาม TOR ข้อ 20.1 ภายใน 45 วัน และแผนการใช้วัสดุภายในประเทศหากข้อกำหนดดังกล่าวใช้บังคับ</p>
+<h2>6.2 กำหนดการส่งมอบแบบบูรณาการ</h2>
+<p>บริษัทฯ วางแผนให้แต่ละสายงานเสร็จก่อนวันส่งมอบตามสัญญา และจัดระยะเวลาสำรองสำหรับการทบทวน ผล UAT และความพร้อมของโฮสต์ Production</p>
+<div class="table-wrap"><table><thead><tr><th>วันนับจากลงนาม</th><th>กิจกรรมของ Rocket</th><th>บัฟเฟอร์ / การพึ่งพา</th><th>ไมล์สโตนตามสัญญา</th></tr></thead><tbody><tr><td>1-12</td><td>Kick-off; ร่างแผนละเอียด</td><td>ยื่นภายในวัน 12</td><td>แผน ≤ <strong>15</strong></td></tr><tr><td>13-15</td><td>บัฟเฟอร์แผนและยื่น</td><td>—</td><td></td></tr><tr><td>16-38</td><td>ร่าง BRD Workflow การออกแบบ</td><td>ทำคู่ขนาน</td><td></td></tr><tr><td>39-45</td><td>ตรึงชุดออกแบบ</td><td>—</td><td>BRD + ออกแบบ ≤ <strong>45</strong></td></tr><tr><td>46-55</td><td>บันทึกความเสี่ยงและผลกระทบ; ยืนยันสภาพแวดล้อมกับ สกพอ.</td><td>—</td><td></td></tr><tr><td>56-60</td><td>ประกอบและยื่นชุดเฟสที่ 1</td><td>บัฟเฟอร์ความเห็น</td><td>เฟสที่ 1 ≤ <strong>60</strong></td></tr><tr><td>61-115</td><td>ตั้งค่าแกนผลิตภัณฑ์; Journey SSO OSS Watermark เฉพาะ</td><td>—</td><td></td></tr><tr><td>116-150</td><td>พัฒนาฟังก์ชันครบและพร้อมเข้า UAT; เตรียม Staging สำหรับการโอนย้ายเสร็จ</td><td>—</td><td></td></tr><tr><td>120-165</td><td>ซ้อมเตรียมโอนย้าย; ทบทวนโดยผู้ดูแลข้อมูล</td><td>ดำเนินการคู่ขนานกับการพัฒนาระบบ</td><td>เตรียม → เฟสที่ 2</td></tr><tr><td>151-168</td><td>UAT ร่วม ทดสอบระบบ Security Scan; แก้ Critical</td><td>เป้าจบประมาณวัน 168</td><td></td></tr><tr><td>169-180</td><td><strong>บัฟเฟอร์</strong>; ยื่นชุดเฟสที่ 2</td><td>คุ้มครองวัน 180</td><td>เฟสที่ 2 ≤ <strong>180</strong></td></tr><tr><td>181-195</td><td>โหลด Clean DB Production; ลงนามกระทบยอด</td><td>พึ่งความพร้อมโฮสต์</td><td></td></tr><tr><td>196-205</td><td>ติดตั้งบนคลาวด์ สกพอ.; Smoke test; Admin และ User TTT</td><td>—</td><td></td></tr><tr><td>206-210</td><td><strong>บัฟเฟอร์</strong>; Go-Live; ยื่นชุดเฟสที่ 3</td><td>คุ้มครองวัน 210</td><td>เฟสที่ 3 ≤ <strong>210</strong></td></tr></tbody></table></div>
+<p>หากโฮสต์คลาวด์ของ สกพอ. ยังไม่พร้อมประมาณวัน 181 บริษัทฯ จะตรวจสอบฐานข้อมูลที่ผ่านการทำความสะอาดในสภาพแวดล้อมควบคุม และติดตั้งทันทีเมื่อโฮสต์พร้อม โดยยังคงเป้าหมาย Go-Live ภายในวัน 210 ความล่าช้าของโฮสต์จะแจ้งไปยังผู้รับผิดชอบตามเส้นทางการสื่อสารในข้อ 7 ทันที</p>
+<h2>6.3 ความพร้อมตรวจรับ</h2>
+<div class="mermaid-wrap"><pre class="mermaid">flowchart TB
+  SIT[ตรวจ Integration SSO OSS] --&gt; UAT[UAT ร่วมกับ สกพอ.]
+  UAT --&gt; SEC[Security Scan]
+  UAT --&gt; SYS[รายงานทดสอบระบบ]
+  SEC --&gt; FIX[แก้และทดสอบซ้ำ]
+  SYS --&gt; FIX
+  FIX --&gt; READY{Go / No-Go}
+  READY --&gt;|ไม่| FIX
+  READY --&gt;|ใช่| TRAIN[TTT]
+  TRAIN --&gt; LIVE[Go-Live]</pre></div>
+<div class="table-wrap"><table><thead><tr><th>สาย</th><th>งานของ Rocket</th></tr></thead><tbody><tr><td>ตรวจ Integration</td><td>เส้นทางเข้าสู่ระบบ SSO EECO; การดึง EEC OSS ตาม Endpoint ใน BA; สถานะข้อผิดพลาดที่มองเห็น</td></tr><tr><td>UAT ร่วม</td><td>สถานการณ์เจ้าหน้าที่บน Journey Ticket Heat Map RBAC Watermark และ Audit</td></tr><tr><td>ทดสอบระบบ</td><td>Regression เชิงฟังก์ชันบนฟังก์ชันหลักในขอบเขต</td></tr><tr><td>Security Scan</td><td>สแกนช่องโหว่และแก้ไขข้อค้นพบก่อนส่งมอบชุดเฟสที่ 2 และ 3</td></tr><tr><td>Go / No-Go</td><td>ไม่มี Critical ค้าง; UAT ลงนามแล้ว; สแกนยอมรับแล้ว; มีแผน Rollback</td></tr></tbody></table></div>
+<p>ก่อน Go-Live บริษัทฯ จะยืนยันว่าการอบรมตามข้อ 6.5 เสร็จครบ ผลกระทบยอดข้อมูลสำหรับ Production ได้รับการลงนาม แผน Rollback ได้รับความเห็นชอบ ติดตั้ง SSL ของ สกพอ. ที่ทางเข้าสาธารณะ จัดทำเอกสาร Backup และ DR แล้ว และพร้อมส่งมอบ Application Log กับ Audit Log ตามข้อ 4.4</p>
+<h2>6.4 การโอนย้ายและ Cutover สู่ Production</h2>
+<p>การโอนย้ายข้อมูลจาก Excel ตามวิธีการใน<strong>ข้อ 5.7</strong> ดำเนินการตามกำหนดเวลาดังนี้</p>
+<div class="table-wrap"><table><thead><tr><th>เมื่อ</th><th>งานโอนย้ายของ Rocket</th><th>ชุดส่งมอบ</th></tr></thead><tbody><tr><td>ประมาณวัน 120-165</td><td>การเตรียมและซ้อม; การตัดสินใจของผู้ดูแลข้อมูล; รายงานเตรียม</td><td>เฟสที่ 2</td></tr><tr><td>ประมาณวัน 181-195</td><td>โหลด Clean DB Production หลังกระทบยอด</td><td>เฟสที่ 3</td></tr></tbody></table></div>
+<p>ข้อมูลต้นทางเป็นไฟล์ Excel ของสำนัก ดังนั้น Rocket ไม่เสนอ Cutover แบบ CDC สด</p>
+<h2>6.5 การอบรมและการส่งมอบ</h2>
+<div class="table-wrap"><table><thead><tr><th>หลักสูตร</th><th>ปริมาณ</th><th>สถานที่</th></tr></thead><tbody><tr><td>Admin TTT</td><td>1 ครั้ง ≥6 ชม. ผู้เข้าร่วม ≥8 คน</td><td>สกพอ. กรุงเทพฯ หรือ ม.บูรพา จ.ชลบุรี</td></tr><tr><td>User TTT</td><td>2 ครั้ง ≥6 ชม. รวมผู้เข้าร่วม ≥30 คน</td><td>เช่นเดียวกัน</td></tr><tr><td>คู่มือ</td><td>Admin + User</td><td>อนุมัติพร้อมแผนอบรมก่อนจัดอบรม</td></tr></tbody></table></div>
+<p>อาหารเป็นไปตามอัตรา TOR การอบรมวางไว้ช่วงวัน 196-205 เพื่อให้หลักสูตรและคู่มือจบภายในชุดเฟสที่ 3</p>
+<p>ในการส่งมอบครั้งสุดท้าย บริษัทฯ จะส่งมอบสิทธิ์ขาดและซอร์สโค้ด โดยทรัพย์สินทางปัญญาเป็นไปตาม TOR ข้อ 17 พร้อมเอกสารสิทธิ์ใช้งานของคลาวด์และซอฟต์แวร์ที่ครอบคลุมอย่างน้อย 3 ปี และไม่มีค่าใช้จ่ายรายปีเพิ่มเติมจาก สกพอ. ในช่วง 3 ปีแรกตาม TOR ข้อ 7.3.6</p>
+<h2>6.6 ความเสี่ยง Cutover</h2>
+<div class="table-wrap"><table><thead><tr><th>ความเสี่ยง</th><th>ผลกระทบ</th><th>การบรรเทา</th></tr></thead><tbody><tr><td>ผล UAT มาช้า</td><td>ปานกลาง</td><td>บัฟเฟอร์วัน 169-180; สายแก้คู่ขนาน</td></tr><tr><td>โฮสต์ สกพอ. ล่าช้า</td><td>สูง</td><td>ส่งคุณสมบัติโครงสร้างพื้นฐานขั้นต่ำตั้งแต่ต้นโครงการ; แจ้งผู้รับผิดชอบตามข้อ 7; ติดตั้งทันทีเมื่อพร้อมโดยยังคงเป้าหมายวัน 210</td></tr><tr><td>คุณภาพ Excel ต่ำกว่าคาด</td><td>ปานกลาง</td><td>กักกันใน Staging; การตัดสินใจของผู้ดูแล; แถวไม่สะอาดไม่ถูกโหลด</td></tr><tr><td>Endpoint SSO หรือ OSS เปลี่ยน</td><td>ปานกลาง</td><td>แยกอะแดปเตอร์ (ข้อ 5.5); วันที่ตรึง BA</td></tr></tbody></table></div>
+<p>อ้างอิง: TOR 5.1, 5.11, 5.12, 6-8 และ 17; รายละเอียดการรับประกันอยู่ในข้อเสนอฯ ข้อ 7 และ TOR ข้อ 14</p>
+<h1>7. การปฏิบัติการและการสนับสนุน</h1>
+<p>ตลอดระยะเวลารับประกัน 1 ปี Named Users ของ สกพอ. สามารถแจ้งคำถามหรือข้อบกพร่องทางโทรศัพท์ อีเมล หรือช่องทางแอปพลิเคชันได้ตลอด 24 ชั่วโมง บริษัทฯ จะตอบรับภายใน 30 นาที แยกคำขอวิธีใช้งานออกจากเหตุขัดข้องทางเทคนิค และแก้ไขตามกรอบเวลาที่สัญญากำหนด สกพอ. หรือ MSP ของหน่วยงานรับผิดชอบโฮสต์ Production ส่วนบริษัทฯ รับผิดชอบการวินิจฉัยและแก้ข้อบกพร่องของแอปพลิเคชัน</p>
+<h2>7.1 กรอบการรับประกัน</h2>
+<p>บริษัทฯ รับแจ้งเหตุได้ตลอด 24 ชั่วโมง ตอบรับภายใน 30 นาที และแก้ไขเหตุแต่ละระดับภายใน 4 ชั่วโมง 24 ชั่วโมง 48 ชั่วโมง หรือ 7 วันทำการตามเงื่อนไขใน TOR ข้อ 14</p>
+<div class="table-wrap"><table><thead><tr><th>การปฏิบัติของบริษัทฯ</th><th>การตอบสนอง</th></tr></thead><tbody><tr><td>ปีรับประกันหลังตรวจรับเฟสที่ 3 สุดท้าย</td><td>บำรุงรักษาแอปพลิเคชันและแก้ข้อบกพร่องเป็นเวลา <strong>1 ปี</strong> นับจากคณะกรรมการตรวจรับชุดส่งมอบสุดท้าย</td></tr><tr><td>รับแจ้ง 24×7; ตอบรับ ≤30 นาที</td><td>Named Users แจ้งทางโทรศัพท์ อีเมล หรือช่องทางแอป; Rocket ตอบรับภายใน <strong>30 นาที</strong></td></tr><tr><td>Critical  —  ฟังก์ชันหลักใช้ไม่ได้ (≤4 ชั่วโมง)</td><td>เริ่มนับเวลาเมื่อได้รับแจ้งและแก้ไขภายใน <strong>4 ชั่วโมง</strong></td></tr><tr><td>ข้อบกพร่องที่ไม่ใช่หน้าที่หลัก (≤24 ชั่วโมง)</td><td>แก้ไขภายใน <strong>24 ชั่วโมง</strong></td></tr><tr><td>ไม่ใช่หน้าที่หลักและไม่มีผลกระทบต่อบริการ (≤48 ชั่วโมง)</td><td>แก้ไขภายใน <strong>48 ชั่วโมง</strong></td></tr><tr><td>มี Workaround แล้ว (≤7 วันทำการ)</td><td>แก้ถาวร ≤ <strong>7 วันทำการ</strong> นับจากได้รับแจ้ง</td></tr><tr><td>ความผิดพลาดฮาร์ดแวร์โฮสต์ (ไม่ใช่แอป)  —  TOR 14.2.4</td><td>สอบสวนและ<strong>รายงาน</strong>ให้ สกพอ.; ไม่ถือเป็นข้อบกพร่องแอป</td></tr><tr><td>ความผิดพลาดจากระบบภายนอก  —  TOR 14.2.5</td><td>สอบสวนและ<strong>รายงาน</strong>; ไม่ถือเป็นข้อบกพร่องแอป</td></tr><tr><td>ความล่าช้าจากเหตุสุดวิสัย  —  TOR 14.2.6</td><td>รายงานความคืบหน้ารายวันจนกว่าจะแก้เสร็จ</td></tr></tbody></table></div>
+<h2>7.2 การสนับสนุนเจ้าหน้าที่</h2>
+<p>Named Users ของ สกพอ. ใช้ช่องทางรับแจ้งเดียวกันสำหรับคำขอประเภทต่อไปนี้</p>
+<div class="table-wrap"><table><thead><tr><th>ประเภทคำขอ</th><th>การจัดการ</th></tr></thead><tbody><tr><td>วิธีใช้ / การนำทาง</td><td>ให้คำแนะนำหรืออ้างอิงคู่มือ และส่งต่อผู้เชี่ยวชาญเมื่อจำเป็น</td></tr><tr><td>คำถามสิทธิ์ / บทบาท</td><td>ตรวจกับการตั้งค่า RBAC; ส่งต่อไป Admin ของ สกพอ. หากเป็นการเปลี่ยนนโยบาย</td></tr><tr><td>สงสัยว่าเป็นข้อบกพร่อง</td><td>เปิด Ticket เทคนิค → ข้อ 7.3</td></tr><tr><td>ขอแก้ข้อมูล</td><td>ตรวจตัวตนและอำนาจ → อนุมัติหากจำเป็น → ดำเนินการ → Audit Log</td></tr></tbody></table></div>
+<h2>7.3 การตอบสนองเหตุการณ์และการส่งต่อ</h2>
+<p>บริษัทฯ จัดประเภทข้อบกพร่องของแอปพลิเคชันตามข้อผูกพันในข้อ 7.1 เริ่มนับเวลาแก้ไขเมื่อได้รับแจ้ง และส่งต่อไปยังผู้เชี่ยวชาญตามระดับความซับซ้อนของปัญหา</p>
+<div class="table-wrap"><table><thead><tr><th>ขั้น</th><th>เป้าหมาย</th></tr></thead><tbody><tr><td>Intake / L1</td><td>ตอบรับ; จัดระดับความรุนแรง; จำลองปัญหา</td></tr><tr><td>L2 สนับสนุนแอป</td><td>วินิจฉัย; แพตช์หรือแก้การตั้งค่า</td></tr><tr><td>L3 วิศวกรรม</td><td>แก้โค้ด; รีลีสฉุกเฉินหาก Critical</td></tr><tr><td>Infra / คลาวด์</td><td>หากเป็นโฮสต์หรือเครือข่าย  —  <strong>MSP ของ สกพอ.</strong> พร้อมรายงานหลักฐานจาก Rocket</td></tr></tbody></table></div>
+<p>สำหรับเหตุโฮสต์หรือเครือข่าย Rocket ส่งหลักฐานแอปให้ สกพอ. หรือ MSP คลาวด์ และวินิจฉัยแอปคู่ขนานต่อไป</p>
+<div class="table-wrap"><table><thead><tr><th>ช่วง</th><th>การกระทำ</th></tr></thead><tbody><tr><td>ก่อน</td><td>ส่งมอบข้อมูลสำหรับการเฝ้าระวังจาก Application Log และ Audit Log; ควบคุมการเปลี่ยนแปลง; กำหนดช่องทาง On-call ตลอดปีรับประกัน</td></tr><tr><td>ระหว่าง</td><td>ติดตามเวลาตอบสนองตามระดับความรุนแรง; สื่อสารกับผู้ใช้; จำกัดผลกระทบ; หลีกเลี่ยงการเปลี่ยนแปลงที่ยังไม่ผ่านการทบทวน</td></tr><tr><td>หลัง</td><td>บันทึกสาเหตุรากสำหรับเหตุสำคัญ; อัปเดต Runbook; ปิด Ticket</td></tr></tbody></table></div>
+<h2>7.4 การจัดการคำขอเปลี่ยนแปลง (ช่วงรับประกัน)</h2>
+<div class="table-wrap"><table><thead><tr><th>ขั้น</th><th>สิ่งที่เกิดขึ้น</th></tr></thead><tbody><tr><td>คำขอ</td><td>บันทึกผ่านช่องทางรับแจ้งหรือผู้ประสานโครงการของ สกพอ.</td></tr><tr><td>ขอบเขต</td><td>ประเมินผลกระทบต่อ Journey การเชื่อมต่อ และข้อมูล พร้อมประมาณระยะเวลาและทรัพยากร</td></tr><tr><td>ผลกระทบ</td><td>ต่ำ / กลาง / สูง</td></tr><tr><td>อำนาจ</td><td>ต่ำ: ผู้จัดการโครงการพร้อมบันทึก; กลาง/สูง: ทบทวนร่วมกับ สกพอ. ก่อนเปลี่ยน Production</td></tr><tr><td>รีลีส</td><td>ทดสอบใน Non-prod; การอนุมัติแบบ CAB สำหรับกลาง/สูง; แผน Rollback</td></tr></tbody></table></div>
+<p>การเปลี่ยนแปลงสัญญาหรืองานเพิ่มเติมนอกขอบเขตจะดำเนินการตามเงื่อนไขของสัญญา โดยผ่านการประเมินทางเทคนิค การอนุมัติ การทดสอบ และการนำขึ้นใช้งานในช่วงรับประกัน</p>
+<h2>7.5 เมทริกซ์การสื่อสาร</h2>
+<div class="table-wrap"><table><thead><tr><th>เหตุการณ์</th><th>สิ่งที่ส่ง</th><th>ช่องทาง</th><th>ความถี่</th><th>เจ้าของ</th><th>ผู้รับ</th></tr></thead><tbody><tr><td>สถานะ (ส่งมอบ)</td><td>สถานะรายสัปดาห์</td><td>อีเมล + ประชุม</td><td>รายสัปดาห์จน Go-Live</td><td>ผู้จัดการโครงการ</td><td>ผู้สนับสนุนของ สกพอ.</td></tr><tr><td>เหตุการณ์ (P-critical)</td><td>แจ้งเหตุ</td><td>โทรศัพท์ + อีเมล</td><td>โดยเร็วที่สุด</td><td>หัวหน้าสนับสนุน</td><td>Product owner / หน่วยที่ได้รับผลกระทบ</td></tr><tr><td>การเปลี่ยนแปลง (กลาง/สูง)</td><td>สรุปการเปลี่ยนแปลง</td><td>อีเมล</td><td>ก่อน Deploy</td><td>ผู้จัดการโครงการ</td><td>IT + ธุรกิจของ สกพอ.</td></tr><tr><td>รายเดือนในช่วงรับประกัน</td><td>บันทึกบริการสั้น</td><td>อีเมล</td><td>รายเดือนในปีรับประกัน</td><td>หัวหน้าสนับสนุน</td><td>ผู้ประสานของ สกพอ.</td></tr></tbody></table></div>
+<p>อ้างอิง: TOR 14; ความรับผิดชอบด้านการปฏิบัติการระบุร่วมกับข้อ 4.4 และข้อ 6</p>
+<h1>8. การทดสอบเชิงปฏิบัติการ (Proof of Concept)</h1>
+<p>บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด จะสาธิต Proof of Concept แบบสดตามภาคผนวก ก ตามกำหนดการที่คณะกรรมการกำหนด</p>
+<p>การสาธิตทำงานใน<strong>สภาพแวดล้อมที่ Rocket บริหาร</strong> แยกจาก Production โดยใช้ข้อมูลตัวแทนที่ไม่มีข้อมูลส่วนบุคคลจริงของนักลงทุน Rocket จะสาธิต:</p>
+<ul><li>สร้าง / จับคู่นักลงทุนและองค์กร</li><li>บันทึก Activity พร้อมไฟล์แนบจากอุปกรณ์ระดับแท็บเล็ต</li><li>เลื่อน Investment Case ผ่าน Stage Pre-incentive พร้อมประวัติ</li><li>เปิด Ticket แสดง SLA และเส้นทางการส่งต่อ</li><li>รูปแบบเข้าสู่ระบบที่สอดคล้อง SSO EECO (อะแดปเตอร์สาธิตหาก SSO Production ไม่พร้อมในห้อง)</li><li>Watermark และ Audit บนตัวอย่างเอกสารลับ</li><li>ตัวกรอง Heat Map / Dashboard</li></ul>
+<p>แต่ละสถานการณ์จบด้วยผลลัพธ์ของระบบที่มองเห็นได้  —  ประวัติที่บันทึก Stage ที่อัปเดต สถานะ SLA การตัดสินใจสิทธิ์ หรือการเปลี่ยน Dashboard  —  เพื่อให้คณะกรรมการตรวจพฤติกรรมระหว่างเซสชันได้</p>
+<p>อ้างอิง: ภาคผนวก ก ข้อ 3</p>
+<h1>9. ส่วนเสริมที่แนะนำ (เกินขั้นต่ำ TOR)  —  สรุป</h1>
+<p>บริษัท ร็อคเก็ต อินโนเวชั่น จำกัด เสนอส่วนเสริมเกินข้อกำหนดขั้นต่ำของ TOR เพื่อลดขั้นตอนแก้ไขข้อมูลด้วยตนเอง รักษาบันทึกงานภาคสนามเมื่อการเชื่อมต่อไม่พร้อม และให้ผู้บังคับบัญชากำหนด Journey และเส้นทางการส่งต่อได้ชัดเจนขึ้น</p>
+<div class="table-wrap"><table><thead><tr><th>ส่วนเสริม</th><th>ประโยชน์ต่อ สกพอ.</th><th>อธิบายใน</th></tr></thead><tbody><tr><td>หน้าจอรวมข้อมูลซ้ำแบบมีผู้ใช้ตรวจสอบ</td><td>เจ้าหน้าที่เปรียบเทียบ Tax ID และชื่อนิติบุคคล แล้วเลือกค่าที่ต้องการเก็บในแต่ละฟิลด์ก่อนรวม</td><td>ข้อ 5.1</td></tr><tr><td>คิวบันทึกงานภาคสนามเมื่อออฟไลน์</td><td>Activity และไฟล์แนบจากการลงพื้นที่ซิงก์เมื่อการเชื่อมต่อกลับมา</td><td>ข้อ 5.2</td></tr><tr><td>หน้าจอกำหนดเส้นทางการส่งต่อรายสำนัก</td><td>กำหนดและปรับปรุงเส้นทางการส่งต่อของแต่ละสำนักในระบบ</td><td>ข้อ 5.2</td></tr><tr><td>คลังเทมเพลต Journey (FDI / ในประเทศ / Aftercare)</td><td>ชุด Stage เริ่มต้นที่อนุมัติแทน Pipeline ว่าง</td><td>ข้อ 5.3</td></tr><tr><td>สรุปผู้บริหารตามรอบเวลา</td><td>สรุป Heat Map และความค้างเป็นระยะโดยไม่ต้องเปิด Dashboard ทุกครั้ง</td><td>ข้อ 5.4</td></tr></tbody></table></div>
+<p>หาก สกพอ. รับรายการเหล่านี้ บริษัทฯ จะยืนยันรายละเอียดใน BRD เฟสที่ 1 และบรรจุไว้ในแผนโครงการ โดยไม่กระทบหรือทดแทนรายการส่งมอบภาคบังคับตาม TOR ข้อ 5-8</p></main>
+<script>
+  (async () => {
+    if (!window.mermaid) { document.body.dataset.ready = "1"; return; }
+    const pageW = Math.max(320, document.documentElement.clientWidth || 700);
+    // Match viewer: theme "neutral" (softer than flat white "base")
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "neutral",
+      securityLevel: "loose",
+      fontFamily: "Sarabun, TH SarabunPSK, sans-serif",
+      themeVariables: {
+        fontFamily: "Sarabun, TH SarabunPSK, sans-serif",
+        fontSize: "13px",
+        primaryTextColor: "#111111",
+        lineColor: "#444444",
+        edgeLabelBackground: "#fafbfb",
+      },
+      flowchart: {
+        htmlLabels: true,
+        curve: "basis",
+        padding: 12,
+        nodeSpacing: 28,
+        rankSpacing: 36,
+        useMaxWidth: true,
+      },
+      state: { htmlLabels: true, useMaxWidth: true },
+    });
+    // Fit within pageW × maxH — do not stretch tall charts to full width.
+    const maxH = 720;
+    for (const node of document.querySelectorAll("pre.mermaid")) {
+      try {
+        const id = "m-" + Math.random().toString(36).slice(2);
+        const { svg } = await mermaid.render(id, node.textContent.trim());
+        // mdToHtml already wraps <pre.mermaid> in .mermaid-wrap — replace pre only
+        const div = document.createElement("div");
+        div.className = "mermaid";
+        div.innerHTML = svg;
+        const el = div.querySelector("svg");
+        if (el) {
+          let vb = el.getAttribute("viewBox");
+          if (!vb) {
+            const w = parseFloat(el.getAttribute("width")) || pageW;
+            const h = parseFloat(el.getAttribute("height")) || 200;
+            vb = "0 0 " + w + " " + h;
+            el.setAttribute("viewBox", vb);
+          }
+          const parts = vb.trim().split(/[\s,]+/).map(Number);
+          const vbW = parts[2] || pageW;
+          const vbH = parts[3] || 200;
+          const scale = Math.min(1, (pageW - 28) / vbW, maxH / vbH);
+          const outW = Math.max(120, Math.round(vbW * scale));
+          const outH = Math.max(80, Math.round(vbH * scale));
+          el.setAttribute("width", String(outW));
+          el.setAttribute("height", String(outH));
+          el.style.width = outW + "px";
+          el.style.height = outH + "px";
+          el.style.maxWidth = "100%";
+          el.style.maxHeight = maxH + "px";
+          el.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        }
+        node.replaceWith(div);
+      } catch (e) { console.error(e); }
+    }
+    document.body.dataset.ready = "1";
+  })();
+</script>
+</body>
+</html>

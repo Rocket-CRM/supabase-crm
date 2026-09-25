@@ -1,0 +1,541 @@
+:root {
+  --bg: #f1f2f3;
+  --paper: #ffffff;
+  --ink: #202223;
+  --muted: #6d7175;
+  --line: #c9cccf;
+  --accent: #2c6ecb;
+  --bar: #1a1c1d;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Sarabun", "Noto Sans Thai", sans-serif;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, strong, th, figcaption {
+  font-family: "Sarabun", "Noto Sans Thai", sans-serif;
+  font-weight: 600;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1.25rem;
+  background: var(--bar);
+  color: #fff;
+}
+
+.topbar .meta {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.topbar code {
+  background: #333;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.actions button,
+.actions a.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.45rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: #fff;
+  background: var(--accent);
+}
+
+.actions button.secondary,
+.actions a.btn.secondary {
+  background: #4a4d50;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 0;
+  max-width: 1320px;
+  margin: 0 auto;
+  min-height: calc(100vh - 52px);
+}
+
+.sidebar {
+  position: sticky;
+  top: 52px;
+  align-self: start;
+  max-height: calc(100vh - 52px);
+  overflow: auto;
+  padding: 1rem 0.85rem 2rem;
+  border-right: 1px solid var(--line);
+  background: #fafbfb;
+  font-size: 0.85rem;
+}
+
+.sidebar h2 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.sidebar h2:first-child {
+  margin-top: 0;
+}
+
+.sidebar ol.toc-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.sidebar .toc-item {
+  margin: 0.28rem 0;
+  line-height: 1.35;
+}
+
+.sidebar .toc-level-2 {
+  margin-left: 0.35rem;
+  font-size: 0.95em;
+  list-style: disc;
+}
+
+.sidebar .toc-level-3 {
+  margin-left: 1rem;
+  font-size: 0.9em;
+  list-style: circle;
+}
+
+.sidebar .toc-group {
+  /* Keep decimal marker — list-style:none hid "3." on expandable parts (proposal) */
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.sidebar .toc-group-head {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  max-width: calc(100% - 0.25rem);
+  vertical-align: top;
+}
+
+.sidebar .toc-toggle {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.sidebar .toc-children {
+  margin: 0.2rem 0 0.55rem 1.15rem;
+  padding-left: 0.85rem;
+  border-left: 1px solid var(--line);
+  list-style: none;
+}
+
+.sidebar .toc-group.is-collapsed .toc-children {
+  display: none;
+}
+
+.sidebar a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.sidebar a:hover { text-decoration: underline; }
+
+.sidebar a.is-active {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sidebar .hint {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+main.doc,
+main.doc h1,
+main.doc h2,
+main.doc .pack-part,
+main.doc figure.proposal-mockup {
+  scroll-margin-top: 4.75rem;
+}
+
+main.doc {
+  background: var(--paper);
+  padding: 2rem 1.75rem 4rem;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+main.doc h1 { font-size: 1.75rem; line-height: 1.25; }
+main.doc h2 {
+  font-size: 1.35rem;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  padding-top: 0.15rem;
+  /* Spacing only — avoid stacked rules with adjacent <hr> (looks AI/template) */
+  border-top: none;
+  line-height: 1.3;
+}
+main.doc h3 { font-size: 1.1rem; margin-top: 1.5rem; }
+main.doc hr {
+  border: 0;
+  border-top: 1px solid #e6e7e8;
+  margin: 1.75rem 0;
+}
+/* Markdown --- before a heading: hide the redundant rule */
+main.doc hr:has(+ h1),
+main.doc hr:has(+ h2),
+main.doc hr:has(+ h3) {
+  display: none;
+}
+
+main.doc table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+main.doc th, main.doc td {
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.55rem;
+  vertical-align: top;
+}
+main.doc th { background: #f1f2f3; }
+
+main.doc pre {
+  background: #f1f2f3;
+  padding: 0.75rem;
+  overflow: auto;
+  font-size: 0.85rem;
+}
+
+.mermaid-wrap {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  background: #fafbfb;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.mermaid-wrap .mermaid {
+  background: transparent;
+  display: flex;
+  justify-content: center;
+}
+
+.mermaid-wrap .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.iframe-error {
+  display: none;
+  padding: 1.25rem;
+  color: #8e1f0b;
+  background: #fff4f4;
+  font-size: 0.9rem;
+}
+
+figure.proposal-diagram {
+  margin: 1.25rem 0 1.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  padding: 0;
+  break-inside: avoid;
+}
+
+figure.proposal-diagram figcaption {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #f1f2f3;
+  border-bottom: 1px solid var(--line);
+  break-after: avoid;
+}
+
+figure.proposal-diagram iframe.diagram-frame,
+figure.proposal-diagram > img {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+}
+
+figure.proposal-diagram iframe.diagram-frame {
+  min-height: 280px;
+  height: 320px;
+}
+
+figure.proposal-diagram > img {
+  height: auto;
+  padding: 0.75rem 0.85rem;
+  box-sizing: border-box;
+}
+
+figure.proposal-mockup {
+  margin: 1.5rem 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fafbfb;
+  break-inside: avoid;
+}
+
+figure.proposal-mockup figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  background: #f1f2f3;
+  border-bottom: 1px solid var(--line);
+  break-after: avoid;
+}
+
+/* Print source is always in the DOM; hidden on screen when a capture exists */
+figure.proposal-mockup img.mockup-print,
+figure.proposal-mockup .mockup-print-missing {
+  display: none;
+}
+
+figure.proposal-mockup img.mockup-print {
+  width: 100%;
+  height: auto;
+  max-height: 220mm;
+  object-fit: contain;
+  object-position: top center;
+  border: 0;
+  background: #fff;
+}
+
+figure.proposal-mockup .mockup-print-missing {
+  margin: 0;
+  padding: 1rem 0.75rem;
+  color: #8e1f0b;
+  background: #fff4f4;
+  font-size: 0.9rem;
+}
+
+figure.proposal-mockup .mockup-open {
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+figure.proposal-mockup iframe {
+  display: block;
+  width: 100%;
+  height: 780px;
+  border: 0;
+  background: #fff;
+}
+
+.error {
+  margin: 2rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: #fff4f4;
+  border: 1px solid #e0b4b4;
+  color: #8e1f0b;
+}
+
+.view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #d2d5d8;
+}
+
+.view-switch select {
+  border: 1px solid #5c5f62;
+  background: #2c2e2f;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font: inherit;
+}
+
+.pack-part {
+  margin: 0 0 3rem;
+  padding-top: 0.5rem;
+}
+
+.pack-part + .pack-part {
+  border-top: 1px solid var(--line);
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+}
+
+.pack-part-header {
+  margin: 0 0 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.pack-part-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pack-part-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.6rem;
+}
+
+.pack-part-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.pack-file-list {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+}
+
+.pack-file-list li {
+  margin: 0.35rem 0;
+}
+
+.pack-pdf-frame {
+  width: 100%;
+  height: 720px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  figure.proposal-mockup iframe { height: 640px; }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 16mm 14mm;
+  }
+
+  .topbar, .sidebar { display: none !important; }
+  .layout { display: block; }
+  main.doc {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  /* Pack parts (combined view) */
+  .pack-part + .pack-part {
+    break-before: page;
+  }
+  .pack-pdf-frame {
+    display: none;
+  }
+
+  /* Chapters = H1 (not pack-part titles — those already ride pack-part breaks) */
+  main.doc h1:not(.pack-part-title) {
+    break-before: page;
+    break-after: avoid;
+  }
+  /* First body H1 after a pack header is already on a fresh page */
+  .pack-part-header + h1:not(.pack-part-title),
+  .pack-part-header ~ h1:not(.pack-part-title):first-of-type {
+    break-before: auto;
+  }
+  /* Proposal-only view: don't blank the first page */
+  main.doc > h1:not(.pack-part-title):first-child {
+    break-before: auto;
+  }
+
+  main.doc h2,
+  main.doc h3,
+  main.doc h4 {
+    break-after: avoid;
+  }
+
+  main.doc table {
+    break-inside: avoid;
+  }
+
+  /* Mockups + shortcode diagrams: title + graphic open on a new page */
+  figure.proposal-mockup,
+  figure.proposal-diagram {
+    break-before: page;
+    break-inside: avoid;
+  }
+
+  /* Mermaid: keep together; do not force every diagram onto its own page */
+  .mermaid-wrap {
+    break-inside: avoid;
+  }
+
+  figure.proposal-mockup .mockup-open {
+    display: none !important;
+  }
+
+  /* Never print live iframes — use capture PNG (Rocket Deck also freezes/screenshots) */
+  figure.proposal-mockup iframe.mockup-live {
+    display: none !important;
+  }
+  figure.proposal-mockup img.mockup-print {
+    display: block !important;
+  }
+  figure.proposal-mockup .mockup-print-missing {
+    display: block !important;
+  }
+
+  figure.proposal-diagram iframe.diagram-frame {
+    height: 480px;
+  }
+}

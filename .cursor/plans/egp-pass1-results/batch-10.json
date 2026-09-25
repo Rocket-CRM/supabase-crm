@@ -1,0 +1,107 @@
+[
+  {
+    "id": 273,
+    "verdict": "Yes",
+    "reason": "จ้างทำธรรมาภิบาลข้อมูล+ระบบบัญชีข้อมูล — custom software, งบ 19.65 ล. ในช่วง sweet spot",
+    "budget": 19650000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 274,
+    "verdict": "Yes",
+    "reason": "พัฒนาและใช้นวัตกรรมระบบสารสนเทศฐานข้อมูลสุขภาพสัตว์เลี้ยง/ปศุสัตว์ — custom software",
+    "budget": 4159000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 275,
+    "verdict": "Maybe",
+    "reason": "ปรับปรุงระบบแผนที่ภาษีและทะเบียนทรัพย์สิน — มักผสม GIS/สำรวจ/แพ็กเกจแผนที่ ไม่ใช่ซอฟต์แวร์ล้วน",
+    "budget": 4500000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 276,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบผู้ช่วยอัจฉริยะให้บริการข้อมูลประชาชนกรมการกงสุล — custom AI/software",
+    "budget": 5500000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 277,
+    "verdict": "No",
+    "reason": "บำรุงรักษาระบบ CRM ที่มีอยู่ — AMS/vendor lock ของระบบเดิม",
+    "budget": 1039000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 278,
+    "verdict": "Maybe",
+    "reason": "จ้างเหมาบริหาร TMC มอเตอร์เวย์+ปรับปรุงโปรแกรม — งานปฏิบัติการ/ฮาร์ดแวร์ปนซอฟต์แวร์",
+    "budget": 18500000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 279,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบผู้ช่วยด้านคดีรัฐธรรมนูญอัจฉริยะ — custom software",
+    "budget": 7000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 280,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบแพลตฟอร์มคนทำงานอิสระ — custom software; small budget",
+    "budget": 853100,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 281,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบบริหารจัดการสินทรัพย์ (Smart Asset Management) — custom software",
+    "budget": 3000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 282,
+    "verdict": "Maybe",
+    "reason": "บำรุงรักษาระบบตรวจสอบรายได้+ปรับปรุงโปรแกรม — AMS ของระบบเดิม อาจมี lock-in",
+    "budget": 8630000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 287,
+    "verdict": "No",
+    "reason": "บำรุงรักษาระบบ Network Operation Dashboard ที่มีชื่อชัด — AMS/incumbent lock",
+    "budget": 1550000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 288,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบลงทะเบียนสื่อมวลชนต่างประเทศ (MMOS) — custom software",
+    "budget": 2500000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 289,
+    "verdict": "Maybe",
+    "reason": "ระบบควบคุมเข้าออกท่าเทียบเรือประมง — มักปนฮาร์ดแวร์/อุปกรณ์ด่าน ไม่ใช่ซอฟต์แวร์ล้วน",
+    "budget": 10102000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 290,
+    "verdict": "Yes",
+    "reason": "พัฒนาระบบ e-petition เรื่องร้องเรียน — custom software; small budget",
+    "budget": 900000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 291,
+    "verdict": "Maybe",
+    "reason": "พัฒนาระบบวิเคราะห์บริหารจัดการที่อยู่อาศัย — software แต่งบ 45.1 ล. ต้อง consortium",
+    "budget": 45143000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "inngest": "https://esm.sh/inngest@3.22.0",
+    "inngest/": "https://esm.sh/inngest@3.22.0/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.46.0"
+  }
+}

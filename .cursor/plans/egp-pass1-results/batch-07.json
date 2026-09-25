@@ -1,0 +1,107 @@
+[
+  {
+    "id": 191,
+    "verdict": "No",
+    "reason": "ดูแล/ปรับปรุงระบบ Misschool ที่มีอยู่แล้ว วิธีเฉพาะเจาะจง — vendor lock; small budget",
+    "budget": 834960,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 192,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบ ERP ดิจิทัลองค์กร (NIEMS) งบ 14.7 ล้าน อยู่ในช่วง sweet spot",
+    "budget": 14720500,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 193,
+    "verdict": "No",
+    "reason": "ดูแล/ปรับปรุง Misschool วิธีเฉพาะเจาะจง — incumbent lock; small budget",
+    "budget": 911700,
+    "status_original": "จัดทำ TOR"
+  },
+  {
+    "id": 194,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบสารบรรณอิเล็กทรอนิกส์ (e-Saraban) ซอฟต์แวร์กำหนดเอง งบ 7 ล้าน",
+    "budget": 7040400,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 195,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบบริหารนวัตกรรมและความรู้ 1 ระบบ งบ ~6 ล้าน",
+    "budget": 5992000,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 203,
+    "verdict": "Maybe",
+    "reason": "บำรุงรักษาระบบและข้อมูลที่มีอยู่ (ปภ.) — ซอฟต์แวร์แต่มีแนว incumbent",
+    "budget": 5000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 204,
+    "verdict": "Maybe",
+    "reason": "ปรับเปลี่ยนระบบบริหารเว็บไซต์ — ซอฟต์แวร์แต่งบ 25 ล้าน consortium",
+    "budget": 25000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 207,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบ ALIS (ข้อมูลการเงิน) ซอฟต์แวร์กำหนดเอง งบ 15 ล้าน",
+    "budget": 15000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 208,
+    "verdict": "No",
+    "reason": "ซื้อสิทธิ์ Microsoft SQL Server และ Exchange Server — licensed package",
+    "budget": 1966499,
+    "status_original": "จัดทำสัญญา/บริหารสัญญา"
+  },
+  {
+    "id": 212,
+    "verdict": "Maybe",
+    "reason": "พัฒนาระบบจัดซื้อ/บริหารสัญญาระยะ 2 — ซอฟต์แวร์แต่งบ 37 ล้าน consortium",
+    "budget": 37000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 214,
+    "verdict": "No",
+    "reason": "บำรุงรักษาโปรแกรมสำเร็จรูป SPSS — licensed package",
+    "budget": 2300500,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 216,
+    "verdict": "Maybe",
+    "reason": "บำรุงรักษา GIS + สิทธิ์ซอฟต์แวร์ งบ 20 ล้าน — integration/license/consortium",
+    "budget": 20000000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 217,
+    "verdict": "No",
+    "reason": "ซื้อซอฟต์แวร์ออกแบบผังระบบไฟฟ้า — licensed design package",
+    "budget": 6420000,
+    "status_original": "จัดทำ TOR"
+  },
+  {
+    "id": 219,
+    "verdict": "No",
+    "reason": "พัฒนาปรับปรุงระบบเครือข่ายคอมพิวเตอร์ — งานโครงข่าย/ฮาร์ดแวร์",
+    "budget": 2500000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  },
+  {
+    "id": 220,
+    "verdict": "Yes",
+    "reason": "จ้างพัฒนาระบบบริหารจัดการตลาด กทม. ซอฟต์แวร์กำหนดเอง งบ 12.4 ล้าน",
+    "budget": 12400000,
+    "status_original": "หนังสือเชิญชวน/ประกาศเชิญชวน"
+  }
+]
