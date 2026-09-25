@@ -41,6 +41,14 @@ async function signAmpPostback(workflowLogId: string, messageNodeId: string, act
   return `src=amp&v=1&r=${r}&n=${n}&a=${a}&s=${full.slice(0, 16)}`;
 }
 
+async function signAmpBroadcastPostback(broadcastId: string, actionKey: string): Promise<string> {
+  const b = compactUuid(broadcastId);
+  const a = actionKey;
+  const canonical = `a=${a}&b=${b}&src=amp&v=1`;
+  const full = await hmacSha256Hex(canonical, AMP_POSTBACK_SECRET);
+  return `src=amp&v=1&b=${b}&a=${a}&s=${full.slice(0, 16)}`;
+}
+
 async function buildQuickReplyItems(pills: any[], workflowLogId: string, messageNodeId: string): Promise<any> {
   const items = [];
   for (const pill of pills || []) {
@@ -48,6 +56,20 @@ async function buildQuickReplyItems(pills: any[], workflowLogId: string, message
     const actionKey = String(pill.action_key || "");
     if (!actionKey) continue;
     const data = await signAmpPostback(workflowLogId, messageNodeId, actionKey);
+    const action: any = { type: "postback", label, data };
+    if (pill.display_text) action.displayText = String(pill.display_text).slice(0, 300);
+    items.push({ type: "action", action });
+  }
+  return { items };
+}
+
+async function buildBroadcastQuickReplyItems(pills: any[], broadcastId: string): Promise<any> {
+  const items = [];
+  for (const pill of pills || []) {
+    const label = String(pill.label || pill.action_key || "Option").slice(0, 20);
+    const actionKey = String(pill.action_key || "");
+    if (!actionKey) continue;
+    const data = await signAmpBroadcastPostback(broadcastId, actionKey);
     const action: any = { type: "postback", label, data };
     if (pill.display_text) action.displayText = String(pill.display_text).slice(0, 300);
     items.push({ type: "action", action });
@@ -119,12 +141,64 @@ async function signAmpPostbacksInMessages(messages: any[], workflowLogId: string
     if (m.type === "template" && m.template) {
       m.template = await signPostbacksInObject(JSON.parse(JSON.stringify(m.template)), workflowLogId, messageNodeId, stats);
     }
-    // quickReply items embedded on resolved messages (non-pill path)
     if (m.quickReply?.items) {
       m.quickReply = await signPostbacksInObject(JSON.parse(JSON.stringify(m.quickReply)), workflowLogId, messageNodeId, stats);
     }
     if (m.metadata?.quickReply?.items) {
       m.metadata = { ...m.metadata, quickReply: await signPostbacksInObject(JSON.parse(JSON.stringify(m.metadata.quickReply)), workflowLogId, messageNodeId, stats) };
+    }
+    out.push(m);
+  }
+  return { messages: out, signed_count: stats.signed, action_keys: stats.keys };
+}
+
+async function signPostbacksInObjectForBroadcast(node: any, broadcastId: string, stats: { signed: number; keys: string[] }): Promise<any> {
+  if (node == null || typeof node !== "object") return node;
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i++) {
+      node[i] = await signPostbacksInObjectForBroadcast(node[i], broadcastId, stats);
+    }
+    return node;
+  }
+  if (node.type === "postback" && typeof node.data === "string") {
+    const actionKey = extractActionKeyFromPostbackData(node.data);
+    if (actionKey) {
+      node.data = await signAmpBroadcastPostback(broadcastId, actionKey);
+      stats.signed += 1;
+      for (const key of actionKey.split(",")) {
+        if (key && !stats.keys.includes(key)) stats.keys.push(key);
+      }
+    }
+  }
+  for (const key of Object.keys(node)) {
+    if (node.type === "postback" && key === "data") continue;
+    const v = node[key];
+    if (v && typeof v === "object") {
+      node[key] = await signPostbacksInObjectForBroadcast(v, broadcastId, stats);
+    }
+  }
+  return node;
+}
+
+async function signBroadcastPostbacksInMessages(messages: any[], broadcastId: string): Promise<{ messages: any[]; signed_count: number; action_keys: string[] }> {
+  const stats = { signed: 0, keys: [] as string[] };
+  const out: any[] = [];
+  for (const msg of messages || []) {
+    const m = { ...msg };
+    if (m.type === "flex" && m.contents) {
+      m.contents = await signPostbacksInObjectForBroadcast(JSON.parse(JSON.stringify(m.contents)), broadcastId, stats);
+    }
+    if (m.type === "template" && m.template) {
+      m.template = await signPostbacksInObjectForBroadcast(JSON.parse(JSON.stringify(m.template)), broadcastId, stats);
+    }
+    if (m.quickReply?.items) {
+      m.quickReply = await signPostbacksInObjectForBroadcast(JSON.parse(JSON.stringify(m.quickReply)), broadcastId, stats);
+    }
+    if (m.metadata?.quickReply?.items) {
+      m.metadata = {
+        ...m.metadata,
+        quickReply: await signPostbacksInObjectForBroadcast(JSON.parse(JSON.stringify(m.metadata.quickReply)), broadcastId, stats),
+      };
     }
     out.push(m);
   }
@@ -166,6 +240,15 @@ function resolveLineRecipient(run_scope: string, user_id: string | null, line_us
 async function emitInngestEvent(name: string, data: any): Promise<void> {
   if (!INNGEST_EVENT_URL) { console.error("INNGEST_EVENT_KEY missing"); return; }
   await fetch(INNGEST_EVENT_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, data }) });
+}
+async function emitInngestEvents(events: Array<{ name: string; data: any }>): Promise<void> {
+  if (!INNGEST_EVENT_URL) throw new Error("INNGEST_EVENT_KEY missing");
+  const resp = await fetch(INNGEST_EVENT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(events)
+  });
+  if (!resp.ok) throw new Error(`Inngest post failed: ${resp.status} ${await resp.text()}`);
 }
 
 function timeRangeToFrom(tr: string | null | undefined): string | null {
@@ -293,6 +376,112 @@ async function callMessagingService(supabase, payload) {
       success: false,
       error: e.message
     };
+  }
+}
+function appendBcToUrl(url: string, broadcastId: string): string {
+  if (!url || !/^https?:\/\//i.test(url)) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("bc", broadcastId);
+    return u.toString();
+  } catch (_e) {
+    return url;
+  }
+}
+function appendBroadcastAttribution(messages: any[], broadcastId: string): any[] {
+  const walk = (node: any): any => {
+    if (node == null || typeof node !== "object") return node;
+    if (Array.isArray(node)) return node.map(walk);
+    const out: any = { ...node };
+    for (const key of Object.keys(out)) {
+      if (key === "uri" && typeof out[key] === "string") out[key] = appendBcToUrl(out[key], broadcastId);
+      else if (typeof out[key] === "object") out[key] = walk(out[key]);
+    }
+    return out;
+  };
+  return (messages || []).map((m: any) => {
+    const msg = { ...m };
+    if (msg.type === "text" && typeof msg.text === "string") {
+      msg.text = msg.text.replace(/https?:\/\/[^\s]+/g, (match: string)=>appendBcToUrl(match, broadcastId));
+    }
+    if (msg.type === "flex" && msg.contents) msg.contents = walk(msg.contents);
+    return msg;
+  });
+}
+async function resolveBroadcastMessages(supabase, broadcast: any) {
+  const config = broadcast.message_config || {};
+  const templateContext = await buildTemplateContext(supabase, null, broadcast.merchant_id, {});
+  let ampMessages = normalizeMessageConfig(config, templateContext);
+  if (ampMessages.length === 0 && config.resource_id) {
+    ampMessages = await resolveResourceMessages(supabase, config.resource_id, broadcast.merchant_id, "line", templateContext);
+  }
+  if (config.json_content && ampMessages.length === 0) {
+    ampMessages = normalizeMessageConfig({ json_content: config.json_content }, templateContext);
+  }
+  if (Array.isArray(config.quick_replies) && config.quick_replies.length > 0) {
+    const qr = await buildBroadcastQuickReplyItems(config.quick_replies, broadcast.id);
+    if (ampMessages.length > 0) {
+      ampMessages[0] = { ...ampMessages[0], quickReply: qr };
+    } else if (config.content) {
+      ampMessages = [
+        {
+          type: "text",
+          text: substituteVariables(String(config.content), templateContext),
+          quickReply: qr,
+        },
+      ];
+    }
+  }
+  const withBc = appendBroadcastAttribution(ampMessages, broadcast.id);
+  const signed = await signBroadcastPostbacksInMessages(withBc, broadcast.id);
+  return signed.messages;
+}
+async function pageNonMemberLineIds(supabase, merchant_id: string, workflow_id: string | null, allowReEnroll: boolean) {
+  const MAX_PAGES = 900;
+  let start: string | null = null;
+  let page = 0;
+  const all: string[] = [];
+  do {
+    const f = await callMessagingServiceFollowers(supabase, merchant_id, start);
+    if (!f?.success) throw new Error(f?.error || "followers_fetch_failed");
+    const ids: string[] = Array.isArray(f.user_ids) ? f.user_ids : [];
+    let targets: string[] = ids;
+    if (ids.length > 0) {
+      const { data, error } = await supabase.rpc("fn_amp_filter_non_member_line_ids", {
+        p_merchant_id: merchant_id,
+        p_line_user_ids: ids
+      });
+      if (error) throw new Error(error.message);
+      targets = data || [];
+      if (!allowReEnroll && workflow_id && targets.length > 0) {
+        const { data: filtered, error: fErr } = await supabase.rpc("fn_amp_filter_enrolled_line_ids", {
+          p_workflow_id: workflow_id,
+          p_line_user_ids: targets
+        });
+        if (fErr) throw new Error(fErr.message);
+        targets = filtered || [];
+      }
+    }
+    all.push(...targets);
+    start = f.next || null;
+    page++;
+  } while (start && page < MAX_PAGES);
+  return all;
+}
+async function callMessagingServiceFollowers(supabase, merchant_id: string, start: string | null) {
+  try {
+    const authKey = await getMessagingAuthKey(supabase);
+    const response = await fetch(`${MESSAGING_SERVICE_URL}/line/followers`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authKey}`
+      },
+      body: JSON.stringify({ merchant_id, start })
+    });
+    return await response.json();
+  } catch (e) {
+    return { success: false, error: e.message };
   }
 }
 async function executeActionDirect(supabase, actionType, config, ctx) {
@@ -561,69 +750,35 @@ function capWaitDuration(requested, maxAllowed) {
 }
 async function evaluateConditionGroup(supabase, group, user_id, merchant_id, userContext, runtimeCtx) {
   const groupType = group.type || "simple";
-  // Delegate to the SQL evaluator for everything except plain simple groups on regular
-  // collections: aggregates (as before), form_submission / form_answer, content_engagement,
-  // and audience membership (amp_audience_member has no merchant_id column and uses
-  // is_member_of / is_not_member_of operators — fn_evaluate_amp_condition_group owns those
-  // semantics).
-  if (groupType !== "simple" || group.collection === "amp_audience_member") {
-    // content_engagement node/workflow scopes count only the current enrollment;
-    // the evaluator resolves it from the Inngest run id via workflow_log.
-    const payload = groupType === "content_engagement" && runtimeCtx ? {
+  // All groups go to the SQL evaluator so split nodes share semantics with entry, preview,
+  // batch and schedule. fn_evaluate_amp_condition_group ignores value_type, so dynamic
+  // values are substituted here before the call.
+  let payload = group;
+  if (groupType === "content_engagement" && runtimeCtx) {
+    payload = {
       ...group,
       _workflow_id: runtimeCtx.workflow_id,
       _inngest_run_id: runtimeCtx.runId
-    } : group;
-    const { data, error } = await supabase.rpc("fn_evaluate_amp_condition_group", {
-      p_user_id: user_id,
-      p_merchant_id: merchant_id,
-      p_group: payload
-    });
-    if (error) {
-      console.error("Condition group RPC error:", error);
-      return false;
-    }
-    return data === true;
+    };
+  } else if (groupType === "simple" && Array.isArray(group.conditions)) {
+    payload = {
+      ...group,
+      conditions: group.conditions.map((cond)=>cond.value_type === "dynamic" ? {
+          ...cond,
+          value: substituteVariables(cond.value, userContext)
+        } : cond)
+    };
   }
-  const collection = group.collection;
-  const conditions = group.conditions || [];
-  let query = supabase.from(collection).select("*");
-  if (collection !== "user_accounts") query = query.eq("user_id", user_id);
-  else query = query.eq("id", user_id);
-  query = query.eq("merchant_id", merchant_id);
-  for (const cond of conditions){
-    const field = cond.field;
-    const value = cond.value_type === "dynamic" ? substituteVariables(cond.value, userContext) : cond.value;
-    switch(cond.operator){
-      case "equals":
-        query = query.eq(field, value);
-        break;
-      case "not_equals":
-        query = query.neq(field, value);
-        break;
-      case "greater_than":
-        query = query.gt(field, value);
-        break;
-      case "greater_or_equal":
-      case "greater_than_or_equals":
-      case "gte":
-        query = query.gte(field, value);
-        break;
-      case "less_than":
-        query = query.lt(field, value);
-        break;
-      case "less_or_equal":
-      case "less_than_or_equals":
-      case "lte":
-        query = query.lte(field, value);
-        break;
-      case "contains":
-        query = query.ilike(field, `%${value}%`);
-        break;
-    }
+  const { data, error } = await supabase.rpc("fn_evaluate_amp_condition_group", {
+    p_user_id: user_id,
+    p_merchant_id: merchant_id,
+    p_group: payload
+  });
+  if (error) {
+    console.error("Condition group RPC error:", error);
+    return false;
   }
-  const { data, error } = await query.limit(1);
-  return !error && data && data.length > 0;
+  return data === true;
 }
 function findNextEdge(edges, nodeId, handle, nodeType) {
   const nh = handle === "true" ? "true" : handle === "false" ? "false" : handle;
@@ -901,6 +1056,82 @@ const workflowExecutor = inngest.createFunction({
   const supabase = getSupabase();
   const runId = event.id || `run-${Date.now()}`;
 
+  if (trigger_data.entry_type === "all_line_friends_exclude_members" && !trigger_data.fanout) {
+    const MAX_PAGES = 900;
+    let start: string | null = null;
+    let page = 0;
+    let followers = 0;
+    let dispatched = 0;
+    let failure: string | null = null;
+    do {
+      const cursor = start;
+      const res = await step.run(`follower-page-${page}`, async ()=>{
+        const f = await callMessagingServiceFollowers(supabase, merchant_id, cursor);
+        if (!f?.success) return { ok: false, error: f?.error || "followers_fetch_failed", next: null, followers: 0, dispatched: 0 };
+        const ids: string[] = Array.isArray(f.user_ids) ? f.user_ids : [];
+        let targets: string[] = [];
+        if (ids.length > 0) {
+          const { data, error } = await supabase.rpc("fn_amp_filter_non_member_line_ids", {
+            p_merchant_id: merchant_id,
+            p_line_user_ids: ids
+          });
+          if (error) return { ok: false, error: error.message, next: null, followers: ids.length, dispatched: 0 };
+          targets = data || [];
+          const { data: wf } = await supabase.from("workflow_master").select("config").eq("id", workflow_id).single();
+          const allowReEnroll = wf?.config?.allow_re_enrollment === true || wf?.config?.allow_re_enrollment === "true";
+          if (!allowReEnroll && targets.length > 0) {
+            const { data: filtered, error: fErr } = await supabase.rpc("fn_amp_filter_enrolled_line_ids", {
+              p_workflow_id: workflow_id,
+              p_line_user_ids: targets
+            });
+            if (fErr) return { ok: false, error: fErr.message, next: null, followers: ids.length, dispatched: 0 };
+            targets = filtered || [];
+          }
+        }
+        const events = targets.map((line_user_id)=>({
+          name: "amp/workflow.trigger",
+          data: {
+            workflow_id,
+            merchant_id,
+            run_scope: "line",
+            line_user_id,
+            user_id: null,
+            trigger_data: { ...trigger_data, entry_type: "all_line_friends_exclude_members", fanout: true }
+          }
+        }));
+        for (let i = 0; i < events.length; i += 500) await emitInngestEvents(events.slice(i, i + 500));
+        return { ok: true, error: null, next: f.next || null, followers: ids.length, dispatched: targets.length };
+      });
+      if (!res.ok) { failure = res.error; break; }
+      followers += res.followers;
+      dispatched += res.dispatched;
+      start = res.next;
+      page++;
+    } while (start && page < MAX_PAGES);
+    const truncated = !failure && !!start;
+    await step.run("follower-scan-log", async ()=>{
+      await supabase.from("workflow_log").insert({
+        merchant_id,
+        workflow_id,
+        user_id: null,
+        line_user_id: null,
+        run_scope: "line",
+        inngest_run_id: runId,
+        event_type: failure ? "follower_scan_failed" : "follower_scan_completed",
+        event_data: {
+          entry_type: "all_line_friends_exclude_members",
+          pages: page,
+          followers,
+          excluded_members: followers - dispatched,
+          dispatched,
+          truncated,
+          error: failure
+        }
+      });
+    });
+    return { success: !failure, fanout: { pages: page, followers, dispatched, truncated, error: failure } };
+  }
+
   if ((ed.dispatch_line_subjects || trigger_data.entry_type === "past_line_interaction") && !trigger_data.fanout) {
     const fan = await step.run("fanout-line-subjects", async ()=>{
       const keys = trigger_data.action_keys || trigger_data.filters?.action_keys || [];
@@ -949,6 +1180,28 @@ const workflowExecutor = inngest.createFunction({
     );
     const { data: wf } = await supabase.from("workflow_master").select("config").eq("id", workflow_id).single();
     const allowReEnroll = wf?.config?.allow_re_enrollment === true || wf?.config?.allow_re_enrollment === "true";
+    if (!allowReEnroll && line_user_id && !user_id && !isContinuation) {
+      const { data: filtered } = await supabase.rpc("fn_amp_filter_enrolled_line_ids", {
+        p_workflow_id: workflow_id,
+        p_line_user_ids: [line_user_id]
+      });
+      if (!filtered || filtered.length === 0) {
+        await supabase.from("workflow_log").insert({
+          merchant_id,
+          workflow_id,
+          user_id: null,
+          line_user_id,
+          run_scope,
+          inngest_run_id: runId,
+          event_type: "execution_skipped",
+          status: "already_enrolled",
+          event_data: { reason: "re_enrollment_disabled_line", trigger_data },
+          parent_workflow_log_id,
+          engagement_event_id
+        });
+        return { ok: true, skip: true, user_id, line_user_id, run_scope };
+      }
+    }
     if (!allowReEnroll && user_id && !isContinuation) {
       const { data: alreadyEnrolled } = await supabase.rpc("fn_amp_user_already_enrolled", {
         p_workflow_id: workflow_id,
@@ -1096,7 +1349,7 @@ const workflowExecutor = inngest.createFunction({
       handle = await step.run(`condition-${node.id}`, async ()=>{
         const config = node.node_config;
         // All LINE Friends: empty groups are intentional — always take True path.
-        if (config?.entry_type === "all_line_friends" || run_scope === "broadcast") {
+        if (config?.entry_type === "all_line_friends" || config?.entry_type === "all_line_friends_exclude_members" || run_scope === "broadcast") {
           await supabase.from("workflow_log").insert({
             merchant_id,
             workflow_id,
@@ -1439,6 +1692,179 @@ const workflowExecutor = inngest.createFunction({
   };
 });
 
+const broadcastSend = inngest.createFunction({
+  id: "amp-broadcast-send",
+  retries: 5,
+  concurrency: {
+    limit: 1,
+    key: "event.data.merchant_id"
+  }
+}, {
+  event: "amp/broadcast.send"
+}, async ({ event, step })=>{
+  const { broadcast_id, merchant_id, test_user_ids } = event.data;
+  const supabase = getSupabase();
+  const { data: broadcast, error: loadErr } = await supabase.from("amp_broadcast_master").select("*").eq("id", broadcast_id).eq("merchant_id", merchant_id).single();
+  if (loadErr || !broadcast) return { success: false, error: "broadcast_not_found" };
+
+  const resolved = await step.run("resolve-messages", async ()=>{
+    const messages = await resolveBroadcastMessages(supabase, broadcast);
+    await supabase.from("amp_broadcast_master").update({
+      resolved_messages: messages,
+      updated_at: new Date().toISOString()
+    }).eq("id", broadcast_id);
+    return messages;
+  });
+
+  if (Array.isArray(test_user_ids) && test_user_ids.length > 0) {
+    const testResult = await step.run("test-send", async ()=>{
+      let sent = 0;
+      let failed = 0;
+      for (const uid of test_user_ids.slice(0, 5)) {
+        const { data: user } = await supabase.from("user_accounts").select("line_id, channel_line").eq("id", uid).eq("merchant_id", merchant_id).single();
+        if (!user?.line_id || user.channel_line === false) {
+          failed++;
+          continue;
+        }
+        const result = await callMessagingService(supabase, {
+          merchant_id,
+          channel: "LINE",
+          recipient: { mode: "push", direct: { line_id: user.line_id } },
+          messages: resolved.map(ampMessageToOutbound),
+          source: "amp_workflow",
+          reference_id: broadcast_id
+        });
+        if (result.success) sent++;
+        else failed++;
+      }
+      return { sent, failed };
+    });
+    return { success: true, test: testResult };
+  }
+
+  const batchesReady = await step.run("build-batches", async ()=>{
+    const { count } = await supabase.from("amp_broadcast_batch").select("id", {
+      count: "exact",
+      head: true
+    }).eq("broadcast_id", broadcast_id);
+    if ((count || 0) > 0) return { created: false, count };
+    const audienceType = broadcast.audience_type;
+    if (
+      audienceType === "audience" &&
+      broadcast.audience_id &&
+      broadcast.refresh_before_send !== false
+    ) {
+      const { data: aud } = await supabase.from("amp_audience_master").select("audience_type").eq("id", broadcast.audience_id).single();
+      if (aud?.audience_type === "static") {
+        await supabase.rpc("fn_amp_resnapshot_audience", { p_audience_id: broadcast.audience_id });
+      }
+    }
+    const rows: Array<{ batch_no: number; line_user_ids: string[] }> = [];
+    if (audienceType === "all_line_friends") {
+      rows.push({ batch_no: 1, line_user_ids: [] });
+    } else if (audienceType === "line_friends_non_members") {
+      const ids = await pageNonMemberLineIds(supabase, merchant_id, null, true);
+      for (let i = 0; i < ids.length; i += 500) {
+        rows.push({ batch_no: Math.floor(i / 500) + 1, line_user_ids: ids.slice(i, i + 500) });
+      }
+      if (rows.length === 0) rows.push({ batch_no: 1, line_user_ids: [] });
+    } else {
+      const { data: lineIds, error } = await supabase.rpc("fn_amp_segment_broadcast_line_ids", {
+        p_merchant_id: merchant_id,
+        p_audience_id: broadcast.audience_id
+      });
+      if (error) throw new Error(error.message);
+      const ids = lineIds || [];
+      for (let i = 0; i < ids.length; i += 500) {
+        rows.push({ batch_no: Math.floor(i / 500) + 1, line_user_ids: ids.slice(i, i + 500) });
+      }
+      if (rows.length === 0) rows.push({ batch_no: 1, line_user_ids: [] });
+    }
+    const recipientCount = audienceType === "all_line_friends"
+      ? 0
+      : rows.reduce((n, r)=>n + r.line_user_ids.length, 0);
+    for (const r of rows) {
+      await supabase.from("amp_broadcast_batch").insert({
+        broadcast_id,
+        batch_no: r.batch_no,
+        line_user_ids: r.line_user_ids,
+        status: "pending"
+      });
+    }
+    await supabase.from("amp_broadcast_master").update({
+      recipient_count: audienceType === "all_line_friends" ? recipientCount : recipientCount,
+      updated_at: new Date().toISOString()
+    }).eq("id", broadcast_id);
+    return { created: true, batch_count: rows.length, recipient_count: recipientCount };
+  });
+
+  const { data: batchRows } = await supabase.from("amp_broadcast_batch").select("*").eq("broadcast_id", broadcast_id).order("batch_no");
+  let sentTotal = 0;
+  let failedTotal = 0;
+  for (const batch of batchRows || []) {
+    if (batch.status === "sent") {
+      sentTotal += batch.line_user_ids?.length || (broadcast.audience_type === "all_line_friends" ? 1 : 0);
+      continue;
+    }
+    const sendRes = await step.run(`send-batch-${batch.batch_no}`, async ()=>{
+      const mode = broadcast.audience_type === "all_line_friends" ? "broadcast" : "multicast";
+      const recipient = mode === "broadcast"
+        ? { mode: "broadcast" }
+        : { mode: "multicast", line_user_ids: batch.line_user_ids };
+      const result = await callMessagingService(supabase, {
+        merchant_id,
+        channel: "LINE",
+        recipient,
+        messages: resolved.map(ampMessageToOutbound),
+        source: "amp_workflow",
+        reference_id: broadcast_id,
+        retry_key: batch.id,
+        custom_aggregation_units: mode === "multicast" ? [broadcast_id] : undefined
+      });
+      if (result.error === "line_rate_limited") throw new Error("line_rate_limited");
+      const ok = !!result.success;
+      const lineRequestId = result.line_request_id || result.details?.line_request_id || null;
+      await supabase.from("amp_broadcast_batch").update({
+        status: ok ? "sent" : "failed",
+        attempt_count: (batch.attempt_count || 0) + 1,
+        error: result.error || null,
+        sent_at: ok ? new Date().toISOString() : null,
+        line_request_id: lineRequestId,
+        updated_at: new Date().toISOString()
+      }).eq("id", batch.id);
+      if (ok && mode === "broadcast" && lineRequestId) {
+        await supabase.from("amp_broadcast_master").update({
+          line_request_id: lineRequestId,
+          updated_at: new Date().toISOString()
+        }).eq("id", broadcast_id);
+      }
+      const n = mode === "broadcast" ? 1 : (batch.line_user_ids?.length || 0);
+      return { ok, n };
+    });
+    if (sendRes.ok) sentTotal += sendRes.n;
+    else failedTotal += sendRes.n;
+  }
+
+  await step.run("finalize", async ()=>{
+    const failedBatches = (batchRows || []).filter((b)=>b.status === "failed").length;
+    const finalStatus = failedTotal > 0 && sentTotal > 0
+      ? "partially_failed"
+      : failedTotal > 0 && sentTotal === 0
+        ? "failed"
+        : "sent";
+    await supabase.from("amp_broadcast_master").update({
+      status: finalStatus,
+      sent_at: new Date().toISOString(),
+      sent_count: sentTotal,
+      failed_count: failedTotal,
+      updated_at: new Date().toISOString()
+    }).eq("id", broadcast_id);
+    return { finalStatus, failedBatches };
+  });
+
+  return { success: true, batchesReady, sentTotal, failedTotal };
+});
+
 const postbackContinue = inngest.createFunction({
   id: "amp-postback-continue",
   retries: 3
@@ -1476,10 +1902,10 @@ const postbackContinue = inngest.createFunction({
         }
       });
     }
-    const { data: workflows } = await supabase.from("workflow_master").select("id, is_active").eq("merchant_id", data.merchant_id).eq("is_active", true).eq("domain", "amp");
+    const { data: workflows } = await supabase.from("workflow_master").select("id, is_active").eq("merchant_id", data.merchant_id).eq("is_active", true).in("domain", ["amp", "campaign"]);
     let triggered = 0;
     for (const wf of workflows || []) {
-      if (wf.id === data.workflow_id) continue;
+      if (data.workflow_id && wf.id === data.workflow_id) continue;
       const { data: nodes } = await supabase.from("workflow_node").select("id, node_type, node_config").eq("workflow_id", wf.id);
       const entry = (nodes || []).find((n)=>n.node_type === "condition" && n.node_config?.entry_type === "line_option_selected");
       if (!entry) continue;
@@ -1510,6 +1936,7 @@ const handler = serve({
   client: inngest,
   functions: [
     workflowExecutor,
+    broadcastSend,
     postbackContinue
   ],
   signingKey: Deno.env.get("INNGEST_SIGNING_KEY"),
