@@ -108,6 +108,8 @@ Canonical operators the metadata emits (the evaluator additionally accepts legac
 | `is_true` / `is_false` | `f IS TRUE / f IS FALSE` | Booleans only. No value input. |
 | `in` / `not_in` | `IN (…)` / `(f IS NULL OR f NOT IN (…))` | `value` is a JSON array. Empty array: `in`→false, `not_in`→true. |
 | `birthday_today`, `anniversary_today` | `fn_amp_lifecycle_date_matches(...)` | Optional condition keys `timezone`, `days_offset`. |
+| `month_in`, `month_not_in` | `EXTRACT(MONTH FROM field)` IN / NOT IN listed months | `value`: array of month numbers as strings `"1"`–`"12"`; invalid entries ignored; NULL date never matches (including `month_not_in`). |
+| `month_current` | month of field = current month in `timezone` | Optional `timezone` (condition, then group, else UTC). NULL date never matches. |
 | `between` | **not implemented** | FE drops it; never emit. |
 
 Aggregate **result** comparison operators: `greater_than`, `greater_or_equal`, `less_than`, `less_or_equal`, `equals` (+ legacy spellings). Unknown → `>=` (v1 fallback kept).
@@ -156,7 +158,8 @@ The caller-side wrapper is unchanged: `{"groups": [...], "groups_operator": "AND
   "conditions": [
     {"field": "email", "operator": "is_not_empty"},
     {"field": "tier_id", "operator": "in", "value": ["<tier-uuid-1>", "<tier-uuid-2>"]},
-    {"field": "birth_date", "operator": "birthday_today", "days_offset": 0}
+    {"field": "birth_date", "operator": "birthday_today", "days_offset": 0},
+    {"field": "birth_date", "operator": "month_in", "value": ["1", "12"]}
   ]
 }
 ```

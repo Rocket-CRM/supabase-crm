@@ -208,8 +208,14 @@ BEGIN
   --    "not found or access denied" — never reveal existence across merchants
 
   -- 4. BUSINESS LOGIC: every query filtered by v_merchant_id (and v_user_id)
+  --    Capture v_before := to_jsonb(row) before UPDATE; v_after after mutate.
 
-  -- 5. RETURN fn_response_success(...)
+  -- 5. AUDIT (admin writes only; no-op for member callers on shared functions)
+  -- PERFORM fn_log_admin_action('<entity>.<verb>', '<entity>', v_entity_id,
+  --                             p_payload_or_config, v_before, v_after,
+  --                             p_related_jsonb, p_reason, '<function_name>');
+
+  -- 6. RETURN fn_response_success(...)
 
 EXCEPTION WHEN OTHERS THEN
   RETURN fn_response_error('Error <doing thing>', SQLERRM, SQLSTATE);

@@ -120,6 +120,7 @@ E: analytics-query (public, `verify_jwt: false`) — Admin JWT validated in-func
 E: dispatch-workflow-trigger (public)
 E: inngest-amp-serve (public)
 C: amp_run_due_scheduled_workflows — `* * * * *` → `fn_amp_run_due_scheduled_workflows()`
+C: amp_run_due_broadcasts — `* * * * *` → `fn_amp_run_due_broadcasts()`
 
 ---
 

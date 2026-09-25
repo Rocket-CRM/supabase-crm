@@ -36,6 +36,7 @@ Every `bff_*` and `bff_admin_*` function calls this as the first line. Resolutio
 - `admin_users` table links `auth_user_id` → `merchant_id`, role, permissions
 - `check_admin_permission(p_permission)` — verifies the current admin has a specific permission
 - `is_current_user_admin()` — checks if the current user is in `admin_users`
+- **Audit actor:** `fn_log_admin_action` resolves the active admin from the Supabase Auth JWT (`iss` ends with `/auth/v1`) and `admin_users`. Service-role callers must pass `p_verified_actor_admin_id` after the Edge/BFF has validated the admin token.
 
 ### Role & Permission System
 

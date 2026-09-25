@@ -29,7 +29,7 @@ domains(prio, name, pattern) AS (VALUES
   (15, 'BigCommerce Storefront API', 'bigcommerce'),
   (15, 'Custom Webhooks',         'custom_webhook'),
   (20, 'Marketplace',             '(marketplace_|merchant_credentials|get_shop_credentials|get_merchant_marketplace)'),
-  (15, 'AMP Workflows',         '(workflow|amp_agent|amp_analysis|amp_audience|audience|amp_tracked_link|amp_engagement|fn_amp_|bff_amp_|fn_evaluate_amp)'),
+  (15, 'AMP Workflows',         '(workflow|amp_agent|amp_analysis|amp_audience|amp_broadcast|audience|amp_tracked_link|amp_engagement|fn_amp_|bff_amp_|fn_evaluate_amp)'),
   (15, 'Receipt / OCR',         '(receipt|ocr_)'),
   (15, 'Resource Content',      '(content_resource|resource_content|quick_reply|canned_response|media_resource|rich_content|member_app_deep_link)'),
   (15, 'Action Macro',          '(action_macro|macro_)'),

@@ -172,11 +172,12 @@ Edge env: `BQ_SERVICE_ACCOUNT_JSON`, `BQ_PROJECT_ID` (default `rocket-prod-analy
 - **Registry** — `REGISTRY_RENDER.md` now lists `analytics-query`; regenerate discipline applies on future edge changes.
 - **Data platform** — Landing tables in `raw_supabase_prod` may be less partitioned than `serving_loyalty`; new reports should prefer serving facts for merchant+date filters.
 - **Scope** — Wave-1 reports exclude marketing funnels, RFM charts, and AMP workflow analytics on the BQ path (some available via PG email extract only).
+- **Audience report (long term → BigQuery)** — `/reports/audiences` ships on Postgres BFFs (`bff_report_audience_compare`, `bff_report_audience`) because audience membership and RFM scores are not in BigQuery and `analytics-query` has no member-set filter. Long-term target: Datastream `amp_audience_member` (+ `rfm_user_score`) into `raw_supabase_prod`, build a serving membership mart clustered by `merchant_id` + `audience_id`, move audience reports to `analytics-query`, and accept `filters.audience_id` on every central report (purchases, redemptions, members, points). Until then audience-report baselines read live Postgres and can differ from BQ-backed Home KPIs by replication lag.
 
 ## Related
 
 - **Admin_Panel.md** — Metabase embed dashboards and `admin_analytics_menu` superadmin config.
-- **AMP_Workflows.md** — Workflow and audience analytics BFFs (`bff_amp_analytics_*`).
+- **AMP_Workflows.md** — Workflow and audience analytics BFFs (`bff_amp_analytics_*`); Audience report rules (§Audience report).
 - **CS_Analytics.md** — CS product metrics (`cs_bff_get_analytics_*`).
 - **RFM_Scoring.md** — RFM scores; PG export extract id `rfm`.
 - **Currency.md** — Wallet ledger semantics behind points reports and snapshot vs live wallet.

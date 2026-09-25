@@ -20,7 +20,7 @@ A **reward** is a merchant-defined benefit (voucher, product, experience) with d
 
 **Fulfillment method** — `digital`, `shipping` (address snapshot on redeem), `pickup`, `printed` (thermal slip on frontline; slip copy from physical draw fields).
 
-**Promo code pool** — Optional unique codes assigned per redemption from `reward_promo_code`; bulk import with partner attribution.
+**Promo code pool** — Optional unique codes assigned per redemption from `reward_promo_code`. Admin upload is a bulk import: any duplicate in the file or already in the pool for that partner blocks the whole file before any code is inserted.
 
 **Stock control** — Optional finite inventory via stock store; unlimited when disabled.
 
@@ -69,6 +69,7 @@ Rocket may layer a **partner catalog** on top of platform rewards: digital e-vou
 - Redemption outside the configured window → rejected; visibility and window are independent (campaign rewards may be invisible in browse but redeemable via push/link).
 - Stock-controlled reward with zero remaining → rejected.
 - Promo-assigned reward: pool must have enough available codes for requested quantity; reservation uses row locking — concurrent redeemers race fairly; insufficient pool → entire transaction fails with no partial codes or point deduction.
+- Promo pool upload: one duplicate in the file, or a code that already exists for the same merchant and partner (including on another reward), rejects the file. The admin sees the file line number and the code. No code from that file is added. Uniqueness stays `(merchant_id, source_id, promo_code)`.
 - Multi-quantity without promo codes → exactly one ledger row with quantity N; with promo codes → exactly N ledger rows with quantity 1 each.
 - Transaction limits are **cumulative**: prior redemptions in the window plus requested quantity must not exceed the cap.
 - Claim creates `redeemed_status` true and `used_status` false; mark-used may only set used after claimed. Fulfillment status tracks shipping independently (`pending` → `shipped` → `delivered` → `completed`, or `cancelled` / `reject`).
@@ -121,7 +122,7 @@ Rocket may layer a **partner catalog** on top of platform rewards: digital e-vou
 2. Complete basic info, eligibility, points matrix, limits, display, sidebar (visibility, promo, stock, fulfillment). Slot entry defaults visibility to `campaign`.
 3. Optionally enable marketplace platforms; for Shopify, pick discount type (percentage, fixed amount, free shipping, free product) and save so the edge function upserts the parent discount before slot attach.
 4. **Save** or **Save and Publish** (forces public `user` visibility).
-5. Manage list: pin, activate/deactivate, delete; upload promo codes in bulk when promo assignment is on.
+5. Manage list: pin, activate/deactivate, delete; upload promo codes in bulk when promo assignment is on. A file with any duplicate is rejected and lists the line and code; a clean file is queued and inserted in the background.
 6. For **Reward groups**: **New group** → add member rewards → add limit rows (reward type = max distinct, reward quantity = group cap) → save (conflicting limits blocked inline).
 7. Frontline: search member → **Push reward** (wallet, zero or priced per engine) or create **claim link** + QR.
 
@@ -193,7 +194,7 @@ Member **browse catalog** on the native app is unchanged. When `online_store` in
 | `bff_admin_push_reward`, `bff_*_claim_link*`, `bff_claim_reward_via_link` | Push and link claim |
 | `bff_get_reward_history` | Member history |
 | `api_mark_redemption_used` | Member mark used |
-| `bulk_upload_promo_codes_chunked` | Promo import |
+| `bff_admin_start_reward_promo_code_import`, `bff_admin_stage_reward_promo_code_import_rows`, `bff_admin_validate_reward_promo_code_import`, `fn_process_reward_promo_code_import_chunk` | Promo pool import. Duplicates fail the batch before insert. Worker event `import/bulk-reward-promo-codes` on `inngest-bulk-import-customers-serve`. |
 | `fn_campaign_reward_slot_attach` / `fn_campaign_reward_slot_detach` | Slot link core (referral / tier entry / lifecycle) |
 | `bff_attach_campaign_reward` / `bff_detach_campaign_reward` | Admin attach API |
 | `bff_upsert_campaign_reward_atomic` | Reward save + slot attach in one request |

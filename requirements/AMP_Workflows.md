@@ -113,6 +113,16 @@ Admin BFFs: `bff_list/get/upsert_amp_broadcast`, `bff_list_amp_broadcast_batches
 - Message nodes expose `engagement` (tracked links, CTR, page metrics for member-app destinations only).
 - Link wrap failures never block message send.
 
+### Audience report
+
+- **Placement** — Central Reports (`/reports/audiences` compare, `/reports/audiences/<id>` drill), not Audience Builder; audience detail links out via **View analytics**.
+- **Member set** — Current members (`exited_at IS NULL`, `user_accounts.deleted_at IS NULL`); activity metrics are those members' behaviour inside `[p_from, p_to)`. Size/movement use entry and exit timestamps.
+- **Baseline** — Every metric is paired with **All members** (non-deleted `user_accounts` for the merchant, same base as Home `total_members`); baseline `joined` = acquired in range (`COALESCE(acquired_at, created_at)`), `left` = null.
+- **Definitions** — Revenue / buyers: completed `purchase_ledger` by `transaction_date` (same as RFM report). Redeemers: distinct `reward_redemptions_ledger.user_id` by `redeemed_at`. LINE reachable: `line_id` set and `channel_line` not false (same as broadcast recipients). Points: average `user_wallet.points_balance`. Tier mix / RFM mix: audience % vs All members %; RFM mix only when `rfm_config.is_active`.
+- **Size series** — Members at bucket end = opening count before range + running (entered − exited) per bucket, Asia/Bangkok buckets (`day` / `week` / `month` / `quarter`).
+- **Broadcasts** — Last 20 `amp_broadcast_master` rows for the audience; unique clickers = distinct `user_id` (or `line_user_id`) with `amp_engagement_event.event_type = 'click'` for that broadcast; click rate = clickers / `sent_count`.
+- **Data path** — Live Postgres (not BigQuery); see Known gaps.
+
 ### Re-enrollment and continuations
 
 - Default: one enrollment per user per workflow unless `allow_re_enrollment` is true.
@@ -128,6 +138,7 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | --- | --- | --- |
 | Audience Builder | loyalty-admin | `bff_*_audience*`, `bff_get_workflow_collections`, `bff_amp_preview_condition`, `bff_import_audience_members` |
 | Targeted broadcast | loyalty-admin | `bff_*_amp_broadcast*`, `bff_list_amp_broadcast_batches`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers` |
+| Audience report | loyalty-admin | `bff_report_audience_compare`, `bff_report_audience` |
 | Workflow List | loyalty-admin | `bff_get_amp_workflow_full`, `bff_upsert_amp_workflow_with_graph`, `bff_amp_batch_run`, `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_amp_analytics_workflow` |
 | Lifecycle Automations | loyalty-admin | `bff_list/get/upsert/delete_lifecycle_automation`, `bff_get_lifecycle_action_options` |
 | Member app (engagement) | loyalty-user | `engagement-beacon` edge (`rct` from tracked links; `bc` + member JWT for broadcast attribution) |
@@ -147,9 +158,10 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Export members / node users | `bff_admin_start_user_export` source modes — see Known gaps |
 | Lifecycle event + actions | Creates/updates a linear automation without graph editor |
 
-1. **Audience Builder** — Create audience (name, type, conditions unless imported). For imported, upload CSV via import modal → `bff_import_audience_members`. Save → `bff_create_audience` / `bff_update_audience`. Preview size → `bff_amp_preview_condition`. Activate (optional backfill) → `bff_activate_audience`. View members and 7/30-day analytics cards. Refresh or deactivate as needed.
-2. **Workflow List** — List `scope=user` workflows. Open canvas → load graph → edit nodes (condition, message, wait, action, API, agent) → save `bff_upsert_amp_workflow_with_graph`. Activate workflow. Run batch manually. Inspect per-node stats, engagement tab, and user list modals. Duplicate workflow when needed (`bff_duplicate_amp_workflow`).
-3. **Lifecycle Automations** — List automations → create/edit wizard (lifecycle event, tier filters where applicable, ordered actions, schedule vs database trigger) → `bff_upsert_lifecycle_automation`. Toggle active state via same upsert contract.
+1. **Audience Builder** — Create audience (name, type, conditions unless imported). For imported, upload CSV via import modal → `bff_import_audience_members`. Save → `bff_create_audience` / `bff_update_audience`. Preview size → `bff_amp_preview_condition`. Activate (optional backfill) → `bff_activate_audience`. View members and 7/30-day analytics cards. **View analytics** opens the audience drill report. Refresh or deactivate as needed.
+2. **Audience report** (Reports → Audience report) — Compare all active/non-empty audiences against All members for a date range (members, joined/left, LINE reach %, bought %, revenue, revenue / member, revenue share, avg points, redeemed %); click a row for the drill: KPIs vs All members, size and revenue over time, tier and RFM mix, recent broadcasts with clicks. Header actions: View members, Send message.
+3. **Workflow List** — List `scope=user` workflows. Open canvas → load graph → edit nodes (condition, message, wait, action, API, agent) → save `bff_upsert_amp_workflow_with_graph`. Activate workflow. Run batch manually. Inspect per-node stats, engagement tab, and user list modals. Duplicate workflow when needed (`bff_duplicate_amp_workflow`).
+4. **Lifecycle Automations** — List automations → create/edit wizard (lifecycle event, tier filters where applicable, ordered actions, schedule vs database trigger) → `bff_upsert_lifecycle_automation`. Toggle active state via same upsert contract.
 
 ### Member journey
 
@@ -190,7 +202,7 @@ Indexes on `workflow_log` include `(workflow_id, node_id, event_type)` and `(wor
 
 **Targeted broadcast** — `bff_list/get/upsert_amp_broadcast`, `bff_list_amp_broadcast_batches`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers`, `fn_amp_run_due_broadcasts`, `fn_amp_record_broadcast_beacon`, `fn_amp_record_broadcast_postback`.
 
-**Analytics** — `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_get_amp_node_link_stats`, `bff_amp_analytics_workflow`, `bff_amp_analytics_overview`, `bff_amp_analytics_user_timeline`, `bff_get_resource_content_engagement`.
+**Analytics** — `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_get_amp_node_link_stats`, `bff_amp_analytics_workflow`, `bff_amp_analytics_overview`, `bff_amp_analytics_user_timeline`, `bff_get_resource_content_engagement`, `bff_report_audience_compare`, `bff_report_audience`, `fn_report_audience_metrics` (internal, `service_role` only; baseline + N audiences in one pass).
 
 **Lifecycle** — `bff_list/get/upsert/delete_lifecycle_automation`, `bff_get_lifecycle_action_options`.
 
@@ -243,6 +255,7 @@ Domain write → chokepoint_event_outbox → OutboxPublisher → inngest-event-r
 - **Audience CDC via Debezium** — Optional future path for `amp_audience_member` inserts documented as pending in `AMP - Rule Based.md` (live path uses outbox/Inngest).
 - **Condition config debt** — Some live workflows reference virtual fields not in the contract (`birth_month`, `service_type`, `expiry_days_remaining`, `tier_eval_days_remaining`); compiler now fails loudly — configs need cleanup or contract extension.
 - **Registry** — `bff_import_audience_members` exists in DB but may be missing from `REGISTRY_SUPABASE.md` until next regen.
+- **Audience report on Postgres (long term → BigQuery)** — v1 reads live Postgres (compare ≈1s, drill ≈1.7s at 90 days on an 80k-member merchant). Long term: replicate `amp_audience_member` (and `rfm_user_score`) into BigQuery serving, move audience reports onto `analytics-query`, and add an `audience_id` filter to every central report. See `requirements/Analytics.md` §Known gaps.
 - **Member engagement beacon** — FE integration per `docs/AMP_ENGAGEMENT_BEACON_SPEC.md` may still be partial on all member routes.
 
 ## Related

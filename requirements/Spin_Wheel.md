@@ -37,6 +37,7 @@ Progress and fairness are **log-derived**: limits and disputes use `spin_wheel_l
 - If a participation limit applies and the member or campaign has reached the cap in the configured window → spin fails with personal or campaign limit reached (status exposes `spins_remaining` and `next_reset_at` where applicable).
 - Before any charge, the engine must find a **winnable set**: at least one active segment with stock (or unlimited stock) **or** an active no-win segment. If none → `no_prize_available` with **no** wallet burn.
 - If `cost_amount > 0` and balance (points or ticket type) is below cost → `insufficient_balance` before charge.
+- A member with no wallet row (never had a points movement) has balance **0**: status returns `balance: 0` and `can_spin: false` on paid wheels — never null.
 - One spin → one segment → N dispatcher calls (one per outcome row on that segment). Never multiple segments per spin.
 - **Atomic transaction** — spend, weighted selection, stock decrement, outcome dispatch, and log insert succeed or fail together. Any dispatch failure rolls back burn and stock.
 - Sold-out segments (`stock_remaining = 0`) are excluded from the draw; remaining weights renormalize. Concurrent last-unit wins use atomic decrement; loser re-draws (up to 50 attempts) or falls back per no-win rules.
@@ -100,6 +101,8 @@ Common pitfalls: ticket cost without ticket type fails upsert; all segments sold
 4. On success: show win/lose modal using spin response outcomes for grants; resolve slice styling via `segment.id` against cached status segments (spin response does not echo `display_config`).
 5. App refreshes status for balance, `can_spin`, and remaining spins.
 6. On failure: show returned error string (unauthenticated, user not linked, inactive campaign, eligibility, limits, insufficient balance, no prize available, dispatch failure).
+
+**Unset presentation:** Each missing `display_config` field falls back to a member-app default derived from the merchant brand colour: single-hue brand background, brand accent (white spin button with brand text), fixed vivid slice palette with white labels near the rim, brand pointer and small "GO" hub. `theme.background_gradient` wins; else `theme.primary_color` → `secondary_color` gradient. String `theme` presets are not resolved (defaults apply). Configured fields always override per field.
 
 | Error (member-visible) | Typical cause |
 | --- | --- |

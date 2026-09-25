@@ -86,9 +86,11 @@ function parseActionKeyList(raw: string): string[] | null {
 
 interface AmpPostbackContext {
   version: string;
-  workflow_log_id: string;
-  message_node_id: string;
   action_key: string;
+  kind: "workflow" | "broadcast";
+  workflow_log_id?: string;
+  message_node_id?: string;
+  broadcast_id?: string;
 }
 
 async function parseAndVerifyAmpPostback(data: string): Promise<AmpPostbackContext | null> {
@@ -103,23 +105,40 @@ async function parseAndVerifyAmpPostback(data: string): Promise<AmpPostbackConte
   const version = params.get("v") || "";
   if (version !== "1") return null;
   const r = params.get("r") || "";
+  const b = params.get("b") || "";
   const n = params.get("n") || "";
   const a = params.get("a") || "";
   const s = params.get("s") || "";
-  if (!r || !n || !a || !s) return null;
+  if (!a || !s) return null;
   if (!parseActionKeyList(a)) return null;
   if (!AMP_POSTBACK_SECRET) {
     console.error("AMP_POSTBACK_SECRET not configured");
     return null;
   }
+
+  if (b) {
+    const canonical = `a=${a}&b=${b}&src=amp&v=1`;
+    const expected = await hmacSha256Hex(canonical, AMP_POSTBACK_SECRET);
+    if (s !== expected && s !== expected.slice(0, 16)) return null;
+    const broadcast_id = expandCompactUuid(b);
+    if (!broadcast_id) return null;
+    return { version, action_key: a, kind: "broadcast", broadcast_id };
+  }
+
+  if (!r || !n) return null;
   const canonical = `a=${a}&n=${n}&r=${r}&src=amp&v=1`;
   const expected = await hmacSha256Hex(canonical, AMP_POSTBACK_SECRET);
-  // Accept full hex or truncated (first 16 chars) to stay under LINE 300-char limit
   if (s !== expected && s !== expected.slice(0, 16)) return null;
   const workflow_log_id = expandCompactUuid(r);
   const message_node_id = expandCompactUuid(n);
   if (!workflow_log_id || !message_node_id) return null;
-  return { version, workflow_log_id, message_node_id, action_key: a };
+  return {
+    version,
+    action_key: a,
+    kind: "workflow",
+    workflow_log_id,
+    message_node_id,
+  };
 }
 
 interface CredentialMatch {
@@ -226,6 +245,65 @@ function extractPostbackContent(event: any, parsed: Record<string, string> | nul
   return `[postback:${event.postback?.data || ""}]`;
 }
 
+async function handleAmpBroadcastPostback(opts: {
+  merchant_id: string;
+  line_user_id: string;
+  webhook_event_id: string;
+  postback_data: string;
+  broadcast_id: string;
+  action_key: string;
+}): Promise<Record<string, unknown>> {
+  const supabase = getSupabase();
+  const keys = parseActionKeyList(opts.action_key) ?? [];
+  const key = keys[0];
+  if (!key) return { accepted: false, reason: "invalid_action_key" };
+
+  const { data: result, error } = await supabase.rpc("fn_amp_record_broadcast_postback", {
+    p_merchant_id: opts.merchant_id,
+    p_line_user_id: opts.line_user_id,
+    p_webhook_event_id: opts.webhook_event_id,
+    p_broadcast_id: opts.broadcast_id,
+    p_action_key: key,
+    p_metadata: {
+      postback_data: opts.postback_data,
+      src: "amp",
+    },
+  });
+
+  if (error) {
+    console.error("fn_amp_record_broadcast_postback error:", error);
+    return { accepted: false, reason: error.message };
+  }
+  if (!result?.accepted) {
+    return result || { accepted: false, reason: "rejected" };
+  }
+
+  const payload = {
+    engagement_event_id: result.engagement_event_id,
+    merchant_id: result.merchant_id,
+    broadcast_id: result.broadcast_id,
+    workflow_id: null,
+    message_node_id: null,
+    workflow_log_id: null,
+    action_key: result.action_key,
+    line_user_id: result.line_user_id,
+    user_id: result.user_id || null,
+    route_snapshot: {},
+  };
+
+  const emitted = await emitInngestEvent("amp/content.postback", payload);
+  if (!emitted.ok) {
+    try {
+      await inngestAmp.send({ name: "amp/content.postback", data: payload });
+    } catch (e: any) {
+      console.error("Inngest amp/content.postback failed (non-blocking):", e.message);
+      return { ...result, inngest_emitted: false, inngest_error: emitted.error || e.message };
+    }
+  }
+
+  return { ...result, inngest_emitted: true };
+}
+
 async function handleAmpPostback(opts: {
   merchant_id: string;
   line_user_id: string;
@@ -233,6 +311,17 @@ async function handleAmpPostback(opts: {
   postback_data: string;
   ampCtx: AmpPostbackContext;
 }): Promise<Record<string, unknown>> {
+  if (opts.ampCtx.kind === "broadcast" && opts.ampCtx.broadcast_id) {
+    return handleAmpBroadcastPostback({
+      merchant_id: opts.merchant_id,
+      line_user_id: opts.line_user_id,
+      webhook_event_id: opts.webhook_event_id,
+      postback_data: opts.postback_data,
+      broadcast_id: opts.ampCtx.broadcast_id,
+      action_key: opts.ampCtx.action_key,
+    });
+  }
+
   const supabase = getSupabase();
 
   // Load route snapshot from originating log for selection_mode + ownership
@@ -245,6 +334,9 @@ async function handleAmpPostback(opts: {
   if (!logRow || logRow.merchant_id !== opts.merchant_id) {
     return { accepted: false, reason: "invalid_run" };
   }
+
+  const workflowLogId = opts.ampCtx.workflow_log_id!;
+  const messageNodeId = opts.ampCtx.message_node_id!;
 
   const snapshot = (logRow.event_data as any)?.route_snapshot || {};
   const selectionMode = snapshot.selection_mode || "single";
@@ -268,8 +360,8 @@ async function handleAmpPostback(opts: {
       p_merchant_id: opts.merchant_id,
       p_line_user_id: opts.line_user_id,
       p_webhook_event_id: webhookEventId,
-      p_workflow_log_id: opts.ampCtx.workflow_log_id,
-      p_message_node_id: opts.ampCtx.message_node_id,
+      p_workflow_log_id: workflowLogId,
+      p_message_node_id: messageNodeId,
       p_action_key: key,
       p_selection_mode: selectionMode,
       p_metadata: {

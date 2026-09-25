@@ -75,7 +75,11 @@ BEGIN
     -- 2. Business logic (all queries filter by merchant_id)
     ...
 
-    -- 3. Return success
+    -- 3. AUDIT (admin writes only; no-op for members / non-admin callers)
+    PERFORM fn_log_admin_action('reward.update', 'reward', v_reward_id,
+                                p_config, v_before, v_after);
+
+    -- 4. Return success
     RETURN fn_response_success('Title', 'Description', jsonb_build_object(...));
 
 EXCEPTION WHEN OTHERS THEN
@@ -93,7 +97,8 @@ $function$;
    - Child has no `id` → INSERT new
    - Track kept IDs in `uuid[]` array
 4. Delete orphans: `DELETE FROM children WHERE parent_id = v_id AND id != ALL(v_kept_ids)`
-5. Return summary: `{success, code: 'CREATED'|'UPDATED', title, description, entity_id, conditions_created, conditions_updated, conditions_deleted, ...}`
+5. Before the success return, call `fn_log_admin_action` with payload and optional before/after row json.
+6. Return summary: `{success, code: 'CREATED'|'UPDATED', title, description, entity_id, conditions_created, conditions_updated, conditions_deleted, ...}`
 
 ## BFF Get Pattern (for edit forms)
 
