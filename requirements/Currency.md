@@ -8,7 +8,7 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (embedded earn co
 
 **Currency** — Loyalty value a member holds: fungible **points** or non-fungible **tickets** (each ticket type is its own balance).
 
-**Earn rule** — Merchant configuration that maps eligible spend or events to currency. Rules are built from **earn factor groups** (program window, stackable flag, optional UI mode) and **earn factors** (rate, multiplier, or fixed grant) with optional **earn conditions** (tier, product, store, persona, thresholds, exclusions).
+**Earn rule** — Merchant configuration that maps eligible spend or events to currency. Rules are built from **earn factor groups** (program window, stackable flag, optional UI mode) and **earn factors** (rate, multiplier, or fixed grant) with optional **earn conditions** (tier, product, store, persona, birth month, thresholds, exclusions).
 
 **Calculation** — Read-only evaluation: given a source (usually a purchase), determine how much of each currency type to grant and which factors applied. Does not change balances.
 
@@ -40,6 +40,7 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 - If **stackable = true** on the group → all qualifying multipliers in scope combine (typically multiplicative per product design).
 - If **stackable = false** → at most one multiplier per scope; **product-scoped** and **transaction-remainder** multipliers may both apply because they operate on disjoint portions of the basket.
 - **Product include** conditions → factor applies only to matching line items; **exclude** conditions (product entities only) → remove matching lines from the eligible set after includes; if the eligible set is empty → factor does not apply.
+- **Birth month** condition (`birth_month`, months 1–12 in `entity_values`) → factor applies only when the member's `user_accounts.birth_date` month is listed; no birth date or no member (anonymous preview) → factor does not apply.
 - **Threshold** on a condition (`quantity_primary`, `quantity_secondary`, `amount`) → factor applies only when min met; **max_threshold** caps eligible quantity/value; **apply_to_excess_only = true** → multiplier applies only above the minimum (excess-only mode).
 - If personalized assignment is past **window_end** at calculation time → that offer is ignored; public rules still apply.
 - **calc_currency_for_source** routes by source: purchase → transaction engine; referral → referral outcome config; mission → mission outcomes; campaign/manual → fixed amounts from metadata.
@@ -102,6 +103,7 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 | Per ticket type expiry | Ticket TTL / frequency / absolute end date |
 | Award delay fields on merchant | When Inngest schedules **currency/award** after source event |
 | Simple vs Advanced (Shopify) | Which embedded editor loads; does not change engine semantics |
+| Advanced Earn **Birth month** column (superadmin) | Row picks birth months; saves a `birth_month` condition; empty = any month |
 
 1. Open **Earn rules** — two merchant modes: **Basic** (single earn config tab: rate per tier or flat, bonus multipliers, expiry, award timing, lifecycle) or **Advanced Earn** (platform flag + column config; merchant edits rows on **Advanced earn**, **Points settings** for delay/expiry/lifecycle only; Earn Studio hidden).
 2. **Basic** merchants use the earn card on **Basic earn config**; **not_basic** merchants see **Earn Studio** instead of the simple card. There is no merchant **Dimensions** or **Rates** tab in Basic mode.
@@ -156,7 +158,7 @@ Storefront **points display** (product badge, balance widget) is configured in *
 | --- | --- |
 | `earn_factor_group` | Program container: merchant, stackable, optional window, `ui_mode` (simple/advanced) |
 | `earn_factor` | Rate, multiplier, or fixed; target currency (points/ticket) and ticket type id |
-| `earn_conditions_group` / `earn_conditions` | Eligibility gates, thresholds, exclusions |
+| `earn_conditions_group` / `earn_conditions` | Eligibility gates, thresholds, exclusions; `entity_ids` (uuid refs) or `entity_values` (int, e.g. birth months) |
 | `earn_factor_user` | Personalized offer assignments |
 | `merchant_master` | Points expiry columns; currency award delay/time/timezone columns |
 | `ticket_type` | Ticket metadata, expiry config, Shopify store credit flags |
