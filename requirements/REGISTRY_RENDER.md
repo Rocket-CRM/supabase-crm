@@ -88,11 +88,13 @@ C: refresh-mission-conditions-mv — `0 1 * * *` → `REFRESH MV mv_mission_cond
 
 E: admin-receipt-approve (public)
 E: admin-receipt-batch-confirm (public)
-E: admin-receipt-batch-confirm-v2 (public)
+E: admin-receipt-batch-confirm-v2 (public; admin session checked in-function)
 E: admin-receipt-batch-preview (public)
-E: admin-receipt-batch-preview-v2 (public)
+E: admin-receipt-batch-preview-v2 (public; admin session checked in-function)
 E: approve-receipts-admin (jwt)
-E: clear-receipt-preview (public)
+E: channel-product-receipt-upload (public; member token checked in-function) — channel OCR auto-approve, see `Receipt_Channel_OCR_Auto_Approve.md`
+E: clear-receipt-preview (public; member or admin token, tolerant)
+E: custom-receipt-upload-validate-duplicate (public; admin session checked in-function)
 E: forward-receipt (jwt)
 E: forward-receipt-with-points (jwt)
 E: receipt-preview-v2 (public) — **MUST deploy with `--no-verify-jwt`**; see `00-core.mdc`
@@ -100,10 +102,12 @@ E: receipt-recalculate-duplicates (public)
 E: receipt-upload-user (public)
 E: scanner (public)
 E: upload-receipts-auto (jwt)
-E: upload-receipts-auto-confirm (public)
-E: upload-receipts-auto-preview (public)
+E: upload-receipts-auto-confirm (public; member token tolerant, stored preview batch)
+E: upload-receipts-auto-preview (public; member token tolerant)
 E: custom-futurepark-confirm-status (public)
 E: custom-futurepark-ocr-eval (public)
+E: futurepark-receipt-crm-sync (public; requires `x-cron-secret`)
+C: futurepark-receipt-crm-sync (job 53) — `0 16 * * *` → `net.http_post` futurepark-receipt-crm-sync with Vault `receipt_crm_sync_cron_secret` header
 
 ---
 

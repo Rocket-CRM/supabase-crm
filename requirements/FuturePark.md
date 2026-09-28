@@ -151,6 +151,18 @@ Edge functions (CRM, Future Park upload path — deploy with `verify_jwt: false`
 | SendGrid | E-Directory HTML email report |
 | Render `futurepark-upload-receipt` | Long-running OCR eval HTTP service (not member upload backend) |
 
+### Edge auth
+
+All receipt edges keep `verify_jwt = false` (the anon key is a valid JWT) and check identity in code via `_shared/request-auth.ts`.
+
+| Edge | Caller | Check |
+| --- | --- | --- |
+| `admin-receipt-batch-preview-v2`, `admin-receipt-batch-confirm-v2`, `custom-receipt-upload-validate-duplicate` | loyalty-admin server actions | Admin session (`auth.getUser` → active `admin_users` for the merchant, or platform superadmin); else 401 |
+| `upload-receipts-auto-preview`, `upload-receipts-auto-confirm`, `receipt-preview-v2`, `clear-receipt-preview` | Member app (and Front Line) | `AUTH_MODE = tolerant`: member token used when valid (merchant/user from token); otherwise legacy body fields still accepted. Flip to `strict` and redeploy once the member app sending tokens is confirmed live |
+| `futurepark-receipt-crm-sync` | pg_cron job 53 | `x-cron-secret` = Vault `receipt_crm_sync_cron_secret` via `fn_verify_internal_cron_secret` |
+
+Preview with a member token stores results in `receipt_preview_batch` (24 h); confirm sends `{batch_id, file_ids?}` and claims the batch atomically (`consumed_at`), 404 / 409 already confirmed / 410 expired. `skip_daily_image_limit` requires an admin session in strict mode. Deploys start from each function's live bundle (live `_shared` files drift per function from the repo).
+
 ### Known gaps
 
 - Deployed edge **version numbers** in prose below drift quickly — verify with Supabase MCP `list_edge_functions` / `get_edge_function` before acting on a specific version cited in nested notes.

@@ -19,6 +19,7 @@ The legacy per-domain slug files at `requirements/domains/<slug>.md` are being r
 | Shopify | [Shopify.md](../Shopify.md) | shopify, shopify_app, embedded admin, storefront widget, shopify-webhooks, auth-shopify-admin, shopify-token-refresh, loyalty entitlement, points-to-discount, rewarding-shopify, shopify billing |
 | FuturePark | [FuturePark.md](../FuturePark.md) | futurepark, future park, OCR receipt, futurepark_redemptions, settlement, FP receipt |
 | Receipt Upload Earning | [Receipt_Upload_Earning.md](../Receipt_Upload_Earning.md) | receipt upload, purchase_receipt_upload, OCR, receipt approval, receipt earning, generic receipt |
+| Receipt Channel OCR Auto-Approve | [Receipt_Channel_OCR_Auto_Approve.md](../Receipt_Channel_OCR_Auto_Approve.md) | channel OCR, auto-approve receipt, channel-product-receipt-upload, receipt_ocr_set_rule, receipt_ocr_channel_product, receipt_ocr_hints, review reasons, approved by system, sales channel allow-list, fn_ocr_evaluate_channel_receipt |
 | Earn Channel | [Earn_Channel.md](../Earn_Channel.md) | earn channel, earn_channel, channel effective, earn from code, channel overlay, earn factor channel, earn_channel_registry, fn_get_effective_earn_channels |
 | Stored Value Cards | [Stored_Value_Cards.md](../Stored_Value_Cards.md) | stored value card, cards, card_types, gift card, prepaid card |
 | Store Credit | [Store_Credit.md](../Store_Credit.md) | store credit, store_credit, store_credit_promo, promo credit, credit balance |
@@ -491,6 +492,10 @@ A flat lookup for any term a frontend AI might encounter.
 | `futurepark_redemptions` | FuturePark |
 | `receipt_upload` | Receipt Upload Earning |
 | `purchase_receipt_upload` | Receipt Upload Earning |
+| `receipt_ocr_set_rule` | Receipt Channel OCR Auto-Approve |
+| `receipt_ocr_channel_product` | Receipt Channel OCR Auto-Approve |
+| `receipt_ocr_hints` | Receipt Channel OCR Auto-Approve |
+| `receipt_preview_batch` | FuturePark |
 | `earn_channel` | Earn Channel |
 | `earn channel` | Earn Channel |
 | `store_credit` | Store Credit |
