@@ -1,0 +1,7 @@
+-- Legacy cache functions + invalidation triggers snapshot placeholder.
+-- Regenerate before Phase 5 G4 with:
+--   SELECT pg_get_functiondef(p.oid) FROM pg_proc p
+--   JOIN pg_namespace n ON n.oid = p.pronamespace
+--   WHERE n.nspname IN ('public','extensions') AND p.proname = '<name>';
+-- Names: see LOYALTY_CACHE_REDIS_AT_RENDER_PLAN.md §1.6 and §10.4.
+-- Captured at execution start 2026-09-22 via live MCP (partial export in agent thread).

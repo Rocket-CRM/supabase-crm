@@ -51,7 +51,7 @@ Canonical writing-principles library compiled from Rocket Deck, Rocket CRM marke
 | [TRANSLATION_PHILOSOPHY.md](./TRANSLATION_PHILOSOPHY.md) | Localization | Localize-don't-translate, English term policy, complexity spectrum, market-specific overrides |
 | [TRANSLATION_PRINCIPLES.md](./TRANSLATION_PRINCIPLES.md) | Proposal Thai | Formal proposal localize craft, smoothness rules, English-first + `th/` convert with English backup |
 | [THAILAND_CONTEXT.md](./THAILAND_CONTEXT.md) | Thai market context | Canonical Thai vocabulary for Rocket product terms, register by surface, recurring calque traps |
-| [FEATURE_GUIDE_WRITING_PRINCIPLES.md](./FEATURE_GUIDE_WRITING_PRINCIPLES.md) | CRM feature guides | 8-section template, multi-audience, route maps, status models, line budget |
+| [FEATURE_GUIDE_WRITING_PRINCIPLES.md](./FEATURE_GUIDE_WRITING_PRINCIPLES.md) | CRM requirement docs (pointer) | Retired; use `.cursor/rules/13-requirements-writing.mdc` + `CORE_WRITING_PRINCIPLES.md` |
 
 ---
 
@@ -87,7 +87,7 @@ Canonical writing-principles library compiled from Rocket Deck, Rocket CRM marke
 
 | Chosen | Notes |
 |--------|-------|
-| `FEATURE_GUIDE_WRITING_PRINCIPLES.md` | Adapted from `.cursor/rules/13-feature-guide-writing.mdc`; pyramid/MECE deferred to CORE |
+| `FEATURE_GUIDE_WRITING_PRINCIPLES.md` | Pointer to `.cursor/rules/13-requirements-writing.mdc`; pyramid/MECE in CORE |
 
 ---
 

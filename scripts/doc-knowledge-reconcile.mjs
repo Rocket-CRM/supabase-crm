@@ -28,7 +28,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const MAX_CHARS = 4000; // ~1k tokens rough cap per chunk
 const EXCLUDE_NAME_RE =
-  /^(REGISTRY_|CHANGELOG\.md$|INDEX_FUNCTION\.md$|INDEX_DOMAIN\.md$)/i;
+  /^(REGISTRY_|CHANGELOG\.md$|INDEX_FUNCTION\.md$|INDEX_DOMAIN\.md$|_TEMPLATE\.md$)/i;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
@@ -84,6 +84,7 @@ function chunkMarkdown(relPath, raw) {
   const hasSection = lines.some((l) => /^#{1,6}\s+SECTION:\s*\S+/i.test(l));
 
   const sections = [];
+  let currentH2 = "";
   let current = {
     headingPath: "",
     title: path.basename(relPath, ".md"),
@@ -124,7 +125,16 @@ function chunkMarkdown(relPath, raw) {
       if (m) heading = m[1].replace(/^SECTION:\s*/i, "SECTION: ").trim();
     } else {
       const m = line.match(/^(#{2,3})\s+(.+)$/);
-      if (m) heading = m[2].trim();
+      if (m) {
+        const level = m[1].length;
+        const text = m[2].trim();
+        if (level === 2) {
+          currentH2 = text;
+          heading = text;
+        } else {
+          heading = currentH2 ? `${currentH2} > ${text}` : text;
+        }
+      }
     }
 
     if (heading) {
@@ -165,7 +175,7 @@ async function walkMarkdownFiles(dir, base = dir) {
   for (const ent of entries) {
     const full = path.join(dir, ent.name);
     if (ent.isDirectory()) {
-      if (ent.name === "archive" || ent.name === "node_modules") continue;
+      if (ent.name === "archive" || ent.name === "node_modules") continue; // archive/ is not indexed
       out.push(...(await walkMarkdownFiles(full, base)));
       continue;
     }

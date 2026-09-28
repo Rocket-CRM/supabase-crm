@@ -403,8 +403,10 @@ Rules:
 
 - At least one `source_refs` entry for every active (`ga`/`beta`/`planned`) feature after provenance lands.
 - Prefer CRM Knowledge hits first; scoped requirement reads only when Knowledge is thin or missing.
+- Prefer `heading` in `H2 > H3` form; Shopify-module features cite the feature doc's `### Shopify` subsection, not `Shopify.md`, unless the capability is platform plumbing.
 - Identifiers/paths must come from tool results or known committed paths — never invent.
 - `last_verified_at` updates only when evidence was actually re-checked in that run.
+- Inline `(beta)` / `(planned)` tags in Concept are the evidence for `status`.
 
 ### Status
 

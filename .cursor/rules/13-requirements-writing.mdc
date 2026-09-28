@@ -1,0 +1,50 @@
+---
+description: "How to write and update canonical requirement docs. Triggers on any edit under requirements/."
+globs:
+  - "requirements/*.md"
+  - "requirements/architecture/*.md"
+alwaysApply: false
+---
+
+# Requirements writing
+
+One canonical `requirements/<Domain>.md` per feature. Four-section spine, then Related. No `SECTION:` tags. No TOC, exec summary, or conclusion.
+
+## Spine
+
+| `##` | Question it alone answers | Depth contract |
+|---|---|---|
+| **Concept** | What is this, and what are its objects? | A new PM understands it in two minutes: purpose (2–4 sentences), the 5–10 nouns with one-line definitions and how they relate, shipped-status inline as `(beta)` / `(planned)` on the capability it qualifies. No identifiers (no table/function names). |
+| **Rules** | What does the system guarantee? | Every rule is testable: condition → outcome. State models fully enumerated: all values, valid transitions, dependence between tracks, member-facing label per state. Limits, precedence, edge cases. One example only where the rule is non-obvious. |
+| **Journeys** | What does the admin do, what does the member see, in order? | `### Admin journey` opens with a **settings table** (knob → effect on behaviour) then numbered steps by **page name**; `### Member journey` numbered steps with every human-visible state incl. errors. Each journey heads with a small map: page → owning repo → BFF/RPC (route optional). Steps never restate a rule — they reference its effect. |
+| **System** | How is it built? | Every table, function, trigger, queue, edge fn, Render/Inngest service a change would touch — **named with its role** and the flow between them (sync path, async path, external calls, caches). Roles and flows, not signatures or bodies. Subsections typically: `### Data model`, `### Functions`, `### Flows`, `### External services`, `### Known gaps`. |
+| **Related** (tail) | Where does it hand off? | 3–6 lines: domain → one-sentence coupling. Routing only. |
+
+## Surface deltas (Shopify today; LINE / WooCommerce later)
+
+- Under any spine section whose default behaviour differs on a surface, add `### Shopify` (or `### LINE`, …) as the **last** subsection of that section.
+- Write **only the delta**: what differs, what is absent, what is added. Never restate the default.
+- If nothing differs in a section, no subsection.
+- Typical placement: `Journeys > Shopify` (checkout / storefront / embedded-admin), `System > Shopify` (webhook path, `rewarding-shopify` calls, credential lookup), occasionally `Rules > Shopify`.
+- `Shopify.md` keeps platform plumbing only (OAuth, embedded auth, webhooks receiver, billing, entitlements, widget shell, `rewarding-shopify` service, landing page, UI hiding) plus a routing table: feature → doc › section where its Shopify variant lives. Cross-refs run hub → feature doc only.
+
+## Where to look before writing
+
+| You're writing | Truth source | Tool |
+|---|---|---|
+| Concept / Rules | Product decision in thread + existing doc | CRM Knowledge `search_docs` |
+| Journeys | `Rocket-CRM/loyalty-admin`, `Rocket-CRM/loyalty-user` (local clone under `~/Documents/rocket/`) | GitHub MCP or local files. Shopify surface → `rewarding-shopify`, storefront extension in loyalty-user |
+| System | `REGISTRY_SUPABASE.md` / `REGISTRY_RENDER.md` | grep, then Supabase MCP `information_schema` / `pg_proc` signatures |
+| Where does X run / live | `requirements/architecture/System_Map.md` | scoped read |
+
+## Frontend boundary
+
+- Intended journey + human-visible states + page → repo → BFF/RPC map.
+- No component, route, or validation specs.
+- Do not hardcode route paths inside steps — the map owns the current path.
+
+## Header
+
+H1 title, one-line scope, `Owner surfaces:` line. Nothing else — no TOC, exec summary, conclusion, or quick reference.
+
+Copy `requirements/_TEMPLATE.md` for a new domain. Prose craft: `Writing Principles/CORE_WRITING_PRINCIPLES.md`. Closeout: `06-update-docs.mdc`.
