@@ -63,6 +63,7 @@ import {
   ampTierRouter,
   ampUserRouter,
 } from "./lib/amp-router.ts";
+import { shopifyRedemptionIssueRouter } from "./lib/shopify-redemption-router.ts";
 
 const handler = serve({
   client: inngest,
@@ -88,6 +89,7 @@ const handler = serve({
     ampWalletRouter,
     ampTierRouter,
     ampUserRouter,
+    shopifyRedemptionIssueRouter,
   ],
   signingKey: Deno.env.get("INNGEST_SIGNING_KEY"),
   servePath: "/functions/v1/inngest-event-router-serve",

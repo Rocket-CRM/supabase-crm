@@ -141,6 +141,8 @@ export function defaultAltText(eventKey: string, subEvent: string): string {
     "redemption.package_granted": "New reward package",
     "receipt.submitted": "ได้รับใบเสร็จแล้ว รอแอดมินอนุมัติ",
     "receipt.rejected": "ใบเสร็จไม่ผ่านการอนุมัติ",
+    "referral.completed": "You earned a referral reward",
+    "referral.friend_rewarded": "You received a referral reward",
   };
 
   return map[`${eventKey}.${subEvent}`] || "You have a new notification";

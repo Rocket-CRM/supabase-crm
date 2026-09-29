@@ -9,7 +9,7 @@
 **Tables:**
 - `display_settings` (per-merchant placements, `config` jsonb)
 - `display_block_template` (global catalogue of `(block_type, block_style)` shapes)
-- `merchant_display_settings` (per-merchant brand theme — `primary_color`, `secondary_color`, `logo`, `border_radius_*`, `ui_config`, plus the merchant-level points display: `points_unit_label`, `points_symbol_type`, `points_symbol_icon`, `points_symbol_image_url`). Single source of truth for primary color + points label/symbol used by widget, LIFF, and admin views.
+- `merchant_display_settings` (per-merchant **`brand_scheme`** v2.3 + optional **`logo`**, `ui_config`, plus merchant-level points display: `points_unit_label`, `points_symbol_*`). **`get_display_settings_fast`** and widget **`resolved.primary_color`** derive accent colours from `fn_brand_scheme_merged` (flat `primary_color` / radius columns removed; backup `merchant_display_settings_brand_backup`).
 - `merchant_widget_settings` (per-merchant widget surface config; one row per `(merchant_id, widget_type)`; `config` jsonb — does NOT store primary_color or points)
 - `widget_config_template` (global catalogue of widget surfaces with `config_default` jsonb; mirrors `display_block_template`)
 
@@ -44,10 +44,10 @@
 
 Sub-menu under *Display Settings* in admin sidebar (alongside Brand Theme, Tier Display). Powers customer-facing widget surfaces — Shopify widget v1, BigCommerce/Web Widget future.
 
-**Single source of truth for merchant-level display values is `merchant_display_settings`:**
-- `primary_color` — used everywhere theme color is applied
-- `points_unit_label` — merchant's chosen name for their points unit ("Coins", "Stars", "แต้ม"). Used by widget AND LIFF mobile app AND admin views
-- `points_symbol_type` / `points_symbol_icon` / `points_symbol_image_url` — symbol next to point counts
+**Single source of truth for brand colours and points display is `merchant_display_settings`:**
+- **`brand_scheme`** — v2.3 JSON (`tokens.primary`, `tokens.accent`, `buttons.radius_px`, `cards.radius_px`, …); admin via `admin_get_brand_scheme` / `admin_upsert_brand_scheme`
+- **`points_unit_label`** / **`points_symbol_*`** — used by widget, LIFF, admin views
+- Member bootstrap **`primary_color`** / **`secondary_color`** / radius strings come from **`get_display_settings_fast`** (derived from scheme, not stored columns)
 
 Widget config only stores widget-specific layout (`theme.mode`, header background, brand mark, coins layout). It does NOT duplicate `primary_color` or `point.*`. The widget read RPCs surface those merchant-level values in a `resolved` block.
 
@@ -88,7 +88,7 @@ Mirrors brand-theme pattern: in-place edits, no versioning, **no per-language tr
 | `api_get_widget_settings_cached(p_widget_type, p_merchant_code)` | API | Anon storefront read for widget JS. Cached 300s. Fail-soft — returns template defaults on any error. No language param. |
 | `fn_validate_widget_config(p_widget_type, p_config)` | Backend | Returns `{ok bool, errors[]:{path,code,message}}`. Used by trigger and admin pre-save. Rejects deprecated `point` block. |
 | `fn_widget_config_with_defaults(p_widget_type, p_config)` | Backend | Shallow-merges saved config over `config_default`. |
-| `fn_resolve_widget_merchant_display(p_merchant_id)` | Backend | Returns `{primary_color, points:{unit_label, symbol_type, symbol_icon, symbol_image_url}}` from `merchant_display_settings`. Single helper used by all 3 widget read RPCs to keep the `resolved` block consistent. |
+| `fn_resolve_widget_merchant_display(p_merchant_id)` | Backend | Returns merged **`brand_scheme`**, **`resolved.primary_color`**, points display from `merchant_display_settings`. Used by widget read RPCs. |
 | `fn_invalidate_widget_settings_cache(p_merchant_id, p_widget_type)` | Backend | Purges `merchant:{id}:widget:{type}` cache key via `extensions.ui_cache_del`. |
 | `trigger_validate_widget_settings_config` | Trigger | BEFORE INSERT/UPDATE on `merchant_widget_settings`; raises SQLSTATE 22P02 with offending JSON path on validation failure. |
 | `trigger_invalidate_widget_settings_cache_on_change` | Trigger | AFTER INSERT/UPDATE/DELETE on `merchant_widget_settings`. |
@@ -96,7 +96,7 @@ Mirrors brand-theme pattern: in-place edits, no versioning, **no per-language tr
 
 ### Key Business Rules
 
-- **Single source of truth for primary color and points display**: widget reads `merchant_display_settings.primary_color`, `points_unit_label`, `points_symbol_*` via the `resolved` block; never store these in `merchant_widget_settings.config`. Same values are used by LIFF mobile app and admin history pages — change once, applies everywhere.
+- **Single source of truth for brand colours and points display**: widget reads **`resolved.primary_color`** (from `brand_scheme.tokens.primary`) and `points_*` via the `resolved` block; never store these in `merchant_widget_settings.config`. Member app uses the same scheme via `get_display_settings_fast`.
 - **Tier list / coin balance / earn-redeem CTAs / greeting text** are NOT stored here. Widget runtime fetches them from Loyalty › Tier, Loyalty › Currency, Loyalty › Rules, and Member Display / Translation respectively.
 - `active_status = false` hides the widget from the public `api_*` RPC but still loads in `admin_*`/`bff_*`.
 - `merchant_id` in `merchant_widget_settings` cascades on merchant delete; `translations` rows for that entity must be cleaned up explicitly (no FK cascade — same as other entity_types).

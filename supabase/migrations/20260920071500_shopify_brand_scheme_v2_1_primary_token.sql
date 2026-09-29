@@ -236,6 +236,7 @@ BEGIN
   END IF;
 
   PERFORM public.fn_invalidate_shopify_landing_page_cache(v_merchant_id);
+  PERFORM public.fn_invalidate_widget_settings_cache(v_merchant_id, 'shopify');
 
   RETURN public.admin_get_shopify_brand_scheme();
 END;

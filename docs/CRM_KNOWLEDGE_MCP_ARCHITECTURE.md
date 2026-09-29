@@ -22,8 +22,10 @@ Hosted at `https://crm-knowledge.onrender.com/mcp` (repo `Rocket-CRM/crm-knowled
 - `get_my_context`
 - `search_docs` — hybrid FTS (`doc_knowledge_search_fts`) + semantic (`doc_knowledge_search_semantic`) merged with RRF. **Default corpus is `requirements/` only** (null `path_prefix`). Narrative is not in this pile.
 - `get_section` — `doc_knowledge_get_section`. Use path `docs/PRODUCT_NARRATIVE.md` + a heading for sales journey/explain. Also works on requirement paths.
+- `eng_bugs_fetch` — POST Rocket Deck `/api/eng/agent` (server-side token). Scope `eng_bugs:read`.
+- `eng_bugs_patch` — PATCH Rocket Deck `/api/eng/agent`. Scope `eng_bugs:write`.
 
-Auth: `fn_validate_mcp_access_token`; scope `knowledge:read`.
+Auth: `fn_validate_mcp_access_token`. Scopes: `knowledge:read` (doc tools), `eng_bugs:read` / `eng_bugs:write` (Rocket Deck proxy: `eng_bugs_fetch`, `eng_bugs_patch`). Deck credentials live only on the Render service env.
 
 ## Embeddings
 

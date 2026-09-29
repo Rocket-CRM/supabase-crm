@@ -228,7 +228,7 @@ E: inngest-bulk-import-redemptions-serve (public)
 ## Inngest (other)
 
 E: inngest-currency-serve (public)
-E: inngest-event-router-serve (public, verify_jwt=false) — chokepoint outbox → Inngest routers: currency / tier / mission / outcome / notification-* / amp-*. Event-driven only; expiry reminders moved to Render cron `expiry-reminder-batch` 2026-09-03.
+E: inngest-event-router-serve (public, verify_jwt=false) — chokepoint outbox → Inngest routers: currency / tier / mission / outcome / notification-* (including `notification-referral-router` for `crm.events.referral`) / amp-*. Event-driven only; expiry reminders moved to Render cron `expiry-reminder-batch` 2026-09-03.
 E: inngest-mission-serve (public)
 E: internal-proposal-inngest (public)
 
