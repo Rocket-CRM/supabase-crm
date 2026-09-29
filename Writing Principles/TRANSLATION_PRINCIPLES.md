@@ -187,4 +187,4 @@ Do not paraphrase away buyer-chosen vocabulary to “make it sound nicer.”
 | [PROPOSAL_WRITING_PRINCIPLES.md](PROPOSAL_WRITING_PRINCIPLES.md) | Proposal structure and section craft (language-agnostic) |
 | [SALES_PRESENTATION_SLIDE_PRINCIPLES.md](SALES_PRESENTATION_SLIDE_PRINCIPLES.md) §6 | Slide-specific Thai term discipline |
 | [WEB_PAGE_COPY_PRINCIPLES.md](WEB_PAGE_COPY_PRINCIPLES.md) §21 | Web Thai–English voice (not government proposal register) |
-| `workflows/general-proposal/REFERENCE.md` | English-first draft; manual Thai convert into `th/` |
+| `.cursor/skills/proposal/SKILL.md` § 7 | English-first draft; Thai only on request into `th/` |

@@ -21,7 +21,7 @@ Use `CORE_WRITING_PRINCIPLES.md` first for the shared structural rules:
 
 This document explains how those principles apply specifically to proposals, plus proposal-only practices for reading source material, understanding what was asked, structuring the response, and writing each section.
 
-> **Scope note — custom and government proposals:** Under `workflows/general-proposal/`, its `REFERENCE.md` and `SCAFFOLDS.md` take precedence for official voice, uneven depth, TOR placement, and chapter texture. CRM Knowledge verification applies only to Rocket product claims; general-proposal facts come from the run’s `sources/` and human answers. Identical peer scaffolds, SCQA-style section narration, and per-module closing matrices are optional techniques, not defaults.
+> **Scope note — custom and government proposals:** In the proposal skill's sources-only mode (`.cursor/skills/proposal/`), its `SCAFFOLDS.md` takes precedence for official voice, uneven depth, TOR placement, and chapter texture. Product verification against `requirements/` applies only to Rocket product claims; sources-only facts come from the run’s `sources/` and human answers. Identical peer scaffolds, SCQA-style section narration, and per-module closing matrices are optional techniques, not defaults.
 
 A proposal succeeds when:
 
@@ -135,7 +135,7 @@ Example:
 
 When a request rests on an assumption that may not hold (a public API exists, a partner will integrate, a workflow is industry-standard, the platform supports something), pause and verify. State the finding. Then offer a realistic alternative.
 
-For the general-proposal workflow, verify against the run’s `sources/`, external primary documentation, and human answers only. Do not use CRM Knowledge as a substitute for evidence in a custom or government bid.
+For custom and government bids (sources-only mode), verify against the run’s `sources/`, external primary documentation, and human answers only. Do not use the product catalogue as a substitute for evidence in a custom or government bid.
 
 Verification checklist:
 
@@ -296,6 +296,22 @@ Example (not built):
 > | Requirement | Coverage | Notes |
 > |---|---|---|
 > | Multi-step journey automation with A/B branches | New development | SMS channel exists; journey builder not in current product |
+
+## S7. Anchor Features To The Customer Journey
+
+Organise and explain features along the retention journey — Join, Earn, Burn, Grow, Campaign, Analyze & Activate, Convert (`docs/PRODUCT_MESSAGING.md`). Present the journey before feature detail, then let every feature sit in its stage.
+
+Rocket has dozens of features. Walked through one by one, the reader loses their place — and so does the writer. With the journey as the frame, complex capabilities land in context: marketing automation is part of Activate; receipt approval is part of Earn.
+
+Answering "what are your key features?" by stage, then going into each stage with examples, is the same move as Core §6–8 at document scale.
+
+The journey is a frame, not a quota. Say where a feature sits when the reader would otherwise wonder; the heading hierarchy carries it the rest of the time.
+
+When the tender has its own feature structure:
+
+- **Clear and well grouped** — follow theirs; evaluators score against it. Use the journey inside their sections where it reads naturally.
+- **Same shape, different words** — their term, ours in brackets, in headings and at first mention: "Member registration (Join)".
+- **A flat or mixed-level list** — group their items for them by stage, keep each item findable in their wording with its clause ID, and add a clause coverage matrix.
 
 ---
 
@@ -560,7 +576,7 @@ When describing a configurable or composable system **and the claim is otherwise
 
 "Flexible" is a low-evidence claim. A worked example proves the system can resolve a realistic input to a clear, explainable output. Using the customer's own context proves you have thought about how their real work would land on the system.
 
-**Judgment, not a template rule:** do not add a worked example to every section because a checklist said so. Add one when it removes ambiguity on a central or scored claim. Skip when bullets already make the behavior obvious, or when another section already carries the story. For custom/government proposals, see also `workflows/general-proposal/SCAFFOLDS.md` → “Depth and examples.”
+**Judgment, not a template rule:** do not add a worked example to every section because a checklist said so. Add one when it removes ambiguity on a central or scored claim. Skip when bullets already make the behavior obvious, or when another section already carries the story. For custom/government proposals, see also the proposal skill's `SCAFFOLDS.md` → “Sources-only mode.”
 
 Example (Caltex multi-currency earn — uses Caltex products, stations, tiers):
 
@@ -589,7 +605,7 @@ When a proposal answers a written TOR or RFP, structure may follow the buyer’s
 
 Do not treat “requirement-led” and “feature-led” as a choice. Tick the requirement *through* the feature narrative. Put exhaustive clause-by-clause audit in a comparison matrix or end-of-section references, not as the opening voice of every chapter.
 
-For custom/government runs, see `workflows/general-proposal/SCAFFOLDS.md` → “Requirements covered by features.”
+For custom/government runs, see the proposal skill's `SCAFFOLDS.md` → “Structure of the features part” and “Sources-only mode.”
 
 ## W13b. Depth Follows The Bid Spine — Uneven On Purpose
 
@@ -603,7 +619,7 @@ Do **not**:
 
 Do:
 
-- After a full draft, re-read against principles and deepen or cut selectively (general-proposal workflow: Principles review → `principles-review.md`).
+- After a full draft, re-read against principles and deepen or cut selectively (proposal skill: `proposal-reviewer` → `review.md`).
 - Prefer one strong spine example over many shallow ones.
 
 ## W13c. Official Voice For Government And E-Bidding Packs
@@ -619,7 +635,7 @@ Do **not**:
 Do:
 
 - Use the buyer’s own terms (e.g. Centralized Intelligence) as defined policy language, then state what the system does in plain operational English or Thai.
-- Derive hosting, environments, and optional “better than TOR” extras from the pack (see general-proposal SCAFFOLDS).
+- Derive hosting, environments, and optional “better than TOR” extras from the pack (see the proposal skill's `SCAFFOLDS.md` → “Sources-only mode”).
 - Address the project owner. Never explain scoring mechanics, “bonus points,” or writing-process rationale in the submission body.
 - Keep document choreography invisible: do not tell the buyer what “this section describes,” which chapter owns a topic, what appears again later, or how the comparison matrix records it unless that navigation is necessary to understand a dependency.
 - Check adjacent chapters for a structural fingerprint. Repeated generic headings such as “Objects,” “Key features,” “How it works,” and “Compliance anchor” should be replaced with subject-specific headings or removed.
