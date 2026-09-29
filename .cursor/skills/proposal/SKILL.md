@@ -1,6 +1,6 @@
 ---
 name: proposal
-description: Write a customer proposal in one Cursor thread — Rocket CRM deals from the requirement docs, or custom / government bids from the tender pack — and publish it to the rocket-deck proposal viewer with live mockups and Mermaid diagrams. Use when the user asks for a proposal, TOR / RFP / e-bidding response, or to continue a run under workflows/proposal/runs/.
+description: Write a customer proposal in one Cursor thread — Rocket CRM deals from the requirement docs, or custom / government bids from the tender pack — and publish it to the rocket-deck proposal viewer with live mockups and brand-style diagrams. Use when the user asks for a proposal, TOR / RFP / e-bidding response, or to continue a run under workflows/proposal/runs/.
 ---
 
 # Proposal
@@ -17,7 +17,7 @@ One thread writes one proposal. This thread (the parent) holds the picture of th
 | `proposal-researcher` | Sonnet 5.5 High | Read a pile (the customer's sources, or the product docs) and return an index with locations |
 | `proposal-writer` | Opus 5.5 High | Write one section — or translate one — in customer-ready prose |
 | `proposal-diagram-planner` | Opus 5.5 High | Read the whole draft; decide which diagram placeholders earn a diagram, what each shows, and where one is missing |
-| `proposal-diagrammer` | Opus 5.5 High | Draw one section's planned diagrams in Mermaid |
+| `proposal-diagrammer` | Opus 5.5 High | Draw one section's planned diagrams (`flow` or Mermaid sequence) |
 | `proposal-reviewer` | Opus 5.5 High | Read the draft cold as the evaluator; write findings with fixes |
 | `proposal-publisher` | Sonnet 5.5 High | Compile the sections and publish to the viewer |
 
@@ -53,9 +53,10 @@ Set at intake; record it in the dossier.
 
 ```
 sources/        Inputs, verbatim, never edited (brief, TOR, notes, answers, review feedback)
-research/       sources.md (customer index), product.md (fit map) — from the researchers
+research/       sources.md (customer index), product.md (fit map), assets.md (uploaded screenshots)
 slides.json     Slide catalogue for this deal (pitch or library)
-dossier.md      The parent's decisions: mode, scope, angle, gaps, open questions
+dossier.md      The parent's decisions: mode, pitch, scope, angle, brief checklist, open questions
+gaps.md         Internal only: open facts, why they matter, who answers — never in the body
 outline.md      The section plan
 sections/       One file per section, numbered in document order
 diagrams.md     The diagram plan
@@ -72,7 +73,7 @@ th/             Thai version, only when asked
 In one message, in parallel:
 
 - **`proposal-researcher`, brief `sources`** → `research/sources.md`: every requirement with its location and their wording, the tender's own structure, their vocabulary, quotable pains, boundaries and constraints, ambiguities.
-- **Slides** — the pitch's slides if the deal has one, else the library:
+- **Slides** — the pitch's slides if the deal has one, else the library. **Assume there is a pitch** and find its slug before falling back: ask the user, or try the customer's name in the usual shapes (`<customer>-loyalty-crm`, …) — an unknown slug returns `Unknown pitch`. The pitch carries the customer's own uploaded images; the library shows generic ones.
 
   ```bash
   curl -s -H "x-internal-proposal-token: $ROCKET_PROPOSAL_TOKEN" \
@@ -85,11 +86,13 @@ In one message, in parallel:
 
 Then, catalog mode: **`proposal-researcher`, brief `product`**, given `research/sources.md` and `slides.json` → `research/product.md`: per requirement, the capability that answers it, fit, the requirement doc and heading that back it, constraints, journey stage, candidate mockups.
 
-The parent reads both research files — open a source location directly when something needs checking — and writes `dossier.md`: mode, pitch, scope decisions, the **angle** (from `PRODUCT_MESSAGING.md` § Adapting to the customer: which parts of the story matter for this customer's channel mix and goals, and how the channel tension is framed or dropped), gaps, and questions. The dossier records decisions; the research files hold the detail.
+Also in catalog mode, once the scope is known: **capture the pitch's slides** as whole-slide screenshots (SCAFFOLDS § Visuals), upload them, and list them in `research/assets-slides.md` (asset id, caption, what it shows, best section). One background agent can do this while the parent writes the dossier. Admin screens are **not** captured — writers embed the live demo-merchant portal (`loyalty.admin.*` mockups), so no section ever waits on a capture. If a background agent errors, treat its output as missing and re-plan; never report it as still running.
+
+The parent reads both research files — open a source location directly when something needs checking — and writes `dossier.md`: mode, pitch, scope decisions, the **angle** (from `PRODUCT_MESSAGING.md` § Adapting to the customer: which parts of the story matter for this customer's channel mix and goals, and how the channel tension is framed or dropped), and questions. It also carries the **brief checklist**: every headline point the user named in their brief (differentiators, framings, quotes, comparisons, emphasis), each with the section that must carry it. The reviewer checks it every round (Proposal V8). The dossier records decisions; the research files hold the detail. Open facts go to `gaps.md` (what, why it matters, who answers) — never into customer prose.
 
 ### 2. Clarify → Gate 1
 
-One round of the questions that most change the proposal, ranked, each saying why it matters; either/or where possible. A second round is fine; a third means convert the rest to `[GAP: what — who can answer]` and assumptions. Answers go into `sources/answers-<n>.md`; if they change the requirement picture, rerun the researcher that owns it.
+One round of the questions that most change the proposal, ranked, each saying why it matters; either/or where possible. A second round is fine; a third means convert the rest to entries in `gaps.md` and assumptions the prose can state in sendable form. Answers go into `sources/answers-<n>.md`; if they change the requirement picture, rerun the researcher that owns it.
 
 **Gate 1:** the user accepts the dossier (scope, angle, gaps) or corrects it. Corrections are new sources.
 
@@ -124,6 +127,10 @@ Pitch: <slug or none>
 
 Writers place mockups directly and leave **diagram placeholders** rather than drawing (SCAFFOLDS § Visuals). When the body is done, launch one more writer for the **executive summary** (`sections/00-executive-summary.md` — first in the document, written last), with the finished sections as its reads. The parent doesn't read the sections; it acts on what writers return (gaps, unsourced claims, notes for siblings).
 
+Each outline entry carries **Opens from** and **Hands to** — the thread this section picks up and the one it passes on — so parallel writers can join up.
+
+**Then one editor pass** (`proposal-writer`, `Mode: edit`): one writer reads every section in order and edits across files for flow only — opening and closing sentences, cross-references that say what they point to, ideas explained twice, slogan cadence (Proposal V9, V12). It does not change facts, scope, markers or diagrams. Parallel writing is fast; without this pass the document reads as separate leaflets.
+
 ### 5. Check
 
 Compile without reading: `cat sections/*.md > proposal.md` in the run folder. Then, in one message:
@@ -142,7 +149,9 @@ Fixes go first so the diagrammers draw into settled prose.
 
 Launch `proposal-publisher` with the run path. It compiles, publishes, and returns the viewer link.
 
-**Gate 3:** the user reviews the viewer page. Feedback goes into `sources/review-<n>.md`.
+Before Gate 3, **look at the page**: open the viewer with Playwright (internal proposal password), scroll the whole document, and check every visual — error boxes, unknown markers, cropped or zoomed mockups, diagrams too wide for an A4 page. Fix those before handing over.
+
+**Gate 3:** the user reviews the viewer page. Feedback goes into `sources/review-<n>.md`. When feedback carries a general lesson (voice, structure, visuals), fold it into `Writing Principles/` or `SCAFFOLDS.md` in the same round, so the next run doesn't repeat it.
 
 ### 8. Polish
 
@@ -155,15 +164,17 @@ Route each piece of feedback to its owner — prose to writers, diagrams to the 
 
 ## Viewer
 
-`https://workspace.rocketcrm.io/proposal-viewer/<viewer_slug>` — `viewer_slug` is the run folder name; internal proposal password; PDF export on the page. Mockups render live from rocket-deck, so a changed slide mockup shows on the next page load; prose drawn from a slide does not — rerun that section.
+`https://workspace.rocketcrm.io/proposal-viewer/<viewer_slug>` (viewer code: the rocket-deck repo, `~/rocket-deck`, `src/components/internal-proposal/`; rendering fixes go there, not into the prose) — `viewer_slug` is the run folder name; internal proposal password; PDF export on the page. Mockups render live from rocket-deck, so a changed slide mockup shows on the next page load; prose drawn from a slide does not — rerun that section.
 
 ## Guardrails
 
 These are the few hard lines; everything else is judgment.
 
-- Never claim a capability, metric, date, integration, or past project the requirement docs or sources don't support. Unsupported → `[GAP: …]` or scope it out.
+- Never claim a capability, metric, date, integration, or past project the requirement docs or sources don't support. Unsupported → `gaps.md`, a sendable commitment the user approved, or scope it out.
+- The body is sendable as-is: no gap markers, open questions, or notes to ourselves in customer prose (Proposal V6).
+- "We" is Rocket; the customer is named in the third person ("KCG's members", "the KCG team"), never "you" / "your" — and never a briefing about their own situation (Proposal V1–V3).
 - Customer prose never names internal tables, functions, or architecture — except a sources-only bid whose tender asks for system design.
 - The messaging lens (StoryBrand roles, villain, framework names) never appears in customer prose.
-- Diagrams are Mermaid `sequenceDiagram` or `flowchart` only.
+- Diagrams are `flow` rocket-graphics (node diagrams) or Mermaid `sequenceDiagram` (messages over time) only.
 - Never write the whole document in one pass; every section gets its own writer with its own reads.
-- Gaps stay visible until a human closes them.
+- Gaps stay visible in `gaps.md` until a human closes them.

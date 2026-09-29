@@ -656,6 +656,111 @@ A section title describes what the customer is buying for their business in the 
 
 ---
 
+# Section 5 — Voice, Density, And Evidence
+
+These come from a draft that read as if an assistant were briefing *us* about the customer, rather than *us* writing *to* the customer. Each is a failure the reader notices on page one.
+
+## V1. Write To The Customer, Not As A Briefing About Them
+
+"We" is Rocket. The customer is named in the third person — "KCG's members", "the KCG team", "most of KCG's customers" — never "you" / "your" (founder decision, 2026-09-29: second person reads presumptuous in a formal bid). Vary the naming so the brand isn't the subject of every sentence. Member-facing copy quoted from a screen or message (*"Finish your profile…"*) keeps its own "you".
+
+Third person is not briefing voice. Do not narrate the customer's situation or their TOR back to them; state what the platform does for them:
+
+| Weak (briefing voice) | Stronger (proposal voice) |
+|---|---|
+| KCG wants to run this itself. The TOR asks for campaigns KCG can build on its own (TOR 5). | The KCG team builds and changes every campaign in the admin portal, with no development per campaign (TOR 5). |
+| The TOR asks that KCG Rewards connect to KCG's LINE Official Account (TOR 4.1). | KCG Rewards lives inside KCG's LINE Official Account (TOR 4.1). |
+| That answers the TOR's first objective, first-party data (TOR 1.1). Everything else serves those two. | *(cut — the reader knows their own objectives; show the answer instead)* |
+
+Clause IDs stay, as a trace tag at the end of the sentence that answers them (R1). "The TOR asks…" as a sentence opener is almost always cuttable.
+
+## V2. Show Understanding In One Line; Never Teach The Customer Their Own Business
+
+The customer knows their channels, their products, their objectives and why they wrote the TOR. Restating those at length reads as either padding or condescension.
+
+- Demonstrate understanding **once**, compactly, where it frames a decision: one sentence, or one row in a current-state → future-state matrix.
+- Spend the words on what they *don't* know: how the platform resolves their situation, what it looks like, what it changes.
+- A test: if a paragraph would be equally true in the customer's own internal strategy memo, it doesn't belong in our proposal — unless it is the one-line setup for something only we can say.
+
+## V3. Declare Once, Then Reference
+
+Each idea has one home, where it is explained in full. Everywhere else it appears as a one-line reminder plus a pointer ("the activation layer (Section 09)"), never a second explanation.
+
+- The executive summary summarises the body; the first body section must not re-tell the executive summary. When an "understanding" or "overview" section exists, it carries something new (the journey map, the coverage map) — not a longer version of the summary.
+- The same scenario, statistic, quote, or framing appears in full once in the document.
+- Before adding a paragraph, check whether a sibling already owns it (W7).
+
+## V4. Density Over Length
+
+Length is not depth. Depth is the number of distinct, useful facts per page, and the evidence behind them.
+
+- Cut sentences that restate the previous one, announce what the section will do, or summarise what it just did.
+- Cut hedges and throat-clearing ("It is worth noting", "In practice", "This matters because" before a point that already carries its own why).
+- Keep every concrete fact, rule, number, example and constraint. Concision means removing repetition and fluff, never removing substance.
+- A long section is fine when each paragraph adds something; a short one is wrong if it drops a capability the reader needs.
+
+## V5. Evidence Beside Every Claim
+
+Walking the TOR clause by clause and saying "we support this" is description without evidence. For each capability the customer will score:
+
+- Show it: a screen (member phone or admin), a slide, a worked example in their context (W13), or a diagram when sequence or branching is the point.
+- Prefer the customer's own customised pitch visuals, then real admin screens from the demo merchant, then library defaults — in that order.
+- One strong visual per capability beats several weak ones. A capability with no visual needs a worked example instead.
+
+## V6. Only Sendable Content In The Document
+
+Everything in the proposal body must be something we would hand to the customer today. Internal notes — open questions, `[GAP: …]` markers, "Rocket engineering to confirm", reviewer asides, drafting rationale — live in the run folder (`gaps.md`, `dossier.md`), never in customer prose.
+
+Where a fact is still open, write the sendable version: commit to what we will do, state it as confirmed during onboarding, or scope it out. Record the open item internally with its owner.
+
+## V7. Describe Objects At Their Business Level
+
+When a proposal introduces a core object (a member, a status, a tier, a campaign), describe it at the level that matters to the customer's decisions before any low-level flag.
+
+Example: "member status" is first *where the member is* — their tier, and their stage in the journey (joined in LINE but hasn't completed the profile form; completed the form but hasn't redeemed; redeemed once but hasn't bought again). Account-level switches (active / frozen) are a footnote, not the headline.
+
+## V8. Carry The Brief's Headline Points Through Every Pass
+
+When the person commissioning the proposal names points that must appear — a differentiator, a framing, a quote, a comparison — those are requirements of the same weight as the TOR. They must survive drafting, review and every fix round. A section that loses a named point (for example, the pain of rule-based journeys that motivates AI decisioning) is a blocking finding, not a style note.
+
+## V9. Explain, Don't Sloganise
+
+Density pressure pushes writers toward copywriting cadence: short parallel sentences, a punchy closer, a clever heading. Evaluators read it as filler, and it hides whether the writer understood the mechanism.
+
+Do not write:
+
+| Pattern | Example |
+|---|---|
+| Parallel triads of short claims | "The brand owns the customer, keeps the margin. Every order earns." |
+| Chiasmus / contrast headings | "The journey KCG designs, and the one members take" |
+| Aphoristic closing lines | "That one wallet is what turns a third-party buyer into a customer." |
+| Antithesis pairs standing in for an explanation | "Order sync brings Shopify into the programme. The plugin brings the programme into Shopify." |
+| Universal quantifiers as rhetoric | "Every purchase, every channel, every member." |
+
+Instead: say what happens, why, and what it means for the customer, in ordinary sentences. If a line would work as a slide tagline, it is probably not doing a proposal's job. Descriptive headings (W12).
+
+## V10. Spell Out The Mechanism Behind The Strategy
+
+When a feature serves the deal's central strategy, the reader needs the causal chain, not the feature. Explain it once, fully, where it first matters, and reference it elsewhere.
+
+Example — converting third-party buyers to first-party: "Marketplaces and retailers leave KCG a thin margin, so members acquired there earn at a lower rate. KCG's own store keeps the full margin, so it can afford a better rate. Because it is one balance, members see the difference every time they earn, and over time more of their repeat purchases move to KCG's own channels." A sentence like "your own store earns 25% more" without the why reads as a setting, not a strategy.
+
+## V11. A Headline Differentiator Is Explained Where The Reader First Meets It
+
+"Full comparison in Section 10" does not license under-explaining the point in an earlier section. Wherever the reader first meets a differentiator, give the core difference in two or three plain sentences (what the ordinary approach does, what ours adds, why it matters here), then point to the full treatment.
+
+## V12. The Document Flows As One Argument
+
+Sections written in parallel read as separate leaflets unless someone joins them.
+
+- Each section opens from where the previous one left off — one sentence that picks up the thread — and ends by handing to the next where there is a natural hand-off.
+- Cross-references say what the reader will find ("§04 sets the per-channel rates"), not just a number.
+- A capability lives where the reader meets it in the journey: the member's home (LINE OA) with Join; the "ways to earn" hub at the start of Earn, not the end; campaign mechanics (lucky draw) with Campaigns, not Rewards; targeting objects (audiences) with the tools that use them.
+- When a process has modes (manual or automatic approval), give the shared outcome first, then the modes, default first.
+- Summary sections (AI, why us) say that they gather threads already seen and name where each appeared.
+
+---
+
 ## Proposal Quality Checklist
 
 ### Reading (when responding to a written requirements document)
@@ -724,6 +829,21 @@ A section title describes what the customer is buying for their business in the 
 - [ ] Is the writing protocol invisible—no document choreography, recurring scaffold labels, or review/scoring mechanics in customer prose?
 - [ ] Do adjacent chapters avoid an identical template fingerprint unless comparison genuinely benefits from it?
 - [ ] Would a technical evaluator think "they have actually built this"?
+
+### Voice, Density, And Evidence
+
+- [ ] Is "we" Rocket and the customer named in the third person (no "you" / "your" outside quoted member copy), without briefing them on their own situation (V1)?
+- [ ] Is the customer's own context stated once, briefly, only where it frames something we say — not taught back to them?
+- [ ] Is each idea explained once, with later mentions as a one-line reminder and a section pointer?
+- [ ] Does every paragraph add a new fact, rule, example or constraint — no restating, announcing or summarising?
+- [ ] Does every scored capability have evidence beside it (screen, slide, worked example or diagram)?
+- [ ] Is the body free of internal notes, gap markers and open questions?
+- [ ] Are core objects (member status, tier, campaign) described at their business level first?
+- [ ] Does every headline point named in the brief appear where it belongs?
+- [ ] Is the prose free of slogan cadence — triads, chiasmus headings, aphoristic closers, antithesis pairs (V9)?
+- [ ] Is the causal chain behind the deal's central strategy explained once, in full (V10)?
+- [ ] Is each headline differentiator explained where the reader first meets it (V11)?
+- [ ] Does each section pick up from the previous one, sit where the reader meets the capability, and name what its cross-references point to (V12)?
 
 ## Sources
 

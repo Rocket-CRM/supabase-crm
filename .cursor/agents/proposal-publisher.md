@@ -23,9 +23,10 @@ The run folder, and `th` when publishing the Thai version (sections from `th/sec
 1. **Compile** `sections/*.md` in filename order into `proposal.md`: an H1 title first (`<Customer> — <proposal title from outline.md>`), then each section as-is. Each section must start with an H2; report any that don't rather than fixing them.
 2. **Check** before publishing, and report — don't fix:
    - `[DIAGRAM: …]` placeholders left (fine before the diagram step, a finding after it);
-   - Mermaid blocks that aren't `sequenceDiagram` or `flowchart`;
-   - `[asset:mockup;id=…]` ids not in `slides.json`;
-   - `[GAP: …]` markers (list them — they are expected until a human closes them).
+   - Mermaid blocks that aren't `sequenceDiagram` (node diagrams belong in `flow` rocket-graphics), and rocket-graphic blocks whose JSON doesn't parse;
+   - `[asset:mockup;id=…]` ids not in `slides.json`, member mockups missing the run's `pitch=`, and `[asset:screenshot;id=…]` ids not in `research/assets.md`;
+   - `[asset:fixed_diagram;slide=…]` on a slide without a `diagram` field in `slides.json`;
+   - `[GAP: …]` markers or other notes to Rocket in the body — each is a finding (open facts belong in `gaps.md`).
 3. **Publish** with Supabase MCP `execute_sql` on the CRM project `wkevmsedchftztoolkmi`. First publish only: generate a UUID and write `viewer.json` (`run_id`, `viewer_slug` = the run folder name, `url`). Every publish:
 
    ```sql

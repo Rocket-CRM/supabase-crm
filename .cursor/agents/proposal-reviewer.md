@@ -31,9 +31,12 @@ The run folder. Diagrams aren't drawn yet — `[DIAGRAM: …]` placeholders are 
 - **Does the structure help?** The features part reads along the journey (or the tender's own structure, as the outline chose); levels and groupings are clean (Core §6–8); no two sections tell the same story; the executive summary adds nothing the body doesn't support.
 - **Why and what before how?** Flag click-by-click walkthroughs and configuration inventories.
 - **Written for this customer?** Their vocabulary, pains, and channel reality. Generic transformation language, pasted slide copy, or messaging-framework language (hero, villain, StoryBrand, "treated like a supplier") in customer prose are findings.
-- **Depth where it matters?** Primary-deliverable sections carry the weight; thin sections are flagged honestly with `[GAP]` rather than presented as complete.
-- **Mockups earn their place**, and every `[asset:mockup;id=…]` id exists in `slides.json`.
-- **Anything internal leaking?** Table, field, or function names; architecture the tender didn't ask for; talk about how the proposal was made.
+- **Is the brief honoured?** Every item in the dossier's brief checklist appears, in full, where it belongs. A missing headline point is **Blocking** (Proposal V8).
+- **Does it speak to them?** Written from us to the customer, not a third-person briefing; no "The TOR asks…" narration; no teaching them their own business (V1–V2).
+- **Said once?** Flag any idea explained in full twice — especially the first body section re-telling the executive summary — and any paragraph that adds no new fact (V3–V4). Name what to cut; never cut a unique fact.
+- **Depth where it matters?** Primary-deliverable sections carry the weight in facts and evidence, not length.
+- **Evidence beside claims?** Each scored capability has a screen, slide, worked example or diagram (V5). Member mockups carry the run's `pitch=` (admin `loyalty.admin.*` embeds don't need one); every `[asset:mockup;id=…]` id exists in `slides.json`; every screenshot id is in `research/assets.md`; no `fixed_diagram` on slides without a diagram. Voice: no "you" / "your" for the customer outside quoted member copy (V1).
+- **Anything internal leaking?** Gap markers, open questions, notes to Rocket (V6); table, field, or function names; architecture the tender didn't ask for; talk about how the proposal was made.
 
 ## Output: `review.md`
 
