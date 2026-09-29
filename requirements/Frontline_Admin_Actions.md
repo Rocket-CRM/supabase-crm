@@ -1,12 +1,64 @@
 # Frontline Admin Actions
 
-Admin actions performed from the Customer 360 dashboard — adjusting currency, editing member profiles, and related operational tasks.
+Admin actions on one member — viewing the unified profile in Customer 360, and acting on the member's behalf from Customer 360 or the Front Line counter page.
+
+Owner surfaces: loyalty-admin (Customer 360, Front Line)
+
+## Concept
+
+The member journey runs basic loyalty → engage → analyze → activate. Analysis has two lenses: aggregate (Analytics dashboards) and individual (**Customer 360**). Customer 360 is the unified-profile piece of Rocket's "mini CDP" (unified profile → segments → activation). It gathers every domain for one member — profile, tier, points, purchases from all channels, redemptions, campaigns — into one page, and shows the member's lifecycle as a single activity timeline. Analysis is passive (read for insight); activation is proactive (send something to the member) and lives in Segments and Marketing Automation, not here. Customer 360 is also where head office corrects a member's record.
+
+**Front Line** is the counter mode of the same admin portal, not a separate app. Store or counter staff use it to transact for a member who is standing in front of them, so the member does not have to use the member app. The reference case is a shopping mall with service counters: shoppers bring the day's receipts, redeem rewards, or claim campaign prizes at the counter.
+
+- **Member profile** — identity (phone, LINE, email), personal and custom fields, persona, tier, tags, and staff remarks.
+- **Service point** — the store, branch, or counter the staff member is serving from. Chosen before any member is opened; every Front Line transaction is attributed to it.
+- **Transaction on behalf** — an action staff perform for the member. There are five groups: profile (register, edit); earn (enter a receipt, adjust points); burn (redeem a reward, burn points for a discount code); campaign (claim a mission, check in, push a free reward); and asset (e.g. registered car plates for tier parking privileges). Store credit is a separate tab.
+- **LINE unlink** — clears the LINE account bound to a member. Login matches both the phone and the LINE account captured at signup, so a member who switches to a new LINE account while keeping the same phone is locked out. Unlinking lets their next phone login bind the new LINE account to the existing member. This is the most common support fix.
+- **Manual tier** — head office assigns a tier by hand, optionally with a downgrade lock so the normal maintain check cannot pull the member back down.
+- **Freeze** — blocks a member's self-service for fraud (for example, burning marketplace points and then refunding the order, or faking receipts). See Member_Freeze.md.
+
+## Journeys
+
+| Page | Owning repo | BFF / RPC |
+|---|---|---|
+| Customer 360 search + detail | loyalty-admin | `bff_admin_search_members`, `bff_admin_get_member_360`, actions in the Overview table, `bff_admin_set_member_freeze` |
+| Front Line hub (member / reward search) | loyalty-admin | `bff_admin_get_store_options`, `bff_admin_search_members`, `api_get_redemption`, `api_mark_redemption_used` |
+| Front Line member page | loyalty-admin | `bff_admin_get_frontline_member`, `bff_admin_get_frontline_hidden_tabs`, per-tab RPCs in the owning domain docs |
+
+### Admin journey — Customer 360
+
+| Knob | Effect |
+|---|---|
+| Profile field *visible / editable by admin* (profile field config) | Controls which fields show and which are editable in Edit Profile. |
+| Role permission `customer-360` read / update | Read opens the page; update shows Edit Profile, Adjust (currency), Adjust tier, Freeze, and Delete. |
+
+1. **Customers** → search → open the member. The page shows the tier card, points and currency (earned / burned, monthly trend, by source), wallet lots, redemptions, purchase spending, check-in / referral / RFM summaries, and the activity timeline (filterable by type and time range).
+2. **Edit Profile** → change fields, mobile, or persona; unlink LINE (confirm dialog); add or remove tags; add a staff remark. Each is saved on its own.
+3. **Adjust** (points or tickets) → add or deduct with a required reason. The adjustment appears in the timeline.
+4. **Adjust tier** → pick a tier on the member's ladder, give a reason, optionally lock downgrade. The tier engine only ever raises a tier on earn or purchase events. Downgrades happen only at the maintain check, and a manual change restarts the maintain clock from today. Without the lock, a raised tier survives until that check; a lowered tier is raised again as soon as the member's next event qualifies them higher (Tier.md).
+5. **Freeze member / Unfreeze member** → confirm. A Frozen badge shows in the header.
+
+### Staff journey — Front Line
+
+| Knob | Effect |
+|---|---|
+| Frontline role (or custom role) tab permissions | Each tab shows only with its `frontline_*` read permission, and its actions need update. Edit Profile needs `frontline_edit_member_profile`. |
+| Per-merchant hidden tabs | Hides tabs the merchant does not use (e.g. check-in, asset group), regardless of role. |
+| Staff store assignment | Limits which service points the staff member can pick. |
+
+1. **Front Line** → pick the service point. With no stores assigned, staff see *No stores assigned — contact an admin*; with no `front_line` access, a no-access banner.
+2. **Member search** → phone, username, member code, ID card, passport, or a QR scan. *No members found* offers **Add new member** (register on the member's behalf).
+3. **Reward search** (no member needed) → type or scan a redemption code. The reward card shows status (active / used / expired), the member, where it was redeemed, and a **Use** button to mark it used. A frozen member's reward shows a warning.
+4. Open the member → the header shows name, persona, tier and progress, points balance, today's earned and used points, and remarks. The service point is locked for the session.
+5. Work the tabs: Upload Receipt, Redemption Reward (mark used from the member's wallet, or redeem, or redeem-and-use), Adjust Points (add or deduct with reason), Claim Mission, Asset Group, Burn Points for Discount, Push Reward, Store Credit, Check-in. **Push to members** on the hub pushes a reward to several members at once. Upload Receipt records the keyed purchase only — the receipt photo is not stored.
+6. **Edit Profile** → the same panel as Customer 360, without tier.
+7. A frozen member shows a warning banner, and every tab and Edit Profile become read-only.
 
 ---
 
 ## Overview
 
-Frontline admins (owner/admin role) can perform direct actions on individual members from the Customer 360 page. These are synchronous, audited operations that bypass the standard user-facing flows.
+Admins act directly on individual members from Customer 360 or Front Line. These are synchronous, audited operations that bypass the standard user-facing flows.
 
 | Action | Function |
 |--------|----------|
@@ -23,12 +75,16 @@ Each action is a **separate, isolated call** — mobile, persona, profile fields
 
 ### Access Control
 
-All functions enforce the same permission model:
+Common to all: authenticated caller, merchant from `get_current_merchant_id()`, active `admin_users` row, target member in the same merchant. Then per function:
 
-- Caller must be authenticated (`auth.uid()` present)
-- Merchant context resolved via `get_current_merchant_id()`
-- Caller must exist in `admin_users` with `active_status = true`
-- Role must be `owner` or `admin` (checked via `admin_roles.role_code`)
+| Function | Gate |
+|---|---|
+| `bff_admin_adjust_currency` | Role `owner`/`admin`, **or** `frontline_adjust_points` create/update |
+| `bff_admin_update_member_profile`, `bff_admin_assign_member_tag`, `bff_admin_create_user_note` | `customer-360.update` or `front_line.update` |
+| `bff_admin_change_member_mobile`, `bff_admin_change_member_persona` | `customer-360.update` or `front_line.update`, **and** role `owner`/`admin` |
+| `bff_admin_adjust_member_tier`, `bff_admin_set_member_freeze` | `customer-360.update` only |
+
+Known gap: the owner/admin role check on mobile and persona means Frontline-role staff are rejected server-side even when their role grants profile edit.
 
 ---
 
@@ -36,7 +92,7 @@ All functions enforce the same permission model:
 
 ### Purpose
 
-Allow admins to add or deduct points/tickets for a member — for corrections, goodwill gestures, customer service resolutions, or manual campaign awards.
+Allow admins (and Front Line staff with Adjust Points) to add or deduct points/tickets for a member — for corrections, goodwill gestures, customer service resolutions, or manual campaign awards.
 
 ### Function
 

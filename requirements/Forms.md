@@ -6,15 +6,15 @@ Owner surfaces: loyalty-admin, loyalty-user
 
 ## Concept
 
-The platform treats member data as **two cooperating field systems** that share one member-facing template API for signup and profile edit.
+Forms decide what the brand learns about a member. The signup/profile form collects it once at Join (and on later edit); surveys collect it again at any point, usually in exchange for a reward. Both feed the member profile that segmentation, reporting, and automation read. Member data comes from **two cooperating field systems** that share one member-facing template for signup and profile edit.
 
-**Default fields** — Built-in profile keys (name, email, phone, address, demographics, and similar). Merchants tune labels, order, requiredness, and visibility per key. Values are stored on **`user_accounts`** and **`user_address`**, not in form response rows.
+**Default fields** — Built-in profile keys (name, email, address, birth date, gender, ID card/passport, and similar). Merchants switch each on or off and set four independent flags: **required**, **visible to member** (shown on signup/edit), **visible to admin** (shown in Customer 360), and **editable by member** (off = write-once). The flags are independent because not all data comes from the member: a field hidden from members is staff-entered (a hotel noting pillow preference or guest temperament), and a field hidden from admins is stored but kept out of the member view (confidential). Values live on the member record, not in form responses.
 
-**Custom fields** — Merchant-defined questions grouped into sections. Definition lives on a **form template**; answers live on **submissions** and **responses** keyed by field id.
+**Custom fields** — Merchant-defined questions a standard key can't cover (e.g. "How would you describe your skin?"): free text, single-select, or multi-select, each with a label, storage key, placeholder, required flag, and options. Every custom field belongs to a **group**. Groups exist for admins and reporting (answers roll up by group); members see a flat list on a separate step from default fields, so signup never shows one overwhelming page. Labels and options are translated centrally.
 
 **USER_PROFILE template** — One special template per merchant (`code = 'USER_PROFILE'`) that holds custom profile questions. Must be **published** to appear in the member profile/signup template. Custom answers for a member are read and written through that template’s submission row.
 
-**Survey template** — Any other published template with **`form_category = 'survey'`**. Used for one-off or repeatable questionnaires (insights, event follow-ups). Member apps list and submit surveys separately from the profile flow.
+**Survey** — A standalone questionnaire the brand publishes to gather opinion or data after signup: satisfaction, product follow-up (e.g. skin condition after using a product), event feedback. The brand gets data and a report; the member can earn a reward for completing it. A survey has four parts: **details** (name, code, banner), **fields** (text, email, phone, number, date, currency, single/multi-select), **submission limits** (per member or in total, per period — usually once per member so the reward can't be farmed), and **completion reward** (points or a ticket). Members reach it through a link the brand places in the member app or messages. Submissions are also usable in automation — as a trigger or condition to message, tag, or assign the member.
 
 **Form submission** — A single fill event for a template: links merchant, optional member, source metadata, and status (**draft** or **completed**). Profile custom fields use one logical submission per member per USER_PROFILE form; surveys create a new submission each time (subject to limits).
 
@@ -28,7 +28,7 @@ The platform treats member data as **two cooperating field systems** that share 
 
 **Signup vs edit** — The same template builder powers signup (`p_mode = 'new'`) and profile edit (`p_mode = 'edit'`): structure from cache/config, values loaded live for edit.
 
-Surveys may attach **reward workflows** (hidden AMP config) and **submission caps** via shared participation limits; USER_PROFILE and anonymous profile paths skip survey-style caps.
+Survey rewards run as a hidden automation attached to the survey; submission caps use the shared participation-limit model. The profile form is never capped.
 
 ## Rules
 
@@ -77,6 +77,7 @@ Surveys may attach **reward workflows** (hidden AMP config) and **submission cap
 - Template **`status`**: `draft` → `published` → `archived`. Only published templates are active for members (USER_PROFILE and surveys).
 - Submission **`status`**: `draft` (e.g. bulk import placeholder) or `completed`.
 - **`source`** / **`source_id`** / **`source_id_2`** identify origin (member app, event, bulk import, survey web). Unique dedup index on `(source_id, source_id_2)` when both set.
+- The AMP **Submit Form** node writes a form answer on the member's behalf (`fn_amp_submit_form`, `source = 'amp'`, `source_id` = workflow). Reacting to survey answers is done with workflow entry conditions or condition splits on form answers, not on the form itself (`AMP_Workflows.md`).
 
 ## Journeys
 
@@ -88,24 +89,29 @@ Surveys may attach **reward workflows** (hidden AMP config) and **submission cap
 | External code pools (profile field) | loyalty-admin | `user_field_config` + upsert config; code tables per field |
 | Surveys list | loyalty-admin | list via survey actions / `bff_get_form_details` |
 | Survey create/edit | loyalty-admin | `bff_upsert_form`, `bff_get_form_details`, `bff_get_form_reward_workflow_config`, `bff_upsert_form_reward_workflow` |
-| Survey reports | loyalty-admin | `get_form_submission_summary`, dashboard aggregations |
+| Survey reports (Reports → Surveys) | loyalty-admin | `bff_report_surveys` — see `Analytics.md` |
 | Customer 360 — profile tab / edit | loyalty-admin | `bff_get_user_profile_template` (admin audience), direct `user_accounts` / field config reads |
 | Event registration (survey link) | loyalty-admin | `bff_get_form_details_user` |
 | Front line / order booking — create member | loyalty-admin | `bff_get_user_profile_template`, validation helpers (not always `bff_save_user_profile` — may use admin member APIs) |
 
 | Setting | Effect on behaviour |
 | --- | --- |
-| Default field enable / required / label | `user_field_config` row; drives template and validation |
-| Default field persona_ids | Restricts field to listed personas |
-| Custom groups and fields | USER_PROFILE `form_templates` structure via profile form settings UI |
+| Default field active | Off → field absent everywhere (member and admin) |
+| Default field required | Member can't pass the default-fields step (or save edit) while empty |
+| Default field visible to member | Off → not on signup/edit; admin-entered only (Customer 360) |
+| Default field visible to admin | Off → stored but hidden from admin profile views |
+| Default field editable by member | Off → write-once: member fills it at signup, then it is locked on profile edit once it has a value |
+| Default field persona scope | Field appears only for listed personas; empty = everyone |
+| Custom group | Admin/report grouping only; members see a flat list |
+| Custom field type, key, label, placeholder, required, options | Question shape on the custom-fields step; options required for single/multi-select |
 | Field conditions | `form_conditions` on USER_PROFILE or survey template |
-| Survey name, status, banner | `form_templates`; publish gates member visibility |
-| Survey submission limits | `transaction_limits` synced on `bff_upsert_form` save |
-| Survey reward workflow | AMP workflow config via reward workflow BFFs |
+| Survey name, code, banner, status | Publish gates member visibility; banner shown atop the survey, blank hides it |
+| Survey submission limits | Per member or total, count per period (e.g. once per member all-time); exceeding shows a limit error |
+| Survey completion reward | Points or a ticket type granted on submit; shown to the member as a reward badge before and a result after |
 | Allow bulk import (non–USER_PROFILE) | `form_templates.allow_bulk_import` |
 
-1. **User profile form settings** — Configure default fields (order, required, visibility, validated external codes) and custom groups/fields on USER_PROFILE; save merges config without wiping nested `config` jsonb (id card, external code pools).
-2. **Surveys** — Create survey, add fields and conditions, set limits and optional banner; publish; copy member link (`/surveys/{identifier}` on loyalty app host).
+1. **User profile form settings** — Three sections: **Default fields** (activate the keys you need, set the four flags and persona scope), **Validated codes** (gated-signup code fields and their pools), **Custom fields** (create a group first, then its questions). Save merges config without wiping nested id-card / code-pool settings.
+2. **Forms and Survey → Survey** — Create survey: details, fields (with conditions), submission limits, completion reward; publish; copy the member link and place it in the member app (icon/banner) or a message.
 3. **Reports → Surveys** — Review aggregated responses for a published survey.
 4. **Customer 360** — View or edit member profile; custom values read from USER_PROFILE submission responses.
 
@@ -118,9 +124,9 @@ Surveys may attach **reward workflows** (hidden AMP config) and **submission cap
 | Survey list | loyalty-user | survey list API (published surveys only) |
 | Survey detail / submit | loyalty-user | `bff_user_get_survey_details`, `bff_user_submit_survey` |
 
-1. **Signup** — Auth hub returns `complete_profile_*`; client loads template (`p_mode = 'new'`), walks sections (persona → default → custom → PDPA/channels per Signup & Login `form_step`), then **`bff_save_user_profile`**; hub sets **`is_signup_form_complete`**.
-2. **Edit profile** — Open profile drawer/page; template `edit` mode prefills values; save merges account, address, USER_PROFILE responses, consent, and channels.
-3. **Survey** — Open linked survey; submit once per attempt; success state and any reward dispatch per workflow config; limit errors if caps exceeded.
+1. **Signup** — After auth, the member walks persona → default fields → custom fields (own step, no group headings) → consent (sequence and states in `Signup_Login.md`); submit saves everything and marks the profile complete.
+2. **Edit profile** — Profile → Edit profile shows member-visible fields prefilled; write-once fields that already have a value are locked; save merges account, address, custom answers, consent, and channels.
+3. **Survey** — Open the survey link: banner, questions, and reward badge (if any) → submit → success with reward result, or field errors / limit reached.
 
 Errors the member may see: required field, format validation, consent not accepted, survey limit exceeded, or unpublished/missing survey identifier.
 
@@ -163,7 +169,7 @@ Errors the member may see: required field, format validation, consent not accept
 | `fn_get_user_form_values` | Read custom answers by field keys for segmentation/AMP. |
 | `evaluate_field_visibility` / `get_field_dependencies` | Condition evaluation helpers. |
 | `fn_amp_submit_form` | AMP/event path for structured form posts. |
-| `get_form_submission_summary` / `get_form_dashboard_aggregated` | Admin reporting. |
+| `bff_report_surveys` | Admin survey report (answer share per option); owned by `Analytics.md`. `get_form_submission_summary` / `get_form_dashboard_aggregated` still exist but loyalty-admin no longer calls them. |
 | `bff_get_form_reward_workflow_config` / `bff_upsert_form_reward_workflow` | Survey reward wiring. |
 
 ### Flows

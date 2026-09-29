@@ -6,15 +6,27 @@ Owner surfaces: loyalty-admin (**Leaderboards**), loyalty-user (`/lb/{path}` nat
 
 ## Concept
 
-**Leaderboard campaign** — Config on `campaign_leaderboard` tied to `campaign_master` for participation codes.
+A leaderboard is a campaign type that shows members a ranked list — typically top spenders on a product or channel during a campaign window — so they compete for a privilege the merchant grants outside the system (e.g. the top 10 meet a celebrity). In Action → Condition → Outcome terms the action is usually purchasing and the in-system result is only the rank; the real outcome is fulfilled offline.
 
-**Source kind** — `native` reads allowlisted `public.v_lb_*` / `public.mv_lb_*` views; `legacy` reads Metabase via card id in `datawh_table_code`.
+The design separates data from display. Engineering first builds a **data view** that already computes the ranking basis for that campaign (e.g. one entitlement per 500 THB of participating-product spend, per member); the leaderboard only reads that view and decides which fields to show, how to rank, and how many rows. A new calculation therefore needs a new view; re-labelling, re-ranking, or masking an existing one is admin-only work.
 
-**Participation gate** — When `requires_participation` is true, members must join (`campaign_participation`) before table and personal quota render.
+**Leaderboard campaign** — Name, campaign code (keys participation records), public path, CRM version, data view, display settings, columns, personal quota, ranking.
 
-**Column config** — Admin chooses visible columns, rank field, direction, `top_x`, center-masking, and member key for quota matching.
+**CRM version (source kind)** — *New CRM* reads a view in this database; *Legacy CRM* reads a Metabase card over the old CRM's separate database. Must match where the brand's data lives; most brands are on New CRM.
 
-Not the same as `get_mission_leaderboard` (missions) or campaign activity grouping.
+**Data view** — The per-campaign dataset, one row per member. Every field it exposes is offered to the admin; nothing is shown until picked.
+
+**Participation gate** — Optional. When on, members must tap Participate before the table and their own quota appear; when off, anyone with the link sees it.
+
+**Columns** — The subset of view fields shown, each with a display label, order, and optional masking (hide N characters in the middle) for personal data such as name or phone. Internal ids stay hidden by not being picked.
+
+**Ranking** — Rank field, direction (usually descending), and Top X rows shown (typically ~20).
+
+**Personal quota** — The signed-in member's own value (e.g. entitlements or spend), matched via a member key field; shown even when the member is outside Top X.
+
+**Display mode** — *Ranked* (table plus optional personal quota) or *Quota only* (banner, copy, and one personal quota card — no table). Works on both CRM versions.
+
+Not the same as mission rankings (see Mission) or campaign activity grouping.
 
 ## Rules
 
@@ -24,6 +36,9 @@ Not the same as `get_mission_leaderboard` (missions) or campaign activity groupi
 - Native rows: server ranks and caps `top_x`; if the signed-in member is outside `top_x` but on the view, their row is appended for quota only.
 - Legacy path uses old CRM `?token=` identity and Metabase JSON API; native uses loyalty JWT (`user_accounts.id` on participation).
 - Translations: default copy on `campaign_leaderboard`; other languages via **Translation_System** `entity_type = leaderboard`. Table cell values are not translated.
+- `quota_only` save requires `user_key_field` and one column with `personal_quota_enabled`; rank field is not required (`top_x` still stored, unused).
+- `quota_only`: member app server strips fetched rows to the signed-in member's own row before render (legacy Metabase result included); no match → quota `0`. No member identity (missing/invalid legacy `?token=`, no native session) → member-not-found + open member app instead of the card.
+- No-participate quota: set `requires_participation = false`; legacy Metabase card only needs rows keyed by `user_key_field` (no participation filter).
 
 ## Journeys
 
@@ -31,20 +46,30 @@ Not the same as `get_mission_leaderboard` (missions) or campaign activity groupi
 
 | Knob | Effect |
 | --- | --- |
-| Source kind | Native view vs Metabase card |
-| Path | Public URL segment (unique per merchant) |
-| `requires_participation` | Join gate before table/quota |
-| Columns / rank / top_x | Table presentation |
-| Banner + header copy | Page chrome |
+| Campaign name / code | List label; code keys participation records |
+| CRM version (source kind) | Native view vs Metabase card; switching clears the source |
+| Public path | Member URL segment (unique per merchant) |
+| Require participation | Join gate before table/quota |
+| View / table name (or Metabase code) | Dataset read; **Check** / load lists its fields as column candidates |
+| Display (`display_mode`) | Ranked table vs Personal quota only (hides Columns + Ranking sections) |
+| Banners, page header, description | Page chrome (default language) |
+| Columns: show, label, order, mask + mask characters | Which fields members see, how they are titled and ordered, how many middle characters are hidden |
+| Member key field | Matches the signed-in member to a row |
+| Personal quota field + label | The member's own value shown beside the table (or alone in quota-only) |
+| Ranked field / direction / Top X | Sort basis, order, and row cap (ranked only) |
 
 | Page | Owning repo | BFF / RPC |
 | --- | --- | --- |
 | Leaderboards | loyalty-admin | `bff_get_leaderboard_campaigns`, `bff_get_leaderboard_campaign`, `bff_upsert_leaderboard_campaign`, `bff_inspect_leaderboard_source` |
 
-1. **Leaderboards** → create/edit; pick New CRM vs Legacy (switch clears source).
-2. Native: paste view name → **Check**; Legacy: Metabase card id → load fields.
-3. Configure participation, columns, rank, masking, member key, banner.
-4. Save; translate optional fields under **Translation → Leaderboards**.
+1. **Leaderboards** lists existing campaigns → **Create leaderboard** (or open one).
+2. **Campaign** section: name, code, CRM version, public path, participation gate, active.
+3. **Data source**: native — paste the view name → **Check**; legacy — Metabase card id → load fields. The fetched field list feeds the next sections.
+4. **Display settings**: banners, display mode, page header and description.
+5. **Columns** (ranked only): tick fields to show, set labels and order, mask personal data.
+6. **Personal quota**: member key field, quota field, quota label.
+7. **Ranking** (ranked only): ranked field, direction, Top X.
+8. Save; translate optional copy under **Translation → Leaderboards**.
 
 ### Member journey
 
@@ -53,10 +78,10 @@ Not the same as `get_mission_leaderboard` (missions) or campaign activity groupi
 | `/lb/{path}` | Native | `api_get_leaderboard_campaign`, `api_get_leaderboard_rows`, `api_check_leaderboard_participation`, `api_join_leaderboard` |
 | `/leaderboard/{path}` | Legacy | `check_campaign_participation_text`, `add_campaign_participant_text`, Metabase query |
 
-1. Load localized campaign config.
-2. If participation required and not joined → show **Participate** only.
-3. Join writes `campaign_participation` (`userid` + `userid_text` = native user uuid).
-4. Load ranked rows; render columns and optional personal quota (match `user_key_field` to session user).
+1. Member opens the campaign link; app loads localized banner, header, and description.
+2. If participation required and not joined → banner and copy with **Participate** only; no table or quota.
+3. Join writes `campaign_participation` (`userid` + `userid_text` = native user uuid); the page then reveals the data.
+4. Ranked: Top X rows with the chosen columns (masked where configured) plus the member's own quota, still shown if they rank below Top X. `quota_only`: centered quota card only.
 5. Language toggle refreshes campaign RPC; static chrome uses `ui_translations` `page_key = leaderboard`.
 
 ## System
@@ -65,7 +90,7 @@ Not the same as `get_mission_leaderboard` (missions) or campaign activity groupi
 
 | Table | Role |
 | --- | --- |
-| `campaign_leaderboard` | Config (`source_kind`, `path`, `datawh_table_code`, `user_key_field`, `columns_config`, `rank_config`, `top_x`, `requires_participation`, copy) |
+| `campaign_leaderboard` | Config (`source_kind`, `display_mode` `ranked`\|`quota_only`, `path`, `datawh_table_code`, `user_key_field`, `columns_config`, `rank_config`, `top_x`, `requires_participation`, copy) |
 | `campaign_master` | Campaign code/name for participation |
 | `campaign_participation` | Join log (native uuid on `userid` + `userid_text`) |
 

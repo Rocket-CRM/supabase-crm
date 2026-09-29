@@ -6,7 +6,7 @@ Owner surfaces: loyalty-admin (Content Library, CS conversations, workflow messa
 
 ## Concept
 
-The **content library** is the single place merchants define things they send repeatedly to customers. Each row is a **resource**: a typed payload plus optional organization, search hints, and marketplace catalog picks. Resources are **shared** across modules (not CS-only) — the same tables and delivery resolver power human agents, AI tools, and workflow message nodes.
+The **content library** is the studio where merchants build content once and reuse it everywhere they talk to customers (comparable to LINE's content maker). In marketing automation it answers the third of three questions — *who* (Audience), *how and when* (workflow or broadcast), *what* (this library): a workflow's LINE message node or a targeted broadcast picks a resource instead of embedding its own layout. Each row is a **resource**: a typed payload plus optional organization, search hints, and marketplace catalog picks. Resources are **shared** across modules (not CS-only) — the same tables and delivery resolver power human agents, AI tools, workflow message nodes, and broadcasts.
 
 **Category** — Optional folder label for admin browsing; at most one level of nesting (parent + children).
 
@@ -18,7 +18,9 @@ The **content library** is the single place merchants define things they send re
 
 **Link** — External URL with optional description and thumbnail.
 
-**Rich content** — Platform-agnostic **blocks** (cards, carousels, buttons, text, images, etc.) authored once; a renderer converts blocks to channel-native formats at send time.
+**Rich content** — Platform-agnostic **blocks** authored once and mixed freely: a single card, a swipeable carousel of cards, or a hero banner with text below, each composed of images, title/subtitle/price/description fields, and buttons, with a live preview while editing. A renderer converts blocks to channel-native formats at send time (LINE Flex on LINE).
+
+**Button action** — What a tap does: open an external link, claim a reward, open a survey, or send a **postback** — a short action key (e.g. `price`, `promotion`) that tells the workflow which button was tapped. Postback keys are what a workflow's LINE interaction router branches on: a three-card carousel with keys `price` / `promotion` / `crm` yields three router paths, so each member's next step depends on what they chose.
 
 **Platform content** — Separate from custom blocks: product (or catalog) items selected from connected marketplace shops (Shopee, Lazada, TikTok). On a marketplace conversation, native catalog cards are preferred when items exist.
 
@@ -80,7 +82,7 @@ Example (link map): a card CTA uses `{ "default": "https://brand.com/p", "shopee
 5. Save — upsert persists `platform_content` and `trigger_patterns`; reward/survey picks reference live rewards/forms.
 6. Optional: view **engagement** card on edit screen via `bff_get_resource_content_engagement`.
 7. In **CS conversations**, search resources in the composer and send — BFF wraps backend send + outbound message insert.
-8. In **Workflow List** / AMP message nodes, attach a resource by id (`content_resource_id` in node config).
+8. In **Workflow List** / AMP message nodes, attach a resource by id (`content_resource_id` in node config); **Targeted broadcast** picks a resource the same way or creates one inline. To branch on taps, give each button a postback key, select the resource on the LINE message node, then add a LINE interaction router after that node — it discovers keys from the message node's selected resource, one output per key (see `AMP_Workflows.md`).
 
 ### Member journey
 
@@ -91,7 +93,7 @@ Example (link map): a card CTA uses `{ "default": "https://brand.com/p", "shopee
 
 1. Customer receives a message on the active channel — plain text, file, link, rendered rich layout, or native marketplace product card depending on delivery resolution.
 2. Taps a **URI button** or link → opens URL (platform-specific link map or resolved member-app page for reward/survey actions).
-3. Taps a **postback button** → LINE posts back to `webhook-line`; AMP-signed postbacks route to AMP recorder; unsigned resource postbacks ingest as synthetic inbound text with postback metadata for agent/AI continuation.
+3. Taps a **postback button** → nothing opens; the next thing the member sees is the message or reward on the workflow branch for that key (AMP-signed postbacks route to the AMP recorder), or an agent/AI reply when the resource was sent in a CS conversation (unsigned postbacks ingest as synthetic inbound text with postback metadata).
 4. If channel only supports degraded format (e.g. SMS), customer sees text + URLs instead of full carousel/button UI.
 
 ## System

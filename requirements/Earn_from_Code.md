@@ -7,6 +7,8 @@
 
 Earn from Code is a product-level loyalty mechanic where unique codes are physically attached to products (printed inside packaging, under caps, on stickers, etc.). Consumers scan or key in these codes to earn points. The system covers the full lifecycle: **bulk import** codes into the platform, **activate** them when products ship, let consumers **validate → claim → earn points**, and give admins tools to **manage, delete, and report** on the code pool.
 
+**Where it fits** — Like receipt upload, product codes serve **offline third-party retail**, where the retailer never shares sales data, so the member proves the purchase. Receipt upload is the default for new programs: it needs no packaging change. Codes cost the brand a unique print per unit and a supply-chain cutover (untagged stock must sell through before coded batches reach shelves), so they are mainly run for brands migrating an existing code program.
+
 ### How It Works (Consumer Journey)
 
 1. **Brand prints codes on products** — each physical unit gets a unique code (QR, Data Matrix, or alphanumeric) during manufacturing

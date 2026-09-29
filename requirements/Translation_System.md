@@ -6,15 +6,21 @@ Owner surfaces: loyalty-admin (language config + admin UI copy), loyalty-user (m
 
 ## Concept
 
-The platform separates **what merchants configure in their primary language** (columns on master tables) from **overrides for other locales** (rows in a shared translation store). Members and APIs always request a **target language**; the backend resolves each field through a fixed fallback chain.
+Every piece of member-facing text is either **static** or **dynamic**, and the test is who created it. Static text belongs to the system — on the rewards page, "Rewards", "My Rewards", "Search" and the "Redeem" button — and ships already translated; the merchant does nothing. Dynamic text belongs to an object the merchant created — a reward's name, description and terms, a mission's title and description — and exists in other languages only if the merchant translates it.
 
-**Dynamic translation** — Optional per-field overrides tied to a concrete program object (a reward, tier, form field, display block, earn channel, etc.). Non-default languages live in the translation store; the merchant’s **default language** is always sourced from the entity’s master row at cache-build time.
+Merchants author each object once, in their default language, inside its feature editor. All other languages are entered in one place, the **Translation** page, never inside the feature editors. This is deliberate: translating inline would add one extra input per translatable field per language to every editor (a reward's five text fields become ten with two languages, fifty with ten), burying the fields that drive program logic under copy. Centralising keeps feature editors about behaviour, and they stay the same size however many languages a merchant adds.
 
-**Member UI translation** — Global or merchant-specific strings keyed by **page** and **field** (titles, buttons, errors, redemption status labels). Loaded in bulk for the member app; no auth required.
+**Static translation** — System copy keyed by page and field (titles, buttons, errors, status labels). Seeded globally in all platform languages; a merchant-specific override can replace a key. Loaded in bulk for the member app; no auth required.
+
+**Dynamic translation** — Optional per-field overrides on a merchant-created object for non-default languages. The default-language value is always the object's own field from its editor, so the translation page shows it as reference but never replaces it.
+
+**Translation page** — The single admin screen for dynamic translation, navigated **Object type → Object → Field**: pick a kind of object (rewards, reward categories, tiers, missions, earn channels, leaderboards, personas, tags, consent documents, communication topics, forms and form fields, display blocks, user fields), pick one object, then edit its translatable fields in a grid with one column per language.
+
+**AI translate** — A helper on the translation page that fills empty language cells for the open object from the existing text. It never overwrites a filled cell; suggestions are marked and saved only when the admin saves.
 
 **Admin UI translation** — A parallel static store and API for loyalty-admin chrome only (headers, section titles, grid columns, shared action buttons). Must not be mixed with member UI keys.
 
-**Merchant languages** — Which of the four platform locales are active for a merchant, which one is default, and display order. Drives fallback and which language labels master-table content.
+**Merchant languages** — Which of the four platform locales are active for a merchant, which one is default, and display order. Set when the merchant is created; the translation page cannot be used until at least one language, including a default, is saved. The default decides which language the feature editors' text is treated as.
 
 **Cache bundles** — Heavy read paths (rewards catalog, profile template, display blocks, earn channels) embed a `translations` object with all active languages in Redis so the client can switch language without a round trip when the bundle is already loaded.
 
@@ -25,7 +31,9 @@ The platform separates **what merchants configure in their primary language** (c
 - **Fallback chain (dynamic fields)** — For each field: requested language → merchant default language → base column on the master row (never hardcoded to English).
 - **Fallback chain (member static UI)** — Requested language → merchant-specific row for `(page_key, field_key)` if present → global row (`merchant_id` null) → English row for the same key.
 - **Default language invariant** — Exactly one `merchant_languages` row per merchant has `is_default = true` among active languages; master-table text is treated as that language in caches and getters.
-- **Write chokepoint (dynamic)** — All admin/API writes of entity overrides go through `save_entity_translations`; direct inserts are for migrations/seeds only.
+- **Write chokepoint (dynamic)** — All admin/API writes of entity overrides go through `save_entity_translations`; direct inserts are for migrations/seeds only. Feature editors do not write translations.
+- **Translation page save** — Saves every language cell of the open object in one call: a non-empty cell upserts the override, an emptied cell deletes it, and the default-language cell is ignored (edit it in the feature editor).
+- **AI translate** — Fills only empty non-English cells, using English as the source when present; filled cells are never changed. Nothing persists until Save.
 - **Static UI separation** — Member pages use `ui_translations` + `get_ui_translations`; admin pages use `ui_translation_admin` + `get_admin_ui_translations`. Cross-wiring keys between tables is invalid.
 - **Cache invalidation** — Inserts/updates/deletes on `translations` fire domain triggers (rewards, display blocks, earn channels, etc.); `ui_translations` / `ui_translation_admin` changes invalidate UI translation Redis keys; `merchant_languages` / merchant config changes invalidate merchant-config cache.
 - **Public member UI API** — `get_ui_translations` is callable without member auth (signup/login surfaces).
@@ -43,21 +51,25 @@ The platform separates **what merchants configure in their primary language** (c
 | Active languages | Which locales appear for members and in translation matrices |
 | Default language | Which master-column language is embedded as the default bundle key |
 | Display order | Language picker ordering in admin/member where shown |
-| Entity override saves | Per-field values for non-default languages on program objects |
+| Translation page cells | Per-field values for non-default languages on merchant-created objects |
+| AI translate | Pre-fills empty cells for review before save |
 | Static admin keys | Dashboard labels via `ui_translation_admin` seeds/overrides |
 | Gap / statistics RPCs | Coverage reporting per entity type and language |
 
 | Page | Owning repo | BFF / RPC |
 | --- | --- | --- |
 | Global Settings (languages) | loyalty-admin | `bff_get_general_config`, `bff_upsert_merchant_languages`, `merchant_languages` table read |
-| Feature editors (rewards, tiers, forms, display blocks, earn channels, …) | loyalty-admin | Entity-specific BFFs; dynamic overrides via `get_translation_form_data` / `save_entity_translations` when wired |
+| Feature editors (rewards, tiers, forms, display blocks, earn channels, …) | loyalty-admin | Entity-specific BFFs; default-language text only |
+| Translation | loyalty-admin | `translation_api` actions `get_menu` → `get_translation_entity_types`, `get_entities`, `get_form` → `get_translation_form_data`, `save` → `save_entity_translations`; AI translate via loyalty-admin server route (Anthropic) |
 | All admin chrome | loyalty-admin | `get_admin_ui_translations` via `useAdminTranslations` |
-| Translation ops (export/gaps) | (no dedicated route in loyalty-admin) | `export_translations_for_language`, `get_translation_gaps`, `get_translation_statistics`, `translation_api` |
+| Translation ops (export/gaps) | (no admin UI) | `export_translations_for_language`, `get_translation_gaps`, `get_translation_statistics` |
 
-1. Open **Global Settings** and enable one or more of en/th/ja/zh; set exactly one default.
-2. Author program content in the default language inside each feature editor (reward name, form label, block title, etc.).
-3. Add other locales via translation tooling or `save_entity_translations` (per entity type/id); use export when bulk-updating.
-4. Admin UI strings resolve automatically from `get_admin_ui_translations` per admin language preference (with in-code fallbacks if a key is missing).
+1. Open **Global Settings**, enable one or more of en/th/ja/zh, set exactly one default, and save. Until this is saved, the Translation page shows "Translation languages are not configured".
+2. Author each object in the default language inside its feature editor (reward name, form label, block title, etc.).
+3. Open **Settings › Translation**. Pick an object type in the left list, then an object in the middle list; the grid shows each translatable field with the reference text and one column per language. Empty lists show "No items found".
+4. Type translations, or press **AI Translate** to fill empty cells (marked "AI"); edited rows show "Edited" and the header "Unsaved changes".
+5. **Save** → "Translations saved"; member caches for that object refresh. Failure shows an error banner and keeps the edits.
+6. Admin UI strings resolve automatically from `get_admin_ui_translations` per admin language preference (with in-code fallbacks if a key is missing).
 
 ### Member journey
 
@@ -142,7 +154,7 @@ Isolated Redis databases prevent a UI translation flush from evicting rewards ca
 
 ### Known gaps
 
-- **Dedicated translation hub** — RPCs (`get_translation_gaps`, `get_translation_form_data`, `translation_api`) exist; loyalty-admin has no standalone “Translation” navigation wired to them (overrides are edited inside feature screens or via SQL/export).
+- **Translation page columns** — The grid always shows en / th / zh / ja with English labelled "Reference", regardless of the merchant's active languages or default; the default-language cell looks editable but its edits are discarded on save. Coverage (`get_translation_gaps` / `get_translation_statistics`) and export have no admin UI.
 - **Catalog vs data** — `form_field_option` (and similar) may appear in `translations` rows but not in `get_entity_type_config()` until registered.
 - **Coverage counts** — Historical row counts in old docs drift quickly; use `get_translation_statistics` live.
 - **Performance numbers** — Sub-100ms targets depend on Redis region and cache hit; treat as order-of-magnitude, not SLAs.

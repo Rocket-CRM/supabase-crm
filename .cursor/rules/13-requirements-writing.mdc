@@ -26,7 +26,7 @@ One canonical `requirements/<Domain>.md` per feature. Four-section spine, then R
 - Write **only the delta**: what differs, what is absent, what is added. Never restate the default.
 - If nothing differs in a section, no subsection.
 - Typical placement: `Journeys > Shopify` (checkout / storefront / embedded-admin), `System > Shopify` (webhook path, `rewarding-shopify` calls, credential lookup), occasionally `Rules > Shopify`.
-- `Shopify.md` keeps platform plumbing only (OAuth, embedded auth, webhooks receiver, billing, entitlements, widget shell, `rewarding-shopify` service, landing page, UI hiding) plus a routing table: feature → doc › section where its Shopify variant lives. Cross-refs run hub → feature doc only.
+- `Shopify.md` is the single canonical Shopify integration doc: platform plumbing (OAuth, embedded auth, webhooks receiver, billing, entitlements, widget shell, `rewarding-shopify` service, UI hiding), storefront identity + touchpoint packaging, order ingest, commerce write-back, partner integrations (Judge.me, Gorgias, Klaviyo, custom webhook — channel-agnostic contracts live here), outbound delivery, and linkage to the chokepoints / outbox. Domain `### Shopify` subsections keep **feature-behaviour** deltas only (editor modes, section shapes, brand scheme); `Shopify.md` System ends with a routing table to them.
 
 ## Where to look before writing
 

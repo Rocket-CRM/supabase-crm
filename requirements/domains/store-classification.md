@@ -28,6 +28,6 @@
 - Stores can be classified across multiple categories simultaneously
 - Attribute Sets group attributes/sub-attributes for business rule targeting (earn factors, campaigns)
 - `store_master.store_code` is text-based (POS-friendly); resolution to UUID happens internally
-- Set membership supports both broad (entire attribute) and specific (single sub-attribute) inclusion
+- Set membership supports both broad (entire attribute) and specific (single sub-attribute) inclusion, direct store pins, and excluded stores (`store_attribute_set_members.exclude`, store rows only; exclusion wins) — one matcher `store_matches_any_attribute_set`
 
 ---

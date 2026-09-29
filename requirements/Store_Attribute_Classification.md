@@ -6,11 +6,15 @@ Owner surfaces: loyalty-admin (taxonomy, sets, store master, front-line store sc
 
 ## Concept
 
-Merchants operate many physical and digital outlets. The platform needs a consistent way to label each store (channel, region, format, partner, and custom dimensions) and to reuse those labels in rules without maintaining ad-hoc store lists.
+Merchants sell through hundreds of outlets and want to treat them by group, not one by one: "5× points at large provincial branches", "this reward only in Bangkok". Store attributes describe each store along independent **dimensions** the merchant chooses—retail chain, size, region, building, floor, opening hours—so rules target a description ("Provincial", "Size L") and new stores inherit the right behaviour the moment they are classified. Which dimensions to create follows how the brand wants to group stores, not a fixed schema. (Old CRM called this *Store Property*.)
 
 **Store** — An operational outlet row with a stable code, display name, active flag, and optional address or integration metadata. Purchases and member flows attach a store (UUID) when attribution matters.
 
-**Category** — A classification dimension the merchant defines (for example Channel, Region, Format). Exactly one category groups each attribute. Some categories are flagged for special product behaviour (receipt channel dimension, store-property dimension).
+**Category** — One dimension (for example Chain, Size, Location). Exactly one category groups each attribute.
+
+**Store channel** — The one category flagged as the **retail-chain dimension** (Watsons, HomePro, Konvy…). It is an ordinary dimension with one extra job: receipt flows group stores by it, so the approver and the member pick a chain first, then a store in that chain. Old CRM kept channel as a separate object; here it is just the flagged dimension, so chains get sets, rules, and reporting for free.
+
+**Store property** — The one category flagged to print as the store's label on Front Line receipt slips and purchase history (attribute names only).
 
 **Attribute** — A value within a category (for example Online marketplace, Bangkok, Flagship). Required parent for sub-attributes.
 
@@ -18,13 +22,13 @@ Merchants operate many physical and digital outlets. The platform needs a consis
 
 **Assignment** — Links one store to one attribute (and optional sub-attribute) within a category. Admin typically configures one pick per category per store.
 
-**Attribute set** — A named, reusable bundle used by downstream rules. Members may pin an entire attribute (all its sub-attributes), a single sub-attribute, or an individual store row. A store qualifies for a set when its assignments match a member row, or when the set lists the store directly.
+**Attribute set** — A named, reusable target that earn conditions, missions, receipt rules, and stock pick instead of store lists. Members may pin an entire attribute (all its sub-attributes), a single sub-attribute, or an individual store row. A set is a **union**: a store qualifies when it matches **any** member row or is listed directly — unless the set lists it as an **excluded store**. A set does not intersect dimensions; "Provincial **and** Size L" is expressed by pinning those stores.
 
 **Partner merchant** — Separate registry for partner entities tied to a merchant (Open API / partner flows); not the same as store master, but shares merchant isolation.
 
 ## Rules
 
-- **Store code uniqueness** — For a given merchant, `store_code` is unique on `store_master`. Upsert rejects duplicates.
+- **Store code required and unique** — Every store needs a code (save fails without one); for a given merchant, `store_code` is unique on `store_master`. Upsert rejects duplicates.
 - **Taxonomy codes** — Category, attribute, and sub-attribute codes are unique within the merchant at their level (enforced on upsert/delete helpers).
 - **Soft delete on taxonomy** — Categories, attributes, and sub-attributes use `is_deleted` (not a separate active flag on those tables). Deleted nodes are hidden from admin pickers; historical assignment rows are not automatically purged.
 - **Store active flag** — `active_status = false` hides the store from member pickers and active admin lists; existing ledger rows keep their store reference.
@@ -32,13 +36,16 @@ Merchants operate many physical and digital outlets. The platform needs a consis
 - **One pick per category (admin UX)** — Store master UI maps each category to at most one attribute/sub-attribute selection; empty category means no row for that category.
 - **Set membership — attribute member** — Set member with `attribute_id` and null `sub_attribute_id`: any store assigned to that attribute qualifies, including any sub-attribute under it.
 - **Set membership — sub-attribute member** — Set member with `sub_attribute_id`: only stores assigned to that exact sub-attribute qualify.
-- **Set membership — store pin** — Set member with `store_id`: that store qualifies regardless of taxonomy match (used for exceptions or store-specific rule targets).
+- **Set membership — store pin** — Set member with `store_id`: that store qualifies regardless of taxonomy match (used for store-specific rule targets).
+- **Set membership — excluded store** — Set member with `store_id` and `exclude = true`: that store never qualifies for the set, even when an attribute, sub-attribute, or store pin in the same set matches it (exclusion wins). Only stores can be excluded; attribute or sub-attribute rows with `exclude` are rejected. A set with only exclusions matches nothing (admin blocks saving it).
 - **Set member soft delete** — Set members use `is_deleted`; list UIs count only non-deleted members.
-- **Resolution output** — `get_store_attribute_sets(store_id)` (and `store_matches_attribute_set`) derive qualifying set IDs from assignments plus member rules; earn and condition evaluation consume set IDs, not hand-maintained store lists.
-- **Channel category** — Exactly one category per merchant should be marked `is_store_channel` for receipt flows: `get_store_channels` exposes channel attributes for member channel → store selection.
+- **Resolution output** — One matcher, `store_matches_any_attribute_set`, defines membership (includes, store pins, exclusions). `get_store_attribute_sets(store_id)` and `store_matches_attribute_set` delegate to it, so earn, mission, and receipt-approval checks agree. Consumers use set IDs, not hand-maintained store lists.
+- **Channel category** — At most one non-deleted category per merchant is `is_store_channel` (unique index). Turning the flag on for a category turns it off on the previous one in the same save. Its attributes are the channels in receipt channel → store pickers (`get_store_channels`, admin review modal). No flagged category → the channel list is empty, so receipt channels should use store-only selection.
+- **Store-property category** — At most one non-deleted category per merchant is `is_store_property` (unique index; same toggle behaviour). Its attribute names are the store label on Front Line slips and purchase history.
+- **Set semantics are OR** — Within a set, members are alternatives, even across categories; there is no intersection operator.
 - **Merchant isolation** — All classification tables carry `merchant_id`; admin BFFs and JWT-scoped reads filter by current merchant.
 
-Example (set matching): A set member “Online marketplace” (attribute only) includes a store assigned “Channel → Online marketplace → Shopee”. A set member “Shopee” (sub-attribute only) includes that store but excludes a store assigned only “Online marketplace” without the Shopee sub-attribute.
+Example (set matching): A set member “Online marketplace” (attribute only) includes a store assigned “Channel → Online marketplace → Shopee”. A set member “Shopee” (sub-attribute only) includes that store but excludes a store assigned only “Online marketplace” without the Shopee sub-attribute. A set “Merchandise → Beauty” with excluded store “Watsons” includes every Beauty store except Watsons. A set with “Provincial” (Location) and “Size L” (Size) matches every provincial store and every L store—not only provincial L stores.
 
 ## Journeys
 
@@ -46,10 +53,13 @@ Example (set matching): A set member “Online marketplace” (attribute only) i
 
 | Knob | Effect |
 | --- | --- |
-| Categories / attributes / sub-attributes | Merchant taxonomy tree; channel and store-property flags on categories |
+| Categories / attributes / sub-attributes | Merchant taxonomy tree (dimension → value → optional finer value) |
+| Store channel toggle (per category) | Marks the retail-chain dimension used by receipt channel → store pickers; one per merchant, switching moves it |
+| Store property toggle (per category) | Marks the dimension printed as the store label on Front Line slips/history; one per merchant |
 | Attribute sets | Reusable targets for earn conditions, OCR rules, and other store-scoped config |
 | Store master | Create outlets, address fields, active flag, per-category assignments |
-| Set members | Attribute-wide, sub-attribute-specific, or direct store pins |
+| Set members | Attribute-wide, sub-attribute-specific, or direct stores (one row may hold several stores, picked by name/code search) |
+| Excluded stores | Stores removed from the set regardless of matching members |
 
 | Page | Owning repo | BFF / RPC |
 | --- | --- | --- |
@@ -59,9 +69,9 @@ Example (set matching): A set member “Online marketplace” (attribute only) i
 | Stores master | loyalty-admin | `get_stores_by_merchant`, `bff_upsert_store_master`, `bff_delete_store_master`; assignments via `store_attribute_assignments` table |
 | Front line / events / rewards (store scope) | loyalty-admin | Store pickers and stock scoped by store master rows |
 
-1. On **Store attributes master**, define categories and nested attributes/sub-attributes; mark the channel category when receipt upload should use channel → store steps.
-2. On **Store attribute sets**, create sets and add members (broad attribute, specific sub-attribute, or pinned store).
-3. On **Stores master**, create or edit stores, set active status and location fields, then assign one classification per category.
+1. On **Store attributes master**, add one category per dimension the brand groups by, then its attributes (and sub-attributes if needed); toggle **Store channel** on the retail-chain category and, if used, **Store property** on the label category; Save (deletions ask for confirmation first).
+2. On **Store attribute sets**, create sets and add members (broad attribute, specific sub-attribute, or searched direct stores), then optionally list **Excluded stores**. Save is blocked when a store is both a direct store and excluded, or when only exclusions exist.
+3. On **Stores master**, create or edit stores (store code required), set active status and location fields, then assign one value per category—for the store-channel category, the chain the store belongs to.
 4. In **earn**, **receipt OCR**, **reward store stock**, or **event store allowlists**, reference attribute sets or store IDs rather than maintaining parallel store lists.
 
 ### Member journey
@@ -88,7 +98,7 @@ Example (set matching): A set member “Online marketplace” (attribute only) i
 | `store_sub_attributes` | Optional third level under an attribute; `is_deleted` |
 | `store_attribute_assignments` | Store ↔ category ↔ attribute (+ optional sub-attribute); one row per configured classification |
 | `store_attribute_sets` | Named set (`set_code`, `name`) per merchant |
-| `store_attribute_set_members` | Set membership: optional `attribute_id`, `sub_attribute_id`, or `store_id`; `is_deleted` |
+| `store_attribute_set_members` | Set membership: exactly one of `attribute_id`, `sub_attribute_id`, `store_id`; `exclude` (store rows only); `is_deleted` |
 | `partner_merchant` | Partner registry (`partner_code`, `partner_name`, `active_status`) for partner-scoped integrations |
 
 Unique business key: `(merchant_id, store_code)` on store master. Taxonomy upserts enforce code uniqueness per merchant at each level.
@@ -100,11 +110,12 @@ Unique business key: `(merchant_id, store_code)` on store master. Taxonomy upser
 | `get_store_attributes_hierarchy` | Admin: nested categories → attributes → sub-attributes for master and taxonomy pages |
 | `upsert_store_attributes_jsonb` / `delete_store_attributes_jsonb` | Admin: batch upsert or soft-delete taxonomy nodes |
 | `bff_upsert_store_master` / `bff_delete_store_master` | Admin: create/update store row; delete path may hard- or soft-delete depending on references |
-| `get_store_attribute_set_members_with_category` | Admin: load set header + members with category context (`new` / `edit`) |
-| `upsert_store_attribute_set_with_members` | Admin: upsert set metadata and replace member rows |
+| `get_store_attribute_set_members_with_category` | Admin: load set header + members with category context (`new` / `edit`); store members grouped into one included row and one excluded row (`store_assignments`, `exclude`) |
+| `upsert_store_attribute_set_with_members` | Admin: upsert set metadata and replace member rows (one store per element, optional `exclude`) |
 | `admin_delete_store_attribute_set` | Admin: remove a set |
-| `get_store_attribute_sets` | Core: UUID[] of set IDs a store matches via assignments + member rules |
-| `store_matches_attribute_set` | Predicate: store (id or code) matches one set |
+| `store_matches_any_attribute_set` | Core: the single membership matcher — store matches any of the given sets (includes, pins, exclusions) |
+| `get_store_attribute_sets` | Core: UUID[] of the merchant's sets a store matches (delegates to the matcher); used by mission evaluation and receipt approval rules |
+| `store_matches_attribute_set` | Predicate: store (id or code) matches one set (delegates to the matcher) |
 | `get_store_classifications` | Read classifications by store id or store code; optional category filter |
 | `resolve_store_uuid` | Map store code → store UUID for integrations |
 | `get_store_channels` | Member/admin: channel attributes (`is_store_channel` category) |
@@ -121,9 +132,9 @@ Legacy JSON upserts (`upsert_store_attributes`, `upsert_store_attribute_sets`, �
 
 **Store save (sync):** `bff_upsert_store_master` validates code uniqueness → upsert row → admin optionally replaces assignment rows on `store_attribute_assignments`.
 
-**Set save (sync):** Upsert set header → replace members (attribute, sub-attribute, and/or store pins) → downstream rules reference set id.
+**Set save (sync):** Upsert set header → replace members (attribute, sub-attribute, store pins, excluded stores) → downstream rules reference set id.
 
-**Set resolution (sync):** Load store assignments → join to set members (attribute-wide, sub-attribute-specific, store pin) → distinct set ids → consumed by earn factor eligibility (`get_eligible_earn_factors_core` store/set conditions), OCR set rules, and similar condition entities.
+**Set resolution (sync):** `store_matches_any_attribute_set` per set: any included member matches (assignment on attribute / sub-attribute, or store pin) and no excluded-store row for that store → consumed by earn eligibility (`evaluate_earn_conditions_core`), mission conditions (`fn_evaluate_mission_conditions` via `get_store_attribute_sets`), and receipt approval rules (Edge `receipt-approval-rules` via `get_store_attribute_sets`). OCR set rules key on channel attribute members only. `fn_get_futurepark_baht_per_point` reads `EARN_RATE_25/50` store pins directly and ignores excluded rows.
 
 **Receipt upload (sync):** Optional channel from `get_store_channels` → store from `bff_list_stores_for_receipt_upload` / `get_stores_by_channel` → purchase/receipt pipeline stores `store_id` UUID on ledger/upload rows.
 

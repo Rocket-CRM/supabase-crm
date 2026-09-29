@@ -31,7 +31,7 @@ The notification service tells members what happened in the loyalty program on t
 - **Wallet earn mapping** — Only `transaction_type = earn` and `component = base` maps to `currency.earned`. Bonus, adjustment, and reversal earns do not notify.
 - **Ticket unit coalesce (LINE wallet only)** — Multi-unit ticket earns emit N wallet chokepoint events; the wallet notification router sends one LINE message per award call (`unit_index === 1`, display amount from `unit_total` when present). Points without `unit_*` unchanged.
 - **Purchase timing** — `purchase.created` can notify (catalog default ON for LINE and Email). Syngenta-style pending orders do not use `completed` until the order actually completes (typically after line-item completion). `promo_applied` and other verbs do not map.
-- **Referral notifications** — Catalog includes `referral.completed`, `referral.friend_rewarded` (from `crm.events.referral` settled/claimed semantics) and `referral.shared` (Email default ON, LINE off; **catalog-only** until share-via-email UI exists — no router maps `action.referral_share`). Klaviyo uses different metric names (`referral.friend_claimed`, `referral.completed`) on the integration path — see `Outbound_Integrations.md` / reference MD Part 1; do not confuse with notification `(event_key, sub_event)` pairs.
+- **Referral notifications** — Catalog includes `referral.completed`, `referral.friend_rewarded` (from `crm.events.referral` settled/claimed semantics) and `referral.shared` (Email default ON, LINE off; **catalog-only** until share-via-email UI exists — no router maps `action.referral_share`). Klaviyo uses different metric names (`referral.friend_claimed`, `referral.completed`) on the integration path — see `Shopify.md` › Rules › Outbound delivery; do not confuse with notification `(event_key, sub_event)` pairs.
 - **Email test send** — Admins may send a draft to one address; rate limit five per merchant per ten minutes; does not create a normal notification log row.
 - **Resolver security** — `fn_resolve_notification_for_event` is `service_role` only (returns LINE channel access token). Never grant to `anon` / `authenticated`.
 
@@ -237,7 +237,7 @@ ORDER BY created_at DESC LIMIT 20;
 - **CRM_Event_Driven_Architecture.md** — Outbox → Inngest chokepoint routing.
 - **Inngest_Primer.md** — Router hosting and idempotency.
 - **Referral.md** — Referral chokepoint events and notification catalog coupling.
-- **Outbound_Integrations.md** — Klaviyo referral metric names (integration layer, not notification catalog keys).
+- **Shopify.md** (Outbound delivery) — Klaviyo referral metric names (integration layer, not notification catalog keys).
 - **Currency.md** / **Reward.md** — Wallet expiry and entitlement sources for reminders.
 - **Purchase_Transaction.md** — Purchase / purchase_item chokepoint events.
 - **Shopify.md** — Embedded admin routing to Customer notifications.

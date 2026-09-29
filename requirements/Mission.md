@@ -6,15 +6,15 @@ Owner surfaces: loyalty-admin, loyalty-user
 
 ## Concept
 
-A **mission** is a merchant campaign with a type, schedule, eligibility, progress rules, and one or more **outcomes** (points, tickets, rewards, earn factors, and related grant types via the central dispatcher).
+A **mission** is a campaign type that pushes a behaviour the brand wants — buy a product line, reach a spend target — within a time-boxed window. Like every campaign it is action → condition → outcome: the member's qualifying actions (purchases, point or ticket earns) build progress against the mission's conditions, and completion grants one or more **outcomes** (points, tickets, rewards, earn factors, and related grant types via the central dispatcher). Unlike a reward, which the member buys with points, a mission is earned by doing; nothing is spent.
 
-**Standard mission** — Several **conditions** run in parallel; every condition must reach its target before the mission completes (logical AND). Each condition accumulates progress independently.
+**Standard mission** — One or more **conditions**, each accumulating progress independently. By default every condition must reach its target (AND); if any condition is set to OR, reaching the target on any one condition completes the mission.
 
-**Milestone mission** — Conditions are ordered **levels** (1 → 2 → 3 …). Progress **waterfalls**: overflow from completing one level applies to the next incomplete level. Each level can have its own outcomes.
+**Milestone mission** — A staircase: conditions are ordered **levels** (1 → 2 → 3 …) and the member must finish a level before the next one counts. Progress **waterfalls**: overflow from completing one level applies to the next incomplete level. Each level can have its own outcomes, typically escalating.
 
-**Condition** — Defines what to measure (purchase spend, points earned, form completed, referral events, etc.), how to measure it (count vs sum), filters (products, stores, amounts, forms), and the target value. Milestone levels also carry display metadata (name, badge, order) on the condition row.
+**Condition** — What to measure (purchase spend, points earned, tickets earned, form completed, referral events), how (sum of amounts vs count of events), which activity counts (filters: product, SKU, category, brand, tier, store attribute set, min/max bill amount), and the target. Milestone levels also carry display metadata (name, badge, order).
 
-**Progress record** — Per member and mission: acceptance timestamp, period counters, unclaimed completion count, and **condition progress** — one JSON document whose keys are either condition ids (standard) or `level_N` (milestone).
+**Progress record** — Per member and mission: acceptance timestamp, period counters, unclaimed completion count, and **condition progress** — current vs target per condition (standard) or per level (milestone).
 
 **Activation** — **Auto** missions evaluate for all eligible members. **Manual** missions require the member (or staff) to **join** before events count.
 
@@ -29,16 +29,18 @@ A **mission** is a merchant campaign with a type, schedule, eligibility, progres
 
 The former **Single** and **Recurring** mission types are retired: standard + reset + progress limit covers both.
 
-**Exclusivity groups** — Optional text groups on progress or claim: only one mission in a group may advance or be claimed at a time; others surface a locked state.
+Per-bill loops control one bill; progress limits control the whole mission. **Claim limits** apply the same scopes and windows to claims.
 
-**Access state** — Schedule, preview window, signup window, persona filters, and claim deadline combine into whether a mission is visible, joinable, in progress, claimable, or locked — exposed to clients as stats and `button_action`.
+**Exclusivity groups** — Optional labels that make missions mutually exclusive for one member. **Progress group:** once the member has joined one mission in the group, the others cannot be joined — the member picks one path. **Claim group:** the member may progress several missions in the group, but once one is claimed the others lock — the member collects only one.
+
+**Access state** — Schedule, preview window (shown before start), signup window, persona filters, and claim deadline (may extend past end) combine into whether a mission is visible, joinable, in progress, claimable, or locked — exposed to clients as a single next action.
 
 Outcomes always flow through the same **central outcome dispatcher** used by check-in, referral, and AMP.
 
 ## Rules
 
 - If the mission is inactive, outside its start/end window, or fails `fn_mission_access_state` (preview, signup window, persona, claim end) → list/detail hide or disable join/claim with the returned reason; staff front line may still see missions but claim respects the same gates unless admin override RPCs apply.
-- **Standard:** mission completes when every condition’s `current` reaches `target` in `condition_progress`; partial progress on one condition does not complete the mission.
+- **Standard:** with all conditions `AND`, the mission completes when every condition’s `current` reaches `target` in `condition_progress`; partial progress on one condition does not complete it. If any condition row has `operator = OR`, the mission completes when any one condition reaches target (the operator is mission-wide in effect; mixed AND/OR is not evaluated per pair).
 - **Milestone:** increments apply to the lowest incomplete level; when `current >= target`, set completion timestamp and carry overflow to the next level; evaluation returns increments keyed by level (waterfall applied in `fn_update_mission_progress`).
 - **Manual activation:** until `accepted_at` is set, qualifying events do not update progress; join calls `accept_mission`.
 - **Manual claim:** completion increments `unclaimed_completions`; claim calls `bff_claim_mission` (optional `p_milestone_level`, quantity) → `fn_distribute_mission_completion` / outcome dispatch; auto claim runs dispatch inside the evaluation transaction when completion is detected.
@@ -54,7 +56,7 @@ Outcomes always flow through the same **central outcome dispatcher** used by che
 - **Progress limits:** scope `user` (per member) or `total` (campaign-wide), time unit day / week / month / year / all time; checked before every completion. Multiple rows stack; a tighter window may not exceed a wider one (`STACKED_LIMIT_EXCEEDS_WIDER`). Milestone: each completed level counts as one completion.
 - **Retired types:** `single` / `recurring` remain in the enum but saves return `MISSION_TYPE_RETIRED`; all rows were migrated to `standard` (Once-configured missions got a 1 per member, all time progress limit so behaviour did not change).
 - **Legacy fallback:** a non-milestone mission with loop off — only creatable outside admin (see Known gaps) — still completes at most once per member.
-- **Exclusivity:** if another mission in the same progress group already holds progress, new progress is blocked; claim exclusivity blocks claim until the group frees — UI may show `exclusivity_locked` on `button_action`.
+- **Exclusivity:** if the member has an accepted, active progress row on another mission in the same progress group → join/progress on this mission is blocked (`fn_check_mission_exclusivity`). If the member has claimed any completion of another mission in the same claim group → this mission is `exclusivity_locked` (`fn_mission_access_state`); the lock does not expire.
 - **Claim limit binding:** a mission may define multiple claim-cap rows. The engine picks one **binding** row (tightest remaining headroom; when headroom ties, per-member `user` scope wins over mission-wide scopes). Member detail and failed claims expose that row’s scope, cap, and time unit so the app can show the correct exhausted copy.
 - **Claim limit copy (member):** mission-wide scopes (`total`, `store`, `user_store`) use “campaign / total” exhausted wording; per-member `user` scope uses “your limit this period” wording. Partial batch claims that would exceed the binding cap return `claim_limit_exceeded` with the same binding fields.
 - **`button_action` priority (list/detail):** `claim_outcome` when unclaimed > 0 and manual claim; else `join_mission` when manual activation and not accepted; else `claimed` when fully done and claimed; else `view_progress` when a progress row exists; else `view_details`. Clients must also respect `can_accept`, `can_claim`, and exclusivity flags from access state (join/claim disabled when false).
@@ -85,13 +87,13 @@ Outcomes always flow through the same **central outcome dispatcher** used by che
 | Progress loops per bill + carry over progress | Completions one bill can trigger; remainder kept for next lap (shown only for standard + one sum condition) |
 | Progress limits | How many times a member / the campaign can complete (default 1 per member, all time) |
 | Claim limits | Caps on claims (`mission_limit_claim`) |
-| Progress / claim exclusivity group | Mutual exclusion within group |
+| Progress / claim exclusivity group | Member can join only one mission per progress group; can claim only one per claim group |
 | User perspective | Customer vs seller attribution on purchases |
-| Conditions | Types, targets, measurement, filters, milestone level metadata |
+| Conditions | Types, targets, sum vs count, filters, AND / OR, milestone level metadata |
 | Outcomes | Per level or mission-wide grants (full replace on save) |
 | Images, goal copy, T&C | Member-facing presentation |
 
-Mission settings page order: Basic info → Conditions → Outcomes → **Progress and claims** (activation, claim type, reset, progress loops per bill, milestone skip; progress and claim limits; exclusivity groups) → Schedule & status → Audience & eligibility → Rich descriptions.
+Mission settings page order: Basic info → Conditions → Outcomes → **Progress and claims** (activation, claim type, reset, progress loops per bill, milestone skip — saved but not evaluated, see Known gaps; progress and claim limits; exclusivity groups) → Schedule & status → Audience & eligibility → Rich descriptions.
 
 1. Open **Mission list**; create via **Mission settings** or edit an existing row.
 2. Set basic info and type (standard / milestone).
@@ -112,8 +114,8 @@ Entitlement: admin nav typically requires `campaign` + `campaign.mission` featur
 | Missions hub | loyalty-user | `bff_get_user_missions` |
 | Mission detail drawer | loyalty-user | `bff_get_mission_detail`, `accept_mission`, `bff_claim_mission` |
 
-1. Member opens **Missions**; app loads the mission list with progress summaries and `button_action` labels.
-2. Tap a card → **detail drawer** with conditions, milestone levels, outcomes, and completion history.
+1. Member opens **Missions**; app loads the mission list with progress summaries and `button_action` labels. Missions in their preview window appear before start but cannot be joined.
+2. Tap a card → **detail drawer** with conditions, a progress bar toward target (e.g. 77%), milestone levels as steps completed one at a time, outcomes, and completion history. A completed mission shows a full bar and completion count (e.g. 1/1).
 3. If manual activation and join allowed → **Join** calls `accept_mission`; errors show access messages from RPC.
 4. Progress updates after backend evaluation (not synchronous on the tap); refresh or realtime product choice reloads state.
 5. If manual claim and `can_claim` → **Claim** calls `bff_claim_mission` (milestone level resolved from lowest unclaimed level); shipping may be required for physical reward outcomes. Detail load includes binding claim-limit fields (`claim_limit_scope`, `claim_limit_max`, `claim_limit_time_unit`, `claimable_now`) from `fn_mission_claim_quota`.
@@ -212,6 +214,7 @@ Purchase / wallet / (other) chokepoint writers
 - **AMP mission drafts** — `fn_amp_analysis_create_mission_draft` inserts standard missions with loop off and no progress limit, so they rely on the legacy once-per-member fallback. Once that path adopts the admin default (loop on + 1 per member, all time), the fallback in `fn_update_mission_progress` can be removed.
 - **Milestone and progress limits** — one event that completes several levels records one completion per level without checking remaining limit headroom mid-burst.
 - **Weekly reset** — weekly reset frequency saves, but scheduled global reset jobs exist only for daily and monthly.
+- **Milestone skip** — the setting is saved and shown in Mission settings, but mission progress never evaluates it; it has no effect on which levels a member can reach.
 - **Purchase_Transaction.md** — Older passages describing 30s batch mission evaluation and DB triggers for auto missions are stale relative to chokepoint + Inngest path; treat this doc as authoritative for mission progress timing.
 
 ## Related

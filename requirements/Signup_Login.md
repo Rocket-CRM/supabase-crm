@@ -6,23 +6,25 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 
 ## Concept
 
-**Auth methods** — Merchant-wide list on `merchant_master.auth_methods`: `line`, `tel`, and optionally `shopify_email` (hybrid / headless paths that still use `bff-auth-complete`). The member app loads enabled methods via `bff_get_auth_config`.
+Signup is the **Join** stage of the member journey: the point where an anonymous buyer becomes a member the brand can identify and reach again. Every later stage (earn, burn, campaigns, analysis, personalised activation) depends on it. On LINE-first merchants the member arrives by tapping a rich-menu button in the brand's LINE Official Account, which opens the member web app inside LINE's in-app browser (LIFF). Signup proves identity, creates the account, then collects profile and consent.
 
-**Identity proof** — LINE OAuth (`auth-line` edge) exchanges a code for `line_user_id` only; phone flow uses `auth-send-otp` plus `fn_validate_otp`. Neither edge creates a user or mints a session by itself.
+**Auth method** — Merchant-wide choice of how members prove identity: LINE, phone + OTP, or both (plus Shopify email linkage for hybrid storefronts). LINE is the recommended default because it yields a LINE user id the brand can message without limit, which is what makes personalised activation possible. Phone alone relies on SMS (length-limited, little read). Email and social logins are not offered: email is rarely read, and Facebook login does not share contact details. Choosing auth methods is therefore a reachability decision as much as a security one.
 
-**Session hub** — `bff-auth-complete` finds or creates `user_accounts`, links missing auth methods, evaluates profile completeness, returns `next_step`, and issues the **member JWT** via shared `issueMemberSession` (same issuer as Shopify proxy/extension — see `Authentication.md`).
+**Identity proof** — A verified LINE login or a verified phone OTP. A proof on its own never creates a member or a session.
 
-**`next_step`** — API-level screen router from `bff-auth-complete`: verification steps (`verify_line`, `verify_tel`, `verify_shopify`) vs profile steps (`complete_profile_new`, `complete_profile_existing`) vs `complete` (home).
+**Auth hub** — The single server step that matches proofs to an existing member or creates a new one, links a second method to an existing member, issues the member session, and returns the next screen.
 
-**Profile template** — `bff_get_user_profile_template` builds default fields, custom form fields (`USER_PROFILE` template), persona picker metadata, PDPA shells, and communication topics; persona-scoped fields filter server-side per member JWT.
+**Member account** — Created by the hub as soon as all required proofs are present (LINE + OTP when both methods are on), *before* the profile form, holding only the verified identifiers. The form later fills it in. This is deliberate: members who abandon the form are still reachable by LINE id and phone, so the brand can re-market ("finish your profile for a coupon") instead of losing them.
 
-**Profile completion flag** — `user_accounts.is_signup_form_complete` means the member has submitted the signup profile at least once; dynamic required-field checks can still force `complete_profile_existing` when merchants add new required fields.
+**Next step** — The hub's routing answer: verify a missing proof, complete the profile (new or existing member), or go home.
 
-**`form_step`** — Client-only section index within the profile form (`persona` → `default_field` → `custom_field` → `pdpa`); orthogonal to `next_step`.
+**Profile form** — The signup form as sequential sections: persona (when chosen before the form), default fields, custom fields, consent. The same form powers later profile edit. Field definitions belong to Forms; consent items to Consent.
 
-**Validated signup codes** — Optional `external_code` rows on `user_field_config` with pools in `signup_codes` / claims in `signup_code_claims`; validated at field entry (`bff_validate_signup_code`) and consumed on save (`fn_consume_signup_code`).
+**Profile completion** — Set on the first successful profile submit. Required fields or consents the merchant adds later still route an existing member through a missing-only form at next sign-in.
 
-**Shopify storefront identity** — Parallel path: HMAC app proxy or customer-account session token → find-or-create member → `issueMemberSession`. Theme Liquid customer id is never trusted for minting.
+**Validated signup code** — Optional field for gated programs (B2B accounts, dealers, employees): the brand pre-loads codes, the member must enter a valid one to complete signup, and a valid code can pre-fill other fields from the brand's imported record. It turns open signup into closed signup and keeps persona data clean.
+
+**Shopify storefront identity** — Parallel path in which the storefront's signed customer context replaces LINE/OTP (see Shopify subsections).
 
 ## Rules
 
@@ -30,6 +32,9 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 - `bff-auth-complete` is the only hub that mints member sessions for LINE / OTP / `shopify_email` completion flows on loyalty-user.
 - Phone numbers are normalized to E.164 (`+66…`) in `auth-send-otp` and `bff-auth-complete` before lookup or insert.
 - If LINE and phone in one request resolve to **different** existing users → `409` with credentials conflict; no merge.
+- A member is matched by both the phone and the LINE account bound at signup, so switching to a new LINE account with the same phone locks the member out until staff unlink the old LINE account (`Frontline_Admin_Actions.md` › Concept › LINE unlink); the next phone login then binds the new LINE account.
+- **Account creation timing:** No member row exists until every enabled method is proven. With LINE + phone enabled, an unknown LINE identity gets `verify_tel` (no row); the row is created on the call that carries both LINE and a valid OTP, with `is_signup_form_complete = false`, before any profile field is collected.
+- **OTP is a one-time signup cost:** With LINE + phone enabled, a returning member matched by LINE who already has a phone on file is signed in with LINE alone — no OTP. OTP is asked again only if the matched member has no phone.
 - OTP: 6 digits, 10-minute expiry, max 3 validation attempts per `session_id` (`fn_validate_otp` / `otp_requests`). OTP is never returned in API responses.
 - **`verify_*` steps:** When a required auth method is still missing, hub returns `next_step` of `verify_line`, `verify_tel`, or `verify_shopify`, **with** `access_token` + `refresh_token`, `profile_check_skipped: true`, and `missing_data: null` — client stores the session and collects the missing proof, then calls hub again (optionally with `access_token` to link).
 - **`next_step` → profile payload:**
@@ -47,7 +52,7 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 - **Signup codes:** Pool policy (single-use vs shareable cap), optional store binding, and persona scope enforced on validate/consume; see registry `Signup Code Validation` and `CHANGELOG` store-binding notes.
 - **Shopify storefront:** Theme `customer.id` / email never mint sessions — only HMAC-verified app proxy fields or extension session tokens.
 - **Shopify storefront:** At most **one** app-proxy auth call per rewards **panel open**; launcher and product points block stay identity-free.
-- **Shopify storefront:** `customers/create` may link CRM early; member home in the widget still requires successful proxy (or extension) auth on panel open.
+- **Shopify storefront:** Shopify accounts link to CRM on the first proxy (or extension) auth at panel open; the `customers/create` early-link path is not live (`Shopify.md` › Known gaps).
 - **Shopify storefront:** Logout or proxy reporting no/different Shopify customer must clear stale Rocket session.
 
 ### Shopify
@@ -69,9 +74,9 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 | Setting | Effect on member signup/login |
 | --- | --- |
 | `auth_methods` | Which proof channels appear and which `verify_*` steps hub enforces |
-| `attain_persona` | When persona is chosen relative to profile (`pre-form` vs post-form — persona metadata in template) |
-| Default field cards | Visibility, required, persona scope, id_card mode / uniqueness |
-| Validated code fields | External code pools, policies, store binding, manage codes upload |
+| `attain_persona` | `on_form` → persona picker is the first profile-form step and the form reloads for the chosen persona; `before_form` (planned, not built) and none → no picker (see Known gaps) |
+| Default field cards | Active, required, visible to member / admin, editable by member, persona scope, id_card mode / uniqueness (knob detail in `Forms.md`) |
+| Validated code fields | Gated signup: code pools, single-use vs shared cap, store binding, persona scope, pre-fill mapping from the imported record |
 | Custom field groups | `USER_PROFILE` form sections and conditional fields |
 
 1. **Global settings** → set allowed authentication methods (standalone merchants; hidden on Shopify embedded).
@@ -88,16 +93,16 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 | Profile completion | loyalty-user | `bff_get_user_profile_template`, `bff_save_user_profile` |
 | Edit profile (later) | loyalty-user | Same template RPC with `p_mode = 'edit'` |
 
-1. Load auth config → render LINE button and/or phone + OTP per merchant methods.
-2. Complete LINE OAuth (`auth-line`) and/or OTP send + verify inputs.
-3. Call `bff-auth-complete` with merchant code and proof payload (and `access_token` when linking a second method).
-4. Branch on `next_step`:
-   - `verify_line` / `verify_tel` / `verify_shopify` → collect missing proof (session already issued when linking).
-   - `complete_profile_*` → bind `missing_data`, walk `form_step` sections, validate required fields per section.
-   - `complete` → navigate to member home (`get_user_summary` merged into `user_account` on hub response).
-5. On final profile section → `bff_save_user_profile` → home.
-6. Optional: enter validated external code during profile → `bff_validate_signup_code` before save; consumption on save.
-7. Optional: after `complete`, apply referral member code per `Referral.md` (signup referral path).
+1. **Entry** — Member taps the brand's LINE rich-menu button (or a shared signup link, optionally carrying a persona slug); the app loads the merchant's enabled methods and shows the LINE button and/or phone field.
+2. **Sign in with LINE** — Redirect to LINE login and back. A returning member with a complete profile lands on **home**; one with a newly required field or new required consent version sees a short form with only those items first.
+3. **Phone + OTP (new member)** — If no member matches, the member enters a phone number, then a 6-digit OTP. States: invalid/expired code, attempts exhausted. On success the account is created (see Rules) and the profile form opens.
+4. **Profile form** — Sections in order, each blocking Next until its required items are filled:
+   - **Persona** — picker, only when persona is chosen before the form; skipped when the link carried a persona.
+   - **Default fields** — validated-code field first; a valid code shows a success state and pre-fills mapped fields (marked as auto-filled); an unknown, inactive, used-up (pool cap reached), or wrong-persona code shows an error and blocks the step.
+   - **Custom fields** — on their own step; admin group headings are not shown.
+   - **Consent** — see `Consent.md`; Accept all available.
+5. **Submit** → profile saved → **home**.
+6. Optional: after `complete`, apply referral member code per `Referral.md` (signup referral path).
 
 | Error / state | Typical cause |
 | --- | --- |
@@ -115,7 +120,7 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 | Customer account extensions | Session token → `shopify-extension-api` | Hub / balance / wishlist (no proxy from extension sandbox) |
 | Product page block | None | Earn estimate from widget settings cache only |
 
-**Outside the loyalty-user signup screens:** Shopper creates a Shopify account on theme/checkout → `customers/create` webhook links CRM → opens rewards panel → signed proxy → member home without Join.
+**Outside the loyalty-user signup screens:** Shopper creates a Shopify account on theme/checkout → opens rewards panel → signed proxy find-or-creates the member → member home without Join. (The `customers/create` webhook is subscribed but not yet routed, so no link happens before the first panel open.)
 
 | Moment | Proxy call? | Behaviour |
 | --- | --- | --- |
@@ -125,7 +130,7 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (storefront widge
 | Proxy: no customer while cached | — | Clear session → Join |
 | Proxy: different customer id | — | Clear and re-auth |
 
-Landing page guest/member CTAs and hub redeem flows are documented under `Display_Settings.md` and reference MD Part 2; identity gateways summarized in **System › Shopify**.
+Landing page guest/member CTAs and hub redeem flows are documented under `Display_Settings.md` and `Shopify.md` › Journeys; identity gateways summarized in **System › Shopify**.
 
 ## System
 
@@ -167,7 +172,7 @@ User creation and profile column updates on the member path go through `chokepoi
 | `shopify_find_or_create_member` | Shopify customer → member row + acquisition |
 | `shopify-proxy` | App proxy HMAC + session mint |
 | `shopify-extension-api` | Session-token routes for account UI |
-| `shopify_webhook_create_customer` | Early link on Shopify account creation |
+| `shopify_webhook_create_customer` | Early link on Shopify account creation (exists; not routed by `shopify-webhooks`) |
 
 Admin: `bff_admin_get_user_profile_config`, `bff_admin_upsert_user_profile_config`, signup code BFFs listed in registry.
 
@@ -183,7 +188,7 @@ Admin: `bff_admin_get_user_profile_config`, `bff_admin_upsert_user_profile_confi
 
 **Profile re-entry:** Merchant adds required field → hub returns `complete_profile_existing` with missing-only `missing_data` when `is_signup_form_complete` is true.
 
-**Shopify widget panel open:** `shopify-proxy` verifies proxy signature → `shopify_find_or_create_member` → `issueMemberSession` → widget APIs with member JWT. Webhook may have created row earlier; proxy still required for session.
+**Shopify widget panel open:** `shopify-proxy` verifies proxy signature → `shopify_find_or_create_member` → `issueMemberSession` → widget APIs with member JWT.
 
 **Template cache:** Redis key `merchant:{id}:user_profile_template:all_languages`; persona filtering applied after cache read using member JWT context.
 
@@ -197,6 +202,8 @@ Admin: `bff_admin_get_user_profile_config`, `bff_admin_upsert_user_profile_confi
 - `auth-send-otp` deploy metadata may show `verify_jwt: true` while member flows treat it as anon-key callable — align deploy config with product intent.
 - Per-phone OTP **request** rate limiting not documented as shipped (see `docs/CRITICAL_BUG_FIXES.md`).
 - `verify_shopify` / `shopify_email` auth method is for hybrid loyalty-user flows, not the Shopify theme widget path (widget uses proxy identity only).
+- Global settings offers an `email` auth method, but neither loyalty-user nor `bff-auth-complete` implements it (member app types auth methods as `line` | `tel`); selecting it has no member-facing effect.
+- **Attain method in the member app** — Only `on_form` shows a persona picker, as the first profile-form step; picking a persona re-calls the hub with the selection and reloads the form for that persona, so persona-scoped fields *do* apply at signup. `before_form` is not built (picker hidden, same as none); a persona slug in the link still pre-selects regardless of the setting.
 
 ### Shopify
 

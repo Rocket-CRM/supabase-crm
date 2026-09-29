@@ -39,7 +39,7 @@ Loyalty behaviour is split into a **fast path** (commit the business fact in Pos
 
 ### Inngest routers and engines
 
-- `inngest-event-router-serve` registers one Inngest function per router (currency, tier, mission, outcome, notification-*, AMP, Shopify redemption issue). Inngest invokes matching functions for each `crm/<domain>.event` (fan-out: one purchase event may hit currency, tier, mission, notification, AMP routers in parallel).
+- `inngest-event-router-serve` registers one Inngest function per router (currency, tier, mission, outcome, notification-*, AMP). Inngest invokes matching functions for each `crm/<domain>.event` (fan-out: one purchase event may hit currency, tier, mission, notification, AMP routers in parallel).
 - Router idempotency replaces legacy Kafka consumer Redis dedup (24h window). Tier evaluation may use per-user concurrency keys where ordering matters.
 - **Not** routed here: expiry reminders (scheduled scan, Render cron `expiry-reminder-batch`); AMP triggers that still depend on CDC-only sources (`form_submissions`, `amp_workflow_log` audience adds) until chokepoint emits exist at those write sites.
 
@@ -49,12 +49,12 @@ Loyalty behaviour is split into a **fast path** (commit the business fact in Pos
 - Cursor keys are per worker (`integration-webhook`, `integration-klaviyo`, etc.); advancing the cursor is independent of `published_at` on the core Inngest path.
 - Rows with no mapped public `event_key` are skipped but the cursor still advances past them.
 - Merchant must have active credentials and subscribed keys; missing email or required identity → skip with logged reason, not silent success.
-- Shopify install does not change the bus contract; wallet/referral emits from Judge.me earn or Gorgias goodwill still flow through the same outbox if integrations are connected (`requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md` Part 3.5 — detail in `Outbound_Integrations.md`).
+- Shopify install does not change the bus contract; wallet/referral emits from Judge.me earn or Gorgias goodwill still flow through the same outbox if integrations are connected (`Shopify.md` › System › Flows — shared-engine linkage).
 
 ### Housekeeping
 
 - pg_cron `chokepoint_outbox_cleanup` (daily): delete rows with `published_at` older than 7 days (core path retention; integration cursors are logical positions, not row deletes).
-- `integration_delivery_log` retention: separate pg_cron cleanup (30 days) — see `Outbound_Integrations.md`.
+- `integration_delivery_log` retention: separate pg_cron cleanup (30 days) — see `Shopify.md` › Rules › Outbound delivery.
 
 ### Example (non-obvious)
 
@@ -133,8 +133,7 @@ Caller (BFF / api_* / edge / import)
        ├─ mission-* → inngest-mission-serve
        ├─ outcome-* → outcome attribution
        ├─ notification-* → fn_resolve_notification_for_event → LINE / email
-       ├─ amp-* → amp-dispatch-realtime-event
-       └─ shopify-redemption-issue (Shopify fulfillment edge case)
+       └─ amp-* → amp-dispatch-realtime-event
 ```
 
 **End-to-end (partners — same outbox, different readers)**
@@ -173,7 +172,7 @@ Env reference (Render): `OUTBOX_PUBLISHER_ENABLED`, `SUPABASE_DB_DIRECT_URL`, `I
 
 - Chokepoint migration convention — `requirements/architecture/event-chokepoints.md`
 - Where code runs — `requirements/architecture/System_Map.md`
-- Partner delivery contract — `requirements/Outbound_Integrations.md`, `requirements/Third_Party_Integrations.md`
+- Partner integrations + delivery contract, Shopify engine linkage — `requirements/Shopify.md`
 - Notification mapping from topics — `requirements/Notification_Service.md` § System
 - Purchase/wallet earn detail — `requirements/Purchase_Transaction.md`, `requirements/Currency.md`
 - Central outcome fan-out — `requirements/Central_Outcome_Dispatcher.md`

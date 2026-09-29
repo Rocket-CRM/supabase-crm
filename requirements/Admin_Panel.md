@@ -1,6 +1,6 @@
 # Admin Panel — Roles, Permissions & UI Configuration
 
-**Last Updated:** 2026-05-06
+**Last Updated:** 2026-09-26
 **Domain:** Admin Panel
 **Covers:** `admin_roles`, `admin_role_permissions`, `admin_users`, `admin_menu_config`, `admin_invitations`, `admin_teams`
 
@@ -86,7 +86,7 @@ Behaviour:
 | Field | Type | Behaviour |
 |---|---|---|
 | `default_path` | text \| null | After login, FE redirects here instead of home. Null = normal home. |
-| `hide_sidebar` | boolean | `true` = sidebar not rendered; content expands to full width. |
+| `hide_sidebar` | boolean | `true` = no menu; standalone desktop keeps a logo + account rail only (Business Rule 5). |
 | `hidden_menu_categories` | text[] | Categories to exclude from sidebar. Values: `loyalty`, `campaigns`, `earning_config`, `operations`, `functional`. `settings` is never filterable by category. |
 | `hidden_menu_items` | text[] | Specific `admin_menu_config.id` values to exclude regardless of category. |
 | `store_scoped` | boolean | Custom-role default `true`. `false` = All stores (Team label + store-gated RPCs unrestricted). Omitted is treated as `true`. `frontline_sales` is always scoped. |
@@ -261,7 +261,7 @@ Columns: `resource_code`, `display_name`, `category`.
 
 Includes:
 - Existing loyalty, operations, settings, functional, admin, analytics, and event resources
-- `frontline` category resources: `front_line`, `frontline_upload_receipt`, `frontline_redemption_reward`, `frontline_burn_points_discount`, `frontline_adjust_points`, `frontline_claim_mission`, `frontline_asset_group`
+- `frontline` category resources: `front_line`, `frontline_upload_receipt`, `frontline_redemption_reward` (also gates Push Reward), `frontline_burn_points_discount`, `frontline_adjust_points`, `frontline_claim_mission`, `frontline_asset_group`, `frontline_store_credit`, `frontline_checkin`, `frontline_edit_member_profile`
 
 ---
 
@@ -274,12 +274,14 @@ Global system role:
 - `is_system_role`: `true`
 - `config.default_path`: `/front-line`
 - `config.hide_sidebar`: `true`
+- `config.hidden_menu_categories`: `loyalty`, `campaigns`, `earning_config`, `operations`, `functional`; `hidden_menu_items`: settings, role, team, translation, display, global-setting
 
 Permissions:
-- `front_line`: `read`
-- Front Line tab resources: `read`, `create`, `update`
+- `front_line`: `read`, `create`, `update`
+- Front Line tab resources (upload receipt, redemption reward, burn for discount, adjust points, claim mission, asset group, store credit, check-in): `read`, `create`, `update`
+- `frontline_edit_member_profile`: `read` only — Edit Profile opens read-only
 
-This role is intended for staff who should only enter the Front Line page. FE route guards must enforce tab visibility using the tab-level permissions.
+Front Line is not a separate app: it is a page of the standalone admin that this role lands on with no menu, so counter staff see only the counter workflow. Staff pick a service point (store) first; store scoping limits the choices. FE enforces tab visibility from tab-level permissions, and merchants can additionally hide unused tabs. Page behaviour: Frontline_Admin_Actions.md.
 
 ---
 
@@ -324,7 +326,8 @@ If `permissions` key is present, all existing permissions for the role are delet
 2. `settings` category is never hidden by `hidden_menu_categories` — it is admin infrastructure. Individual settings items can still be hidden via `hidden_menu_items`.
 3. `default_path` redirect fires once per login session. FE must guard against repeated redirects (sessionStorage flag or auth store flag).
 4. Floating menu appears only when `floating_menu` array is non-empty. It overlays at the bottom regardless of sidebar state. When present and sidebar is visible, FE must add bottom padding to prevent content being obscured.
-5. `hide_sidebar = true` removes the sidebar entirely — content expands to full width. Used for frontline roles that only need the floating menu.
+5. `hide_sidebar = true` removes the menu. In the standalone admin, desktop keeps a slim rail with only the logo and account menu; content takes the rest. Used for frontline roles that only need the floating menu.
+6. Standalone admin navigation (loyalty-admin, not the embedded Shopify view) has no top bar. The sidebar has two modes, remembered per browser: expanded (icons + labels, a parent's submenu opens inline) and collapsed (icon rail, submenus in a hover popup). The module switcher sits under the logo. Merchant switching, language, platform admin and log out live in the account menu at the bottom of the sidebar. Settings opens a settings sub-panel beside the rail instead of page tabs. Page search is ⌘K only.
 
 ---
 

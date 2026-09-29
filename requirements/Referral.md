@@ -6,7 +6,9 @@ Owner surfaces: loyalty-admin, loyalty-user, Shopify storefront widget, Open API
 
 ## Concept
 
-Rocket runs a single referral program per merchant. Each conversion type can be enabled independently; both share program-level limits and notification hooks but bind relationships differently.
+Referral uses the existing member base to spread a valuable behaviour to their friends: a member invites a friend, and when the friend completes the target action — **sign up** or **make a first purchase** — configured outcomes reward the parties (formerly "Invite Friend"). It follows the same action → condition → outcome shape as campaigns, but it is an always-on program with no campaign window, so it is not a campaign type and has no schedule.
+
+Rocket runs a single referral program per merchant. The two conversion types can be enabled independently; both share program-level limits and notification hooks but bind relationships differently.
 
 **Referrer / friend** — An existing member advocates; the friend receives the offer. On signup, the friend must become a loyalty member. On purchase, the friend is a commerce buyer and need not join loyalty.
 
@@ -153,7 +155,7 @@ There is no separate “program master switch” section on either surface; prog
 
 **Alternate claim** — `referral-claim` edge function for hosted / marketplace-style claim; Shopify storefront should prefer HMAC app proxy.
 
-**Shopper-visible referral content** — Loyalty hub (`fn_compose_shopify_hub` referral tiles), landing `shopify_landing_referrals` section, widget invite entry; Klaviyo profile **Rocket Referral URL** when integration connected (`Outbound_Integrations.md`).
+**Shopper-visible referral content** — Loyalty hub (`fn_compose_shopify_hub` referral tiles), landing `shopify_landing_referrals` section, widget invite entry; Klaviyo profile **Rocket Referral URL** when integration connected (`Shopify.md` › Rules › Outbound delivery).
 
 ## System
 
@@ -219,7 +221,6 @@ loyalty-admin: `referral-settings/*`, `referral-outcome-cards.tsx`, `src/lib/rew
 ### Known gaps
 
 - `requirements/REGISTRY_SUPABASE.md` Referral section lists only a subset of live tables/functions (missing `referral_program`, `referral_claim`, `referral_code`, attribution RPCs) — regenerate registry when convenient.
-- Shopify reference MD table name `campaign_reward_relation` does not exist; slots persist via `referral_outcomes` / `friend_offer` attach path above.
 - Retired model: per-user `referral_codes` tables, `merchant_master.referral_active`, mission types `referral_signup` / `referral_purchase` for inviter payouts — missions do not drive referral rewards in the current model.
 
 ## Related
@@ -230,4 +231,4 @@ loyalty-admin: `referral-settings/*`, `referral-outcome-cards.tsx`, `src/lib/rew
 - **Shopify.md** — Embed auth, proxy shell, feature routing to this doc.
 - **Reward.md** — Campaign reward slot layer (`bff_attach_campaign_reward`).
 - **Central_Outcome_Dispatcher.md** — Outcome grants.
-- **requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md** — Part 1 authoritative Shopify narrative (on-site touchpoints in Part 2 → Display_Settings.md).
+- **Shopify.md** — Purchase referral claim/mint/settle on Shopify and its chokepoint/outbox linkage.

@@ -8,6 +8,15 @@ Owner surfaces: loyalty-admin, loyalty-user, Open API partners, marketplace inge
 
 A **purchase** is a merchant-scoped transaction that records who bought (or who sold, in B2B flows), where it happened, how much was paid, and whether loyalty should treat it as final. Purchases are **append-only at the business level**: corrections and refunds add new rows or events rather than rewriting history.
 
+Every purchase-based earn channel ends in the same purchase record, so earn rules, tiers, and missions work identically however the member bought. Channels differ only in how the purchase arrives and how it is tied to a member:
+
+| | Third-party (someone else sells) | First-party (brand's own) |
+| --- | --- | --- |
+| **Online** | Marketplace order claimed by the member entering its order number | Brand.com order pushed in (Shopify natively) and matched by phone/email |
+| **Offline** | Receipt uploaded by the member and approved (pack-code scanning awards points without a purchase — `Earn_from_Code.md`) | POS order integrated and matched to a member, or frontline staff recording it |
+
+**Member key** — A purchase can earn only if it identifies a member — usually phone number, else email or external id. An order that says only what was bought and where cannot be credited; any integration (POS push, nightly file import, partner API) must carry a key that matches a member, which is why stores ask buyers to sign up and give their phone number at the till. Frontline staff can instead either adjust points directly (no purchase row, no earn rules) or record the purchase on the member's behalf so earn rules compute the points.
+
 **Header** — One row per transaction: amounts, status, payment state, buyer/seller, store context, processing flags, and external references.
 
 **Line item** — SKU-level rows under a header: quantity, pricing, optional partial pickup progress, and the same completion metadata pattern as the header when lines finish individually.
@@ -82,7 +91,7 @@ Any transition to `status = completed` should set `completed_at`, `completed_by_
 
 ### Referral on order settlement (purchase-adjacent)
 
-- After a qualifying commerce order exists as a purchase (Shopify webhook / marketplace claim path), **purchase referral** attribution runs via `fn_attribute_referral` (`kind = purchase`) and, when matched, `fn_settle_referral` → referrer outcomes. Friend offer at claim time is separate from referrer settlement. See `Referral.md` and reference MD Part 1 § Purchase referral (steps 6–8). Reconciliation: `fn_reconcile_missed_referral_purchases`.
+- After a qualifying commerce order exists as a purchase (Shopify webhook / marketplace claim path), **purchase referral** attribution runs via `fn_attribute_referral` (`kind = purchase`) and, when matched, `fn_settle_referral` → referrer outcomes. Friend offer at claim time is separate from referrer settlement. See `Referral.md` and `Shopify.md` › System › Flows (purchase referral). Reconciliation: `fn_reconcile_missed_referral_purchases`.
 
 **Example (debit pattern):** A 1,500 THB credit completes and earns 15 points. A full refund inserts a debit row for 1,500 THB and reverses 15 points from wallet history tied to the original purchase id.
 
@@ -192,7 +201,7 @@ Indexes support merchant/date reporting, transaction number lookup, and user+sta
 
 ### External services
 
-- Open API edge routes call `api_*` purchase RPCs with merchant API keys (`Open_API.md`).
+- Open API edge routes call `api_*` purchase RPCs with merchant API keys (`Open_API.md`). This is also the POS path: there is no built-in POS connector — a POS (or per-merchant middleware reading its end-of-day export) posts purchases with a member key (`tel`, `email`, `external_user_id`).
 - Marketplace webhooks + `inngest-marketplace-serve` populate `order_ledger_mkp` before claim (`Marketplace.md`).
 - Currency workers (`inngest-currency-serve`, etc.) consume `crm.events.purchase*` per `Currency.md`.
 

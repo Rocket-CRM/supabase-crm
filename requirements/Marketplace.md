@@ -6,11 +6,17 @@ Owner surfaces: loyalty-admin (Marketplace Settings, ops), loyalty-user (Earn �
 
 ## Concept
 
-Merchants connect Shopee, Lazada, or TikTok Shop so loyalty can see orders without manual receipt upload. The platform pushes lightweight status events; the CRM enriches each order with platform API detail, stores a normalized header and line items, and waits for a **claim** before points or tickets flow.
+Marketplaces are the online third-party channel: the brand knows what it sold but not to whom, because the buyer relationship belongs to the platform. Claiming points is the lure that converts an anonymous marketplace buyer into a registered member — the member signs up, enters the order number, and the brand gains both the purchase history and a direct relationship. In the channel strategy, marketplaces usually bring the first order (acquisition); earn rates and rewards then steer repeat orders to the brand's own higher-margin channels.
+
+Mechanically, merchants connect Shopee, Lazada, or TikTok Shop so the CRM learns every order before anyone claims it. The platform pushes lightweight status events; the CRM enriches each order with platform API detail and stores it as an unowned order (order number, buyer username, amounts, lines) — at that point the system cannot tie it to a member. A **claim** makes that link; only then do points or tickets flow. Claiming is deliberately member-initiated rather than auto-awarded: points go only to buyers who care enough to claim, instead of being given away to buyers who never notice them.
 
 **Order ledger row** — One marketplace order per merchant: buyer hints, amounts, platform-native status, normalized status, and a **claim sync flag** (false until a purchase row exists).
 
 **Claim** — Promotes one ledger row into the purchase ledger (+ line items), sets the sync flag, optionally runs earn, and may attach the buyer’s platform id to the member profile. Shopee/Lazada/TikTok claims are **member-initiated** (or admin-assisted). Shopify can auto-claim when the buyer matches (see hub doc).
+
+**Buyer link** — The platform buyer id from a member's first successful claim, stamped on the member profile per platform. Later orders from the same buyer are recognisable without an order number, so they can be offered to the member as one-tap claims — backend lookup live, member UI (planned).
+
+**Claim threshold** — Per platform, the earliest order status at which a claim succeeds. Earlier (e.g. shipped/delivered) gives members points sooner, and a refunded order's points can still be reversed by cancelling its purchase; later (completed — accepted or past the refund window) blocks the buy → redeem points → return abuse, where no balance is left to reverse. The recommended default is delivered: abusers are few and can be found and frozen.
 
 **Shop credential** — OAuth token row keyed by platform `service_name` and `external_id` equal to the webhook shop/seller id. Order ingest ignores rows whose `scope` includes CS (marketplace IM apps).
 
@@ -22,7 +28,9 @@ Merchants connect Shopee, Lazada, or TikTok Shop so loyalty can see orders witho
 
 ## Rules
 
-- **No earn on webhook alone** — Wallet credit runs only after a successful claim (or Shopify auto-claim path).
+- **No earn on webhook alone** — Wallet credit runs only after a successful claim (or Shopify auto-claim path). Shopee / Lazada / TikTok have no merchant switch for auto-award; auto-claim exists only on Shopify.
+- **Buyer link** — A successful claim whose order carries a platform buyer id merges `{platform: buyer_id}` into the member's `marketplace_external_ids`. `get_user_claimable_orders` returns that member's unclaimed orders at or past the threshold whose buyer id matches; no member surface calls it yet.
+- **Post-claim refunds** — A marketplace cancel/return after claim does not reverse points automatically; ops cancel the purchase (see `Purchase_Transaction.md` › Refunds and admin cancel).
 - **Credential routing** — `merchant_credentials.external_id` must equal the webhook shop identifier: Shopee/TikTok `shop_id`; Lazada numeric `seller_id` (account email lives in `credentials`, not `external_id`). `get_shop_credentials` resolves `shop_id` as `COALESCE(credentials.shop_id, external_id)` and requires `service_name = platform`, `is_active`, and `scope IS NULL`.
 - **Webhook status is immediate** — `update_marketplace_order_status` runs on every accepted push for an existing row. Claim eligibility does not wait for Inngest detail fetch.
 - **UNPAID noise** — Shopee and TikTok webhooks drop UNPAID-equivalent events at the edge (Hookdeck-style filter). Lazada verifies push HMAC before accept.
@@ -65,22 +73,24 @@ Shared ledger and `claim_marketplace_order` / `fn_claim_marketplace_order_servic
 | Page | Owning repo | BFF / RPC / Edge |
 | --- | --- | --- |
 | Marketplace Settings | loyalty-admin | `get_merchant_marketplace_channels`, OAuth edges, `admin_delete_marketplace_channel` |
-| Marketplace Settings → Order Claims | loyalty-admin | `bff_get_marketplace_order`, `claim_marketplace_order` (admin + `p_user_id`) |
+| Marketplace Settings → Order Claims | loyalty-admin | `bff_get_marketplace_order` (search only; admin claim via `claim_marketplace_order` + `p_user_id` is API-only) |
 | Merchant global settings | loyalty-admin | `bff_get_general_config` (includes `marketplace_claim_from_status` when configured) |
 | Integrations catalog | loyalty-admin | Links into Marketplace Settings OAuth |
 
 | Setting | Effect on behaviour |
 | --- | --- |
 | Connect Shopee / Lazada / TikTok | Creates `merchant_credentials` with correct `external_id`; TikTok may require shop picker after OAuth |
-| `marketplace_claim_from_status` (per platform) | Minimum platform `order_status` before claim succeeds |
+| Order status to claim points from (Add channel, per platform) | Claim threshold — minimum platform `order_status` before claim succeeds; stored in `marketplace_claim_from_status` |
 | Delete channel | `admin_delete_marketplace_channel` deactivates connection |
-| Order Claims search | Ops/support lookup of ledger + purchase sync state |
+| Order Claims search | Support lookup: order status, amount, buyer, lines, claimed badge and points earned |
 | Backfill window / `dry_run` | Historical missing orders into `stg_marketplace_backfill` then promote |
 
-1. Open **Marketplace Settings** → **Marketplace Connections** and add a channel (OAuth redirect via `marketplace-{platform}-get-auth-url` → `marketplace-{platform}-exchange-token`; Lazada may use pending multi-shop flow in `marketplace_oauth_pending`).
+Marketplace is setup-only: once shops are connected there is no per-order admin work, because members claim self-service.
+
+1. Open **Marketplace Settings** → **Marketplace Connections** and add a channel: pick platform, store name, and the order status to claim points from, then log in on the marketplace and return (OAuth redirect via `marketplace-{platform}-get-auth-url` → `marketplace-{platform}-exchange-token`; Lazada may use pending multi-shop flow in `marketplace_oauth_pending`).
 2. Confirm platform webhooks target `webhook-marketplace-{shopee|lazada|tiktok}` (Hookdeck or direct); verify `marketplace_connect_events` and custom webhook logs show success.
-3. Set claim thresholds in merchant config if defaults are too early/late for the brand (`get_platform_order_statuses` supports admin status pickers).
-4. Use **Order Claims** to search by platform + order id; claim on behalf of a member when needed.
+3. Status options per platform come from `get_platform_order_statuses` (Shopee and TikTok end at Completed; Lazada ends at Delivered — there is no Lazada Completed option).
+4. When a member reports "claim failed", search the order number in **Order Claims** — typically the order has not reached the threshold yet, or it is already claimed — and answer the member without engineering help.
 5. For pre-live gaps, run **marketplace-orders-backfill** (dry-run first), then `fn_promote_marketplace_backfill` until staging drains (see System › Ops backfill).
 
 ### Member journey
@@ -90,10 +100,11 @@ Shared ledger and `claim_marketplace_order` / `fn_claim_marketplace_order_servic
 | Earn → marketplace channel | loyalty-user | `bff_get_earn_channels`, `claim_marketplace_order` |
 | Order detail (when shown) | loyalty-user | `bff_get_marketplace_order` |
 
-1. Member completes a marketplace order until it reaches the merchant’s claim threshold (status webhooks + Inngest detail).
-2. Member opens **Earn**, chooses the marketplace method, selects platform, enters **order id** (platform order sn).
+1. Buyer learns about points from brand material in the parcel (typically an insert with a QR code to sign up) and registers as a member; the order must reach the merchant’s claim threshold (status webhooks + Inngest detail).
+2. Member opens the earn sheet, chooses the marketplace tab, selects platform, enters **order id** (platform order sn).
 3. **Claim** — success creates purchase (`transaction_source = marketplace_{platform}`) and runs earn when `p_earn_currency` is true; failure surfaces localized title/description (not found, not claimable status, already claimed).
 4. Member sees updated balance per [`Currency.md`](./Currency.md).
+5. **Later orders (planned)** — after the first claim links the buyer id, new orders from the same buyer appear as a list the member claims with one tap, no order number needed. Until the member UI ships, every order is claimed by entering its number.
 
 ### Shopify
 
@@ -171,7 +182,9 @@ See [`Shopify.md`](./Shopify.md) — no duplicate OAuth/webhook journey here.
 
 - **Legacy Kafka path** — Webhook code still supports `MARKETPLACE_INGEST_MODE=kafka|both`; production is **inngest**. [`Ecommerce_Marketplace_Integration.md`](./Ecommerce_Marketplace_Integration.md) and [`MARKETPLACE_SETUP.md`](./MARKETPLACE_SETUP.md) describe retired Hookdeck→Kafka→`marketplace-process-orders` architecture — do not use for new work.
 - **Deployed but legacy** — `marketplace-batch-checker`, `marketplace-process-orders`, and `webhook-shopee` remain in the project; live SEA ingest uses `webhook-marketplace-*` + Inngest.
-- **Admin UI for claim threshold** — `marketplace_claim_from_status` is on `merchant_master` and returned by `bff_get_general_config`; dedicated Marketplace Settings UI for per-platform thresholds may be incomplete — defaults apply from claim RPC.
+- **Claim threshold editing** — Threshold is chosen in the Add channel modal at connect time; Merchant global settings exposes only the Shopify threshold, so changing a SEA threshold later has no dedicated admin control. Unset platforms fall back to claim-RPC defaults.
+- **One-tap claim list** — `get_user_claimable_orders` is live but not called by loyalty-user.
+- **Admin claim on behalf** — Supported by `claim_marketplace_order` with `p_user_id`, not exposed in Order Claims UI.
 - **Registry lag** — `REGISTRY_RENDER.md` may not list all `webhook-marketplace-*` slugs; edge list from Supabase is authoritative.
 
 ## Related

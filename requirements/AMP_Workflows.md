@@ -2,23 +2,29 @@
 
 Rule-based marketing automation: saved audiences, visual workflow graphs, simplified lifecycle automations, and the execution/analytics contracts that tie them to Inngest.
 
-Owner surfaces: loyalty-admin (Audience Builder, **Targeted broadcast**, Workflow List, Lifecycle Automations), loyalty-user (engagement beacon on member-app links), Render/Inngest (`inngest-amp-serve`, event routers), Supabase Edge (`amp-dispatch-realtime-event`, `amp-dispatch-workflow-batch`, `dispatch-workflow-trigger`, `link-redirect`, `engagement-beacon`), messaging-service (LINE push / broadcast / multicast)
+Owner surfaces: loyalty-admin (Audience Builder, **Targeted broadcast**, Workflow List, Reports → Audiences, Earn Rules → Lifecycle), loyalty-user (engagement beacon on member-app links), Render/Inngest (`inngest-amp-serve`, event routers), Supabase Edge (`amp-dispatch-realtime-event`, `amp-dispatch-workflow-batch`, `dispatch-workflow-trigger`, `link-redirect`, `engagement-beacon`), messaging-service (LINE push / broadcast / multicast)
 
 ## Concept
 
-**AMP (Automated Marketing Platform)** in the rule-based lane lets merchants define *who* qualifies (audiences and condition nodes), *when* runs start (realtime domain events, schedules, manual batch, or audience entry), and *what* happens next (messages, waits, CRM actions, API calls, optional AI agent nodes). Execution is durable orchestration in Inngest; Postgres stores definitions, membership, and an append-only execution log.
+**AMP (Automated Marketing Platform)** replaces the manual loop of exporting member data, filtering a target list, and uploading it to LINE for a broadcast. Every outbound communication answers three questions, each configured in its own place: **who** receives it (Audience), **how and when** it is sent (a workflow, or a one-shot targeted broadcast), and **what** is sent (Content Library — see `Resource_Content.md`). A journey starts from a CRM event or a schedule (signup, first purchase, new tier, points threshold), then conditions, waits, and actions take over without staff involvement.
 
-**Workflow** — A directed graph of nodes and edges stored per merchant. Marketer-facing workflows (`scope = user`, `domain = campaign`) are built in Workflow List. The first node with no incoming edges is the entry (usually a condition). `workflow_trigger` rows declare which table/operation changes can start realtime matching; scheduled triggers add cron-driven batch runs.
+**Audience** — A named group of members defined by conditions over any CRM data (profile, purchases, currency, tier, persona, tags, form answers, …). “Segment” in client language means the same thing. Tier and persona are also groupings, but they are primary classifications that other loyalty logic reads (earn multipliers, reward eligibility); an audience is a custom grouping for marketing, and tier or persona can be one of its inputs. Audiences are **reusable**: build one once and pick it as the entry of any workflow or broadcast instead of re-entering conditions.
 
-**Audience** — A named segment backed by a hidden **system workflow** (`scope = system`, `domain = audience`) with the same condition grammar as campaign workflows. Membership lives in `amp_audience_member` (enter/exit timestamps, soft exit). Audiences can be **dynamic** (conditions + realtime + hourly reconciliation), **static** (snapshot at activation and explicit refresh), or **imported** (CSV membership; conditions not evaluated).
+**Audience type** — *When* members enter. **Dynamic**: a member joins the moment their data changes to match (non-matches are removed by an hourly reconciliation), so an audience built once keeps itself current. **Static**: membership is a snapshot, updated only on refresh — manually by the admin or daily at a set time. **Imported**: membership comes from an uploaded CSV of existing members; conditions are ignored. Example: conditions “Silver tier and spend ≥ 100,000 THB in 12 months”; a member at 90,000 who buys another 10,000 at 09:00 enters a dynamic audience immediately, but a daily-refresh static audience at 23:00 that night. Dynamic costs more compute because every relevant data change is re-evaluated; the product does not gate types by plan today.
 
-**Lifecycle automation** — A guided admin pattern for common lifecycle moments (signup, tier change, etc.): one event or schedule, ordered actions, implemented as `workflow_master` rows with dedicated BFFs (`bff_*_lifecycle_automation*`), not the full canvas.
+**Audience uses** — **Analyse**: per-audience reports (size, purchase rate, average order, wallet balance, trends) and a cross-audience comparison (e.g. revenue per member by audience). **Act**: a targeted broadcast or a workflow.
 
-**Execution lane** — How a user enters a run: **realtime** (outbox → Inngest routers → per-user trigger), **manual batch** (admin “Batch run” → SQL matcher → chunked dispatch), or **scheduled** (pg_cron every minute → due triggers → same matcher and dispatch). All bulk paths fan out through `amp-dispatch-workflow-batch` into per-user `amp/workflow.trigger` events.
+**Targeted broadcast** — One identical LINE message sent once to a chosen audience, all LINE friends, or LINE friends who are not yet members (a conversion play). It sits between blanket broadcast and personalization: everyone receives the same content, but only within the chosen group. Audience-based broadcasts reach members with a linked LINE account only.
 
-**Condition engine** — Shared metadata (`bff_get_workflow_collections`) and evaluators compile audience/workflow criteria to SQL (batch) or per-user RPC (Inngest). Full field/operator contract: `requirements/AMP_Condition_Contract.md`.
+**Workflow** — A directed graph of nodes run per member, for anything that needs more than one step: send, wait, branch on behaviour, send again. Node families: **flow control** (entry condition — mandatory, defines who enters; conditional split — true/false branch; time delay — minutes to months; LINE interaction router — one branch per button the member taps), **messages** (LINE, SMS — the outcome the member sees), **loyalty actions** (award currency, push reward, assign/remove tag, assign persona, grant a private earn factor for a window, submit a form response on the member's behalf), **audience actions** (add to / remove from audience), **webhook** (call a third-party URL), and **AI agent** (merchant brings its own model key; `AMP - AI Decisioning.md`). Loyalty actions only offer objects that already exist in their module (rewards, earn factors, personas, forms).
 
-**Engagement** — Message links wrapped per recipient; clicks and member-app page time/scroll depth feed analytics on nodes and workflows (LINE per-message open/delivery descoped).
+**Lifecycle automation** — A simplified, linear automation that fires on a moment in the member's life with the brand rather than on something the member did: sign-up, tier upgraded, tier downgraded, birthday, membership anniversary. Normal earning requires member action (buy, play a campaign); lifecycle automation observes these events and delivers something anyway (birthday points, a coupon on tier upgrade, a consolation coupon on downgrade, auto-assign a starter persona on sign-up). It is configured in the Earn Rules hub, not the workflow canvas, but runs on the same workflow engine with the same action set.
+
+**Execution lane** — How a member enters a run: **realtime** (a data change matches a trigger), **manual batch** (admin runs the workflow now against everyone matching), or **scheduled** (a recurring time). All three converge on the same per-member executor.
+
+**Condition engine** — One shared field/operator grammar for audiences, entry conditions, and splits, evaluated in bulk for batch runs and per member for realtime. Contract: `AMP_Condition_Contract.md`.
+
+**Engagement** — Message links are wrapped per recipient; clicks and member-app page time/scroll depth feed node and workflow analytics (LINE per-message open/delivery descoped).
 
 Graph orchestration, node handlers, cache layer, and historical pipeline notes: `requirements/AMP - Rule Based.md`. AI agent nodes: `requirements/AMP - AI Decisioning.md`.
 
@@ -29,7 +35,7 @@ Graph orchestration, node handlers, cache layer, and historical pipeline notes: 
 | Dimension | Values | Effect |
 | --- | --- | --- |
 | `workflow_master.scope` | `user` (default), `system` | `system` workflows are infrastructure (audience engine); hidden from Workflow List. |
-| `workflow_master.domain` | `campaign` (default), `audience` | Audience system workflows use `audience`. |
+| `workflow_master.domain` | `campaign` (default), `audience`, `loyalty` | Audience system workflows use `audience`; lifecycle automations use `loyalty` (`scope = user`) and are edited only through the lifecycle editor. |
 | `workflow_master.run_mode` | `event`, `batch`, … | How the admin UI classifies the workflow; triggers still govern realtime vs scheduled. |
 | `workflow_master.config.allow_re_enrollment` | default `false` | When false, batch/scheduled matcher excludes users with `execution_started` in `workflow_log`; realtime path skips with `execution_skipped` unless the trigger is a continuation (postback/router). |
 
@@ -47,6 +53,8 @@ Graph orchestration, node handlers, cache layer, and historical pipeline notes: 
 | `dynamic` | Condition SQL + backfill | On (when active) | Hourly `fn_amp_reconcile_dynamic_audiences` resnapshot |
 | `static` | Snapshot at activate + `bff_refresh_audience` | Off | `refresh_schedule`: `manual` (default) or `daily` at `refresh_time` (merchant local) |
 | `imported` | `bff_import_audience_members` (CSV) | Off | Import only; conditions ignored |
+
+**CSV import** — Rows match existing members only, on `tel`, `email`, and/or `member_code`; unmatched rows are returned as `not_found` and never create members, so non-member LINE friends cannot be imported (reach them with the *LINE friends (non-members)* broadcast or entry type). Max 10,000 rows per request; mode `append` (default) or `replace` (soft-exits current members first); duplicate rows for one member are reported, not double-added.
 
 `bff_refresh_audience` / `fn_amp_resnapshot_audience` — For an **active** audience of any type: compile current conditions, soft-exit non-matches, insert new matches, recount `member_count`, set `last_refreshed_at`. Direct adds from resnapshot bypass enrollment logging; a later batch run may re-dispatch those users; `fn_add_to_audience` dedupe makes that harmless. Whether resnapshot inserts start campaign workflows whose trigger is `audience_entered` is unverified.
 
@@ -129,7 +137,8 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Audience Builder | loyalty-admin | `bff_*_audience*`, `bff_get_workflow_collections`, `bff_amp_preview_condition`, `bff_import_audience_members` |
 | Targeted broadcast | loyalty-admin | `bff_*_amp_broadcast*`, `bff_list_amp_broadcast_batches`, `bff_amp_estimate_audience`, `bff_amp_send/cancel/test_send_broadcast`, `bff_amp_refresh_broadcast_line_stats`, `bff_amp_create_audience_from_broadcast_clickers` |
 | Workflow List | loyalty-admin | `bff_get_amp_workflow_full`, `bff_upsert_amp_workflow_with_graph`, `bff_amp_batch_run`, `bff_get_amp_workflow_node_stats`, `bff_get_amp_node_users`, `bff_amp_analytics_workflow` |
-| Lifecycle Automations | loyalty-admin | `bff_list/get/upsert/delete_lifecycle_automation`, `bff_get_lifecycle_action_options` |
+| Reports → Audiences (compare + per-audience) | loyalty-admin | `bff_report_audience_compare`, `bff_report_audience` |
+| Earn Rules hub → Lifecycle section (list) + lifecycle editor | loyalty-admin | `bff_list/get/upsert/delete_lifecycle_automation`, `bff_get_lifecycle_action_options` |
 | Member app (engagement) | loyalty-user | `engagement-beacon` edge (`rct` from tracked links; `bc` + member JWT for broadcast attribution) |
 
 ### Admin journey
@@ -145,19 +154,27 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Schedule on condition/trigger node | `next_run_at` advanced by `fn_amp_compute_next_run_at`; cron picks due rows |
 | Condition preview (audience or node) | Estimated audience size without saving |
 | Export members / node users | `bff_admin_start_user_export` source modes — see Known gaps |
-| Lifecycle event + actions | Creates/updates a linear automation without graph editor |
+| Entry type (entry condition node) | Audience, custom condition, all LINE friends, LINE friends excluding members, when a LINE option is selected, or past LINE content interaction — see Entry types |
+| Interaction router: upstream message + selection mode | Router reads button keys from the chosen upstream LINE message node only (editing the resource in Content Library alone does not add keys); `single` continues on the first key tapped, `multiple` runs one branch per key |
+| Broadcast recipients | Segment, all LINE friends, or LINE friends who are not members |
+| Broadcast content | Content Library resource (can create one inline), custom Flex JSON, or text with quick-reply pills |
+| Broadcast “Refresh segment before sending” | Re-snapshots a static audience immediately before send (default on) |
+| Lifecycle event + target tier + actions | Linear automation; `to_tier_id` limits tier-change events to one destination tier; birthday and anniversary run daily at a set time with an optional day offset |
 
-1. **Audience Builder** — Create audience (name, type, conditions unless imported). For imported, upload CSV via import modal → `bff_import_audience_members`. Save → `bff_create_audience` / `bff_update_audience`. Preview size → `bff_amp_preview_condition`. Activate (optional backfill) → `bff_activate_audience`. View members and 7/30-day analytics cards. Refresh or deactivate as needed.
-2. **Workflow List** — List `scope=user` workflows. Open canvas → load graph → edit nodes (condition, message, wait, action, API, agent) → save `bff_upsert_amp_workflow_with_graph`. Activate workflow. Run batch manually. Inspect per-node stats, engagement tab, and user list modals. Duplicate workflow when needed (`bff_duplicate_amp_workflow`).
-3. **Lifecycle Automations** — List automations → create/edit wizard (lifecycle event, tier filters where applicable, ordered actions, schedule vs database trigger) → `bff_upsert_lifecycle_automation`. Toggle active state via same upsert contract.
+1. **Audience Builder** — Create audience (name, type, conditions unless imported). For imported, upload CSV via import modal → `bff_import_audience_members`. Save → `bff_create_audience` / `bff_update_audience`. Preview size → `bff_amp_preview_condition`. Activate (optional backfill) → `bff_activate_audience`. View members and 7/30-day analytics cards. Refresh or deactivate as needed. From the audience, **View analytics** opens its report; **broadcast** opens Targeted broadcast pre-filled with the segment.
+2. **Reports → Audiences** — Compare all audiences against each other and against all members for a date range; open one audience for its own trends.
+3. **Workflow List** — List marketer workflows. Open canvas → place the entry condition (pick a saved audience or enter conditions; preview matching members before running) → add flow-control, message, loyalty, audience, webhook, and agent nodes from the palette → save `bff_upsert_amp_workflow_with_graph`. When a LINE message carries postback buttons, put a LINE interaction router on the edge after it so taps continue the journey; a time delay only waits and does not detect clicks. To act on whether the member did something (e.g. used a pushed reward), place a time delay before a conditional split so they have time to act. Activate workflow. Run batch manually. Inspect per-node stats, engagement tab, and user list modals. Duplicate workflow when needed (`bff_duplicate_amp_workflow`).
+4. **Targeted broadcast** — New broadcast → choose recipients (segment shows deliverable count of members with linked LINE) → choose content → optional test send to up to 5 member IDs → send now or schedule → watch send log; afterwards refresh LINE stats or create a static segment from clickers.
+5. **Earn Rules → Lifecycle section** — The lifecycle list is embedded in the Earn Rules hub (no standalone menu entry; plan-locked where the lifecycle feature is off). Create/edit opens the lifecycle editor: choose the event, optional destination tier for tier changes, daily time and day offset for birthday/anniversary, then ordered actions (award currency, push reward, assign/remove tag, assign persona, earn factor, submit form) → `bff_upsert_lifecycle_automation`. Toggle active state via the same upsert.
 
 ### Member journey
 
-1. **Message** — Receives LINE/SMS (or other channel) from a workflow message node; URLs in the payload are tracked redirects.
+1. **Message** — Receives LINE/SMS (or other channel) from a workflow message node, or an identical LINE message from a targeted broadcast; workflow URLs are tracked redirects, broadcast member-app links carry the broadcast id instead. Members without linked LINE (or opted out of LINE) receive nothing from LINE sends.
 2. **Click** — Browser hits `link-redirect` → click logged → redirect to destination with `rct` query param.
 3. **Member app** — If destination is Rocket Loyalty app, client sends page view / time on page / scroll depth to `engagement-beacon` (contract: `docs/AMP_ENGAGEMENT_BEACON_SPEC.md`).
-4. **Postback / router** — LINE button postback can resume workflow at a configured node without re-enrollment gate (continuation path).
-5. **Errors** — Failed sends and node errors appear in `workflow_log` for admin analytics; member may see provider-level delivery failure only (no separate member-facing workflow status page).
+4. **Postback / router** — Tapping a postback button (e.g. card 1 “Price”, card 2 “Promotion”) continues the member down the router branch for that key without the re-enrollment gate; the member simply receives that branch's next message or reward. A tap on a broadcast button can enroll them into a *When LINE option selected* workflow.
+5. **Lifecycle** — On sign-up, tier change, birthday, or anniversary the member receives the configured currency, reward, persona, or tag with no action of their own; it appears in their wallet/history like any other grant.
+6. **Errors** — Failed sends and node errors appear in `workflow_log` for admin analytics; member may see provider-level delivery failure only (no separate member-facing workflow status page).
 
 ## System
 

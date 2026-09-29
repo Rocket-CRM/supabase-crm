@@ -6,28 +6,34 @@ Owner surfaces: loyalty-admin (Consent settings), loyalty-user (signup/profile P
 
 ## Concept
 
-**Notice vs consent** — A **notice** is display-only (“we showed you this”); no checkbox and no ledger row. A **consent** requires an explicit accept/decline; each decision appends to history. Interaction style is configured per version (`notice`, `required`, `optional`).
+Consent is the last step of Join: before signup completes, the member reviews the brand's legal documents and states how, and about what, the brand may contact them. It exists so brands stay compliant with PDPA/GDPR-style rules, and what the member records here is what later gates marketing sends. It has three groups — **documents**, **communication channels**, **communication topics** — shown together on one screen.
 
-**Consent type** — One of three legal buckets: privacy policy, terms of service, or marketing. Each type can have many historical versions; only one version per type may be **active** for members at a time.
+**Consent document** — Legal text the brand writes (title, preview, full content, display order), tagged with a **type**: privacy policy, terms of service, or marketing data use. The type is a label; it does not change signup behaviour. The brand may keep any number of documents over time, but only **one version per type is live** at once.
 
-**Consent version** — Immutable legal text identified by `version_code`, with title, preview, body, display order, and mandatory flag. Activating a version publishes it (`published_at`); deactivation is soft (row kept for ledger integrity).
+**Interaction type** — What actually enforces behaviour, set per document: **notice** (shown with a pre-ticked, locked checkbox; nothing recorded), **required** (member must tick to submit; declining means not joining), **optional** (tick or not; either way the decision is recorded). Typical setup: privacy policy as notice, terms as required, marketing as optional.
 
-**Consent ledger** — Per-user, per-version audit log: accepted, withdrawn, or rejected. Current stance for a version is the **latest** row by time — never update or delete ledger rows.
+**Consent version** — Documents change with law, company policy, or regulator guidance. The brand deactivates the old version and adds a new one; old versions are kept because decisions point to them. Existing members never re-signup: at next sign-in, an unaccepted **required** version is shown before home, like a banking app's updated-terms prompt.
 
-**Communication channel** — Fixed delivery paths (email, SMS, LINE, push) stored as booleans on the member record — “may we contact you on this channel?”
+**Consent ledger** — Append-only record of each member's decision per version (accepted, withdrawn, rejected). The latest row is the member's current stance.
 
-**Communication topic** — Merchant-defined subscription category (e.g. promotions, newsletter). Per-user opt-in is stored separately from channels. Outbound messaging should require **channel enabled and topic opted in** when both apply.
+**Communication channel** — Email, SMS, LINE, push: the paths the member allows the brand to use. Fixed list; the merchant configures nothing here.
 
-**Profile PDPA slice** — Signup and profile flows embed consent UI in the `pdpa` section of the profile template (`missing_data` from auth hub). Save is shared with profile fields via one member save RPC.
+**Communication topic** — Optional merchant-defined subject (e.g. per sub-brand, promotions, newsletter) with a name and description. No logic beyond recording each member's opt-in so audiences can be filtered (send brand-B content only to members who opted into brand B). Most merchants don't need topics; with none active, the section is hidden.
+
+**Consent step and Consent Management** — The consent step sits inside the signup/profile form and is saved with it; members change their choices later in Profile → Consent Management.
 
 ## Rules
 
 - **One active version per consent type per merchant** — Activating a second version of the same type without deactivating the first fails (partial unique index on active rows).
 - **Unique version codes** — `(merchant_id, version_code)` must be unique.
-- **`interaction_type = notice`** — Shown in the notices bucket; `requires_action` false; no ledger write on save.
+- **Interaction type, not consent type, drives the signup/profile form** — `consent_type` only labels the document there.
+- **`interaction_type = notice`** — Rendered with a pre-ticked, disabled checkbox; `requires_action` false; no ledger write on save.
 - **`interaction_type = required`** — Checkbox required; member UI blocks submit until accepted; ledger records `accepted` or `withdrawn` on save.
 - **`interaction_type = optional`** — Checkbox optional; ledger still records accept/withdraw when the member submits.
 - **Ledger actions** — Enum: `accepted`, `withdrawn`, `rejected`. Append-only; status = latest row for `(user_id, consent_version_id)`.
+- **New version re-prompt** — Decisions are per version, so a new version starts unaccepted for every member. At sign-in the auth hub returns `complete_profile_existing` with only the unaccepted **required** versions; the member can't reach home until they accept. New **optional** versions (e.g. marketing) are not re-prompted — members count as not accepted until they opt in via Consent Management.
+- **Topics section** — Omitted from the member form when the merchant has no active topics.
+- **Preview** — Template returns the stored preview, else the first 150 characters of content.
 - **Soft deactivation** — Admin “delete” sets `active_status = false` on versions and topics; no hard deletes of config rows that ledger entries reference.
 - **Activation** — First time `active_status` becomes true with null `published_at`, server stamps `published_at = now()`.
 - **Translations** — Active consent copy resolves `title`, `preview`, `content` from the translation system (`entity_type = consent_version`) with fallback to base columns.
@@ -45,11 +51,14 @@ Example (send gate): email enabled + “Promotions” topic opted in → promoti
 
 | Knob | Effect |
 | --- | --- |
-| Consent version (type, interaction, copy) | What members see on signup/profile and in Consent Management |
-| `active_status` / replace flow | Which version is live per type; replace warns when another active version exists |
-| `order_index` | Display order within the member form |
-| Communication topic | Optional categories for marketing opt-in grid |
-| Topic `active_status` | Whether topic appears on member form |
+| Document type | Label only on signup (privacy / terms / marketing); one live version per type |
+| Interaction type | Notice (locked tick, not recorded) / required (blocks submit) / optional (recorded either way) |
+| Version code | Unique per merchant; identifies which text a member accepted |
+| Title, preview, content | Title and content shown on the consent step; see Known gaps for preview |
+| Active / replace | Which version is live per type; activating a new version prompts to deactivate the old; a new required version re-prompts existing members at next sign-in |
+| Display order | Order of documents on the consent step |
+| Communication topic (name, description) | Adds an opt-in option; description is not shown to members |
+| Topic active | Inactive topics disappear; no active topics hides the section |
 
 | Page | Owning repo | BFF / RPC |
 | --- | --- | --- |
@@ -73,8 +82,8 @@ Example (send gate): email enabled + “Promotions” topic opted in → promoti
 | Profile → Consent Management | loyalty-user | `bff_get_consent_form_template` (`edit`), save `bff_save_user_profile` |
 | Public consent read (Shopify chrome) | loyalty-user | `api_get_consent_documents_cached` (merchant code, no session) |
 
-1. After auth, if hub returns `complete_profile_*`, member reaches profile steps; **PDPA** step shows notices (read-only), required/optional checkboxes, channel toggles, and topic toggles from embedded template data (same shape as `bff_get_consent_form_template`).
-2. Submit blocked if any **required** consent in the form is unchecked; error copy lists missing titles.
+1. **Consent step** (last section of signup, after custom fields) — one accordion list: each document with its title and a two-line teaser (expand for full text); notices pre-ticked and locked; required/optional documents with a tick box; **Communication channels** (Email, SMS, LINE, Push) and, if any are active, **Communication topics** as multi-option blocks; an **Accept all** tick at the bottom.
+2. Submit blocked if any **required** consent in the form is unchecked; error copy lists missing titles. After an admin publishes a new required version, a returning member sees this step with only that document at sign-in.
 3. On save, channels update on `user_accounts`; consent decisions append ledger rows; topic preferences upsert.
 4. Existing members open **Profile → Consent Management** to change marketing/channel/topic choices without repeating full signup.
 5. **Errors** — save failures surface generic profile save errors; permission/session loss returns to sign-in.
@@ -140,7 +149,7 @@ bff_admin_get_consent_config('list')
 Latest user_consent_ledger row for (user_id, consent_version_id) by created_at DESC
 ```
 
-**Template bucketing (form builder)** — Privacy policy versions map to `notices` when notice interaction; terms + marketing map to `consents` with `requires_action` true; edit mode prefills `accepted` from latest ledger per version.
+**Template bucketing** — Signup/profile template (`bff_get_user_profile_template`): item type and mandatory flag derive from `interaction_type`. Consent Management (`bff_get_consent_form_template`): privacy policy → `notices`, terms + marketing → `consents` with `requires_action` true. Both prefill `accepted` from the latest ledger row per version.
 
 ### Triggers
 
@@ -159,6 +168,9 @@ None dedicated — consent is Postgres BFFs only. Notification sending honors ch
 - `api_get_consent_documents_cached` not listed in `REGISTRY_SUPABASE.md` (registry lag).
 - Admin `audit` mode for `bff_admin_get_consent_config` has no loyalty-admin page.
 - `rejected` ledger enum exists; member save path primarily writes `accepted` / `withdrawn` — confirm product use of `rejected` for optional declines if reporting depends on it.
+- **Consent Management buckets by type, not interaction type** — `bff_get_consent_form_template` treats every privacy policy as a notice and every terms/marketing version as a tick box (using the legacy `is_mandatory` column), so a document can behave differently there than on signup (which uses `interaction_type`).
+- **Stored preview unused by loyalty-user** — The collapsed teaser is derived from full content; the admin preview field has no visible effect today.
+- **Channels are not tied to auth methods** — All four channels always show, even when the merchant signs members up with LINE only.
 
 ## Related
 

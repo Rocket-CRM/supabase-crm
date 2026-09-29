@@ -1,6 +1,6 @@
 # Custom Webhooks
 
-Merchant-specific **inbound** HTTP adapters (HookDeck-style filter → transform → forward) and CRM-triggered **outbound** forwards to MCA plays / Open API / Pipedream — audited in Postgres. Not the productized merchant outbound webhook (see **Outbound_Integrations.md**).
+Merchant-specific **inbound** HTTP adapters (HookDeck-style filter → transform → forward) and CRM-triggered **outbound** forwards to MCA plays / Open API / Pipedream — audited in Postgres. Not the productized merchant outbound webhook (see **Shopify.md** › Rules › Outbound delivery).
 
 Owner surfaces: Supabase Edge (deployed per merchant/integration); ops/debug via SQL on audit table; no loyalty-admin configuration UI
 
@@ -120,6 +120,5 @@ Env: `DRPONG_CRM_API_KEY` for CRM OpenAPI.
 
 ## Related
 
-- **Outbound_Integrations.md** — Merchant-configured signed outbound events + Klaviyo (product path).
+- **Shopify.md** — Productized partner integrations: signed outbound webhook + Klaviyo, Judge.me / Gorgias inbound (different ingress patterns).
 - **Purchase_Transaction.md** — Receipt ledger rows fed by createReceiptWorkflow / Open API after ZORT forwards.
-- **Third_Party_Integrations.md** — Judge.me, Klaviyo inbound, etc. (different ingress patterns).

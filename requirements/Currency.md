@@ -6,23 +6,29 @@ Owner surfaces: loyalty-admin, loyalty-user, rewarding-shopify (embedded earn co
 
 ## Concept
 
-**Currency** — Loyalty value a member holds: fungible **points** or non-fungible **tickets** (each ticket type is its own balance).
+Currency is how a brand decides what a member gets for buying, and how long they keep it. Most brands want one flat rate or a rate per tier; a few want rules like "Gold students buying vitamins (except omega-3) at Watsons outside Bangkok get ×5". One earn engine serves both: every rule, simple or advanced, is stored as **what the member gets** mapped to **the condition that earns it**, so hard cases are configuration, not custom code. After earning, each grant becomes a lot that is spent first-expiring-first and expires on the merchant's policy.
 
-**Earn rule** — Merchant configuration that maps eligible spend or events to currency. Rules are built from **earn factor groups** (program window, stackable flag, optional UI mode) and **earn factors** (rate, multiplier, or fixed grant) with optional **earn conditions** (tier, product, store, persona, birth month, thresholds, exclusions).
+**Currency** — Loyalty value a member holds: fungible **points** or **tickets** (each ticket type is its own balance).
 
-**Calculation** — Read-only evaluation: given a source (usually a purchase), determine how much of each currency type to grant and which factors applied. Does not change balances.
+**Earn factor** — What the member gets: a **rate** (spend per unit, e.g. 100 THB = 1 point) or a **multiplier** (bonus on the rate-derived base, e.g. ×2), targeting points or one ticket type.
 
-**Award** — Durable write path: after calculation, insert **wallet ledger** rows and update balances, usually via Inngest so delays and cancellations survive restarts.
+**Earn condition** — One requirement a purchase or member must meet. Two families: **purchase attributes** — what was bought (product category, brand, product, SKU; include or exclude) and where (store, store attribute such as sales channel or region); and **member attributes** — tier, persona, birth month. Thresholds and time windows (dates, days of week, hours) qualify conditions and factors.
 
-**Wallet lot** — A ledger earn row with optional **expiry date**, **deductible balance** (FIFO burn tracking), and lifecycle fields (redeemed, expired). Reversals and burns reference lots.
+**Earn condition group** — The unit a factor attaches to. Conditions inside a group are all required (AND); values listed inside one condition are alternatives (Gold *or* Platinum). A factor with no group applies to every eligible purchase. "Either A or B earns ×2" is two factors, each with its own group.
 
-**Public vs personalized earn** — Public factors (`public = true`) apply to all eligible members; personalized offers (`public = false`) attach to specific members via assignment rows with their own validity window.
+**Earn factor group** — Container that sets **stackability** for the multipliers inside it (combine all, or keep only the best). Winners from different groups always combine. The admin UI keeps one group per currency; multi-group setups are built by the team on the backend.
 
-**Source type** — Why currency moved: purchase, purchase item, referral, mission, campaign, manual adjustment, redemption burn, expiry, import, etc. Each award row records source type and source id for idempotency and reversal.
+**Basic vs Advanced mode** — Per-merchant editor mode chosen in Super Admin. Basic: flat or per-tier rate, product exclusions, multipliers conditioned only on product and tier. Advanced: rates and multipliers on any property Super Admin enables for that merchant. Same engine and data either way.
 
-**Simple vs Advanced earn UI (Shopify embedded admin)** — Same backend rows; Simple is a constrained editor when the merchant config satisfies detection rules; Advanced exposes the full earn engine.
+**Calculation** — Read-only evaluation of a source (usually a purchase) into amounts per currency and the factors that produced them. **Award** — the durable write that follows, optionally after a merchant **award delay**.
 
-Tier, persona, product category, store, payment method, and campaigns are **independent attributes** in condition evaluation — tier is one gate among many, not the sole rate driver.
+**Wallet lot** — Each earn row in the ledger: amount, optional **expiry date** (fixed at earn time), and **deductible balance** — the part not yet spent or expired. A member's balance equals the sum of deductible balances across their live lots.
+
+**Expiry policy** — None, **rolling** (each lot lives N months), or **fixed frequency** (all lots expire on shared period ends, with a minimum lifetime so late earns roll to the next period).
+
+**Public vs personalized earn** — Public factors apply to every eligible member; personalized offers attach to specific members with their own validity window.
+
+**Source type** — Why currency moved (purchase, referral, mission, campaign, manual, redemption, expiry, import, …); recorded with the source id for idempotency and reversal.
 
 ## Rules
 
@@ -36,10 +42,17 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 ### Calculation (purchases and routed sources)
 
 - If transaction amount is zero → calculated earn is zero; award path may still record audit when invoked.
-- For each target currency (points or a specific ticket type): among qualifying **rate** factors, **lowest spend-per-unit wins** (member-favorable); result is floored to whole units.
-- If **stackable = true** on the group → all qualifying multipliers in scope combine (typically multiplicative per product design).
-- If **stackable = false** → at most one multiplier per scope; **product-scoped** and **transaction-remainder** multipliers may both apply because they operate on disjoint portions of the basket.
+- For each target currency (points or a specific ticket type): among qualifying **rate** factors across all groups, **lowest spend-per-unit wins** (member-favorable); result is floored to whole units.
+- Conditions in one condition group are ANDed; values inside one condition are ORed; a factor qualifies only if its whole group passes.
+- A factor earns only when the purchase status is in that factor's **allowed purchase statuses** (pending / processing / completed; default completed). Claim- and receipt-created purchases are always completed.
+- Each qualifying multiplier adds a **bonus** of `base × (multiplier − 1)` on the base units of the lines it covers. Multipliers **add, they do not compound**.
+- Backend-only merchant option **additive multiplier** → bonus is `base × multiplier` instead (×2 adds 2× base on top). Not exposed in the admin UI.
+- If **stackable = true** on the group → every qualifying multiplier in the group adds its bonus (line-overlap caveat under **Known gaps**).
+- If **stackable = false** → per group, only the highest **product-scoped** multiplier and the highest **basket-level** multiplier apply; the basket-level one covers only lines the product-scoped one did not.
+- Across factor groups there is no switch: each group's surviving multipliers always add together.
+- Multiplier **window** (start/end) and **time conditions** (days of week, hour range) → outside them the multiplier does not qualify.
 - **Product include** conditions → factor applies only to matching line items; **exclude** conditions (product entities only) → remove matching lines from the eligible set after includes; if the eligible set is empty → factor does not apply.
+- **Store attribute** condition → matches a purchase at any store holding **any** of the listed attribute values (OR); it cannot require two store dimensions at once (e.g. region = North **and** channel = Mall). For that, pin the qualifying stores directly with a **store** condition.
 - **Birth month** condition (`birth_month`, months 1–12 in `entity_values`) → factor applies only when the member's `user_accounts.birth_date` month is listed; no birth date or no member (anonymous preview) → factor does not apply.
 - **Threshold** on a condition (`quantity_primary`, `quantity_secondary`, `amount`) → factor applies only when min met; **max_threshold** caps eligible quantity/value; **apply_to_excess_only = true** → multiplier applies only above the minimum (excess-only mode).
 - If personalized assignment is past **window_end** at calculation time → that offer is ignored; public rules still apply.
@@ -49,6 +62,7 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 ### Award timing and cancellation
 
 - Merchant delay settings on **merchant_master** (`currency_award_delay_days`, `currency_award_delay_minutes`, `currency_award_time`, `currency_award_timezone`, `currency_award_delay_type`) determine scheduled award time in the async worker.
+- Award-on-status is set per factor (Calculation above); what pending / processing / completed mean is decided by the merchant's integration mapping (`Purchase_Transaction.md`), so the same setting can fire at different real-world moments per merchant.
 - Precedence: **delay_days > 0** → calendar date + award time in merchant timezone; else **delay_minutes > 0** → rolling delay from event time; else **award_time** only → next occurrence of that clock time; else immediate.
 - Pending delayed awards live in **Inngest workflow state** (no separate pending table); **currency/cancelled** with matching `source_type` + `source_id` cancels sleep via `cancelOn`.
 - If the same source is awarded twice with the same `(merchant_id, source_type, source_id, currency, component, transaction_type)` → second write is rejected by ledger uniqueness (idempotent skip).
@@ -59,13 +73,25 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 - **Points** balance is stored on **user_wallet.points_balance**; each **ticket type** has its own balance row; ledger **target_entity_id** is null for points and ticket type id for tickets.
 - **Earn** increases balance; **burn** / **reversal** / **expiry** decrease or mark lots; reversals cannot exceed originally awarded amounts for that source (policy may clamp when balance insufficient).
 
+### Deduction order (FIFO)
+
+- Every earn lot starts with deductible balance = amount earned.
+- Any burn other than expiry (redemption, refund reversal, manual deduction) → deducts from the member's live lots of that currency with deductible balance > 0, ordered **soonest expiry date first**, lots with **no expiry last**, ties by earliest earn. A lot is drained before the next is touched.
+- Under a single rolling or fixed policy this equals oldest-first; it differs when lots carry different policies (e.g. no-expiry lots from before expiry was enabled are spent after newer expiring lots).
+- Expiry → removes only the lot's **remaining** deductible balance and marks the lot processed; a fully spent lot expires nothing.
+- Balance = sum of deductible balances on unexpired earn lots. If the wallet balance exceeds lots (legacy/import gap), the burn still posts, the unallocated part is logged as a reconciliation issue, and a burn may never widen that gap.
+
+*Example:* Lots of 50 (Jan) and 100 (Feb); redeem 80 → Jan lot 0, Feb lot 70. Under 12-month rolling, the Jan lot's expiry next January deducts nothing.
+
 ### Expiry
 
 - **Points expiry** is configured per merchant (`points_expiry_active`, `points_expiry_mode`, TTL months, fixed frequency, fiscal year-end month, minimum period months on **merchant_master**).
 - **Ticket expiry** is configured per **ticket_type** (TTL, fixed frequency, or absolute date mode for event tickets).
-- Modes: **ttl** (per-lot date from earn date + months); **fixed_frequency** (next fiscal period end with minimum-period protection); **absolute_date** (tickets only — all lots share configured calendar end).
+- Modes: **ttl** / rolling (lot date = award date + N months); **fixed_frequency** (monthly, quarterly, semi-annual, or annual period ends aligned to the fiscal year-end month); **absolute_date** (tickets only — all lots share configured calendar end).
+- **Minimum period** (fixed frequency) → a lot expires at the first period end at least N months after award; otherwise it rolls to the next. *E.g.* annual, December year-end, 6-month minimum: October earn expires December of the following year.
+- Expiry date is stamped on the lot at award time from the policy then in force; later policy changes do not re-date existing lots. Delayed awards take the award date, not the purchase date.
 - Expiry date must be computable before earn insert when expiry is active; if calculation fails → entire wallet transaction rolls back (no lot without expiry when policy requires it).
-- Only **unused** lot balance expires (respects deductible / redeemed portions).
+- If lots due on a date exceed the member's current balance → that member's expiry is skipped and logged as a reconciliation issue instead of driving the balance negative.
 - Daily batch: **should_run_expiry_today** gates work; **process_currency_expiry_batch** processes in chunks; results logged to **expiry_processing_log**. Scheduled on Render **currency-expiry-daily** (replaces retired pg_cron `daily-currency-expiry`, 2026-09-02). Legacy **process_expiry_if_needed** remains callable but is not the primary scheduler.
 - **Expiry reminders** (LINE/email content) are **not** the notification outbox — Render cron **expiry-reminder-batch** lists due merchants, runs finder RPCs, delivers via shared notification engine, marks **fn_mark_expiry_reminder_ran** (replaced Inngest expiry tick, 2026-09-03).
 
@@ -76,6 +102,8 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 - Shopify **refunds/create** → purchase cancel path with best-effort reversal policy (see **Shopify** under System).
 
 *Example (rate selection):* Two public rates qualify — 100 THB/point and 50 THB/point — member receives the 50 THB/point rate.
+
+*Example (stacking):* 1,000 THB at 100 THB/point = 10 base points. Stackable ×2 and ×3 both qualify → 10 + 10 + 20 = **40**, not 60. Non-stackable → only ×3 → 10 + 20 = **30**. Backend grouping (×5 and ×3 in a non-stackable group, ×2 in another group) → 10 + 40 + 10 = **60**.
 
 ## Journeys
 
@@ -92,23 +120,29 @@ Tier, persona, product category, store, payment method, and campaigns are **inde
 | Manual wallet adjustment | loyalty-admin | admin wallet / adjustment RPCs (via member ops flows) |
 | Reports — points | loyalty-admin | reporting BFFs (aggregates from ledger) |
 
-| Setting | Effect on behaviour |
-| --- | --- |
-| Earn rate (Baht per point or per ticket unit) | Creates **rate** earn factors per currency target |
-| Different rate per tier | One rate factor per tier with tier **earn_condition** |
-| Product exclusions | **exclude** product conditions; two-pass eval |
-| Multipliers + stackable | **multiplier** factors; **earn_factor_group.stackable** |
-| Allowed purchase statuses (basic config) | Which purchase statuses may earn when wired on create/update paths |
-| Points expiry fields on merchant | TTL vs fixed frequency, fiscal alignment, minimum period, active flag |
-| Per ticket type expiry | Ticket TTL / frequency / absolute end date |
-| Award delay fields on merchant | When Inngest schedules **currency/award** after source event |
-| Simple vs Advanced (Shopify) | Which embedded editor loads; does not change engine semantics |
-| Advanced Earn **Birth month** column (superadmin) | Row picks birth months; saves a `birth_month` condition; empty = any month |
+| Setting | Where | Effect on behaviour |
+| --- | --- | --- |
+| Advanced earn on/off | Super Admin → merchant | Off = Basic editor; on = Advanced editor. Engine unchanged |
+| Advanced properties | Super Admin → merchant | Which condition columns the merchant sees: store attribute categories (e.g. sales channel), store, product category / brand / product / SKU, tier, persona, birth month. Unselected properties are hidden |
+| Earn rate — flat | Basic | One rate for every member |
+| Different rate per tier | Basic | One rate per tier (tier condition on each) |
+| Exclude products | Basic | Excluded lines earn nothing (loss-leader or low-margin items) |
+| Multiplier (value + product and/or tier) | Basic | Bonus on matching purchases; Basic allows only product and tier conditions |
+| Multiplier window + days of week / hours | Basic, Advanced | Multiplier applies only inside the window and on the chosen days/hours |
+| Stackable | Basic (merchant); Advanced (Super Admin) | Combine all qualifying multipliers vs keep only the best (see Rules) |
+| Rate / multiplier rows on enabled properties | Advanced | One row per rate or multiplier; filled columns form the row's AND condition; empty column = any |
+| Award on status | Basic, Advanced | Purchase status(es) that earn: pending / processing / completed. Meaning of each status is whatever the merchant's integration maps |
+| Factor groups with separate stackability; additive multiplier | Backend only (team) | Mixed stacking (best-of within a group, combined across groups); bonus = base × multiplier |
+| Points expiry: none / rolling months / fixed frequency (frequency, fiscal year-end month, minimum period) | Points settings | Expiry date stamped on each new lot |
+| Per ticket type expiry | Ticket types | Ticket TTL / frequency / absolute end date |
+| Award delay: minutes, or days + time of day (merchant timezone) | Points settings | Points post after the delay instead of on the event, so they cannot be spent in the same visit |
+| Show expiring points | Display Settings → Profile card | Member home shows next expiring lot, next-30-days, end-of-month, or end-of-year expiring amount |
+| Simple vs Advanced (Shopify) | Embedded admin | Which embedded editor loads; does not change engine semantics |
 
-1. Open **Earn rules** — two merchant modes: **Basic** (single earn config tab: rate per tier or flat, bonus multipliers, expiry, award timing, lifecycle) or **Advanced Earn** (platform flag + column config; merchant edits rows on **Advanced earn**, **Points settings** for delay/expiry/lifecycle only; Earn Studio hidden).
-2. **Basic** merchants use the earn card on **Basic earn config**; **not_basic** merchants see **Earn Studio** instead of the simple card. There is no merchant **Dimensions** or **Rates** tab in Basic mode.
-3. Configure earn rate and multipliers on Basic, or **Studio** / **Advanced earn** for multi-group, personas, store columns, thresholds, and time conditions.
-4. Set **points expiry** and **award timing** on merchant currency settings (same hub area / linked settings).
+1. **Super Admin** (our CS, at merchant setup): choose Basic or Advanced; for Advanced, tick only the properties this brand will use, and the stackable flag.
+2. Open **Earn rules**. **Basic** merchants get one earn config tab: flat or per-tier rate, excluded products, multipliers with timing, stackable, award-on-status. Merchants flagged not-basic see **Earn Studio** instead of the Basic card. **Advanced** merchants get **Points settings** (expiry, delay, lifecycle) as the first tab and build rates on the **Advanced earn** tab.
+3. On **Advanced earn**, choose **Add rate** or **Add multiplier**, fill the enabled property columns that should gate it, and set the value.
+4. Set **points expiry** and **award timing** on **Points settings** (Basic: same earn config tab).
 5. Define **ticket types** (names, credit vs raffle, Shopify store credit flag) before ticket earn factors.
 6. Save — upsert BFFs rewrite factor groups/factors/conditions for that editor scope.
 7. On **Customer 360**, inspect **wallet history** and **lots** (expiry dates, deductible balance, reversals).
@@ -124,14 +158,18 @@ Common pitfalls: shared condition group edits affecting multiple factors; two ra
 | Store credit history (when ticket is Shopify credit) | loyalty-admin front-line / member views | `bff_store_credit` |
 
 1. Member completes an eligible purchase or mission — app may show projected earn from preview APIs where integrated.
-2. Balance updates after async award (or immediately for synchronous manual/API paths).
-3. Wallet shows ledger lines with descriptions by source type; lots show expiry when configured.
-4. On refund, member sees reversal lines linked to original earn; balance may not go negative depending on merchant policy.
+2. Balance updates after async award — after the merchant's award delay if set, otherwise within moments (immediately for synchronous manual/API paths). A purchase earns only once it reaches an award-on status.
+3. Wallet shows ledger lines with descriptions by source type; lots show expiry when configured. Home profile card shows expiring points in the format chosen in Display Settings (e.g. "800 points expire 30 Sep").
+4. On redemption, points come off the soonest-expiring lots first; the balance shown drops by the redeemed amount.
+5. On an expiry date, only the unspent remainder of each due lot is deducted, as an expiry line.
+6. On refund, member sees reversal lines linked to original earn; balance may not go negative depending on merchant policy.
 
 | Error (typical) | Cause |
 | --- | --- |
-| No earn posted | Purchase not in earn-eligible status, earn disabled on order, or workflow cancelled |
-| Lower than expected points | Best-rate selection, non-stackable multiplier scope, or exclusions removed lines |
+| No earn posted | Purchase not in an award-on status, earn disabled on order, or workflow cancelled |
+| Points not yet visible | Award delay still running |
+| Lower than expected points | Best-rate selection, multipliers add rather than compound, non-stackable scope, or exclusions removed lines |
+| "My points disappeared" | Expiry of an unspent lot remainder — check lot deductible balances against expiry dates |
 | Missing expiry on row | Merchant/ticket expiry inactive at earn time |
 
 ### Shopify
@@ -160,7 +198,7 @@ Storefront **points display** (product badge, balance widget) is configured in *
 | `earn_factor` | Rate, multiplier, or fixed; target currency (points/ticket) and ticket type id |
 | `earn_conditions_group` / `earn_conditions` | Eligibility gates, thresholds, exclusions; `entity_ids` (uuid refs) or `entity_values` (int, e.g. birth months) |
 | `earn_factor_user` | Personalized offer assignments |
-| `merchant_master` | Points expiry columns; currency award delay/time/timezone columns |
+| `merchant_master` | Points expiry columns; currency award delay/time/timezone columns; `advanced_earn_enabled` + `advanced_earn_config` (enabled properties, stackable; set by `superadmin_upsert_advanced_earn`, which syncs `stackable` to all the merchant's factor groups); `multiplier_additive` (backend-only bonus formula) |
 | `ticket_type` | Ticket metadata, expiry config, Shopify store credit flags |
 | `user_wallet` | Points balance per user/merchant |
 | User ticket balance table | Per ticket type quantity (see live schema) |
@@ -170,7 +208,7 @@ Storefront **points display** (product badge, balance widget) is configured in *
 | `chokepoint_event_outbox` | Deliberate event emission for purchase (and other) chains → Inngest routers |
 | Materialized views backing eligibility | Fast **get_eligible_earn_factors** paths (refreshed on schedule) |
 
-Triggers on **wallet_ledger** (preserved through wallet chokepoint migration): dedup key, FIFO burn tracking, Shopify store credit issue enqueue — data-integrity and side-effect enqueue, not alternate writers.
+Triggers on **wallet_ledger**: dedup key and Shopify store credit issue enqueue — data-integrity and side-effect enqueue, not alternate writers. FIFO lot deduction is not a trigger: **chokepoint_post_wallet_transaction** runs it inline for every non-expiry burn via `util.fn_allocate_fifo_burn` (order: expiry date, nulls last, then created_at), guarded by `util.fn_allocatable_lot_balance`; shortfalls go to **wallet_reconciliation_issue**. Expiry batches zero lot deductible balance directly and post one expiry burn per member and date.
 
 ### Functions
 
@@ -257,6 +295,7 @@ Platform webhook map: **Shopify.md**. Marketplace claim: **Marketplace.md**. Sto
 
 - **Dual ingest:** Outbox → Inngest and CDC → CurrencyConsumer may both exist; confirm per-environment flags (`CHOKEPOINT_EVENTS_ENABLED`, consumer subscriptions) before assuming a single path.
 - **Open API** HTTP shapes in older doc sections were illustrative; contract truth is **Open_API.md** and live Edge **wallet-***/**currency-*** functions.
+- **Stacking order quirk:** `calc_currency_core` applies multipliers highest-value first and a product-scoped multiplier consumes its lines; a lower-valued basket-level multiplier processed later skips those lines even in a stackable group, so same-line stacking depends on value order.
 - **ui_mode** on **earn_factor_group** — confirm column shipped everywhere Simple detection relies on it (detection logic also inspects factor shape).
 
 ## Related

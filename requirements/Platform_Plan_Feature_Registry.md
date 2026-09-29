@@ -47,7 +47,7 @@ Example (default-on): Munasoul on `loyalty_essentials` has no `enabled=true` row
 ### Shopify
 
 - Runtime checks in Shopify earn/redeem/receipt paths use **`fn_merchant_shopify_feature_enabled`** (platform pinned to Shopify) — same taxonomy keys as Core, different plan ladder and seeded deltas.
-- **Customer account hub, widget, product points, wishlist** touchpoints are available on **all** Shopify plans including Free (reference MD Part 2); entitlement keys do not block install.
+- **Customer account hub, widget, product points, wishlist** touchpoints are available on **all** Shopify plans including Free (`Shopify.md` › Rules › Billing and entitlements); entitlement keys do not block install.
 - **Loyalty landing page** CMS, on-site content overview, and theme sections require **`display` / `shopify_landing_page`** (Essential+); Free plan carries an explicit off-row.
 - **Referral settings page** is visible on all plans; **embedded admin section visibility** (purchase vs signup tabs, program master switch, etc.) is **surface gating** in loyalty-admin (`REFERRAL_SECTIONS`), not a separate registry node — do not conflate with plan entitlements.
 - **Earn rules** sections gate on leaf keys (`earn.multiplier`, `currency.expiry`, `lifecycle.*`, `tier.per_tier_earn_rate`, …) via `EARN_SECTIONS` + `FeatureGate`; tier burn matrix and tier qualification fields use `tier.per_tier_burn_rate`, `tier.conditions_by_spend_orders`, `reward.tier_reward_eligibility` where wired.
@@ -234,4 +234,4 @@ While all production merchants remain on grant-all `enterprise`, many gates are 
 - **Earn_Channel.md** — Earn channel display vs referral program gate.
 - **Admin_Panel.md** — Admin menu transform and role permissions layered on plan gates.
 - **Tier.md** / **Reward.md** — Product behaviour when tier/reward entitlement leaves are off.
-- **reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md** — Part 2 plan gating narrative for on-site surfaces (not CRM Knowledge indexed).
+- **Shopify.md** — Plan ladder, quotas, and where entitlements are enforced inside the engines.

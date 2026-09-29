@@ -8,9 +8,13 @@ Owner surfaces: loyalty-admin, loyalty-user, Shopify Loyalty Hub / landing / wid
 
 Earn channels are the **display gateway** to earning mechanics. They answer what appears on the Earn page (and Shopify earn tiles), how each card is grouped, and which member UI flow opens when the member taps — not whether points actually accrue. That split matters: a merchant can hide a card while the underlying feature stays on, or show a referral card while the referral **program** is off (invite then fails at apply).
 
+The purchase channels a brand sells through fall on two axes — online vs offline, and third-party (someone else sells: marketplace, modern trade, dealers) vs first-party (the brand's own store or website). Only some quadrants need the member to act inside the program: online third-party (claim a marketplace order) and offline third-party (upload a receipt or scan a pack code). First-party purchases earn without member action — brand.com and integrated POS orders are matched to the member by phone or email, and frontline staff key points in — so their cards exist only to tell members the channel earns. Showing every way to earn on one surface is deliberate: members who arrive for one channel discover the others (including higher-earning first-party ones), and members do not have to understand the purchase-vs-campaign split to find how to earn.
+
+**Earn sheet** — The single member surface listing every active channel as a tab; opens as a slider over the current page, so any page (Home, a leaderboard banner, a deep link) can embed a "collect points" call to action without navigating away.
+
 **Channel type** — Section grouping on the earn surface: purchase, campaign, lifecycle, or custom.
 
-**Earn method** — The member interaction contract (stored as `method_type`, returned as `earn_method`). One field drives the entire inner flow (receipt upload, marketplace claim, mission list, referral share, etc.).
+**Earn method** — The member interaction contract (stored as `method_type`, returned as `earn_method`). One field drives the entire inner flow (receipt upload, marketplace claim, jump to missions, referral share, etc.).
 
 **Registry template** — Platform catalog row keyed by stable `channel_code`: default copy, default method, availability rule, and what merchants may customize.
 
@@ -18,7 +22,9 @@ Earn channels are the **display gateway** to earning mechanics. They answer what
 
 **Effective channel** — Merged view of registry + source facts + merchant override row (if any) + custom/legacy rows. Consumer APIs return only rows where display `active = true`.
 
-**Override row** — Physical `earn_channel` row tied to a registry `channel_code` (or a custom channel). Customizes copy/assets/order/button or hides a default with `active = false`.
+**Override row** — Physical `earn_channel` row tied to a registry `channel_code` (or a custom channel). Customizes copy/assets/order/button or hides a default with `active = false`. Channels backed by a feature appear automatically when the feature is activated and can be hidden but not deleted.
+
+**Custom channel** — A merchant-created card not derived from any feature: content, how-to, and an optional button (in-app page or external URL). Display only — it awards nothing. Typical uses: an earn mechanic run outside the system (points later imported by CSV), a link to an integrated online store with its better rate, or "buy in store" instructions for POS earning (sign up, give your phone number at the till, points arrive next day).
 
 **Display vs functional** — Display eligibility = source availability + merchant display override. Functional earning = the source system (purchase pipeline, `fn_process_referral_signup`, mission check-in, etc.).
 
@@ -35,7 +41,7 @@ Earn channels are the **display gateway** to earning mechanics. They answer what
 - **Copy resolution order** — Object translation → override/custom stored value → static UI default (`ways_to_earn` / `default_<channel_code>_…`) → registry default. Effective translation entity id: override row id when present, else deterministic `fn_earn_channel_effective_id(merchant_id, channel_code)` (stable when override is created).
 - **New registry overrides** — Inserts seed `earn_channel.id` via `fn_earn_channel_effective_id` so object translations do not orphan when a computed default becomes physical (~11 pre-fix rows keep random ids but remain internally consistent).
 - **Historical attribution** — `purchase_ledger.earning_channel_id` and `purchase_receipt_upload.earning_channel_id` are optional metadata **without FK**; deleting/hiding a channel leaves stale UUIDs on old rows.
-- **Referral card (`campaign:referral`)** — Always listed in the effective catalog for CMS/marketing; **program on/off** is `referral_program` / `fn_is_referral_program_active`. Invite and apply require program active; earn-channel Active is not the program switch. See `requirements/Referral.md` and `requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md` Part 1.
+- **Referral card (`campaign:referral`)** — Always listed in the effective catalog for CMS/marketing; **program on/off** is `referral_program` / `fn_is_referral_program_active`. Invite and apply require program active; earn-channel Active is not the program switch. See `requirements/Referral.md` and `requirements/Shopify.md` › Rules › Referrals on Shopify.
 - **Receipt upload channel** — Member upload options (`seller_reference`, `receipt_selection`, `receipt_number`, `purchase_date`) live in channel `config`, merged on upsert so they are not wiped. Admin approval entry modes (`line_item_amount`, `line_item_derived`, `total_only`) live in merchant-level `feature_config` (`feature_key = upload_receipt`, group `earn_channel`), not in the channel row.
 - **External link / generic card** — `config.mode` ∈ `{ page, url }` plus `value` (route key or URL). Button show/label from `button_action`.
 - **Marketplace** — Platform list on `marketplace_platforms`; claim status floors on `merchant_master.marketplace_claim_from_status` — not in channel `config`.
@@ -43,7 +49,7 @@ Earn channels are the **display gateway** to earning mechanics. They answer what
 
 ### Shopify
 
-- **Landing / Hub earn tiles** — Not stored in Shopify metafields. `fn_enrich_shopify_landing_sections` and hub composers merge live effective channels (and referral/rewards/tiers) at read time. Landing block type `ways_to_earn`; widget drawer page `drawer_earn-channels`. See `requirements/Display_Settings.md`, `requirements/Shopify.md`, reference MD Part 2.
+- **Landing / Hub earn tiles** — Not stored in Shopify metafields. `fn_enrich_shopify_landing_sections` and hub composers merge live effective channels (and referral/rewards/tiers) at read time. Landing block type `ways_to_earn`; widget drawer page `drawer_earn-channels`. See `requirements/Display_Settings.md`, `requirements/Shopify.md`.
 - **Shopify store channel** — Registry `shopify_store` (default method `external_link`) available when `merchant_credentials.service_name = 'shopify_app'` is active; often seeded via `shopify_seed_default_earn_channel`.
 - **Referral in embedded admin** — Shopify embedded referral settings hide signup tab, program master switch, and **earn-channel banner**; purchase referral tab remains. Earn card on storefront still follows effective-channel rules above.
 
@@ -64,7 +70,11 @@ Earn channels are the **display gateway** to earning mechanics. They answer what
 | Active (show/hide) | Whether the channel appears on member earn surfaces (`bff_get_earn_channels` filters `active = true`) |
 | Display order | Sort among channels within the earn list |
 | Channel type + method type | Section grouping and member flow when tapped (identity fields locked on registry-backed rows unless capability allows) |
-| Copy / banners / how-to | Card and detail presentation; overridable per registry capabilities |
+| Channel name / headline / description | Tab label and card copy |
+| Participating stores banner | Top banner on the channel tab — usually which stores or platforms take part |
+| Customer guide (how-to images + description) | Step-by-step instructions shown under the channel's form |
+| Channel banners | Lower banners — rules, promotions |
+| Channel icon | Icon for the channel on landing / hub / widget earn lists |
 | Button action + link config | CTA for `external_link` / `generic_card` |
 | Marketplace platforms | Which platforms appear on marketplace_code flow |
 | Receipt upload config keys | Extra member fields and channel/store picker on upload |
@@ -73,7 +83,7 @@ Earn channels are the **display gateway** to earning mechanics. They answer what
 1. Open **Earn Channels** — list loads all effective rows with source metadata (`can_hide`, `can_delete`, `can_reset`, `is_computed_default`).
 2. Toggle visibility or reorder — saves via single-channel upsert (override row created when needed).
 3. Edit copy/assets — same upsert; optional **Translations** for non-default languages on physical override ids.
-4. Customize a registry default — upsert with matching `channel_code` (or deterministic computed id); capabilities gate method/button edits.
+4. Customize a registry default — upsert with matching `channel_code` (or deterministic computed id); capabilities gate method/button edits. To add a **custom channel**, create a new channel with type custom and method `generic_card` (content only) or `external_link` (button to a page or URL).
 5. Remove custom channel — delete when `can_delete`; registry default — hide (inactive override) instead of delete.
 6. Restore platform default — **Reset** when `can_reset` (registry-backed overrides only).
 
@@ -86,14 +96,14 @@ Earn channels are the **display gateway** to earning mechanics. They answer what
 | Shopify Hub earn section | rewarding-shopify + extensions | `bff_user_get_shopify_hub` / `fn_compose_shopify_hub` (enriched channels) |
 | Shopify landing `ways_to_earn` | rewarding-shopify theme + proxy | `api_get_shopify_landing_page_cached` + `fn_enrich_shopify_landing_sections` |
 
-1. Member opens Earn — client loads `bff_get_earn_channels` (optional `p_language`, `p_surface` for cache keying).
-2. Cards render grouped by `channel_type`; tap uses **`earn_method`** only.
+1. Member taps any "collect points" entry (Home, campaign banner, `?earn_method=` deep link) — the earn sheet slides up over the current page; client loads `bff_get_earn_channels` (optional `p_language`, `p_surface` for cache keying). A deep link preselects the matching tab.
+2. Channels render as tabs in display order; tab content is chosen by **`earn_method`** only. Closing the sheet returns the member to the page they were on.
 3. **`receipt_upload`** — upload flow; optional seller/receipt fields from channel config; store picker when `receipt_selection` requires it (`bff_list_stores_for_receipt_upload`). See `requirements/Receipt_Upload_Earning.md`.
 4. **`marketplace_code`** — platform picker + order claim using `marketplace_platforms`.
 5. **`external_link` / `generic_card`** — content + button; `mode=url` opens browser, `mode=page` uses app route map.
-6. **`mission` / `form` / `checkin` / `social`** — navigate to respective feature pages (feature APIs own progress).
-7. **`referral`** — referral share/apply UI; if program inactive, apply/share errors per Referral rules (card may still show).
-8. **`info_card`** — read-only lifecycle messaging; earning triggered elsewhere (workflows).
+6. **`mission`** — passthrough tab: closes the sheet and opens the Missions page (missions are not listed inside the sheet).
+7. **`referral`** — share link rendered inside the tab; if program inactive, apply/share errors per Referral rules (card may still show).
+8. **`form` / `checkin` / `social` / `info_card`** — generic content card with optional button (same body as custom channels); earning happens in the owning feature.
 
 Routing reference (field usage): card display uses `channel_name`, `headline`, `description`, banners; detail uses how-to fields; `button_show` / `button_label` / flattened config for CTAs. Legacy Thai FE guide content archived at `Earn_Channel_FE_Guide.md` (pointer only).
 
@@ -184,7 +194,7 @@ Subtype and manual-only templates (`purchase:online_store`, `purchase:partner_st
 
 ### Shopify
 
-- Storefront earn **content** is composed server-side (`fn_enrich_shopify_landing_sections`, hub composer); install/configure paths in `requirements/Display_Settings.md` and reference MD Part 2 §2.2–2.4.
+- Storefront earn **content** is composed server-side (`fn_enrich_shopify_landing_sections`, hub composer); install/configure paths in `requirements/Display_Settings.md` and `requirements/Shopify.md` › Journeys.
 - Checkout points estimate touchpoint deferred (not in extension deploy manifest).
 
 ## Related
@@ -195,4 +205,4 @@ Subtype and manual-only templates (`purchase:online_store`, `purchase:partner_st
 - **Display_Settings.md** / **Shopify.md** — Widget drawer earn tab, landing `ways_to_earn`, on-site content hub routes.
 - **Currency.md** / **Purchase_Transaction.md** — Functional purchase earning after receipt/marketplace/Shopify order paths.
 - **Platform_Plan_Feature_Registry.md** — Feature keys backing availability rules (`earn_channel.*`, campaign.activity).
-- **reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md** — Part 1 (referral vs program gate), Part 2 (storefront earn surfaces).
+- **Shopify.md** — Storefront earn surfaces, referral on Shopify, engine linkage.

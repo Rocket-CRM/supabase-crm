@@ -6,17 +6,25 @@ Owner surfaces: loyalty-admin (persona structure, tag catalog, member profile), 
 
 ## Concept
 
-Members are already classified by **tier** (loyalty progression) and **user type** (`buyer` vs `seller` for transactional rules). Personas and tags add a second axis merchants use for eligibility, pricing, forms, and display.
+The system groups members along three independent dimensions, and one member holds all three. **Tier** groups by the value the member gives the brand (points, spend — `Tier.md`). **Persona** groups by who the member *is*: a student, an employee of a corporate partner, a dealer. Two students can sit in opposite tiers; persona does not move with spend. **Tag** covers any other marker neither captures.
 
-**Persona group** — Named bucket of personas. May set a default **user type** applied when a member is assigned any persona in the group. Some merchants also store B2B **contract** metadata on the group (company, contact, contract dates).
+Persona exists so a brand can give each kind of member a different experience, in three ways: **form data** (signup and profile fields shown only to relevant personas), **display** (home blocks, banners, and menus per persona), and **eligibility** (which rewards, campaigns, and surveys a persona can see or join, combinable with tier and tag). A merchant may use any subset — for example identical forms but persona-only rewards.
 
-**Persona** — The member’s single optional business profile (`user_accounts.persona_id`). Belongs to exactly one group. May have display **image**, optional signup **code**, and **active** flag.
+**Persona group** — Named bucket of personas (Students: Primary, Secondary, University). Optionally sets the **user type** for every persona in it. Some merchants also store B2B **contract** metadata on the group.
 
-**Tag** — Merchant-defined label in `tag_master`. Members hold many tags via `user_tags`; tags are flat (no hierarchy).
+**Persona** — The member’s single optional identity segment. Belongs to one group; has an **icon** (shown on the persona picker), an optional **URL slug**, and an active flag.
 
-**Tier ↔ persona** — A tier may list allowed personas in `tier_persona_assignments`. Empty list means all personas; non-empty restricts which personas can hold or attain that tier (see `Tier.md`).
+**URL slug** — Value in a signup-link parameter that pre-assigns the persona, so the member skips the picker and sees only that persona's form. Used when a partner distributes its own link (e.g. Central sends staff a link with Central's slug), which prevents members choosing the wrong persona. Not a verification code: proving the member is entitled to a persona (a dealer code) is a code-validation signup field (`Signup_Login.md`).
 
-**Persona entitlement** — Separate product: automatic grants when persona is assigned (`Persona_Entitlement.md`).
+**Attain method** — Merchant-wide setting for how members get a persona at signup: **on form** (persona picker is the first step of the signup form; choosing a persona reloads the form with that persona's fields), **before form** (planned — a separate persona step ahead of signup; not built in the member app), or **none** (sign up without persona; assigned later by admin on Customer 360 or by automation).
+
+**User type** — Buyer or seller, taken from the persona group when the group defines one. Drives which tier program and earn rules apply. Seller groups let one program serve a whole trade ecosystem (see Rules › Buyer–seller ecosystem).
+
+**Tag** — Merchant-defined flat label; a member holds many.
+
+**Tier ↔ persona** — A tier may list allowed personas; empty means all. Lets each persona have its own ladder (`Tier.md`).
+
+**Persona entitlement (shelved)** — Automatic grants on persona assignment; not launched (`Persona_Entitlement.md`).
 
 **When to use persona vs tag**
 
@@ -28,6 +36,8 @@ Members are already classified by **tier** (loyalty progression) and **user type
 | Multiple per member | No (at most one) | Yes (unlimited) |
 
 Personas answer “what kind of customer is this?” Tags answer “what labels apply right now?” Both combine with tier and user type in reward rules, missions, check-in, forms, and display blocks.
+
+Tier and persona are not audiences: they are primary groupings that other loyalty logic reads (earn rates, reward eligibility, homepage blocks), while an audience is a custom grouping for targeting and analysis that may use tier or persona as an input (`AMP_Workflows.md`).
 
 ## Rules
 
@@ -42,7 +52,10 @@ Personas answer “what kind of customer is this?” Tags answer “what labels 
 - **Persona side-effects** — After a successful persona assign, `fn_auto_assign_on_persona` may run (packages / entitlements per `Persona_Entitlement.md`). Customer import in **migration** mode can defer these triggers until postprocess.
 - **Tier persona gate** — `fn_tier_matches_persona` / `trigger_validate_tier_persona_assignment` enforce tier–persona consistency when tiers declare persona allowlists.
 - **Type consistency** — `validate_persona_type_consistency` guards persona choice against member `user_type` where product rules require alignment.
+- **Attain method** — `merchant_master.attain_persona`: `on_form` → persona picker is the first form step (skipped when a persona is already selected); on pick, the form reloads with that persona's scoped fields; `before_form` → (planned) not implemented in loyalty-user, which hides the picker for any value other than `on_form`; `NULL` (none) → no persona at signup. A valid URL slug in the signup link pre-assigns the persona and skips the picker.
+- **Buyer–seller ecosystem** — A seller-group persona (e.g. sub-dealer) earns sell-out points when a buyer's approved receipt references the seller's **member code** (typed or scanned at upload). The code must belong to a member of user type `seller` and cannot be the buyer's own. Upstream dealers who never sell to end customers earn from brand sell-in data via import or Open API. Seller tiers and earn rules run on the seller program, separate from buyers (`Tier.md`).
 - **Downstream filtering** — Rewards, missions, check-in, forms, and display blocks may filter on persona id, persona group, tag ids, or “any listed tag”; empty filters mean no restriction (each feature doc owns its AND/OR semantics).
+- **Homepage block targeting** — A homepage display block may be restricted to personas; members with no persona (and logged-out visitors) resolve to `guest` and see only persona-unrestricted blocks (`Display_Settings.md` › Rules › Audience match).
 
 ## Journeys
 
@@ -59,18 +72,20 @@ Personas answer “what kind of customer is this?” Tags answer “what labels 
 
 | Setting | Effect on behaviour |
 | --- | --- |
-| Persona group name + optional group `user_type` | Default transactional role when members pick a persona in that group |
-| Personas in group (name, image, code, active) | Choices at signup and on member profile |
-| `attain_persona` (merchant config) | How/whether members must choose a persona during signup |
+| Persona group name + optional group `user_type` | Buyer or seller role for every persona in the group; selects tier program and earn rules |
+| Personas in group (name, icon, URL slug, active) | Picker choices (icon shown on the picker; missing icons look broken); slug enables a direct-signup link |
+| `attain_persona` (merchant config) | Before form / on form / none — see Rules › Attain method |
+| Persona scope on form fields, display blocks, rewards, campaigns | Set on each object's own config page, not here |
 | Tag name, description, active | Catalog for assignment and targeting |
 | Member profile persona change | Updates `persona_id` and possibly `user_type`; may trigger persona entitlements |
 | Member profile tag chips | Add/remove tags without changing persona |
 
-1. Open **Tier** → **Personas**: create groups, set optional buyer/seller default per group, add personas (name, image, optional deep-link **code**).
-2. Configure **Persona onboarding** on the same tab when signup should require or offer persona selection (`attain_persona`).
-3. Open **User Tags**: define tag catalog (unique name per merchant); deactivate tags that should not be assignable going forward.
-4. On **Customer 360**, use **Edit profile** to change persona or add/remove tags for one member.
-5. For automation, add **Assign persona** or **Assign tag** actions in AMP or lifecycle workflows; bulk operational tagging may also use SQL/API `assign_tag` from integrations.
+1. Open **Tier** → **Personas**: create groups, set buyer/seller per group, add personas (name, icon, optional URL slug).
+2. Configure **Persona onboarding** on the same tab: choose the attain method.
+3. Scope objects by persona on their own pages: form fields (`Forms.md`), display blocks (`Display_Settings.md`), rewards and campaigns (eligibility).
+4. Open **User Tags**: define tag catalog (unique name per merchant); deactivate tags that should not be assignable going forward.
+5. On **Customer 360**, use **Edit profile** to change persona or add/remove tags for one member (the only manual path when attain method is none).
+6. For automation, add **Assign persona** or **Assign tag** actions in AMP or lifecycle workflows; bulk operational tagging may also use SQL/API `assign_tag` from integrations.
 
 Common pitfalls: clearing persona does not restore previous `user_type`; assigning inactive persona or tag returns an error; tier with persona allowlist rejects members outside the list; tag catalog page does not assign tags to members (profile only).
 
@@ -78,20 +93,22 @@ Common pitfalls: clearing persona does not restore previous `user_type`; assigni
 
 | Page / surface | Owning repo | BFF / RPC |
 | --- | --- | --- |
-| Signup / profile (when `attain_persona` enabled) | loyalty-user | Persona picker; `bff_validate_signup_code` when persona uses signup codes |
+| Signup / profile (when `attain_persona` enabled) | loyalty-user | Persona picker or slug pre-assignment; code-validation fields via `bff_validate_signup_code` (`Signup_Login.md`) |
 | Profile template fields | loyalty-user | `bff_admin_get_member_profile_form` / template filtered by `fn_filter_user_profile_template_by_persona`, `fn_profile_field_visible_for_persona` |
 | Rewards, missions, check-in, display | loyalty-user | Reads member `persona_id` and tags from session/profile; server-side filters on list/detail RPCs |
 | Display settings preview | loyalty-user | Preview tool filters blocks by persona id / guest |
 
-1. During signup (if configured), member selects a persona (and may enter a persona **code** where required).
-2. If the persona’s group defines `user_type`, member role updates to buyer or seller as part of assignment.
-3. Member sees tiers, rewards, missions, forms, and content blocks only when their persona and tags satisfy each feature’s eligibility rules.
-4. Members do not self-serve tag management in the standard app; tags are applied by admin, import, or automation.
+1. Signup via a link carrying a persona slug: persona is pre-assigned, no picker, straight to that persona's form.
+2. Signup via the general link: **on form** → first form step is the persona picker (icons); after picking, the member sees that persona's fields; **none** (or **before form**, not yet built) → no persona step.
+3. Where a persona-scoped code-validation field exists (e.g. dealer code), the member must enter a valid code to finish (`Signup_Login.md`).
+4. Group `user_type` sets the member's role to buyer or seller as part of assignment.
+5. After login, home blocks, banners, and menus follow the persona; rewards, missions, and other objects appear only when persona, tier, and tags satisfy each object's eligibility.
+6. Members do not self-serve tag management in the standard app; tags are applied by admin, import, or automation.
 
 | Error (typical) | Cause |
 | --- | --- |
 | Invalid or inactive persona | Catalog row inactive or wrong merchant |
-| Persona code invalid | `bff_validate_signup_code` mismatch |
+| Signup code invalid | Code-validation field rejects the entered code (`bff_validate_signup_code`) |
 | Tier / reward / mission not visible | Persona or tag filter excludes member |
 | Tag not applied | Inactive tag or wrong merchant (admin/API path) |
 
@@ -102,7 +119,8 @@ Common pitfalls: clearing persona does not restore previous `user_type`; assigni
 | Artifact | Role |
 | --- | --- |
 | `persona_group_master` | Group header: `group_name`, optional `user_type`, `active_status`, optional contract fields (`contract_type`, `company_name`, `contact_*`, `contract_*`, `contract_metadata`), legacy `mongo_id` |
-| `persona_master` | Persona row: `group_id`, `persona_name`, `image`, optional `code`, `active_status`, `mongo_id` |
+| `persona_master` | Persona row: `group_id`, `persona_name`, `image` (picker icon), optional `code` (signup-link URL slug, e.g. `arcane-buyer`), `active_status`, `mongo_id` |
+| `merchant_master` | `attain_persona` (`before_form` / `on_form` / NULL = none); legacy `persona_attain` column still present |
 | `tag_master` | Tag definition: `tag_name`, `description`, `active_status` |
 | `user_tags` | Junction: `user_id`, `tag_id`, `merchant_id`, `created_at`, optional `source_type`, `source_id` |
 | `user_accounts` | Member `persona_id` FK (nullable), `user_type`, `tier_id` |

@@ -6,29 +6,31 @@ Owner surfaces: loyalty-admin, loyalty-user
 
 ## Concept
 
-Spin wheel is a **gamified lottery mechanic** merchants configure as one or more **campaigns** (wheels). Each campaign defines who may spin, when, at what **cost**, how often (participation caps), and a set of **segments** (wheel slices). One spin always selects exactly one segment by **relative weight**, then delivers zero or more **outcomes** (points, tickets, reward pushes, earn-factor assignments) for that slice.
+Spin wheel lets a member trade currency they already hold for a chance at a prize. Unlike most campaigns it has no qualifying action of its own — the points or tickets it consumes were earned elsewhere (purchases, missions, check-in) — so structurally it is closer to a reward redemption than to an Action → Condition → Outcome campaign. The difference from a reward is uncertainty: a reward has a known price and a known prize; a spin has a known price and a random prize. It is still a campaign because merchants run it for a limited window rather than as an always-on feature.
 
-**Campaign / wheel** — Named program with active window, spin cost, eligibility filters, presentation JSON, and participation limits.
+Mental model: points and tickets are **intermediate outcomes** — worth nothing until spent. A spin converts them into a **final outcome** (a prize, more currency, or a temporary multiplier), with excitement as the added value.
 
-**Segment / prize slice** — One wheel slice with a **weight** (relative probability, not a fixed percentage), display order, optional inventory cap, optional no-win flag, and marketing label. Product language treats the slice as “the prize”; dispatcher language treats each grant row as an **outcome**.
+**Campaign (wheel)** — One wheel with its own member link, active window, spin cost, eligibility filters, participation limits, presentation (banner, colours, icons, copy), and slices.
 
-**Outcome (grant row)** — One configured grant on a winning segment: points quantity, ticket type + quantity, reward push, or earn-factor assignment. A segment may have many outcome rows or none when marked no-win.
+**Slice (segment)** — One wedge of the wheel: label, weight, optional stock, optional no-win flag, and zero or more outcomes. Product language calls the slice “the prize”.
 
-**Spin (event)** — One immutable ledger row: cost charged (if any), winning segment, RNG audit snapshot, link to wallet burn. Participation limits count spin rows, including no-win spins.
+**Weight** — Relative likelihood of landing on a slice: its weight ÷ the sum of weights of slices still in the draw. Weights need not sum to 100; the admin sees derived percentages.
 
-**Relative weights** — At draw time, eligible segments contribute weight; probability of segment S = weight(S) / sum(weights). Weights need not sum to 100. Inactive segments and sold-out segments (stock remaining zero) drop out before normalization. Admin UI may show percentages derived from weights.
+**Stock** — Optional cap on how many times a slice can be won across all members. A sold-out slice leaves the draw and its share is redistributed proportionally across the remaining slices, so the odds of every other slice rise. Independent of reward stock and of spin limits.
 
-**Cost** — Points burn, ticket burn, or free (`cost_amount = 0`). Outcome grants are independent of cost (e.g. pay points, win tickets).
+**No-win slice** — A “try again” wedge that grants nothing but still costs the spin and counts toward limits. It is also the fallback once every prize slice has sold out; without one, the wheel stops accepting spins.
 
-**Segment stock** — Optional cap on how many times a **slice** can be won worldwide; distinct from reward redemption limits and from campaign-wide spin caps.
+**Outcome** — One grant on a slice: points, tickets, a reward, or a personal earn factor. A slice may carry several (e.g. points plus a ticket); all are granted when it wins.
 
-**No-win segment** — Slice that participates in the draw but dispatches no grants (“try again”). Still charges cost unless free; still counts toward limits.
+**Personal earn factor** — An earn multiplier assigned to the winning member only, for a window after the win (default 30 days) — e.g. ×10 points on purchases for that one member, unlike campaign-wide multipliers that apply to every sale.
 
-**Presentation config** — Opaque JSON on campaign and segments for banners, colors, icons, and copy. Backend stores pass-through JSON; the spin engine never reads it.
+**Cost** — Points, one ticket type, or free. Independent of what slices grant (pay points, win tickets).
 
-**Participation limit** — Per-campaign cap in the shared limits facility with entity type spin wheel; scope per member or campaign-wide, over day/week/month/year/all_time.
+**Participation limit** — Cap on spins per member or across the whole campaign, per day / week / month / year / all time.
 
-Progress and fairness are **log-derived**: limits and disputes use `spin_wheel_log`; per-grant audit lives in outcome distribution log with source type spin wheel. All grants route through the same dispatcher primitive as check-in, missions, and AMP. Sync path only — no Kafka, Inngest, or edge function on the spin path.
+**Spin** — One immutable event recording cost charged, winning slice, and a draw snapshot. Limits and disputes are derived from these events, no-win spins included.
+
+Each spin is one synchronous, all-or-nothing step: charge, draw, stock decrement, and grants succeed or fail together. All grants go through the same central outcome dispatcher as check-in, missions, and workflows.
 
 ## Rules
 
@@ -45,6 +47,7 @@ Progress and fairness are **log-derived**: limits and disputes use `spin_wheel_l
 - Free spins skip wallet burn; cost fields on log may be null.
 - Limit counting includes every spin log row, including no-win spins.
 - Reward-type outcomes still enforce reward and reward-group limits at grant time via the dispatcher.
+- Earn-factor outcome → the member is assigned that earn factor from spin time until spin time + window days (outcome setting; default 30). The multiplier itself is defined on the earn factor, not on the slice.
 - Admin upsert requires at least one segment with `weight > 0`. Ticket cost requires valid active ticket type. Weights not summing to 100 → advisory `weight_note` only, not rejected.
 - Admin delete: if any spin log exists → soft delete (`active_status = false`); else hard delete campaign tree and limit rows.
 - User BFFs resolve member identity from session only — never accept client-supplied user or merchant ids. Internal engine functions are not granted to browser roles.
@@ -72,7 +75,8 @@ Progress and fairness are **log-derived**: limits and disputes use `spin_wheel_l
 | Segment stock total / remaining | Limited prize inventory (admin-visible only) |
 | Segment no-win flag | Slice with zero outcome rows |
 | Outcome rows per segment | Grant types, amounts, entity refs, metadata |
-| Campaign / segment `display_config` | Presentation JSON (pass-through; engine ignores) |
+| Earn factor window (days), earn-factor outcomes only | How long the personal multiplier stays active after the win (default 30) |
+| Campaign / segment `display_config` | Cosmetic only — background, text colours, per-slice colour / icon / text colour, banner and banner copy; engine ignores |
 | Participation limits | Per-user and/or campaign-wide spin caps |
 
 1. Open **Spin wheel list** and start **Create spin wheel** (or edit an existing row).
@@ -86,7 +90,7 @@ Progress and fairness are **log-derived**: limits and disputes use `spin_wheel_l
 9. Copy member deep link from settings when needed (`…/spin-wheel/{campaign_id}` on the loyalty-user host).
 10. Delete from list when retiring: soft-deletes if spins exist, else removes config tree.
 
-Common pitfalls: ticket cost without ticket type fails upsert; all segments sold out with no no-win slice blocks spins; reward outcome out of stock rolls back entire spin; weights are relative — changing one slice changes displayed odds for all.
+Common pitfalls: ticket cost without ticket type fails upsert; all segments sold out with no no-win slice blocks spins; a sold-out grand prize raises the odds of every remaining slice; reward outcome out of stock rolls back entire spin; weights are relative — changing one slice changes displayed odds for all.
 
 ### Member journey
 
@@ -94,10 +98,10 @@ Common pitfalls: ticket cost without ticket type fails upsert; all segments sold
 | --- | --- | --- |
 | Spin wheel (per campaign) | loyalty-user | `bff_user_get_spin_wheel_status`, `bff_user_spin_wheel` |
 
-1. Member opens spin wheel (deep link or in-app navigation). App loads **status**: campaign name, description, presentation config, segment list with `weight_pct` and labels, cost, balance, eligibility, `can_spin`, spins remaining.
+1. Member opens the campaign's own link, which the merchant places anywhere (home banner, rich menu, CMS page). App loads **status**: campaign name, description, presentation config, segment list with `weight_pct` and labels, cost, balance, eligibility, `can_spin`, spins remaining.
 2. If not eligible, inactive, over limit, or insufficient balance → UI disables spin and shows error copy from status (`is_eligible`, `can_spin`, `eligibility_error`).
 3. Member taps spin; app calls **spin** RPC (debounce double-taps). Backend selects winning segment and grants before animation completes; UI animates wheel to returned `segment.id`.
-4. On success: show win/lose modal using spin response outcomes for grants; resolve slice styling via `segment.id` against cached status segments (spin response does not echo `display_config`).
+4. On success: show win modal (listing every grant from the spin response) or no-win modal; resolve slice styling via `segment.id` against cached status segments (spin response does not echo `display_config`).
 5. App refreshes status for balance, `can_spin`, and remaining spins.
 6. On failure: show returned error string (unauthenticated, user not linked, inactive campaign, eligibility, limits, insufficient balance, no prize available, dispatch failure).
 

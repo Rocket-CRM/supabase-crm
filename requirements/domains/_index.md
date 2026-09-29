@@ -16,7 +16,7 @@ The legacy per-domain slug files at `requirements/domains/<slug>.md` are being r
 | Activity Earning | [Activity_Based_Earning.md](../Activity_Based_Earning.md) | activity, upload, image upload, admin approval, exercise, POSM, activity matrix, field definitions, primary dimension, secondary field, currency config |
 | Purchase Transaction | [Purchase_Transaction.md](../Purchase_Transaction.md) | purchase, transaction, order, payment, refund, credit, debit, line item, SKU, purchase ledger, purchase items, final amount, status, completed |
 | Marketplace | [Marketplace.md](../Marketplace.md) | marketplace, lazada, shopee, tiktok, order_ledger_mkp, claim_marketplace_order, upsert_marketplace_order, get_shop_credentials, seller_id, webhook-marketplace, inngest-marketplace-serve, merchant_credentials external_id, marketplace claim, order claims |
-| Shopify | [Shopify.md](../Shopify.md) | shopify, shopify_app, embedded admin, storefront widget, shopify-webhooks, auth-shopify-admin, shopify-token-refresh, loyalty entitlement, points-to-discount, rewarding-shopify, shopify billing |
+| Shopify | [Shopify.md](../Shopify.md) | shopify, shopify_app, embedded admin, storefront widget, shopify-webhooks, auth-shopify-admin, shopify-token-refresh, loyalty entitlement, points-to-discount, rewarding-shopify, shopify billing, shopify-proxy, shopify-extension-api, loyalty hub, store credit shopify, third-party integrations, judgeme, gorgias, outbound webhook, klaviyo, X-Rocket-Signature, event_key, integration_delivery_log, integration_outbox_cursor, integration_sync_jobs, sync_new_members, merchant_credentials webhook, Rocket Points Balance |
 | FuturePark | [FuturePark.md](../FuturePark.md) | futurepark, future park, OCR receipt, futurepark_redemptions, settlement, FP receipt |
 | Receipt Upload Earning | [Receipt_Upload_Earning.md](../Receipt_Upload_Earning.md) | receipt upload, purchase_receipt_upload, OCR, receipt approval, receipt earning, generic receipt |
 | Receipt Channel OCR Auto-Approve | [Receipt_Channel_OCR_Auto_Approve.md](../Receipt_Channel_OCR_Auto_Approve.md) | channel OCR, auto-approve receipt, channel-product-receipt-upload, receipt_ocr_set_rule, receipt_ocr_channel_product, receipt_ocr_hints, review reasons, approved by system, sales channel allow-list, fn_ocr_evaluate_channel_receipt |
@@ -80,7 +80,6 @@ The legacy per-domain slug files at `requirements/domains/<slug>.md` are being r
 | Action Macro (Shared) | [Action_Macro.md](../Action_Macro.md) | action_macro, macro, macro_context, execute_macro, multi_step_action, parameterized_action, variable_definitions, variable_constraints, approval |
 | BigCommerce Storefront API | [Ecommerce_Marketplace_Integration.md](../Ecommerce_Marketplace_Integration.md) (pointer; BC APIs in registries) | bigcommerce, storefront, api_bigcommerce_get_merchant_config, api_bigcommerce_get_user_profile, api_bigcommerce_get_user_rewards, mongoId, mongo_id, migrated user, storefront rewards |
 | Custom Webhooks | [Custom_Webhooks.md](../Custom_Webhooks.md) | custom_webhook, hookdeck, zort, pipedream, createReceiptWorkflow, webhook proxy, custom_webhook_events |
-| Outbound Integrations | [Outbound_Integrations.md](../Outbound_Integrations.md) | outbound webhook, klaviyo, X-Rocket-Signature, event_key, integration_delivery_log, integration_outbox_cursor, integration_sync_jobs, sync_new_members, merchant_credentials webhook, Rocket Points Balance |
 | Universal Action System (Shared) `(slug)` | [universal-action-system-shared.md](universal-action-system-shared.md) | action_registry, action_category, action_caller_config, rule_type_registry, entity_registry, intent_registry, rules_code, rules_prompt, fn_execute |
 | Internal Knowledge `(slug)` | [internal-knowledge.md](internal-knowledge.md) | internal_knowledge, feature knowledge, knowledge_blocks, feature_items, downstream agent context, slide_generation, frontend_context, implementation_brief |
 | System Map | [architecture/System_Map.md](../architecture/System_Map.md) | repo, where does, runs on, edge function vs rpc, render, inngest, surface, frontend lives |
@@ -526,13 +525,13 @@ A flat lookup for any term a frontend AI might encounter.
 | `top spender` | Leaderboard |
 | `api_get_leaderboard_rows` | Leaderboard |
 | `api_join_leaderboard` | Leaderboard |
-| `klaviyo` | Outbound Integrations |
-| `outbound webhook` | Outbound Integrations |
-| `X-Rocket-Signature` | Outbound Integrations |
-| `integration_delivery_log` | Outbound Integrations |
-| `integration_outbox_cursor` | Outbound Integrations |
-| `integration_sync_jobs` | Outbound Integrations |
-| `sync_new_members` | Outbound Integrations |
-| `bff_integration_klaviyo_get_connection` | Outbound Integrations |
-| `fn_integration_resolve_member_snapshot` | Outbound Integrations |
+| `klaviyo` | Shopify |
+| `outbound webhook` | Shopify |
+| `X-Rocket-Signature` | Shopify |
+| `integration_delivery_log` | Shopify |
+| `integration_outbox_cursor` | Shopify |
+| `integration_sync_jobs` | Shopify |
+| `sync_new_members` | Shopify |
+| `bff_integration_klaviyo_get_connection` | Shopify |
+| `fn_integration_resolve_member_snapshot` | Shopify |
 

@@ -47,6 +47,7 @@ Future Park runs a **deferred receipt-earning** program: members photograph mall
 - Member history: **Pending** tab while any receipt in batch is pending or approved-but-not-settled; **Reviewed** when batch fully decided; reviewed rows show approved/rejected count chips.
 - `receipt_approval_rules` matches force manual review with admin-visible rule name; member history shows processing without rule text.
 - Datetime policy: missing visible time → `missing_receipt_time` manual path; never send midnight as fabricated time to Old CRM payloads.
+- Receipt number: terminal IDs (constant per machine — REG#/RID, POS# / POS ID, `E041310`/`D041310`) are never the receipt number. Exception: a POS ID that embeds the receipt date and ends in a sequence is a transaction ID — chosen when the store's `receipt_number_example` is that format, otherwise only as the last fallback. Tax ID stays excluded.
 - E-Directory: one CRM store per Oracle `CustomerNumber`; duplicate `external_ref` rows skip write; lease end + 1 month Bangkok can mark store inactive.
 
 ## Journeys

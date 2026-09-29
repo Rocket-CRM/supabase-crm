@@ -85,7 +85,7 @@ Signup screens, `next_step`, and profile completion live in **Signup_Login.md**;
 | Referral claim page POST | `shopify-proxy` `/referral/claim` | Claim RPCs; not the widget JWT path |
 | Product points block | None | Anonymous widget settings cache only |
 
-App proxy is registered in `rewarding-shopify` `shopify.app.toml` → Supabase `shopify-proxy`. Proxy also serves landing storefront paths and referral page HTML/API per **Display_Settings.md** / reference MD Part 2.
+App proxy is registered in `rewarding-shopify` `shopify.app.toml` → Supabase `shopify-proxy`. Proxy also serves landing storefront paths and referral page HTML/API per **Display_Settings.md** / **Shopify.md**.
 
 ## System
 
@@ -161,10 +161,10 @@ App proxy is registered in `rewarding-shopify` `shopify.app.toml` → Supabase `
 | --- | --- |
 | `issueMemberSession` (`_shared/member-session.ts`) | Single member JWT issuer for hub, proxy, extensions |
 | `shopify-proxy` | HMAC verification, `/auth/signup`, `/auth/login`, `/referral/page`, `/referral/claim`, landing storefront paths |
-| `shopify-extension-api` | Session-token auth, hub/balance/wishlist/redeem routes (representative list in reference MD Part 2 §2.5) |
+| `shopify-extension-api` | Session-token auth, hub/balance/wishlist/redeem routes (route list in `Shopify.md` › System › External services) |
 | `rewarding-shopify` | App proxy URL config; widget calls proxy—not Liquid customer for auth |
 
-Reference narrative (identity gateways, extension route table): `requirements/reference/SHOPIFY_REFERRALS_ONSITE_INTEGRATIONS.md` Part 2 §2.4–2.5. Storefront signup/login **screens** and `next_step`: **Signup_Login.md**.
+Identity gateways and extension routes: `Shopify.md` › Rules › Storefront identity and composition. Storefront signup/login **screens** and `next_step`: **Signup_Login.md**.
 
 ## Related
 
