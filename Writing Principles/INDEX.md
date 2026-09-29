@@ -22,7 +22,9 @@ Canonical writing-principles library compiled from Rocket Deck, Rocket CRM marke
 | Keep standard tech terms in English | `TRANSLATION_PHILOSOPHY.md` | Part 1 §21 (Thai pages); `TRANSLATION_PRINCIPLES.md` |
 | Tone calibration by market (e.g. Thai B2B/SME direct) | `TRANSLATION_PHILOSOPHY.md` | `THAILAND_CONTEXT.md` §1 (register by surface) |
 | Canonical Thai product vocabulary | `THAILAND_CONTEXT.md` §2 | — |
-| Proposal Thai smoothness / English backup | `TRANSLATION_PRINCIPLES.md` | general-proposal REFERENCE stage 11 |
+| Proposal Thai smoothness / English backup | `TRANSLATION_PRINCIPLES.md` | proposal skill § 7 |
+| Anchor features to the customer journey | `PROPOSAL_WRITING_PRINCIPLES.md` S7 | `docs/PRODUCT_MESSAGING.md` (journey) |
+| Why and What before How | `CORE_WRITING_PRINCIPLES.md` §13 | — |
 | Structure fidelity (title vs description roles) | `TRANSLATION_PHILOSOPHY.md` | — |
 | Name the decision, not the tech | `TRANSLATION_PHILOSOPHY.md` | Part 1 §10 |
 
@@ -42,7 +44,7 @@ Canonical writing-principles library compiled from Rocket Deck, Rocket CRM marke
 | File | Content type | When to use |
 |------|--------------|-------------|
 | [CORE_WRITING_PRINCIPLES.md](./CORE_WRITING_PRINCIPLES.md) | All structured writing | Foundation: pyramid, vertical/horizontal logic, MECE, same-level grouping, layered depth, specificity, limitations |
-| [PROPOSAL_WRITING_PRINCIPLES.md](./PROPOSAL_WRITING_PRINCIPLES.md) | B2B proposals / RFPs | Requirement reading (R1–R4), interpretation (U1–U4), structure (S1–S6), section writing (W1–W14), quality checklist |
+| [PROPOSAL_WRITING_PRINCIPLES.md](./PROPOSAL_WRITING_PRINCIPLES.md) | B2B proposals / RFPs | Requirement reading (R1–R4), interpretation (U1–U4), structure (S1–S7), section writing (W1–W14), quality checklist |
 | [SALES_PRESENTATION_SLIDE_PRINCIPLES.md](./SALES_PRESENTATION_SLIDE_PRINCIPLES.md) | Sales / marketing decks | Buyer-first slides, one message per slide, decision story, proof, objections, Thai term discipline |
 | [SALES_FEATURE_COPY_PRINCIPLES.md](./SALES_FEATURE_COPY_PRINCIPLES.md) | Product Feature Catalog | Sales names and 1–2-sentence summaries — not config objects |
 | [CANONICAL_VIEW_COPY_PRINCIPLES.md](./CANONICAL_VIEW_COPY_PRINCIPLES.md) | **Moved** — pointer only | Author in `rocket-sales/commercial/COPY_PRINCIPLES.md` |
@@ -147,7 +149,7 @@ Compose both for Rocket proposals, decks, and feature guides that mention platfo
 |------|----------------------|-----------|
 | Cold email, blog, landing, SEO page | `core-writing` → genre slug → `translation` (if localized) | — |
 | B2B proposal / RFP | `core-writing` → `proposal-writing` | CRM `search_semantic` for feature facts |
-| Custom / government proposal Thai | `core-writing` → `proposal-writing` → `TRANSLATION_PRINCIPLES.md` (manual convert) | general-proposal workflow; no CRM Knowledge facts |
+| Custom / government proposal Thai | `core-writing` → `proposal-writing` → `TRANSLATION_PRINCIPLES.md` (manual convert) | proposal skill, sources-only mode |
 | Sales / marketing deck | `core-writing` → `sales-slides` | CRM `get_feature_context` if feature-specific |
 | Catalog names / summaries | `core-writing` → `SALES_FEATURE_COPY_PRINCIPLES.md` | CRM Knowledge; live catalog |
 | Pricing sheet / features summary | Open `rocket-sales` pack → `commercial/COPY_PRINCIPLES.md` | Live catalog (required); Product Narrative optional color |

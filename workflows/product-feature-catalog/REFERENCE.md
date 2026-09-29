@@ -502,7 +502,7 @@ Each catalog run:
 - Map changed `feature_key`s → narrative `###` sections (via anchors / `<!-- feature_key -->`).
 - Rewrite only those sections (+ module intros if group set changed).
 - Leave unrelated sections untouched.
-- Update proposal workflow paths when the narrative file is renamed (`workflows/proposal-generator/REFERENCE.md`, `SCAFFOLDS.md`, and any scaffolds/resources that cite the old path). `workflows/general-proposal` may mention the old path only as a negative “do not use” — retarget that string to `PRODUCT_NARRATIVE.md` so the ban stays accurate.
+- Update the proposal skill when the narrative file is renamed, its `###` anchors change, or its section labels change (`.cursor/skills/proposal/SCAFFOLDS.md` reading map; `narrative-overview.sh`, which prints module intros plus each capability's **Overview** / **Purpose** / **What it enables** and stops at the next label).
 
 ### Schema evolution (provenance)
 
@@ -617,9 +617,8 @@ When renaming the narrative file, update at least:
 
 | Path | Change |
 |---|---|
-| `workflows/proposal-generator/REFERENCE.md` | `PRODUCT_FEATURE_CATALOG.md` → `PRODUCT_NARRATIVE.md` |
-| `workflows/proposal-generator/SCAFFOLDS.md` | Same path + wording (“catalogue” may stay; path must match) |
-| `workflows/general-proposal/REFERENCE.md` | Negative citation path |
+| `.cursor/skills/proposal/SKILL.md` | Narrative path in Resources |
+| `.cursor/skills/proposal/SCAFFOLDS.md` | Narrative path + `###` anchors in the reading map |
 | `docs/PROJECT_CONTEXT_STRUCTURE.md` | If it still points at the old path |
 | `requirements/CHANGELOG.md` | Optional historical mentions — leave unless editing that changelog entry anyway |
 

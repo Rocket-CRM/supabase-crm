@@ -364,15 +364,36 @@ In all other cases, omit. A list of limitations the customer never asked about r
 
 ---
 
+## 13. Explain Why And What Before How
+
+When explaining a feature, start with **why** it exists, then **what** it is — its main groups — and leave **how** (the click steps) out unless the reader will actually configure it.
+
+Anyone can recite steps without understanding them. Steps don't tell the reader what the feature is for or how its parts fit together; purpose and grouping do.
+
+How-first:
+
+> Click Add Reward, then Create Reward. Name the reward, set the point cost, set the end date, choose who can see it, then save.
+
+Why, then what:
+
+> Rewards let members burn the points they earn. Each reward has three groups of settings: how it's displayed (name, description, image), what it costs (points), and who can redeem it (eligibility).
+
+Name a group and one or two examples of what's in it; don't walk every setting. Even for someone who will configure it, the groups are usually enough — they can find the fields themselves. Step-by-step detail belongs in training or setup material, not in proposals, decks, or feature explanations.
+
+This is the explanation-level form of §1: the purpose is the core concept; the groups are the structure beneath it.
+
+---
+
 ## Core Checklist
 
-Checking every box does not make a draft sendable. For general proposals, pair this checklist with the excerpt-based cold-reader review in `workflows/general-proposal/SCAFFOLDS.md`.
+Checking every box does not make a draft sendable. For proposals, pair this checklist with the cold-reader review in the proposal skill (`.cursor/skills/proposal/`).
 
 ### Core Concept
 
 - [ ] Does the section lead with the controlling idea before detail?
 - [ ] Does every subsection and paragraph open with its answer or claim, not bury it at the end?
 - [ ] Can the reader understand the point from the headings and paragraph openers alone?
+- [ ] Are features explained by purpose and setting groups rather than click steps?
 
 ### Vertical Logic
 
