@@ -430,11 +430,11 @@ Headers:
 
 #### How It Works
 
-1. Validates admin auth + permission
+1. Validates admin auth + permission (`customer-360.update`, `front_line.update`, `event.update`, or `grower_registration.update`)
 2. Validates target user exists in merchant
 3. Loads the **allowed** field keys from config:
-   - Default fields: `user_field_config` where `editable_by_admin = true` AND `visible_to_admin = true`
-   - Custom fields: `form_fields` where `editable_by_admin = true` AND `visible_to_admin = true`
+   - Default fields: `user_field_config` where `editable_by_admin = true` AND `visible_to_admin = true` — for all four permissions above (event / grower-registration staff edit from admin forms such as order booking). Callers with none of them never reach this step.
+   - Custom fields: `form_fields` where `editable_by_admin = true` AND `visible_to_admin = true` for `customer-360.update` / `front_line.update`; event / grower-registration-only callers use `visible_to_user = true`
 4. For each submitted default field:
    - Skips if field_key is not in the allowed list
    - **Exception:** `line_id` with an empty value is always accepted for `customer-360.update` / `front_line.update`, even when `line_id` is inactive in `user_field_config` (identity unlink, not a profile field)

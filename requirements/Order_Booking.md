@@ -31,6 +31,7 @@ Owner surfaces: loyalty-admin (Choose Events → New Order modal, Orders tab, or
 - Member search is **merchant-wide** (not limited to event registration attendees). Attendee-scoped search exists elsewhere but is not the New Order customer picker.
 - Unknown **9-digit phone** queries can open **spot capture**, creating a member with acquisition source **event order spot**.
 - Walk-in event registration flows are out of scope on this modal.
+- The customer card pencil opens **Edit Member** (admin template). Phone is shown and editable there; a changed number is normalized to E.164 and saved through `bff_admin_update_member_profile` (duplicate phone in the merchant is rejected). It replaces the member's OTP login number with no re-verification. Staff with only `event.update` / `grower_registration.update` (e.g. Syngenta `frontline_sales`) can edit every `editable_by_admin` default field, including phone and email.
 
 ### Catalogue and lines
 

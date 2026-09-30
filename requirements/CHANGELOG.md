@@ -1,3 +1,7 @@
+## 2026-09-30
+
+- **Order Booking (Edit Member phone)** — New Order Edit Member now shows and saves phone (E.164, merchant-unique); `bff_admin_update_member_profile` applies admin default-field rules to `event.update` / `grower_registration.update` staff, so Syngenta `frontline_sales` phone and email edits persist (email was silently dropped before). Migration `bff_admin_update_member_profile_event_staff_admin_fields` (live). See `requirements/Order_Booking.md` §Rules › Customer selection, `requirements/Frontline_Admin_Actions.md` §4 Step 2.
+
 ## 2026-09-28
 
 - **Receipt Upload Earning (channel OCR auto-approve)** — Channel OCR is now a Super Admin switch (`feature_config.channel_ocr_enabled`); member uploads go to `channel-product-receipt-upload` (member token required, OpenRouter `google/gemini-3.8-flash`). Auto-approve needs merchant `auto_approve` (unset = off) + policy auto-approve + no failed check; new reasons `merchant_auto_approve_off`, `channel_auto_approve_off`, `purchase_failed`; auto purchase + upload written atomically by `fn_ocr_persist_channel_receipt`; `estimated_points` now points. Admin queue: review reasons, System/Admin approved + `p_approved_by` filter; settings: auto-approve, reading policies, sales channel product/hint editors. New handoff doc. See `requirements/Receipt_Channel_OCR_Auto_Approve.md` §Rules, `requirements/Receipt_Upload_Earning.md` §Rules.
