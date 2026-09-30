@@ -1,3 +1,7 @@
+## 2026-09-30
+
+- **AMP Workflows (audiences)** — Audience Edit now pre-fills saved conditions via new `bff_get_audience_details` (AUDIENCE-0072); gender conditions compare case-insensitively so `Male` matches merchant-config values like `male` (AUDIENCE-0077, AUDIENCE-0084). Migrations `20260930040108_bff_get_audience_details.sql`, `20260930040944_amp_condition_gender_case_insensitive.sql` (live); loyalty-admin `f6acd322`. See `requirements/AMP_Workflows.md` §Condition evaluation (shared semantics), §Admin journey.
+
 ## 2026-09-26
 
 - **Mission (AMP drafts + lifetime guard)** — `fn_amp_analysis_create_mission_draft` now matches admin defaults for standard missions (loop on, 1 per member all time progress limit, per-bill cap 1 when there is a single sum condition). Removed the legacy once-per-member block in `fn_update_mission_progress` that treated `allow_progress_loop = false` as “complete at most once ever.” Migration `20260926123000_amp_mission_draft_defaults_and_drop_lifetime_block.sql` (live). See `requirements/Mission.md` §Rules.

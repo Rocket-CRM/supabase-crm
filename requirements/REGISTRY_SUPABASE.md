@@ -165,6 +165,7 @@ F: bff_duplicate_amp_workflow(p_workflow_id uuid, p_new_name text DEFAULT NULL::
 F: bff_get_amp_workflow_full(p_workflow_id uuid) -> jsonb
 F: bff_get_amp_workflow_node_stats(p_workflow_id uuid) -> jsonb
 F: bff_get_audience_analytics(p_audience_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
+F: bff_get_audience_details(p_audience_id uuid, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_get_audience_members(p_audience_id uuid, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_include_exited boolean DEFAULT f...) -> jsonb
 F: bff_get_form_reward_workflow_config(p_form_id uuid) -> jsonb
 F: bff_get_workflow_collections() -> jsonb

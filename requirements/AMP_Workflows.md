@@ -101,6 +101,7 @@ Admin BFFs: `bff_list/get/upsert_amp_broadcast`, `bff_list_amp_broadcast_batches
 - Batch matcher `fn_amp_find_matching_users` evaluates **all** groups on the first condition node; `groups_operator` `and`/`all` → INTERSECT, `or`/`any` → UNION (default AND).
 - Per-user path `fn_evaluate_amp_condition_group` — group combination stays in the caller (Inngest). **Conditional Split** nodes use the same SQL evaluator (no client-side filter subset).
 - **Zero-row aggregates never match** in either path.
+- **Gender** compares case-insensitively for `equals` / `not_equals` / `in` / `not_in` (`fn_amp_build_condition_clause`): stored values follow each merchant's `user_field_config` (e.g. `male`) while metadata emits `MALE` / `FEMALE` / `NOT_SPECIFIED`. NULL semantics unchanged — unset gender does not match `not_equals`.
 - `fn_amp_assert_collection` whitelists all 13 metadata collections plus pseudo-collection `amp_audience_member` (`is_member_of` / `is_not_member_of`).
 - Audience entry: `fn_amp_resolve_entry_groups` synthesizes membership group when `entry_type = audience` and `groups` empty.
 - **Content engagement** condition groups (click / page time / scroll) are workflow split-only — excluded from audiences, entry matching, and `bff_amp_preview_condition` (see `AMP_Condition_Contract.md` §4.5).
@@ -147,7 +148,7 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Export members / node users | `bff_admin_start_user_export` source modes — see Known gaps |
 | Lifecycle event + actions | Creates/updates a linear automation without graph editor |
 
-1. **Audience Builder** — Create audience (name, type, conditions unless imported). For imported, upload CSV via import modal → `bff_import_audience_members`. Save → `bff_create_audience` / `bff_update_audience`. Preview size → `bff_amp_preview_condition`. Activate (optional backfill) → `bff_activate_audience`. View members and 7/30-day analytics cards. Refresh or deactivate as needed.
+1. **Audience Builder** — Create audience (name, type, conditions unless imported). For imported, upload CSV via import modal → `bff_import_audience_members`. Edit loads the audience with its saved conditions via `bff_get_audience_details` (the list payload omits conditions). Save → `bff_create_audience` / `bff_update_audience`. Preview size → `bff_amp_preview_condition`. Activate (optional backfill) → `bff_activate_audience`. View members and 7/30-day analytics cards. Refresh or deactivate as needed.
 2. **Workflow List** — List `scope=user` workflows. Open canvas → load graph → edit nodes (condition, message, wait, action, API, agent) → save `bff_upsert_amp_workflow_with_graph`. Activate workflow. Run batch manually. Inspect per-node stats, engagement tab, and user list modals. Duplicate workflow when needed (`bff_duplicate_amp_workflow`).
 3. **Lifecycle Automations** — List automations → create/edit wizard (lifecycle event, tier filters where applicable, ordered actions, schedule vs database trigger) → `bff_upsert_lifecycle_automation`. Toggle active state via same upsert contract.
 
@@ -182,7 +183,7 @@ Indexes on `workflow_log` include `(workflow_id, node_id, event_type)` and `(wor
 
 ### Functions
 
-**Audience BFFs** — `bff_create/update/delete/list_audiences`, `bff_activate/deactivate_audience`, `bff_refresh_audience`, `bff_get_audience_members`, `bff_get_audience_analytics`, `bff_import_audience_members`.
+**Audience BFFs** — `bff_create/update/delete/list_audiences`, `bff_get_audience_details` (single audience + `conditions` from the system workflow's condition node), `bff_activate/deactivate_audience`, `bff_refresh_audience`, `bff_get_audience_members`, `bff_get_audience_analytics`, `bff_import_audience_members`.
 
 **Workflow graph BFFs** — `bff_get_amp_workflow_full`, `bff_upsert_amp_workflow_with_graph`, `bff_duplicate_amp_workflow`, `bff_get_workflow_collections` (+ v2/v3/v4 extension helpers), `bff_amp_preview_condition`.
 
