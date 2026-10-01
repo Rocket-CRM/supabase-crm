@@ -8,6 +8,12 @@ const corsHeaders = {
 };
 const REFRESH_WINDOW_MS = 5 * 60 * 1000;
 const ENTITLEMENT_WINDOW_MS = 24 * 60 * 60 * 1000;
+/**
+ * Burns before this date used metafield delivery, whose single per-customer
+ * entitlement slot is overwritten by each later redemption — usage can no longer
+ * be established for them, so they are out of scope permanently.
+ */
+const SWEEP_MIN_CREATED_AT = Deno.env.get("SHOPIFY_POINTS_SWEEP_SINCE") ?? "2026-10-01T00:00:00Z";
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -82,13 +88,6 @@ query PointsDiscountUsage($id: ID!) {
   }
 }`;
 
-const CUSTOMER_ENTITLEMENT_QUERY = `
-query CustomerEntitlement($id: ID!) {
-  customer(id: $id) {
-    metafield(namespace: "loyalty", key: "discount_entitlement") { value }
-  }
-}`;
-
 type BurnRow = {
   id: string;
   user_id: string;
@@ -108,33 +107,29 @@ function windowEnd(row: BurnRow): number {
   return new Date(row.created_at).getTime() + ENTITLEMENT_WINDOW_MS;
 }
 
-async function hasReversal(supabase: any, transactionId: string): Promise<boolean> {
-  const { count } = await supabase
+/**
+ * One scan for every reversal, not one per candidate — wallet_ledger has no index
+ * for this predicate, so a per-row lookup costs a full seq scan each time.
+ */
+async function loadReversedTransactionIds(supabase: any): Promise<Set<string>> {
+  const { data, error } = await supabase
     .from("wallet_ledger")
-    .select("id", { count: "exact", head: true })
+    .select("metadata")
     .eq("metadata->>type", "shopify_points_to_discount_reversal")
-    .eq("metadata->>original_transaction_id", transactionId);
-  return (count ?? 0) > 0;
+    .gte("created_at", SWEEP_MIN_CREATED_AT);
+  if (error) throw error;
+  const ids = new Set<string>();
+  for (const row of data ?? []) {
+    const original = row?.metadata?.original_transaction_id;
+    if (typeof original === "string") ids.add(original);
+  }
+  return ids;
 }
 
 async function discountCodeWasUsed(supabase: any, cred: any, nodeId: string): Promise<boolean> {
   const { body } = await shopifyGraphql(supabase, cred, CODE_USAGE_QUERY, { id: nodeId });
   const usage = body?.data?.codeDiscountNode?.codeDiscount?.asyncUsageCount;
   return typeof usage === "number" && usage > 0;
-}
-
-async function metafieldWasConsumed(supabase: any, cred: any, customerId: string, intentId: string): Promise<boolean> {
-  const customerGid = customerId.startsWith("gid://") ? customerId : `gid://shopify/Customer/${customerId}`;
-  const { body } = await shopifyGraphql(supabase, cred, CUSTOMER_ENTITLEMENT_QUERY, { id: customerGid });
-  const raw = body?.data?.customer?.metafield?.value;
-  if (!raw) return false;
-  try {
-    const entitlement = JSON.parse(String(raw));
-    if (entitlement?.intent_id !== intentId) return false;
-    return entitlement?.status === "consumed";
-  } catch {
-    return false;
-  }
 }
 
 Deno.serve(async (req: Request) => {
@@ -152,11 +147,14 @@ Deno.serve(async (req: Request) => {
       .select("id, user_id, merchant_id, amount, source_id, created_at, metadata")
       .eq("transaction_type", "burn")
       .eq("metadata->>type", "shopify_points_to_discount")
+      .eq("metadata->>delivery", "discount_code")
+      .gte("created_at", SWEEP_MIN_CREATED_AT)
       .order("created_at", { ascending: true })
       .limit(500);
 
     if (error) throw error;
 
+    const reversed = await loadReversedTransactionIds(supabase);
     const credByMerchant = new Map<string, any>();
 
     for (const row of (burns ?? []) as BurnRow[]) {
@@ -169,12 +167,17 @@ Deno.serve(async (req: Request) => {
         summary.skipped.push(`${transactionId}:window_open`);
         continue;
       }
-      if (await hasReversal(supabase, transactionId)) {
+      if (reversed.has(transactionId)) {
         summary.skipped.push(`${transactionId}:already_reversed`);
         continue;
       }
 
-      const delivery = row.metadata?.delivery === "discount_code" ? "discount_code" : "metafield";
+      const nodeId = row.metadata?.discount_node_id;
+      if (typeof nodeId !== "string" || !nodeId.startsWith("gid://")) {
+        summary.skipped.push(`${transactionId}:missing_discount_node_id`);
+        continue;
+      }
+
       let used = false;
 
       try {
@@ -183,23 +186,7 @@ Deno.serve(async (req: Request) => {
           cred = await getShopifyCredential(supabase, row.merchant_id);
           credByMerchant.set(row.merchant_id, cred);
         }
-
-        if (delivery === "discount_code") {
-          const nodeId = row.metadata?.discount_node_id;
-          if (typeof nodeId === "string" && nodeId.startsWith("gid://")) {
-            used = await discountCodeWasUsed(supabase, cred, nodeId);
-          } else {
-            summary.skipped.push(`${transactionId}:missing_discount_node_id`);
-            continue;
-          }
-        } else {
-          const customerId = row.metadata?.shopify_customer_id;
-          if (customerId == null) {
-            summary.skipped.push(`${transactionId}:missing_shopify_customer_id`);
-            continue;
-          }
-          used = await metafieldWasConsumed(supabase, cred, String(customerId), transactionId);
-        }
+        used = await discountCodeWasUsed(supabase, cred, nodeId);
       } catch (err: any) {
         summary.errors.push(`${transactionId}:${err.message || "shopify_check_failed"}`);
         continue;
