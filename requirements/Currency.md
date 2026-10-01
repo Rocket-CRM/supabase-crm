@@ -226,6 +226,7 @@ Triggers on **wallet_ledger**: dedup key and Shopify store credit issue enqueue 
 | `bff_upsert_earn_factor_group` | Save a **whole** group; factors missing from the list are deleted |
 | `bff_admin_get_member_wallet_history` / `bff_admin_get_member_wallet_lots` | Admin member wallet views |
 | `api_get_wallet_transactions` | External/history reads |
+| `get_user_burn_rate` | Member burn rate + checkout cap; **available_points** / **max_discount** read **user_wallet.points_balance** (same balance **chokepoint_post_wallet_transaction** enforces), not a raw **wallet_ledger** sum |
 | `should_run_expiry_today` | Gate daily expiry job |
 | `process_currency_expiry_batch` | Batch expire lots for a run date |
 | `process_expiry_if_needed` | Legacy wrapper (prefer Render cron loop) |

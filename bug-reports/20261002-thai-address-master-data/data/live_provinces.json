@@ -1,0 +1,387 @@
+[
+  {
+    "id": "10",
+    "province_name_th": "กรุงเทพมหานคร",
+    "province_name_en": "Bangkok"
+  },
+  {
+    "id": "11",
+    "province_name_th": "จ.สมุทรปราการ",
+    "province_name_en": "Samut Prakarn"
+  },
+  {
+    "id": "12",
+    "province_name_th": "จ.นนทบุรี",
+    "province_name_en": "Nonthaburi"
+  },
+  {
+    "id": "13",
+    "province_name_th": "จ.ปทุมธานี",
+    "province_name_en": "Pathum Thani"
+  },
+  {
+    "id": "14",
+    "province_name_th": "จ.พระนครศรีอยุธยา",
+    "province_name_en": "Phra Nakhon Si Ayutthaya"
+  },
+  {
+    "id": "15",
+    "province_name_th": "จ.อ่างทอง",
+    "province_name_en": "Ang Thong"
+  },
+  {
+    "id": "16",
+    "province_name_th": "จ.ลพบุรี",
+    "province_name_en": "Lop Buri"
+  },
+  {
+    "id": "17",
+    "province_name_th": "จ.สิงห์บุรี",
+    "province_name_en": "Sing Buri"
+  },
+  {
+    "id": "18",
+    "province_name_th": "จ.ชัยนาท",
+    "province_name_en": "Chai Nat"
+  },
+  {
+    "id": "19",
+    "province_name_th": "จ.สระบุรี",
+    "province_name_en": "Saraburi"
+  },
+  {
+    "id": "20",
+    "province_name_th": "จ.ชลบุรี",
+    "province_name_en": "Chon Buri"
+  },
+  {
+    "id": "21",
+    "province_name_th": "จ.ระยอง",
+    "province_name_en": "Rayong"
+  },
+  {
+    "id": "22",
+    "province_name_th": "จ.จันทบุรี",
+    "province_name_en": "Chanthaburi"
+  },
+  {
+    "id": "23",
+    "province_name_th": "จ.ตราด",
+    "province_name_en": "Trat"
+  },
+  {
+    "id": "24",
+    "province_name_th": "จ.ฉะเชิงเทรา",
+    "province_name_en": "Chachoengsao"
+  },
+  {
+    "id": "25",
+    "province_name_th": "จ.ปราจีนบุรี",
+    "province_name_en": "Prachin Buri"
+  },
+  {
+    "id": "26",
+    "province_name_th": "จ.นครนายก",
+    "province_name_en": "Nakhon Nayok"
+  },
+  {
+    "id": "27",
+    "province_name_th": "จ.สระแก้ว",
+    "province_name_en": "Sa kaeo"
+  },
+  {
+    "id": "30",
+    "province_name_th": "จ.นครราชสีมา",
+    "province_name_en": "Nakhon Ratchasima"
+  },
+  {
+    "id": "31",
+    "province_name_th": "จ.บุรีรัมย์",
+    "province_name_en": "Buri Ram"
+  },
+  {
+    "id": "32",
+    "province_name_th": "จ.สุรินทร์",
+    "province_name_en": "Surin"
+  },
+  {
+    "id": "33",
+    "province_name_th": "จ.ศรีสะเกษ",
+    "province_name_en": "Si Sa Ket"
+  },
+  {
+    "id": "34",
+    "province_name_th": "จ.อุบลราชธานี",
+    "province_name_en": "Ubon Ratchathani"
+  },
+  {
+    "id": "35",
+    "province_name_th": "จ.ยโสธร",
+    "province_name_en": "Yasothon"
+  },
+  {
+    "id": "36",
+    "province_name_th": "จ.ชัยภูมิ",
+    "province_name_en": "Chaiyaphum"
+  },
+  {
+    "id": "37",
+    "province_name_th": "จ.อำนาจเจริญ",
+    "province_name_en": "Amnat Charoen"
+  },
+  {
+    "id": "38",
+    "province_name_th": "จ.บึงกาฬ",
+    "province_name_en": "Bueng Kan"
+  },
+  {
+    "id": "39",
+    "province_name_th": "จ.หนองบัวลำภู",
+    "province_name_en": "Nong Bua Lam Phu"
+  },
+  {
+    "id": "40",
+    "province_name_th": "จ.ขอนแก่น",
+    "province_name_en": "Khon Kaen"
+  },
+  {
+    "id": "41",
+    "province_name_th": "จ.อุดรธานี",
+    "province_name_en": "Udon Thani"
+  },
+  {
+    "id": "42",
+    "province_name_th": "จ.เลย",
+    "province_name_en": "Loei"
+  },
+  {
+    "id": "43",
+    "province_name_th": "จ.หนองคาย",
+    "province_name_en": "Nong Khai"
+  },
+  {
+    "id": "44",
+    "province_name_th": "จ.มหาสารคาม",
+    "province_name_en": "Maha Sarakham"
+  },
+  {
+    "id": "45",
+    "province_name_th": "จ.ร้อยเอ็ด",
+    "province_name_en": "Roi Et"
+  },
+  {
+    "id": "46",
+    "province_name_th": "จ.กาฬสินธุ์",
+    "province_name_en": "Kalasin"
+  },
+  {
+    "id": "47",
+    "province_name_th": "จ.สกลนคร",
+    "province_name_en": "Sakon Nakhon"
+  },
+  {
+    "id": "48",
+    "province_name_th": "จ.นครพนม",
+    "province_name_en": "Nakhon Phanom"
+  },
+  {
+    "id": "49",
+    "province_name_th": "จ.มุกดาหาร",
+    "province_name_en": "Mukdahan"
+  },
+  {
+    "id": "50",
+    "province_name_th": "จ.เชียงใหม่",
+    "province_name_en": "Chiang Mai"
+  },
+  {
+    "id": "51",
+    "province_name_th": "จ.ลำพูน",
+    "province_name_en": "Lamphun"
+  },
+  {
+    "id": "52",
+    "province_name_th": "จ.ลำปาง",
+    "province_name_en": "Lampang"
+  },
+  {
+    "id": "53",
+    "province_name_th": "จ.อุตรดิตถ์",
+    "province_name_en": "Uttaradit"
+  },
+  {
+    "id": "54",
+    "province_name_th": "จ.แพร่",
+    "province_name_en": "Phrae"
+  },
+  {
+    "id": "55",
+    "province_name_th": "จ.น่าน",
+    "province_name_en": "Nan"
+  },
+  {
+    "id": "56",
+    "province_name_th": "จ.พะเยา",
+    "province_name_en": "Phayao"
+  },
+  {
+    "id": "57",
+    "province_name_th": "จ.เชียงราย",
+    "province_name_en": "Chiang Rai"
+  },
+  {
+    "id": "58",
+    "province_name_th": "จ.แม่ฮ่องสอน",
+    "province_name_en": "Mae Hong Son"
+  },
+  {
+    "id": "60",
+    "province_name_th": "จ.นครสวรรค์",
+    "province_name_en": "Nakhon Sawan"
+  },
+  {
+    "id": "61",
+    "province_name_th": "จ.อุทัยธานี",
+    "province_name_en": "Uthai Thani"
+  },
+  {
+    "id": "62",
+    "province_name_th": "จ.กำแพงเพชร",
+    "province_name_en": "Kamphaeng Phet"
+  },
+  {
+    "id": "63",
+    "province_name_th": "จ.ตาก",
+    "province_name_en": "Tak"
+  },
+  {
+    "id": "64",
+    "province_name_th": "จ.สุโขทัย",
+    "province_name_en": "Sukhothai"
+  },
+  {
+    "id": "65",
+    "province_name_th": "จ.พิษณุโลก",
+    "province_name_en": "Phitsanulok"
+  },
+  {
+    "id": "66",
+    "province_name_th": "จ.พิจิตร",
+    "province_name_en": "Phichit"
+  },
+  {
+    "id": "67",
+    "province_name_th": "จ.เพชรบูรณ์",
+    "province_name_en": "Phetchabun"
+  },
+  {
+    "id": "70",
+    "province_name_th": "จ.ราชบุรี",
+    "province_name_en": "Ratchaburi"
+  },
+  {
+    "id": "71",
+    "province_name_th": "จ.กาญจนบุรี",
+    "province_name_en": "Kanchanaburi"
+  },
+  {
+    "id": "72",
+    "province_name_th": "จ.สุพรรณบุรี",
+    "province_name_en": "Suphan Buri"
+  },
+  {
+    "id": "73",
+    "province_name_th": "จ.นครปฐม",
+    "province_name_en": "Nakhon Pathom"
+  },
+  {
+    "id": "74",
+    "province_name_th": "จ.สมุทรสาคร",
+    "province_name_en": "Samut Sakhon"
+  },
+  {
+    "id": "75",
+    "province_name_th": "จ.สมุทรสงคราม",
+    "province_name_en": "Samut Songkhram"
+  },
+  {
+    "id": "76",
+    "province_name_th": "จ.เพชรบุรี",
+    "province_name_en": "Phetchaburi"
+  },
+  {
+    "id": "77",
+    "province_name_th": "จ.ประจวบคีรีขันธ์",
+    "province_name_en": "Prachuap Khiri Khan"
+  },
+  {
+    "id": "80",
+    "province_name_th": "จ.นครศรีธรรมราช",
+    "province_name_en": "Nakhon Si Thammarat"
+  },
+  {
+    "id": "81",
+    "province_name_th": "จ.กระบี่",
+    "province_name_en": "Krabi"
+  },
+  {
+    "id": "82",
+    "province_name_th": "จ.พังงา",
+    "province_name_en": "Phang-nga"
+  },
+  {
+    "id": "83",
+    "province_name_th": "จ.ภูเก็ต",
+    "province_name_en": "Phuket"
+  },
+  {
+    "id": "84",
+    "province_name_th": "จ.สุราษฎร์ธานี",
+    "province_name_en": "Surat Thani"
+  },
+  {
+    "id": "85",
+    "province_name_th": "จ.ระนอง",
+    "province_name_en": "Ranong"
+  },
+  {
+    "id": "86",
+    "province_name_th": "จ.ชุมพร",
+    "province_name_en": "Chumphon"
+  },
+  {
+    "id": "90",
+    "province_name_th": "จ.สงขลา",
+    "province_name_en": "Songkhla"
+  },
+  {
+    "id": "91",
+    "province_name_th": "จ.สตูล",
+    "province_name_en": "Satun"
+  },
+  {
+    "id": "92",
+    "province_name_th": "จ.ตรัง",
+    "province_name_en": "Trang"
+  },
+  {
+    "id": "93",
+    "province_name_th": "จ.พัทลุง",
+    "province_name_en": "Phatthalung"
+  },
+  {
+    "id": "94",
+    "province_name_th": "จ.ปัตตานี",
+    "province_name_en": "Pattani"
+  },
+  {
+    "id": "95",
+    "province_name_th": "จ.ยะลา",
+    "province_name_en": "Yala"
+  },
+  {
+    "id": "96",
+    "province_name_th": "จ.นราธิวาส",
+    "province_name_en": "Narathiwat"
+  }
+]
