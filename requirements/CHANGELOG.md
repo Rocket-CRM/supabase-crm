@@ -1,5 +1,6 @@
 ## 2026-10-01
 
+- **Authentication (bot login)** — Prod-gated member shortcut `GET /api/auth/bot-login` (Vercel `BOT_LOGIN_ENABLED`, server `BOT_SECRET`, allowlist merchant/tel); Edge `bff-auth-complete` `bot_secret` limited to one merchant + phone (`BOT_ALLOWED_MERCHANT_CODE` / `BOT_ALLOWED_TEL`, defaults `newcrm` / `+66966564526`). See `requirements/Authentication.md` §Rules.
 - **Currency (earn rules)** — Fixed Advanced earn **Add rule** / Uncovered stores **Add earn rule** saving the store condition but never the rate (success toast, store stayed uncovered; ADVANCEEARN-0110). New `bff_upsert_earn_factor` saves one factor and returns its id (`NOT_FOUND` instead of false success); `bff_upsert_earn_factor_group` now shares the row write `fn_upsert_earn_factor_row` (behavior unchanged). loyalty-admin single-row saves no longer re-send the whole group. Migration `earn_factor_single_row_upsert` (live). See `requirements/Currency.md` §Earn Factor Saves — Single Rate vs Whole Group.
 
 ## 2026-09-30
