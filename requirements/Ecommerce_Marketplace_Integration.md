@@ -1,8 +1,10 @@
 # E-commerce Marketplace Integration - Claim Points from Orders
 
+> **Routing:** Shopee / Lazada / TikTok Shop **order ledger, webhooks, Inngest ingest, and member claim** are documented in [`Marketplace.md`](./Marketplace.md). This file is retained for **BigCommerce storefront API** context and historical Kafka-era notes below (largely superseded for SEA marketplaces).
+
 **Version**: 2.0  
 **Last Updated**: December 2025  
-**Architecture**: Hookdeck → Kafka → Render Consumer → Inngest (Event-Driven with Native Batching)
+**Architecture**: Hookdeck → Kafka → Render Consumer → Inngest (Event-Driven with Native Batching) — **SEA live path is webhook → Inngest per `Marketplace.md`**
 
 ## Overview
 

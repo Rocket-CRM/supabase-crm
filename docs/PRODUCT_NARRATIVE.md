@@ -33,6 +33,34 @@ Voice: consultative, specific, outcome-led, proposal-ready. Mark `beta` / `plann
 
 ---
 
+## Buyer Story
+
+The frame every feature section plugs into. Taglines and copy variants live in the messaging doc, not here.
+
+**The problem — the brand makes the sale, someone else keeps the customer.** Most mass-market brands sell through third parties: marketplaces (Shopee, Lazada, TikTok Shop) and retail (Watsons, 7-Eleven, modern trade, dealers). The brand knows *what* it sold, not *who* bought it — offline it gets a monthly sales total; on a marketplace it gets a masked phone number it cannot use. That costs three things:
+
+- **Margin** — third-party channels take GP and campaign fees that keep rising.
+- **A leaky bucket** — with no way to bring a buyer back, growth depends on buying new customers with ads forever.
+- **Platform risk** — the relationship belongs to the platform, which can change fees, policy, or traffic at any time.
+
+**The answer — turn every buyer into the brand's own customer, then move repeat purchases to the brand's own channel.** Points are the lure that gets an anonymous third-party buyer to sign up and identify their order; campaigns and AI-driven activation then bring them back to the brand's own store, where margin is highest. Shorthand: *the first order comes from them; the second order comes from Rocket.*
+
+*Journey stages and where they live in this doc*
+
+| Stage | What happens | Sections |
+|---|---|---|
+| **Acquire (Join)** | Buyer finds the program (parcel insert QR, LINE rich menu, in-store QR) and signs up with LINE + phone | Authentication & Signup, Forms, PDPA Consent |
+| **Basic loyalty (Earn · Burn · Grow)** | Earn points on any channel, redeem rewards, climb tiers with better earn rates and exclusive rewards | Purchase Transactions, Currency, Rewards, Tiers |
+| **Deep engagement (Return)** | Rotating campaigns give members a reason to come back beyond the next purchase | Campaigns |
+| **Analyze (passive)** | The brand reads who bought what, where, and how they engage — dashboards, Customer 360, AI analysis | Reports, AMP AI Analysis & Recommendations |
+| **Activate (active)** | The brand sends a specific member a specific push — an offer, bonus points, a message — to drive the next action, usually a repeat purchase on the brand's own store | AMP Workflows, AMP AI Decisioning, Shopify |
+
+**Basic loyalty is necessary but not sufficient.** Earn, burn, and tiers are what every brand already runs; on their own they look generic and members drop off after the first redemption or two. Campaigns are what make a program worth returning to.
+
+**Why AI that acts matters.** A well-designed journey does not run itself: members sign up and never earn, earn and never redeem, redeem once and never return, or never hear about the campaign. Members stay at rest unless something pushes them. Rule-based workflows and the AI decisioning agent are that push — they move each member to the next stage. Most "AI" in loyalty tools answers questions about the data (Rocket does this too); Rocket's AI also decides and executes the next action per member within the brand's guardrails. It is the layer that connects the stages, not a feature bolted on top.
+
+---
+
 ## Loyalty
 
 Loyalty covers acquisition → engagement → campaigns → analysis → activation: members join, earn and burn value, move through tiers and campaigns, and the brand analyzes and activates next actions. Signup, campaigns, segmentation/RFM, loyalty admin (including PDPA, languages, Member 360, and 30+ reports), and Front Line all sit in this module.
@@ -1387,6 +1415,23 @@ The feature unifies multiple purchase sources — POS, admin entry, marketplace,
 
 Be the single source of truth for "did the member spend, where, on what, and what loyalty effects should that produce?" — across every commerce channel a merchant operates. The dual-ledger header/line-item model lets the platform award currency from amount alone when SKU data is missing, but unlock product/category/brand-specific rules when line items are present. The credit/debit refund pattern keeps loyalty math (currency reversals, tier progress adjustments, sales metrics) auditable instead of destructively edited.
 
+**Channel strategy — earn anywhere the brand sells**
+
+Every purchase channel falls on two axes: online vs offline, and third party (someone else sells) vs first party (the brand's own store or site). Each quadrant earns differently, and each plays a different role in the journey:
+
+| | Third party | First party |
+|---|---|---|
+| **Online** | **Marketplace** — member enters the Shopee / Lazada / TikTok order number to claim points | **Brand.com** — orders flow in automatically and match the member by phone or email; Shopify is a native app |
+| **Offline** | **Retail** — member uploads a receipt (AI can auto-approve clean receipts), or scans a unique code printed on the pack | **Brand's own stores** — POS orders matched to the member, or staff record the sale at the counter |
+
+- **Third party is the lure; first party is the repeat.** Claiming points on a marketplace or retail purchase is what turns an anonymous buyer into a member with a direct relationship. From there, rewards, campaigns, and activation steer the next purchase to the brand's own higher-margin channel.
+- **Earn rates can follow that strategy.** Earn factors can be conditioned by store, so a brand can earn lower on third-party channels and higher — or with a time-bound multiplier — on brand.com. Rewards designed as a meaningful discount on the next brand.com order close the loop.
+- **Only third-party quadrants ask the member to act** (claim an order, upload a receipt, scan a code). First-party purchases earn without member effort.
+- **Every order needs a member key.** A purchase can earn only when it identifies the member — usually phone, else email or an external id. An order that says only what was bought and where cannot be credited, which is why stores ask for the phone number at the till and why signup captures it.
+- **POS has an easy path and a harder one.** POS systems with an API can push orders in real time through the Open API. For POS without an API, the lowest-effort route is the daily order report almost every POS can already email: that file is imported nightly and each row becomes a purchase — set up per POS as a custom integration, not a self-serve setting. Small stores can skip integration entirely and use Front Line.
+- **Front Line gives staff two ways to credit a counter sale:** adjust points directly (with a receipt photo, no earn rules applied), or record the purchase — date, receipt number, amount — so earn rules compute the points.
+- **Unique pack codes** suit brands migrating an existing scan-to-earn program; for new programs receipt upload with AI auto-approve is usually cheaper, since unique codes require printing and a supply-chain changeover.
+
 **User Journey**
 
 *Admin journey*
@@ -1456,7 +1501,9 @@ The pipeline is event-driven outside the database and lands in `order_ledger_mkp
 
 **Purpose**
 
-Channel unification. A member who buys on the merchant's marketplace shop earns loyalty credit **without manual claim forms or receipt uploads**, and the merchant sees marketplace orders alongside POS, app, and other purchase sources in one history. This removes the operational tax of "I bought it on Shopee, why don't I have my points?" and gives merchants a single ledger for cross-channel loyalty performance.
+Turn anonymous marketplace buyers into known members. On a marketplace the brand knows what sold but not to whom — the relationship belongs to the platform. Claiming points is the lure: the buyer signs up, enters the order number, and the brand gains both the purchase history and a direct relationship it can use to bring that buyer back, ideally to brand.com. Because the CRM already holds every synced order, the member only types an order number — no receipt upload, no admin review — and the merchant sees marketplace orders alongside POS, app, and other purchase sources in one history.
+
+Claiming is deliberately member-initiated on Shopee, Lazada, and TikTok Shop: points go only to buyers who care enough to claim, instead of being given away to buyers who never notice them. Shopify orders auto-claim when the buyer matches a member.
 
 **User Journey**
 
@@ -1469,7 +1516,12 @@ The feature lives in **Marketplace Settings** and has two main areas:
 
 *Member journey*
 
-Members never configure or manually claim marketplace orders. They buy on the marketplace; the order syncs automatically; points appear after the order reaches the channel's claim-from status **and** purchase/currency processing succeeds.
+1. The buyer orders on the marketplace and learns about points from brand material in the parcel — typically an insert with a QR code to sign up.
+2. They sign up (or log in), open Earn, choose the marketplace, and enter the order number.
+3. If the order has synced and reached the claim-from status, the claim creates a purchase and points land; otherwise they see a clear reason (not found, not yet claimable, already claimed).
+4. The first successful claim links the member to their marketplace buyer account. Later orders from the same buyer can be offered as one-tap claims without retyping the order number — backend live, member screen **planned**.
+
+Shopify buyers skip the claim: the order matches the member by phone or email and points arrive automatically once the order is paid.
 
 *Edge cases*
 
@@ -1511,7 +1563,8 @@ Members never configure or manually claim marketplace orders. They buy on the ma
 
 - Orders below claim-from status do **not** create purchase transactions.
 - Duplicate webhooks **update** existing marketplace orders rather than insert duplicates.
-- **Buyer matching** uses marketplace buyer data — phone, email, username, or external user id. No CRM member match → marketplace order is stored but unclaimed.
+- **Shopee / Lazada / TikTok orders wait unclaimed** until a member claims them by order number; there is no auto-award switch for these platforms.
+- **Shopify buyer matching** uses buyer phone, email, or external user id. No CRM member match → the order is stored but unclaimed.
 - Shopify webhook handler does the match synchronously and auto-claims when both (a) a member matches and (b) the order has reached claim threshold.
 
 *Limitations*
@@ -1530,7 +1583,9 @@ This sub-feature does not have its own configuration surface beyond Purchase Tra
 
 **Purpose**
 
-Cover the long tail of purchases that **do not flow in via POS, e-commerce, marketplace, or any direct integration**. Where a merchant has retail partners, off-network channels, distributor networks, or simply legacy point-of-sale that can't push transaction data, receipts are the bridge. Members get credit; merchants extend loyalty into channels they don't directly own.
+Cover the long tail of purchases that **do not flow in via POS, e-commerce, marketplace, or any direct integration**. Receipt upload is the earn method for offline third-party retail — Watsons, 7-Eleven, modern trade, dealers — where the brand does not own the till and the retailer will never send it sales data. The receipt in the shopper's hand is the only record tying that purchase to a person, so the member supplies it self-service and the brand gains a direct relationship with a shopper it otherwise could not see.
+
+With **AI receipt reading** switched on, the system reads each receipt, matches eligible products for its sales channel, and auto-approves clean receipts (points land immediately) while sending the rest to the admin queue with plain-language review reasons. The operator's recurring work shrinks to the exceptions.
 
 **User Journey**
 
@@ -1558,12 +1613,13 @@ Cover the long tail of purchases that **do not flow in via POS, e-commerce, mark
 - **Batch id** marks receipt-sourced transactions for support traceability.
 - **Receipt image metadata** is stored on the purchase header and surfaces in admin tools.
 - **Identity preservation** — receipt purchases keep their source identifiers (`api_source`, `external_ref`, batch id) so support and reporting can distinguish them from POS/marketplace purchases.
-- **Review-gated** — unlike POS or marketplace purchases that are auto-completed, receipt purchases land in a review state and are completed only on admin approval.
+- **Review-gated by default** — receipt purchases land in a review state and complete on admin approval, unless AI receipt reading auto-approves them.
+- **AI receipt reading** — enabled per merchant by Rocket; auto-approve can be on or off overall and per sales-channel policy (e.g. stricter for third-party channels). Approved receipts show whether the system or an admin approved them.
 
 *Limitations*
 
-- Receipt upload depends on **manual admin review capacity** — throughput is bounded by reviewer count.
-- OCR/auto-extraction is not part of the loyalty contract documented here; submissions are reviewed against admin discretion plus configured rules.
+- Without AI auto-approve, throughput is bounded by **admin review capacity**.
+- AI receipt reading is not a self-serve toggle — Rocket switches it on; the brand then maintains the reading policies and the per-channel product lists receipts are matched against.
 
 ---
 
@@ -1819,7 +1875,7 @@ The sales story is **controlled personalization** — AI chooses timing and acti
 
 **Purpose**
 
-Replace static if/then automation with **AI-driven per-member decisions** that still operate inside merchant-defined guardrails. Where AMP Workflows says "if inactive 30 days, send 100 points," AMP AI Decisioning says "re-engage lapsed customers using these actions, within these limits, optimizing this outcome — figure out for each member whether to ACT, WAIT, or SKIP." This is the layer for high-judgment moments where rules over-fire or under-fire and a human marketer can't tune individually.
+Replace static if/then automation with **AI-driven per-member decisions** that still operate inside merchant-defined guardrails. Where AMP Workflows says "if inactive 30 days, send 100 points," AMP AI Decisioning says "re-engage lapsed customers using these actions, within these limits, optimizing this outcome — figure out for each member whether to ACT, WAIT, or SKIP." This is the layer for high-judgment moments where rules over-fire or under-fire and a human marketer can't tune individually. Example: a win-back rule for "spent over 5,000 THB in 12 months, no purchase in 2 months" never reaches the member who spent 4,900 THB and has been gone for 5 months — a human marketer would obviously act, and so does the agent. Covering that judgment with rules alone means writing workflows for every edge. Each time a member event reaches the agent it decides afresh; most of the time it waits or skips, and it acts only when an action is worth it.
 
 **User Journey**
 
@@ -3134,7 +3190,9 @@ Configurable per merchant for regulated industries.
 
 Campaign mechanics are part of **Loyalty**, not a separate public module. They are short-burst engagement activities that turn member attention into wallet spend, repeat visits, social acquisition, and habit formation. Each mechanic has its own configuration surface, but all plug into Currency, Rewards, Missions progress, and Marketing Automation for triggered communication.
 
-The five core campaign mechanics are: **Spin Wheel**, **Mass Lucky Draw**, **Missions**, **Referral**, and **Check-in**.
+Campaigns are what keep a program from being generic. Earn, burn, and tiers are table stakes — members try them once or twice and drift away when there is nothing new. Brands rotate mechanics (for example, one new campaign a quarter) so members always have a fresh reason to come back and buy.
+
+The five core campaign mechanics are: **Spin Wheel**, **Mass Lucky Draw**, **Missions**, **Referral**, and **Check-in**. **Leaderboard** is also available: a public ranked table — typically top spenders on a product or channel during a campaign window — competing for a privilege the brand fulfils offline (e.g. the top ten meet a celebrity); it does not yet have its own section below.
 
 ---
 
@@ -3510,6 +3568,8 @@ Authentication & Signup is the member identity and onboarding flow. Members auth
 **Purpose**
 
 To support the dominant SEA identity model (LINE in Thailand, Japan, Taiwan; phone OTP everywhere) and let merchants choose the minimum-friction onboarding that still gives them clean identity. The single `bff-auth-complete` entry point removes the combinatorial complexity of multiple auth methods × multiple device states × multiple profile-completeness states — the frontend just calls one endpoint and follows `next_step`.
+
+*Where members find the program.* The member program is a web app — a link that opens in any browser — so acquisition is a question of where the brand places that link: a LINE OA rich menu button (the most common, and it opens inside LINE so the member never switches apps), a QR code on a parcel insert or store counter, a social bio or ad, or a broadcast to existing LINE friends who are not yet members. Standard signup is allow LINE → enter phone → verify OTP. The brand ends up with the member's LINE ID (for personalized LINE messaging) and phone number (the key that matches POS, brand.com, and counter purchases to the member).
 
 **User Journey**
 

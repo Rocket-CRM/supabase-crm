@@ -88,11 +88,13 @@ C: refresh-mission-conditions-mv — `0 1 * * *` → `REFRESH MV mv_mission_cond
 
 E: admin-receipt-approve (public)
 E: admin-receipt-batch-confirm (public)
-E: admin-receipt-batch-confirm-v2 (public)
+E: admin-receipt-batch-confirm-v2 (public; admin session checked in-function)
 E: admin-receipt-batch-preview (public)
-E: admin-receipt-batch-preview-v2 (public)
+E: admin-receipt-batch-preview-v2 (public; admin session checked in-function)
 E: approve-receipts-admin (jwt)
-E: clear-receipt-preview (public)
+E: channel-product-receipt-upload (public; member token checked in-function) — channel OCR auto-approve, see `Receipt_Channel_OCR_Auto_Approve.md`
+E: clear-receipt-preview (public; member or admin token, tolerant)
+E: custom-receipt-upload-validate-duplicate (public; admin session checked in-function)
 E: forward-receipt (jwt)
 E: forward-receipt-with-points (jwt)
 E: receipt-preview-v2 (public) — **MUST deploy with `--no-verify-jwt`**; see `00-core.mdc`
@@ -100,10 +102,12 @@ E: receipt-recalculate-duplicates (public)
 E: receipt-upload-user (public)
 E: scanner (public)
 E: upload-receipts-auto (jwt)
-E: upload-receipts-auto-confirm (public)
-E: upload-receipts-auto-preview (public)
+E: upload-receipts-auto-confirm (public; member token tolerant, stored preview batch)
+E: upload-receipts-auto-preview (public; member token tolerant)
 E: custom-futurepark-confirm-status (public)
 E: custom-futurepark-ocr-eval (public)
+E: futurepark-receipt-crm-sync (public; requires `x-cron-secret`)
+C: futurepark-receipt-crm-sync (job 53) — `0 16 * * *` → `net.http_post` futurepark-receipt-crm-sync with Vault `receipt_crm_sync_cron_secret` header
 
 ---
 
@@ -116,6 +120,7 @@ E: amp-batch-dispatch (public)
 E: amp-dispatch-realtime-event (public)
 E: amp-dispatch-workflow-batch (public)
 E: amp-export-node-users (public)
+E: analytics-query (public, `verify_jwt: false`) — Admin JWT validated in-function; named loyalty reports → BigQuery `rocket-prod-analytics.serving_loyalty`. Source: `supabase/functions/analytics-query/`. See `Analytics.md`.
 E: dispatch-workflow-trigger (public)
 E: inngest-amp-serve (public)
 C: amp_run_due_scheduled_workflows — `* * * * *` → `fn_amp_run_due_scheduled_workflows()`
@@ -182,7 +187,7 @@ E: embed-jobs (jwt)
 E: embed-knowledge (public)
 E: embed-text (jwt)
 Q: internal_knowledge_embedding_jobs
-C: process-internal-knowledge-embeddings — `10 seconds` → `util.process_embeddings()`
+C: process-internal-knowledge-embeddings — `10 seconds` → `util.process_embeddings()` (**inactive**; daily drain via `doc_knowledge_drain_embeddings` + `scripts/drain-doc-knowledge-embeddings.mjs` after reconcile)
 
 ---
 
@@ -223,7 +228,7 @@ E: inngest-bulk-import-redemptions-serve (public)
 ## Inngest (other)
 
 E: inngest-currency-serve (public)
-E: inngest-event-router-serve (public, verify_jwt=false) — chokepoint outbox → Inngest routers including `notification-referral-router` (`crm.events.referral`).
+E: inngest-event-router-serve (public, verify_jwt=false) — chokepoint outbox → Inngest routers: currency / tier / mission / outcome / notification-* (including `notification-referral-router` for `crm.events.referral`) / amp-*. Event-driven only; expiry reminders moved to Render cron `expiry-reminder-batch` 2026-09-03.
 E: inngest-mission-serve (public)
 E: internal-proposal-inngest (public)
 
@@ -305,6 +310,7 @@ C: refresh-form-aggregation — `*/10 * * * *` → `fn_refresh_form_response_agg
 C: chokepoint_outbox_cleanup — `0 3 * * *` → `DELETE FROM public.chokepoint_event_outbox WHERE published_at < now() - 7d` (housekeeping for chokepoint→Kafka outbox)
 C: loyalty-cache-dirty-5m — Render Cron Job `*/5 * * * *` → dirty `fn_loyalty_cache_refresh_5m()`
 C: loyalty-cache-catchup-daily — Render Cron Job `0 19 * * *` → due `fn_loyalty_cache_catchup_chunk` (5000-user)
+C: expiry-reminder-batch — Render Cron Job `*/15 * * * *` → `fn_list_due_expiry_reminder_merchants(p_channel)` gate → `fn_find_points_expiring_soon` / `fn_find_rewards_expiring_soon` → shared delivery engine → `fn_mark_expiry_reminder_ran`. Replaces Inngest `expiry-reminder-tick` / `expiry-reminder-merchant` (removed from `inngest-event-router-serve` 2026-09-03).
 
 ---
 
@@ -317,6 +323,7 @@ R: crm-event-processors — Kafka consumers (Currency, Tier, Mission, AMP, Outco
 R: currency-expiry-daily — Render Cron Job (`0 19 * * *` UTC ≈ 02:00 ICT); one-shot `npm run job:currency-expiry-daily` on `crm-event-processors` image; loops `process_currency_expiry_batch` until `has_more=false`. Replaces pg_cron `daily-currency-expiry` (retired 2026-09-02).
 R: loyalty-cache-dirty-5m — Render Cron Job (`*/5 * * * *`); one-shot `npm run job:loyalty-cache-dirty-5m` on `crm-event-processors` image; dirty `fn_loyalty_cache_refresh_5m` only.
 R: loyalty-cache-catchup-daily — Render Cron Job (`0 19 * * *` UTC ≈ 02:00 ICT); one-shot `npm run job:loyalty-cache-catchup-daily`; full nightly re-eval via `fn_loyalty_cache_catchup_chunk` (5000 users, `SUPABASE_DB_DIRECT_URL`). Resume interrupted walks via manual trigger.
+R: expiry-reminder-batch — Render Cron Job (`*/15 * * * *`); one-shot `npm run job:expiry-reminder-batch` on `crm-event-processors` image. **Reminder, not notification**: no outbox / Inngest / notification-*-router. Merchant gate `fn_list_due_expiry_reminder_merchants(p_channel='line')` (event enabled on channel, local time ≥ `run_local_time` default 09:00 Asia/Bangkok, not marked ran today) → per merchant serial: finder RPCs (keyset 200) → `src/notification/deliver-notification.ts` in chunks of 50 (30s pause on LINE 429) → `fn_mark_expiry_reminder_ran` (skipped when a transient error occurred so the next tick retries; `ALREADY_SENT` dedups). Env: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, LINE proxy vars; optional `EXPIRY_REMINDER_MERCHANT_ID`, `EXPIRY_REMINDER_DRY_RUN`.
 R: mcp-crm-server — read-only MCP server exposing Supabase CRM data via Cursor MCP; source in `mcp-crm-server/`
 R: n8n-replacement — receipt + contact webhook handler that proxies to CRM/HubSpot; source in `n8n-replacement/`
 
