@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { applyPaidOrderToLoyaltyBalance } from "../_shared/shopify-points-balance.ts";
 import { handleComplianceWebhook, isComplianceTopic } from "./compliance.ts";
 import { handleCustomerWebhook, isCustomerTopic } from "./customers.ts";
 import { handleProductWebhook, isProductTopic } from "./products.ts";
@@ -234,50 +235,6 @@ function getLoyaltyDiscountAmount(order: Record<string, unknown>): number | null
   if (String(app.value_type || "").toLowerCase() !== "fixed_amount") return null;
   const amount = num(app.value);
   return amount > 0 ? amount : null;
-}
-
-async function consumeLoyaltyEntitlement(
-  credentialId: string,
-  credentialsIn: Record<string, unknown>,
-  customerGid: string,
-  orderIdStr: string,
-  expectedIntentId: string | null,
-  appliedDiscountAmount: number | null,
-): Promise<Record<string, unknown>> {
-  const readQuery = `query GetLoyaltyEntitlement($id: ID!) { customer(id: $id) { id metafield(namespace: "${LOYALTY_METAFIELD_NAMESPACE}", key: "${LOYALTY_METAFIELD_KEY}") { id value updatedAt } } }`;
-  const read = await shopifyGraphql(credentialId, credentialsIn, readQuery, { id: customerGid });
-  if (!read.ok || read.body?.errors) return { success: false, reason: "metafield_read_failed", raw_read: { status: read.status, body: read.body } };
-  const mf = (read.body?.data as Record<string, unknown>)?.customer as Record<string, unknown> | undefined;
-  const metafield = mf?.metafield as Record<string, unknown> | undefined;
-  if (!metafield?.value) return { success: false, reason: "no_active_entitlement", raw_read: { status: read.status, customer: mf } };
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(String(metafield.value));
-  } catch {
-    return { success: false, reason: "invalid_metafield_json", before: metafield.value };
-  }
-  if (parsed.status && parsed.status !== "active") return { success: true, reason: "already_consumed_or_inactive", before: parsed, intent_id: parsed.intent_id };
-  if (expectedIntentId) {
-    if (parsed.intent_id && parsed.intent_id !== expectedIntentId) return { success: false, reason: "intent_id_mismatch", before: parsed };
-  } else {
-    // Buy-Now fallback: Shopify strips cart attributes on "Buy it now"
-    // (https://community.shopify.dev/t/-/1895), so the order carries no
-    // intent_id. Match by customer (metafield is customer-scoped, one
-    // entitlement per customer) + amount sanity check: the Function can apply
-    // less than the entitlement (cart cheaper than discount) but never more.
-    const entitlementAmount = num(parsed.amount);
-    if (appliedDiscountAmount != null && entitlementAmount > 0 && appliedDiscountAmount > entitlementAmount + 0.01) {
-      return { success: false, reason: "amount_mismatch", before: parsed, applied_amount: appliedDiscountAmount };
-    }
-  }
-
-  const consumed = { ...parsed, status: "consumed", consumed_at: new Date().toISOString(), order_id: orderIdStr };
-  const writeQuery = `mutation ConsumeLoyaltyEntitlement($input: CustomerInput!) { customerUpdate(input: $input) { customer { id metafield(namespace: "${LOYALTY_METAFIELD_NAMESPACE}", key: "${LOYALTY_METAFIELD_KEY}") { id value updatedAt } } userErrors { field message } } }`;
-  const write = await shopifyGraphql(credentialId, read.credentials, writeQuery, { input: { id: customerGid, metafields: [{ namespace: LOYALTY_METAFIELD_NAMESPACE, key: LOYALTY_METAFIELD_KEY, type: "json", value: JSON.stringify(consumed) }] } });
-  const customerUpdate = (write.body?.data as Record<string, unknown>)?.customerUpdate as Record<string, unknown> | undefined;
-  const userErrors = customerUpdate?.userErrors as Array<Record<string, unknown>> | undefined;
-  if (!write.ok || write.body?.errors || (userErrors && userErrors.length > 0)) return { success: false, reason: "metafield_write_failed", before: parsed, raw_write: { status: write.status, body: write.body } };
-  return { success: true, matched_by: expectedIntentId ? "intent_id" : "customer_amount", before: parsed, after: consumed, intent_id: parsed.intent_id, raw_write: { status: write.status, written_metafield: (customerUpdate?.customer as Record<string, unknown>)?.metafield } };
 }
 
 async function markRewardCodesUsed(
@@ -611,6 +568,8 @@ Deno.serve(async (req: Request) => {
       claim: claimResult,
     };
 
+    const orderCodes = normalized?.discount_codes ?? [];
+
     let consumeResult: Record<string, unknown> | null = null;
     if (isCancelled) {
       consumeResult = {
@@ -619,63 +578,20 @@ Deno.serve(async (req: Request) => {
       };
     } else if (!paidLike) {
       consumeResult = { skipped: true, reason: `not_paid_yet:${finStatus || "unknown"}` };
-    } else if (!hasLoyaltyLine) {
-      consumeResult = { skipped: true, reason: "no_loyalty_discount_line" };
-    } else if (!customerGid) {
-      consumeResult = { skipped: true, reason: "no_customer" };
-    } else if (!intent) {
-      console.warn(
-        "[shopify-webhooks] paid order with Loyalty Redemption but no intent_id — consuming via customer+amount fallback (Buy Now)",
-        {
-          shop: shopDomain,
-          order_sn: String(order.id),
-          customer_gid: customerGid,
-          applied_amount: appliedLoyaltyAmount,
-        },
-      );
-      try {
-        const r = await consumeLoyaltyEntitlement(
-          merchant.credentialId,
-          merchant.credentials,
-          customerGid,
-          String(order.id),
-          null,
-          appliedLoyaltyAmount,
-        );
-        consumeResult = {
-          ...r,
-          matched_by: r.matched_by ?? "customer_amount",
-          applied_amount: appliedLoyaltyAmount,
-        };
-      } catch (err) {
-        console.error("[shopify-webhooks] fallback consume error:", err);
-        consumeResult = {
-          success: false,
-          reason: "consume_exception",
-          message: (err as Error)?.message,
-        };
-      }
     } else {
-      if (intent.usedKey !== LOYALTY_INTENT_CANONICAL_KEY) {
-        console.warn("[shopify-webhooks] non-canonical intent attribute key", {
-          shop: shopDomain,
-          order_sn: String(order.id),
-          intent_id: intent.intentId,
-          used_key: intent.usedKey,
-        });
-      }
       try {
-        const r = await consumeLoyaltyEntitlement(
-          merchant.credentialId,
-          merchant.credentials,
-          customerGid,
-          String(order.id),
-          intent.intentId,
-          appliedLoyaltyAmount,
-        );
-        consumeResult = { ...r, used_key: intent.usedKey };
+        consumeResult = await applyPaidOrderToLoyaltyBalance(supabase, {
+          id: merchant.credentialId,
+          merchant_id: merchant.merchantId,
+          credentials: merchant.credentials,
+        }, {
+          orderId: String(order.id),
+          customerGid: customerGid ?? null,
+          discountCodes: orderCodes,
+          order,
+        });
       } catch (err) {
-        console.error("[shopify-webhooks] consume error:", err);
+        console.error("[shopify-webhooks] balance apply error:", err);
         consumeResult = {
           success: false,
           reason: "consume_exception",
@@ -686,7 +602,6 @@ Deno.serve(async (req: Request) => {
     debugEntry.consume = consumeResult;
 
     let markUsedResult: Record<string, unknown> | null = null;
-    const orderCodes = normalized?.discount_codes ?? [];
     if (isCancelled) {
       markUsedResult = {
         skipped: true,
