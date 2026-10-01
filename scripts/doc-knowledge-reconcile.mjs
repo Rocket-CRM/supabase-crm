@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Reconcile requirements markdown + docs/PRODUCT_NARRATIVE.md
+ * Reconcile requirements markdown + docs/PRODUCT_NARRATIVE.md + docs/QA_Bot.md
  * → public.doc_knowledge_chunks (hash-skip).
- * search_docs defaults to requirements/ only; narrative is get_section-only.
+ * search_docs defaults to requirements/ only; the docs/ files are get_section-only.
  * Intended for daily CI cron + manual runs.
  *
  * Env:
@@ -26,6 +26,8 @@ const REQUIREMENTS_DIR = process.env.REQUIREMENTS_DIR
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+// Outside requirements/, so search_docs' default prefix never returns them.
+const GET_SECTION_ONLY_DOCS = ["docs/PRODUCT_NARRATIVE.md", "docs/QA_Bot.md"];
 const MAX_CHARS = 4000; // ~1k tokens rough cap per chunk
 const EXCLUDE_NAME_RE =
   /^(REGISTRY_|CHANGELOG\.md$|INDEX_FUNCTION\.md$|INDEX_DOMAIN\.md$)/i;
@@ -229,21 +231,19 @@ async function deactivateIds(ids) {
 async function main() {
   console.log(`Scanning ${REQUIREMENTS_DIR}`);
   const files = await walkMarkdownFiles(REQUIREMENTS_DIR);
-  const narrativePath = path.join(REPO_ROOT, "docs", "PRODUCT_NARRATIVE.md");
-  try {
-    await fs.access(narrativePath);
-    files.push(narrativePath);
-  } catch {
-    console.warn("docs/PRODUCT_NARRATIVE.md not found — skip narrative ingest");
+  for (const rel of GET_SECTION_ONLY_DOCS) {
+    const full = path.join(REPO_ROOT, rel);
+    try {
+      await fs.access(full);
+      files.push(full);
+    } catch {
+      console.warn(`${rel} not found — skip`);
+    }
   }
   const desired = [];
   for (const full of files) {
     const rel = path.relative(REPO_ROOT, full).split(path.sep).join("/");
-    // requirements/ for search_docs; narrative for get_section only
-    if (
-      !rel.startsWith("requirements/") &&
-      rel !== "docs/PRODUCT_NARRATIVE.md"
-    ) {
+    if (!rel.startsWith("requirements/") && !GET_SECTION_ONLY_DOCS.includes(rel)) {
       continue;
     }
     const raw = await fs.readFile(full, "utf8");

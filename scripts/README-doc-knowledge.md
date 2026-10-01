@@ -1,6 +1,6 @@
 # Doc knowledge reconcile
 
-Indexes local `requirements/**/*.md` (for `search_docs` + `get_section`) and `docs/PRODUCT_NARRATIVE.md` (`get_section` only) into `doc_knowledge_chunks`. Default `search_docs` stays on `requirements/`.
+Indexes local `requirements/**/*.md` (for `search_docs` + `get_section`), `docs/PRODUCT_NARRATIVE.md`, and `docs/QA_Bot.md` (`get_section` only) into `doc_knowledge_chunks`. Default `search_docs` stays on `requirements/`.
 
 ## Manual / daily (recommended)
 
