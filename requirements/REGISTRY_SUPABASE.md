@@ -622,6 +622,7 @@ F: bff_reverse_point_discount_burn(p_wallet_ledger_id uuid DEFAULT NULL::uuid, p
 F: bff_upsert_activity_currency_matrix(p_activity_id uuid, p_matrix_configs jsonb, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_basic_currency_config(p_config jsonb, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_currency_config(p_data jsonb, p_language text DEFAULT 'en'::text) -> jsonb
+F: bff_upsert_earn_factor(p_factor jsonb, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_earn_factor_group(p_group_data jsonb, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_expiry_reminder_settings(p_run_local_time time without time zone, p_timezone text, p_language text DEFAULT 'en'::text) -> jsonb
 F: bff_upsert_ticket_type(p_data jsonb, p_language text DEFAULT 'en'::text) -> jsonb
@@ -687,6 +688,7 @@ F: fn_ttl_points_repair_build_lots_multi(p_run_id uuid, p_limit integer DEFAULT 
 F: fn_ttl_points_repair_build_manifest(p_merchant_id uuid) -> jsonb
 F: fn_ttl_points_repair_finalize_manifest(p_run_id uuid) -> jsonb
 F: fn_ttl_points_repair_init_manifest(p_merchant_id uuid) -> jsonb
+F: fn_upsert_earn_factor_row(p_merchant_id uuid, p_group_id uuid, p_factor jsonb, OUT o_earn_factor_id uuid, OUT o_created boolean) -> record
 F: fn_wallet_today_stats(p_user_id uuid) -> jsonb
 F: generate_random_wallet_ticket_code(p_merchant_id uuid, p_transaction_type currency_transaction_type) -> text
 F: get_active_earn_factors(p_merchant_id uuid, p_check_time timestamp with time zone DEFAULT now()) -> TABLE(earn_factor_id uuid, earn_factor_t...

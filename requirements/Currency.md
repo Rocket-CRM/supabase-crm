@@ -3119,6 +3119,27 @@ Creates or updates the full basic config in one transaction.
 
 ---
 
+## Earn Factor Saves — Single Rate vs Whole Group (Implemented)
+
+Two admin BFFs write `earn_factor`. Both go through one internal row write, `fn_upsert_earn_factor_row(p_merchant_id, p_group_id, p_factor)` (not callable by clients), so column mapping and defaults live in one place.
+
+| BFF | Use for | What it does |
+|---|---|---|
+| `bff_upsert_earn_factor(p_factor, p_language)` | Adding or editing **one** rate or multiplier (loyalty-admin **Advanced earn → Add rule / edit**, **Uncovered stores → Add earn rule**) | `p_factor.earn_factor_group_id` is required and must belong to the merchant. No `id` → inserts and returns the new `earn_factor_id` (`created: true`). With `id` → updates that factor in that group (`created: false`). Touches no other factor in the group. |
+| `bff_upsert_earn_factor_group(p_group_data, p_language)` | Saving a **whole group** (Earn Studio, bulk save) | Upserts the group, then each factor in `factors[]`; factors in the group but missing from the list are **deleted**. |
+
+**Rules**
+
+- New factors are sent **without** an `id`; the server assigns it. A client-made id is treated as an update.
+- `bff_upsert_earn_factor` returns `NOT_FOUND` when the group is missing, or when an `id` is sent that is not a factor in that group (e.g. deleted meanwhile) — it never reports success without a write.
+- `bff_upsert_earn_factor_group` keeps its list semantics: an `id` that matches no factor in the group is skipped, and anything not kept is deleted. Do not use it to add a single row to a large group — re-sending every factor is slow and a concurrent save can delete another admin's new row.
+- Both validate `award_scope` (`INVALID_AWARD_SCOPE`) and reject a **rate** linked to a conditions group with a minimum threshold (`RATE_THRESHOLD_NOT_ALLOWED`).
+- Edits through either BFF replace the factor's window/time fields with what is sent (omitted → cleared); `allowed_purchase_statuses`, `award_scope`, `allowed_item_statuses` keep the existing value when omitted.
+
+**Journey — Uncovered stores:** a store with no store-scoped rate appears on Earn rules → **Uncovered stores**. **Add earn rule** writes the store condition (`bff_upsert_earn_conditions_group`), then one rate via `bff_upsert_earn_factor`; the store then resolves a rate (`fn_get_futurepark_baht_per_point` for FuturePark) and leaves the list.
+
+---
+
 ## Conclusion
 
 This currency rewards system provides merchants with a powerful, flexible platform for multi-currency loyalty programs. The architecture ensures accuracy through three-level idempotency protection (QStash, Inngest, Database), scales via durable execution with flow control, and maintains complete audit trails for all currency movements including reversals.
