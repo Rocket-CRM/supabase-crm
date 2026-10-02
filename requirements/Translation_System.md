@@ -35,7 +35,7 @@ Merchants author each object once, in their default language, inside its feature
 - **Translation page save** — Saves every language cell of the open object in one call: a non-empty cell upserts the override, an emptied cell deletes it, and the default-language cell is ignored (edit it in the feature editor).
 - **AI translate** — Fills only empty non-English cells, using English as the source when present; filled cells are never changed. Nothing persists until Save.
 - **Static UI separation** — Member pages use `ui_translations` + `get_ui_translations`; admin pages use `ui_translation_admin` + `get_admin_ui_translations`. Cross-wiring keys between tables is invalid.
-- **Cache invalidation** — Inserts/updates/deletes on `translations` fire domain triggers (rewards, display blocks, earn channels, etc.); `ui_translations` / `ui_translation_admin` changes invalidate UI translation Redis keys; `merchant_languages` / merchant config changes invalidate merchant-config cache.
+- **Cache invalidation** — Inserts/updates/deletes on `translations` fire domain triggers (rewards, display blocks, earn channels, etc.); `ui_translations` changes bump one cache version that is part of every member UI translation key, so a global row reaches every merchant's cached map on the next read; `ui_translation_admin` changes invalidate admin UI translation Redis keys; `merchant_languages` / merchant config changes invalidate merchant-config cache.
 - **Public member UI API** — `get_ui_translations` is callable without member auth (signup/login surfaces).
 - **Admin UI API** — `get_admin_ui_translations` requires admin JWT; parameter order is language first, then optional page key (opposite of the member UI RPC).
 - **Export** — `export_translations_for_language` returns dynamic rows for a merchant/language (optional entity-type filter) for bulk edit or external TMS handoff.
@@ -126,7 +126,7 @@ Storefront and embedded loyalty surfaces use the **same** member translation RPC
 | `fn_build_display_config_with_translations` / `fn_extract_display_block_translations` | Merge display block config with dynamic translations at read time. |
 | `api_get_rewards_full_cached`, `bff_get_user_profile_template`, `api_mark_redemption_used`, `bff_get_display_blocks_cached`, `bff_get_earn_channels` | Primary member/API surfaces accepting `p_language` and applying fallback extraction. |
 
-**Triggers** — `translations` → `translations_cache_invalidation`, display-block and earn-channel invalidation triggers; `ui_translations` → `ui_translations_cache_invalidation`.
+**Triggers** — `translations` → `translations_cache_invalidation`, display-block and earn-channel invalidation triggers; `ui_translations` → `ui_translations_bump_cache_version` (statement-level, bumps `ui_translation_cache_version.version`) and `trg_cache_purge_ui_translations` (Render `bootstrap,language_pack`).
 
 ### Flows
 
@@ -134,7 +134,7 @@ Storefront and embedded loyalty surfaces use the **same** member translation RPC
 
 **Dynamic read (display blocks)** — Cached block payload includes translatable config fields; `fn_build_display_config_with_translations` applies language + default language when serving `bff_get_display_blocks_cached` / `api_get_display_blocks_cached`.
 
-**Member static UI** — `get_ui_translations` checks Redis (`ui:{page_key}:lang:{language}` or all-pages key), on miss queries `ui_translations` with merchant override precedence, stores with ~1h TTL.
+**Member static UI** — `get_ui_translations` checks Redis (`ui:v{version}:{page_key}[:merchant:{id}]:lang:{language}` or the all-pages key), on miss queries `ui_translations` with merchant override precedence, stores with ~1h TTL. `{version}` comes from `ui_translation_cache_version`, so any `ui_translations` write makes every older key unreachable; they expire on TTL.
 
 **Merchant config** — Default language and enabled locales read from `merchant_languages` (and merchant config cache ~30m TTL) so getters do not assume English.
 
