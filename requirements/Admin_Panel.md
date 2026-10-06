@@ -328,6 +328,7 @@ If `permissions` key is present, all existing permissions for the role are delet
 4. Floating menu appears only when `floating_menu` array is non-empty. It overlays at the bottom regardless of sidebar state. When present and sidebar is visible, FE must add bottom padding to prevent content being obscured.
 5. `hide_sidebar = true` removes the menu. In the standalone admin, desktop keeps a slim rail with only the logo and account menu; content takes the rest. Used for frontline roles that only need the floating menu.
 6. Standalone admin navigation (loyalty-admin, not the embedded Shopify view) has no top bar. The sidebar has two modes, remembered per browser: expanded (icons + labels, a parent's submenu opens inline) and collapsed (icon rail, submenus in a hover popup). The module switcher sits under the logo. Merchant switching, language, platform admin and log out live in the account menu at the bottom of the sidebar. Settings opens a settings sub-panel beside the rail instead of page tabs. Page search is ⌘K only.
+7. Screens before a merchant is active — login, forgot password, and select merchant (`/select-merchant`, "Select a store") — show an EN / ไทย language switcher and render in the chosen language. The choice is the same admin UI language the account menu sets (stored per browser), so it carries into the app after the merchant is picked. It is independent of the merchant's member-facing languages.
 
 ---
 

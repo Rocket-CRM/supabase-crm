@@ -1,3 +1,7 @@
+## 2026-10-06
+
+- **Admin Panel (select merchant language)** — The post-login "Select a store" screen now has the same EN / ไทย language switcher as login and renders in the chosen language (LOGINSELECTMERCH-0194). loyalty-admin only; Thai copy ships as static admin overrides (no `ui_translation_admin` rows yet). See `requirements/Admin_Panel.md` §Business Rules.
+
 ## 2026-10-02
 
 - **Translation (member UI cache)** — A global `ui_translations` change cleared only the unscoped cache keys, so merchants (cached per merchant) kept the old map for up to 1h. Now every write bumps `ui_translation_cache_version` and `get_ui_translations` puts that version in its cache key; the per-row `trigger_invalidate_ui_cache` is dropped. Migration `ui_translations_versioned_cache` (live). See `requirements/Translation_System.md` §System › Member static UI.
