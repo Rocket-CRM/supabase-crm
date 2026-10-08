@@ -1,6 +1,6 @@
 # Shopify
 
-How Rocket loyalty plugs into Shopify end to end: app connection, embedded admin, storefront touchpoints, order ingest, commerce write-back, partner integrations (Judge.me, Gorgias, Klaviyo, custom webhook), and outbound delivery. It also covers where each path hands off to the shared chokepoint and outbox engines.
+How Rocket loyalty plugs into Shopify end to end: app connection, embedded admin, storefront touchpoints, order ingest, commerce write-back, partner integrations (Judge.me, Stamped.io, Gorgias, Klaviyo, custom webhook), and outbound delivery. It also covers where each path hands off to the shared chokepoint and outbox engines.
 
 Owner surfaces: loyalty-admin (`portal.rocket-loyalty.com`, standalone + Shopify Admin iframe), rewarding-shopify (Shopify app shell, theme + UI extensions, widget build), Supabase Edge (`auth-shopify-admin`, `shopify-webhooks`, `shopify-proxy`, `shopify-extension-api`, `integration-*`), Render `crm-event-processors` (outbox publishers + partner workers)
 
@@ -32,7 +32,7 @@ The integration is seven layers. Each depends only on the layer below it or on t
 | **Commerce ingest** | Shopify orders, refunds, and customer changes arrive as signed webhooks and join the shared marketplace order pipeline (same claim semantics as Shopee / Lazada / TikTok). |
 | **Shared engines** | The chokepoint writers (purchase, wallet, member, tier, referral, redemption) and the transactional outbox. Downstream engines react to outbox events, never to Shopify directly. |
 | **Commerce write-back** | Rocket pushes value into Shopify: unique reward / referral discount codes, Shopify store credit, points-to-discount checkout entitlements, free-product price sync. |
-| **Partner integrations** | Merchant-connected tools in the same embedded admin: reviews (Judge.me), support (Gorgias), marketing (Klaviyo), and a merchant-owned HTTPS endpoint (custom webhook). Contracts are channel-agnostic: LINE-only merchants use the same partner and outbound paths. |
+| **Partner integrations** | Merchant-connected tools in the same embedded admin: reviews (Judge.me, Stamped.io), support (Gorgias), marketing (Klaviyo), and a merchant-owned HTTPS endpoint (custom webhook). Contracts are channel-agnostic: LINE-only merchants use the same partner and outbound paths. |
 
 **Nouns**
 
@@ -152,7 +152,7 @@ Hub, widget, points on product, balance banner, points after purchase, and wishl
 | --- | --- | --- | --- |
 | Outbound event | Rocket → partner | A business event should trigger partner automation | Klaviyo metrics, custom webhook |
 | Snapshot sync | Rocket → partner | The partner needs current state for many members | Klaviyo Sync all |
-| Inbound fact webhook | Partner → Rocket | The partner reports a completed fact | Judge.me review published |
+| Inbound fact webhook | Partner → Rocket | The partner reports a completed fact | Judge.me or Stamped.io review published |
 | On-demand lookup | Partner → Rocket → partner | The partner UI needs live loyalty context | Gorgias ticket sidebar |
 | Inbound command | Partner → Rocket | A verified user action requests a core mutation | Gorgias Add earnings |
 
@@ -160,7 +160,7 @@ Hub, widget, points on product, balance banner, points after purchase, and wishl
 - **Identity** for partner facts: linked platform customer id, then verified external id, then normalized email, then phone where policy allows. No auto-create.
 - **Duplicates**: a repeat delivery returns success with no second side effect. An upgrade to the same object may pay only the delta (e.g. a photo added to a text review).
 - **OAuth**: start requires an admin session. State binds merchant + integration + expiry + nonce, with PKCE where supported. Tokens never appear in browser URLs. The callback redirects with `?partner=connected|error` as a notification only; the page renders authoritative state from BFFs. In the embedded app, partner authorization opens in the top window.
-- **Admin boundary**: integration pages show connection health, sync, and data/event docs. Point amounts, tier matrices, limits, and refund policy live under Earn, Rewards, and Tiers. Judge.me connect alone awards zero points.
+- **Admin boundary**: integration pages show connection health, sync, and data/event docs. Point amounts, tier matrices, limits, and refund policy live under Earn, Rewards, and Tiers. Judge.me or Stamped.io connect alone awards zero points.
 - **Health**: disconnected (no active credential), connected, degraded (repeated delivery or provisioning failure). Disconnect deactivates the credential and stops traffic. Feature rules elsewhere stay.
 
 ### Outbound delivery (custom webhook + Klaviyo)
@@ -205,12 +205,12 @@ Shopify is the last leg of a longer member journey: acquire on a marketplace or 
 | Plan & billing (Welcome, plan picker) | Shopify plan → Rocket plan assignment → entitlements refresh in embedded nav |
 | Earn rules › Earn from orders | Order earn rate / multipliers / per-tier rates (Simple vs Advanced editor: `Currency.md` › Shopify) |
 | Claim-from status + auto-complete days | Earn at paid (default) or at completed; auto-complete N days after delivery |
-| Earn rules › Earn from activities | Lifecycle templates plus **Write a product review** (Judge.me matrix: type × VIP tier, frequency) |
+| Earn rules › Earn from activities | Lifecycle templates plus **Write a product review** (Judge.me or Stamped.io matrix: type × VIP tier, frequency) |
 | Rewards (Shopify discount type) | Creates / updates the Shopify discount; redemptions mint unique codes |
 | Store credit ticket | Earning onto it issues Shopify store credit |
 | Referral settings (purchase tab) | Friend offer = mother discount; referrer outcomes; invite limits |
 | On-site content cards | Deep-link to the Shopify theme / checkout editor or the Rocket landing / widget editors |
-| Integrations hub | Connect Judge.me / Gorgias / Klaviyo (detail pages) or the custom webhook / LINE (modal) |
+| Integrations hub | Connect Judge.me / Stamped.io / Gorgias / Klaviyo (detail pages) or the custom webhook / LINE (modal) |
 | Klaviyo Sync new members / Sync all | Gates the `member.created` metric; bulk profile backfill (state only) |
 | Custom webhook URL + secret + events | Destination, signing key, subscription filter |
 
@@ -226,7 +226,7 @@ Shopify is the last leg of a longer member journey: acquire on a marketplace or 
 | Rewards | loyalty-admin → Edge | Reward save → `shopify-upsert-reward-discount` |
 | Referral settings | loyalty-admin | `/referral-settings`; `bff_upsert_referral_reward_atomic`, `bff_attach_campaign_reward` |
 | Integrations hub | loyalty-admin | `/integrations`; `bff_get_merchant_credentials`; catalog `integration-catalog.ts` |
-| Judge.me / Klaviyo / Gorgias detail | loyalty-admin → Edge | `/integrations/{partner}`; `bff_integration_{partner}_*`; `integration-{partner}-oauth-*` |
+| Judge.me / Stamped.io / Klaviyo / Gorgias detail | loyalty-admin → Edge | `/integrations/{partner}`; `bff_integration_{partner}_*`; Judge.me / Klaviyo / Gorgias OAuth; Stamped.io store hash + API key + manual review webhook (`integration-stamped-connect`, `integration-stamped-webhooks`) |
 | Custom webhook / registry modals | loyalty-admin → Edge | `bff_get_integration_config` / `bff_upsert_integration_config`, `integration-config-api` |
 
 1. **Cold install**: the merchant installs from Shopify → portal OAuth (full window) → consent → the callback creates the merchant + credentials → webhooks registered → redirect with `?shop=&host=` → App Bridge enters the Admin iframe.
@@ -237,10 +237,11 @@ Shopify is the last leg of a longer member journey: acquire on a marketplace or 
 6. **Configure rewards**: create a reward with a Shopify discount type → save creates the Shopify discount → it appears in hub spend tiles.
 7. **Configure purchase referral**: **Referral settings → Purchase** → friend offer (mother discount) + referrer outcome (points / tickets / reward via campaign slot) → share copy → **History**. Without a Shopify connection, the tab shows an empty state pointing to Connect Shopify.
 8. **Connect Judge.me**: **Integrations → Judge.me** → OAuth or private token (shop domain prefilled from the Shopify connection) → review webhooks registered (a failure shows **degraded**) → CTA to **Earn from activities → Write a product review**.
-9. **Connect Gorgias**: **Integrations → Gorgias** → subdomain → OAuth → the ticket sidebar + Add earnings form are provisioned (a failure shows **degraded** with a repair path).
-10. **Connect Klaviyo**: **Integrations → Klaviyo** → OAuth → the return banner → toggle **Sync new members** → **Sync all** to backfill → build flows on Rocket metrics and properties.
-11. **Connect custom webhook**: hub → webhook modal → public HTTPS URL + secret → select events → save. After 20 failures the connection shows **degraded** until re-saved.
-12. **Upgrade**: a locked feature → Shopify pricing plans → return to **Welcome** → sync → nav unlocks.
+9. **Connect Stamped.io**: **Integrations → Stamped.io** → store hash + private API key (shop domain prefilled) → copy Rocket payload URL + secret into Stamped **Reviews** webhook → first verified webhook moves health from **degraded** to **connected** → CTA to **Earn from activities → Write a product review** (Stamped provider).
+10. **Connect Gorgias**: **Integrations → Gorgias** → subdomain → OAuth → the ticket sidebar + Add earnings form are provisioned (a failure shows **degraded** with a repair path).
+11. **Connect Klaviyo**: **Integrations → Klaviyo** → OAuth → the return banner → toggle **Sync new members** → **Sync all** to backfill → build flows on Rocket metrics and properties.
+12. **Connect custom webhook**: hub → webhook modal → public HTTPS URL + secret → select events → save. After 20 failures the connection shows **degraded** until re-saved.
+13. **Upgrade**: a locked feature → Shopify pricing plans → return to **Welcome** → sync → nav unlocks.
 
 **Embedded surface rules** (loyalty-admin `settings-visibility.ts`): Rewards hides promo / settings tabs and forces digital fulfillment. Earn rules shows Earn from orders + Earn from activities and hides Earn Studio. Customers is a read-only profile with no import / export or marketplace demo card. Referral is purchase-only. Settings shows email-only customer notifications and hides Languages and ticket types on global currency. Lifecycle actions are reduced to points award, push reward, and tags.
 
@@ -415,6 +416,7 @@ flowchart LR
 | Store credit earn | wallet chokepoint → `trg_enqueue_shopify_store_credit_issue` → `shopify-issue-store-credit` | wallet | `wallet` | Shopify store credit issued; partners also receive `points.earned` (mapper is currency-blind) |
 | Points-to-discount | `shopify-points-to-discount` → wallet burn → checkout entitlement; the order webhook consumes it | wallet | `wallet` | `points.burned` |
 | Judge.me review | `integration-judgeme-webhooks` → `fn_award_judgeme_review` | wallet | `wallet` | `points.earned` → Klaviyo; tier / mission |
+| Stamped.io review | `integration-stamped-webhooks` → `fn_integration_stamped_award_review` | wallet | `wallet` | `points.earned` → Klaviyo; tier / mission |
 | Gorgias Add earnings | `integration-gorgias-adjust` → `fn_integration_gorgias_award_points` | wallet | `wallet` | Profile refresh in Klaviyo |
 
 **Webhook topic map (live `shopify-webhooks`)**
