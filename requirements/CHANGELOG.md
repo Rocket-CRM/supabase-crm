@@ -1,3 +1,8 @@
+## 2026-10-12
+
+- **CRM Event-Driven Architecture (outbox lock-down)** — `chokepoint_event_outbox` had RLS off with full `anon` / `authenticated` grants, so anyone with the public key could forge partner events. RLS is now on and those grants are revoked on the table, its sequence and `v_chokepoint_outbox_health`; chokepoint writers (SECURITY DEFINER) and Render readers are unaffected. Migration `lock_chokepoint_event_outbox` (live). See `requirements/CRM_Event_Driven_Architecture.md` §Rules › Chokepoint and emit.
+- **CRM Event-Driven Architecture (Mailchimp)** — Mailchimp partner integration live: admin card + `/integrations/mailchimp` (OAuth, audience picker, Sync new members, Sync all, Disconnect), Edge `integration-mailchimp-*`, and Render `IntegrationMailchimpEventConsumer` / `IntegrationMailchimpSyncWorker` behind `INTEGRATION_MAILCHIMP_ENABLED` (on). See `requirements/CRM_Event_Driven_Architecture.md` §Rules › Partner integration publishers.
+
 ## 2026-10-06
 
 - **Admin Panel (select merchant language)** — The post-login "Select a store" screen now has the same EN / ไทย language switcher as login and renders in the chosen language (LOGINSELECTMERCH-0194). loyalty-admin only; Thai copy ships as static admin overrides (no `ui_translation_admin` rows yet). See `requirements/Admin_Panel.md` §Business Rules.

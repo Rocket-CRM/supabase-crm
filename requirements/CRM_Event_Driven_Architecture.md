@@ -14,7 +14,7 @@ Loyalty behaviour is split into a **fast path** (commit the business fact in Pos
 
 **Core automation bus** — Reactions that stay inside Rocket (earn points, evaluate tier, missions, LINE/email notifications, AMP triggers, outcome attribution). An outbox publisher on Render drains eligible rows into **Inngest**; edge-hosted **router functions** match each incoming event name and invoke the right engine (currency serve, tier RPC, notification resolver, etc.). Routers may **bounce back** new Inngest events (for example delayed `currency/award` at 08:00) that engine serves execute later.
 
-**Partner integration bus** — The same outbox table, but **separate workers** with **separate cursors** (custom webhook, Klaviyo). They map internal topics to public `event_key` vocabulary, enrich with a live member snapshot, and POST to merchant credentials. This path does **not** use Inngest.
+**Partner integration bus** — The same outbox table, but **separate workers** with **separate cursors** (custom webhook, Klaviyo, Mailchimp). They map internal topics to public `event_key` vocabulary, enrich with a live member snapshot, and POST to merchant credentials. This path does **not** use Inngest.
 
 **Retired path (historical)** — Before 2026-07-07, ledger changes were also captured by Debezium CDC into Confluent Kafka; `crm-event-processors` consumers read Kafka topics. Confluent was deactivated; **live core processing is outbox → Inngest**. CDC cron jobs may still exist for housekeeping or analytics publications; they are not the operational source of truth for chokepoint domain events.
 
@@ -27,6 +27,7 @@ Loyalty behaviour is split into a **fast path** (commit the business fact in Pos
 - `fn_chokepoint_emit_event` (or equivalent inline emit inside the chokepoint) inserts one outbox row per emitted event with topic `crm.events.<domain>`, a `partition_key` for ordering (typically user id, purchase id, or redemption id), and a JSON payload aligned with the old CDC shape where routers still expect it.
 - `p_skip_emit`, payload `_skip_emit`, or domain-specific skip flags suppress emit for backfills and recursive chokepoint-to-chokepoint calls so the same business action does not double-publish.
 - Outbox `topic` must match `^crm\.events\.[a-z_]+$` (table CHECK).
+- Only chokepoint code writes the outbox. RLS is on with no policies and `anon` / `authenticated` hold no grants on the table, its id sequence, or `v_chokepoint_outbox_health`; writers are SECURITY DEFINER functions, readers are Render over `SUPABASE_DB_DIRECT_URL` or `service_role`. A client-writable outbox would let forged rows reach merchants' partner accounts.
 
 ### Core publisher (Inngest)
 
@@ -49,6 +50,7 @@ Loyalty behaviour is split into a **fast path** (commit the business fact in Pos
 - Cursor keys are per worker (`integration-webhook`, `integration-klaviyo`, etc.); advancing the cursor is independent of `published_at` on the core Inngest path.
 - Rows with no mapped public `event_key` are skipped but the cursor still advances past them.
 - Merchant must have active credentials and subscribed keys; missing email or required identity → skip with logged reason, not silent success.
+- Mailchimp (`mailchimp_events`): cursor seeds at the outbox head on first start, so history is never replayed into merchants' Customer Journeys. Writes only to members already in the merchant's selected audience (404 = skipped) unless `sync_new_members` is on (default off; adds as `transactional`, never changes subscription status). Mailchimp events have no idempotency key, so rows already logged `delivered` in `integration_delivery_log` are skipped on replay. Sync all (`integration_sync_jobs`, `integration_key = 'mailchimp'`) PATCHes existing audience members only.
 - Shopify install does not change the bus contract; wallet/referral emits from Judge.me earn or Gorgias goodwill still flow through the same outbox if integrations are connected (`Shopify.md` › System › Flows — shared-engine linkage).
 
 ### Housekeeping
@@ -81,8 +83,8 @@ There is no merchant settings page for the event bus. Journeys below are **opera
 
 ### Operator journey (partner path health)
 
-1. Confirm `INTEGRATION_WEBHOOK_ENABLED` and/or `INTEGRATION_KLAVIYO_ENABLED` on the same Render service.
-2. In admin **Integrations**, merchant connects webhook or Klaviyo (credentials in `merchant_credentials`).
+1. Confirm `INTEGRATION_WEBHOOK_ENABLED`, `INTEGRATION_KLAVIYO_ENABLED` and/or `INTEGRATION_MAILCHIMP_ENABLED` on the same Render service.
+2. In admin **Integrations**, merchant connects webhook, Klaviyo or Mailchimp (credentials in `merchant_credentials`).
 3. Monitor `integration_delivery_log` and credential degraded state; cursor lag warnings in worker logs (>5000 id gap or stale `created_at`).
 
 ### Member journey
@@ -140,9 +142,9 @@ Caller (BFF / api_* / edge / import)
 
 ```
 chokepoint_event_outbox
-  → IntegrationWebhookPublisher / IntegrationKlaviyoEventConsumer (cursor tail, 10s lag)
+  → IntegrationWebhookPublisher / IntegrationKlaviyoEventConsumer / IntegrationMailchimpEventConsumer (cursor tail, 10s lag)
   → event_keyFromOutbox + fn_integration_resolve_member_snapshot
-  → HTTPS to merchant webhook or Klaviyo APIs
+  → HTTPS to merchant webhook, Klaviyo or Mailchimp APIs
   → integration_delivery_log
 ```
 
@@ -158,7 +160,7 @@ chokepoint_event_outbox
 | Inngest Cloud | Registry, fan-out, idempotency, scheduling |
 | pg_cron | `chokepoint_outbox_cleanup`; legacy `cdc-heartbeat` / WAL alerts if CDC publication still monitored |
 
-Env reference (Render): `OUTBOX_PUBLISHER_ENABLED`, `SUPABASE_DB_DIRECT_URL`, `INNGEST_EVENT_KEY`, `OUTBOX_PUBLISH_TOPICS`, `OUTBOX_PUBLISHER_BATCH_SIZE` (default 500 drain; Inngest POST chunks 50 events), `INTEGRATION_WEBHOOK_ENABLED`, `INTEGRATION_KLAVIYO_ENABLED`.
+Env reference (Render): `OUTBOX_PUBLISHER_ENABLED`, `SUPABASE_DB_DIRECT_URL`, `INNGEST_EVENT_KEY`, `OUTBOX_PUBLISH_TOPICS`, `OUTBOX_PUBLISHER_BATCH_SIZE` (default 500 drain; Inngest POST chunks 50 events), `INTEGRATION_WEBHOOK_ENABLED`, `INTEGRATION_KLAVIYO_ENABLED`, `INTEGRATION_MAILCHIMP_ENABLED`.
 
 ### Known gaps
 

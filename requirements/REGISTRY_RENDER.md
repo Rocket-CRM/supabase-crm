@@ -281,6 +281,9 @@ C: rocket-agent-collect-results — `0 20 * * *` (inactive) → POST to rocket-a
 
 E: database-webhook-handler (jwt)
 E: integration-config-api (jwt)
+E: integration-mailchimp-oauth-start (jwt)
+E: integration-mailchimp-oauth-callback (public)
+E: integration-mailchimp-audiences (jwt)
 E: metabase-embed (public)
 E: metabase-sdk-auth (public)
 E: metabase-sso (public)
