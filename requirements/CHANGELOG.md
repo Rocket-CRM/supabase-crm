@@ -1,3 +1,8 @@
+## 2026-10-14
+
+- **Receipt Upload Earning (approve date)** — `bff_approve_receipt_upload` passed a UTC-rendered timestamp to `api_create_purchase`, which the parser reads as Bangkok wall time, so admin-approved receipts stored `transaction_date` 7h early (HERHYNESSREWARD-0214). Now passes the Bangkok wall-clock key. Migration `fix_approve_receipt_transaction_date_wall_bkk` (live); rows approved 2026-08-03 to 2026-10-14 are not yet repaired. See `requirements/Receipt_Upload_Earning.md` §Rules.
+- **Reward (Shipping redeem popup)** — Shipping rewards no longer offer Use now / See wallet after redeem; they show a delivery-details-received message and Done, with status in My Reward (REWARD-0207). loyalty-user only; new global `ui_translations` rows `popup_redeem_success_shipping`, `popup_redeem_success_title`, `popup_button_done`. See `requirements/Reward.md` §Journeys.
+
 ## 2026-10-12
 
 - **CRM Event-Driven Architecture (outbox lock-down)** — `chokepoint_event_outbox` had RLS off with full `anon` / `authenticated` grants, so anyone with the public key could forge partner events. RLS is now on and those grants are revoked on the table, its sequence and `v_chokepoint_outbox_health`; chokepoint writers (SECURITY DEFINER) and Render readers are unaffected. Migration `lock_chokepoint_event_outbox` (live). See `requirements/CRM_Event_Driven_Architecture.md` §Rules › Chokepoint and emit.

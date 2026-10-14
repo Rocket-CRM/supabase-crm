@@ -158,7 +158,7 @@ Common pitfalls: require points match with no rows; promo on with empty pool; wi
 3. Shipping rewards: confirm or save address, then confirm redeem.
 3a. Variant rewards: pick one option per required dimension.
 4. Redeem → immediate ack → spinner; success via Realtime ledger insert; failure via broadcast; timeout toast if neither within ~15s.
-5. Success popup: **Use now** or **See wallet** when self-use is on; when off, only **See wallet** with "show the code to staff" copy.
+5. Success popup: **Use now** or **See wallet** when self-use is on; when off, only **See wallet** with "show the code to staff" copy. **Shipping** rewards get neither: a "delivery details received" message with one **Done** button, and the member tracks it in My Reward (**View delivery**). Catalog route only; the legacy `/rewards-v2` and `/rewards-legacy` routes still show Use now / See wallet.
 6. **My Rewards** (wallet) holds redeemed-unused rewards. **Use** marks the redemption used and opens the slip: code, barcode, QR, slip instruction; flash rewards show a countdown under relative-minutes expiry.
 7. History tabs: claimed unused, used, expired.
 8. Claim link: preview → auth if needed → address if shipping → claim → wallet entry.
