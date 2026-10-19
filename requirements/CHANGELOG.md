@@ -1,3 +1,7 @@
+## 2026-10-19
+
+- **Product catalog** — Weekly run `abc1d106-ea71-4def-a289-330f3361b00b` reverified 90 active features and repaired 87 stale evidence pointers; five unsupported or contradictory GA rows were left unchanged for product review. See `workflows/product-feature-catalog/REFERENCE.md` §9–§10.
+
 ## 2026-10-16
 
 - **AMP Workflows (row OR)** — Conditions inside one group can now combine with OR: the AND between rows is a toggle on the group's `operator`, and both condition evaluators apply it, so entry, split, audience, funnel, preview and batch match agree (WORKFLOW-0215). Migration `amp_condition_group_row_operator` (live). See `requirements/AMP_Workflows.md` §Rules › Condition evaluation.
