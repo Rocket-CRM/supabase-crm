@@ -1,3 +1,9 @@
+## 2026-10-16
+
+- **AMP Workflows (row OR)** — Conditions inside one group can now combine with OR: the AND between rows is a toggle on the group's `operator`, and both condition evaluators apply it, so entry, split, audience, funnel, preview and batch match agree (WORKFLOW-0215). Migration `amp_condition_group_row_operator` (live). See `requirements/AMP_Workflows.md` §Rules › Condition evaluation.
+- **AMP Workflows (Remove Persona)** — New `remove_persona` workflow action clears the member's persona (WORKFLOW-0218). Migration `amp_action_remove_persona` + `inngest-amp-serve` v96 (live). See `requirements/AMP_Workflows.md` §Rules › Loyalty actions and message variables.
+- **AMP Workflows (tier/persona variables)** — Messages can use `{{user.tier_name}}` and `{{user.persona_name}}`, resolved at send time by `inngest-amp-serve` v96 (WORKFLOW-0216). See `requirements/AMP_Workflows.md` §Rules › Loyalty actions and message variables.
+
 ## 2026-10-14
 
 - **Receipt Upload Earning (approve date)** — `bff_approve_receipt_upload` passed a UTC-rendered timestamp to `api_create_purchase`, which the parser reads as Bangkok wall time, so admin-approved receipts stored `transaction_date` 7h early (HERHYNESSREWARD-0214). Now passes the Bangkok wall-clock key. Migration `fix_approve_receipt_transaction_date_wall_bkk` (live); rows approved 2026-08-03 to 2026-10-14 are not yet repaired. See `requirements/Receipt_Upload_Earning.md` §Rules.

@@ -16,7 +16,7 @@ Owner surfaces: loyalty-admin (Audience Builder, **Targeted broadcast**, Workflo
 
 **Targeted broadcast** — One identical LINE message sent once to a chosen audience, all LINE friends, or LINE friends who are not yet members (a conversion play). It sits between blanket broadcast and personalization: everyone receives the same content, but only within the chosen group. Audience-based broadcasts reach members with a linked LINE account only.
 
-**Workflow** — A directed graph of nodes run per member, for anything that needs more than one step: send, wait, branch on behaviour, send again. Node families: **flow control** (entry condition — mandatory, defines who enters; conditional split — true/false branch; time delay — minutes to months; LINE interaction router — one branch per button the member taps), **messages** (LINE, SMS — the outcome the member sees), **loyalty actions** (award currency, push reward, assign/remove tag, assign persona, grant a private earn factor for a window, submit a form response on the member's behalf), **audience actions** (add to / remove from audience), **webhook** (call a third-party URL), and **AI agent** (merchant brings its own model key; `AMP - AI Decisioning.md`). Loyalty actions only offer objects that already exist in their module (rewards, earn factors, personas, forms).
+**Workflow** — A directed graph of nodes run per member, for anything that needs more than one step: send, wait, branch on behaviour, send again. Node families: **flow control** (entry condition — mandatory, defines who enters; conditional split — true/false branch; time delay — minutes to months; LINE interaction router — one branch per button the member taps), **messages** (LINE, SMS — the outcome the member sees), **loyalty actions** (award currency, push reward, assign/remove tag, assign/remove persona, grant a private earn factor for a window, submit a form response on the member's behalf), **audience actions** (add to / remove from audience), **webhook** (call a third-party URL), and **AI agent** (merchant brings its own model key; `AMP - AI Decisioning.md`). Loyalty actions only offer objects that already exist in their module (rewards, earn factors, personas, forms).
 
 **Lifecycle automation** — A simplified, linear automation that fires on a moment in the member's life with the brand rather than on something the member did: sign-up, tier upgraded, tier downgraded, birthday, membership anniversary. Normal earning requires member action (buy, play a campaign); lifecycle automation observes these events and delivers something anyway (birthday points, a coupon on tier upgrade, a consolation coupon on downgrade, auto-assign a starter persona on sign-up). It is configured in the Earn Rules hub, not the workflow canvas, but runs on the same workflow engine with the same action set.
 
@@ -108,12 +108,18 @@ Admin BFFs: `bff_list/get/upsert_amp_broadcast`, `bff_list_amp_broadcast_batches
 
 - Batch matcher `fn_amp_find_matching_users` evaluates **all** groups on the first condition node; `groups_operator` `and`/`all` → INTERSECT, `or`/`any` → UNION (default AND).
 - Per-user path `fn_evaluate_amp_condition_group` — group combination stays in the caller (Inngest). **Conditional Split** nodes use the same SQL evaluator (no client-side filter subset).
+- **Rows inside a `simple` group** combine by the group's `operator`: `AND` (default, also when absent) or `OR`. The builder's separator between rows toggles it, one operator per group, for entry, split, audience and funnel conditions. Both `fn_evaluate_amp_condition_group` and `fn_amp_compile_condition_group` honour it. Aggregate `filters` always AND.
 - **Zero-row aggregates never match** in either path.
 - **Gender** compares case-insensitively for `equals` / `not_equals` / `in` / `not_in` (`fn_amp_build_condition_clause`): stored values follow each merchant's `user_field_config` (e.g. `male`) while metadata emits `MALE` / `FEMALE` / `NOT_SPECIFIED`. NULL semantics unchanged — unset gender does not match `not_equals`.
 - `fn_amp_assert_collection` whitelists all 13 metadata collections plus pseudo-collection `amp_audience_member` (`is_member_of` / `is_not_member_of`).
 - Audience entry: `fn_amp_resolve_entry_groups` synthesizes membership group when `entry_type = audience` and `groups` empty.
 - **Content engagement** condition groups (click / page time / scroll) are workflow split-only — excluded from audiences, entry matching, and `bff_amp_preview_condition` (see `AMP_Condition_Contract.md` §4.5).
 - Preview: `bff_amp_preview_condition` compiles only; count capped at 10,000 with `capped = true`; `statement_timeout` 30s on `authenticated`.
+
+### Loyalty actions and message variables
+
+- **Remove Persona** (`remove_persona`) clears the member's persona through the user-update chokepoint; no-op when they have none. No picker: a member holds at most one persona. Member-only, like the other loyalty actions.
+- **Message variables** resolve at send time in `inngest-amp-serve` from the member's `user_accounts` row plus `{{user.points_balance}}`, `{{user.tier_name}}` (`tier_master`) and `{{user.persona_name}}` (`persona_master`). Unset values render empty.
 
 ### Node stats and engagement
 

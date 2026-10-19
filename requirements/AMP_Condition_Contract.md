@@ -153,6 +153,7 @@ The caller-side wrapper is unchanged: `{"groups": [...], "groups_operator": "AND
   "type": "simple",
   "collection": "user_accounts",
   "timezone": "Asia/Bangkok",
+  "operator": "AND",
   "conditions": [
     {"field": "email", "operator": "is_not_empty"},
     {"field": "tier_id", "operator": "in", "value": ["<tier-uuid-1>", "<tier-uuid-2>"]},
@@ -161,7 +162,7 @@ The caller-side wrapper is unchanged: `{"groups": [...], "groups_operator": "AND
 }
 ```
 
-Scoping is automatic: `user_id = p_user_id AND merchant_id = p_merchant_id` (`id = p_user_id` for `user_accounts`). Conditions AND together within a group.
+Scoping is automatic: `user_id = p_user_id AND merchant_id = p_merchant_id` (`id = p_user_id` for `user_accounts`). Conditions combine by the group's `operator`: `AND` (default, also when absent) or `OR`. The per-member evaluator and `fn_amp_compile_condition_group` both apply it.
 
 ### 4.2 `aggregate` (unchanged shape; filters accept the full operator set incl. logical fields)
 

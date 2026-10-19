@@ -293,8 +293,11 @@ function substituteDeep(value, context) {
 async function buildTemplateContext(supabase, user_id, merchant_id, trigger_data) {
   let userRow = null;
   if (user_id) {
-    const { data } = await supabase.from("user_accounts").select("*").eq("id", user_id).single();
-    userRow = data;
+    const { data } = await supabase.from("user_accounts").select("*, tier_master!user_accounts_tier_id_fkey(tier_name), persona_master!user_accounts_persona_id_fkey(persona_name)").eq("id", user_id).single();
+    if (data) {
+      const { tier_master, persona_master, ...row } = data;
+      userRow = { ...row, tier_name: tier_master?.tier_name ?? "", persona_name: persona_master?.persona_name ?? "" };
+    }
   }
   let points_balance = null;
   if (userRow) {
@@ -523,6 +526,7 @@ async function executeActionDirect(supabase, actionType, config, ctx) {
     assign_persona: ()=>({
         persona_id: normalized.persona_id
       }),
+    remove_persona: ()=>({}),
     assign_earn_factor: ()=>({
         earn_factor_id: normalized.earn_factor_id,
         days: parseInt(normalized.window_end_days) || 30
