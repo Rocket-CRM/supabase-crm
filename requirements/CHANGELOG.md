@@ -1,3 +1,7 @@
+## 2026-10-22
+
+- **Forms (surveys)** — Survey fields added after the first save were saved with `group_id` null (member app showed only the first grouped questions; submit still validated all). Backfill assigns orphan fields to `default_fields` where that group exists; `bff_upsert_form` now resolves `default_fields` (or the first kept group) for payload fields missing `group_id`; loyalty-admin survey save stamps `group_id` on flat field lists. Migration `20261022113000_fix_survey_orphan_form_field_groups` (live). See `requirements/Forms.md` §System › Flows.
+
 ## 2026-10-19
 
 - **Product catalog** — Weekly run `abc1d106-ea71-4def-a289-330f3361b00b` reverified 90 active features and repaired 87 stale evidence pointers; five unsupported or contradictory GA rows were left unchanged for product review. See `workflows/product-feature-catalog/REFERENCE.md` §9–§10.

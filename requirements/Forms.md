@@ -178,6 +178,8 @@ Errors the member may see: required field, format validation, consent not accept
 
 **Profile save:** Client posts full template payload to `bff_save_user_profile` → validate → upsert account + address → upsert USER_PROFILE submission + responses → write consent ledger and channel prefs → set `is_signup_form_complete`.
 
+**Survey admin save:** loyalty-admin sends a flat field list; `bff_upsert_form` auto-creates `default_fields` when no groups are sent, and on later saves assigns fields missing `group_id` to `default_fields` (or the first kept group). Member load (`bff_get_form_details_user`) only returns fields joined to a group.
+
 **Survey submit:** Load published survey → client validation → `fn_check_form_submission_limits` (if applicable) → insert submission + responses → trigger reward workflow if configured.
 
 **Import:** Customer import may create draft USER_PROFILE submission (`source = 'bulk_import'`) when a published USER_PROFILE exists and the member has no submission yet.
