@@ -1945,23 +1945,23 @@ Members do **not** see an AI screen. They see normal CRM effects — points land
 
 **What it enables**
 
-Marketing teams get AI-assisted analysis of workflow and agent performance, with concrete recommendations on what to change next — without handing the AI the authority to ACT on customers.
+Marketing teams can ask AI to analyze customer acquisition, purchases, points earned, redemptions, and form data, then save a recommendation with its rationale, expected impact, target segment, and proposed configuration.
 
 **How it works**
 
-Operators review campaign/workflow results, ask analysis questions, and receive ranked recommendations grounded in observed outcomes (who converted, who stalled, which actions underperformed). Recommendations stay advisory until a human applies them in workflows or AI decisioning config.
+An operator starts an analysis thread and asks a question. The analysis worker reads the relevant loyalty and commerce views, stores the conversation, and saves any recommendation for review. Applying a recommendation is a separate authenticated action; proposed mission configurations stay inactive until a person reviews and applies them.
 
 **What differentiates it**
 
-Separates **analysis** from **decisioning**: the decisioning agent chooses ACT/WAIT/SKIP in-flight; analysis helps marketers improve the system of record afterward.
+Analysis stays separate from **decisioning**: the decisioning agent chooses ACT, WAIT, or SKIP for an individual customer, while analysis turns observed program data into proposals for the marketing team.
 
 **Key controls**
 
-Which workflows/agents are in scope, which outcomes matter, and whether a recommendation is accepted into a draft change.
+Analysis thread and question, recommendation type, target segment, proposed configuration, and the human decision to apply or dismiss it.
 
 **Example**
 
-After a win-back workflow underperforms, analysis highlights that WAIT decisions cluster on VIP personas and recommends tightening the VIP constraint or adding a softer first touch.
+A marketer asks why redemptions fell. The analysis compares burn activity and top rewards, explains the likely drivers, and saves a proposed mission as an inactive draft for review.
 
 ---
 
@@ -2423,6 +2423,32 @@ To turn "who picks this up?" from a manual decision into a deterministic rule th
 - **SLA timers pause on `waiting on customer` and `snoozed` statuses** and resume when the conversation re-opens; pause/resume logged in `cs_conversation_events`.
 - **Business hours pause SLA timers** outside the configured schedule (per-team / per-channel / per-tier supported; holiday calendar per country).
 - **Escalation is rule-driven** — SLA approaching → notify + bump priority; SLA breached → reassign supervisor + alert; agent unavailable → reassign within team.
+
+---
+
+### Quick replies
+
+<!-- feature_key: customer_service.agent_productivity.quick_replies -->
+
+**What it enables**
+
+Agents answer common questions with saved text replies instead of retyping them, improving response speed and consistency.
+
+**How it works**
+
+A merchant creates a text quick reply in the shared content library. From the Customer Service reply composer, an agent searches for or selects that resource; the delivery resolver sends the text through the active channel and records which resource was used.
+
+**What differentiates it**
+
+The saved reply is a reusable content asset, not text locked to one inbox. The same resource can support human agents, AI tools, workflows, and broadcasts while the agent keeps control of the customer response.
+
+**Key controls**
+
+Reply name and text, category, language, search tags, trigger patterns, and active status.
+
+**Example**
+
+An agent handling a delivery-delay question selects the saved status explanation, checks it against the order, and sends it without rewriting the standard guidance.
 
 ---
 

@@ -1,3 +1,7 @@
+## 2026-10-26
+
+- **Product catalog** — Weekly run `647f143c-06d1-4710-a85c-be9295355d58` repaired Quick replies and AMP AI Analysis evidence/copy, reverified Custom profile fields after the survey-save change, and left three unsupported or roadmap-conflicting GA rows unchanged for product review. Product Narrative updated for the two repaired rows. See `workflows/product-feature-catalog/REFERENCE.md` §9–§10.
+
 ## 2026-10-22
 
 - **Forms (surveys)** — Survey fields added after the first save were saved with `group_id` null (member app showed only the first grouped questions; submit still validated all). Backfill assigns orphan fields to `default_fields` where that group exists; `bff_upsert_form` now resolves `default_fields` (or the first kept group) for payload fields missing `group_id`; loyalty-admin survey save stamps `group_id` on flat field lists. Migration `20261022113000_fix_survey_orphan_form_field_groups` (live). See `requirements/Forms.md` §System › Flows.
