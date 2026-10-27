@@ -131,10 +131,12 @@ Common pitfalls: require condition match with no matching outcomes blocks all ch
 
 Entry point: the **earn channel**. A channel configured with `earn_method = 'checkin'` is a passthrough — tapping it leaves the earn sheet and opens `/checkin`, the same mechanism missions use. No new nav item is required.
 
+The built-in `campaign:checkin` channel is availability-gated on there being an active, in-window check-in campaign, and — because `/checkin` only lists QR-collection events — on the campaign's `condition_type` being `qr_collection`. A merchant running only streak campaigns therefore does not see a Check-in channel that would open an empty page. A custom channel may also select the `checkin` method.
+
 1. Member opens the check-in surface from the earn channel. The list shows active, in-window, eligible events with a progress bar and collected/total.
 2. Member opens an event: image, description, campaign window, the codes they have already collected (labels and times), and the outcomes split into "for each code" and "when all codes are collected".
 3. Member taps **Scan collect now**, or scans a printed code with the phone camera (which opens `?page=checkin&token=…`).
-4. Logged out, the scanned URL lands on the event preview; the token is kept across login and the collect resumes automatically.
+4. Logged out, the scanned URL lands on the event preview (the public `bff_get_checkin_event_preview`, which needs no session and exposes no member data); the token is kept across login and the collect resumes automatically.
 5. On success the app shows the granted outcomes and progress, driven entirely by the collect response. The completing scan shows the completion state with both the per-code and completion grants.
 6. Errors (already collected, inactive code, outside hours, limit, not eligible) are shown with the localized title/description returned by the RPC.
 
@@ -186,6 +188,7 @@ Members do not write `checkin_ledger` directly: the insert policy was removed an
 | `bff_delete_checkin_qr_code` | Deletes an unscanned code; refuses once scanned |
 | `bff_user_list_checkin_events` | Member list of active, in-window, eligible QR campaigns with progress |
 | `bff_user_get_checkin_event` | Member event detail by id or by scanned token; never returns a token for an uncollected code |
+| `bff_get_checkin_event_preview` | **Public** preview by scanned token, granted to `anon`: campaign, outcomes, scanned code label and total count only. No member data, no progress, no tokens for uncollected codes. This is what a logged-out scan renders; the collect write stays authenticated |
 | `bff_user_collect_checkin_qr` | The only member write: resolves the member from the session, delegates to `process_checkin`, returns the granted outcomes and completion state |
 | `fn_member_app_deep_link` | Shared member-app URL builder; kind `checkin_qr` returns `?page=checkin&token=…` |
 | `fn_dispatch_outcome` | Central grant primitive for every matched outcome |
