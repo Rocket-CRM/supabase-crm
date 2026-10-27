@@ -102,8 +102,9 @@ The purchase channels a brand sells through fall on two axes — online vs offli
 4. **`marketplace_code`** — platform picker + order claim using `marketplace_platforms`.
 5. **`external_link` / `generic_card`** — content + button; `mode=url` opens browser, `mode=page` uses app route map.
 6. **`mission`** — passthrough tab: closes the sheet and opens the Missions page (missions are not listed inside the sheet).
-7. **`referral`** — share link rendered inside the tab; if program inactive, apply/share errors per Referral rules (card may still show).
-8. **`form` / `checkin` / `social` / `info_card`** — generic content card with optional button (same body as custom channels); earning happens in the owning feature.
+7. **`checkin`** — passthrough tab: closes the sheet and opens `/checkin`, the check-in events surface (QR code collection). Like missions, the feature is too large to render inside the sheet. See `requirements/Checkin.md` §Journeys › Member journey.
+8. **`referral`** — share link rendered inside the tab; if program inactive, apply/share errors per Referral rules (card may still show).
+9. **`form` / `social` / `info_card`** — generic content card with optional button (same body as custom channels); earning happens in the owning feature.
 
 Routing reference (field usage): card display uses `channel_name`, `headline`, `description`, banners; detail uses how-to fields; `button_show` / `button_label` / flattened config for CTAs. Legacy Thai FE guide content archived at `Earn_Channel_FE_Guide.md` (pointer only).
 
