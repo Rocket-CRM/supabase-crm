@@ -53,6 +53,7 @@ Receipt upload is the earn method for **offline third-party retail**—Watsons, 
 - **Approved by** — `approved_method` `auto` / `auto_ocr` = System; any other value or null = Admin. `bff_list_receipt_uploads(p_approved_by = system | admin)` filters on this.
 - **Deferred CRM** — When `fn_get_upload_receipt_config.deferred_crm_confirm` is true (Future Park), approve may queue CRM sync instead of immediate local purchase; `crm_sync_*` columns drive member copy and display status. Full state machine → `FuturePark.md`.
 - **Referral** — Receipt-upload purchases do not drive referral purchase conversion; marketplace/Shopify orders use `referral_claim`. Signup referral still applies at join (`Referral.md`).
+- **Outcome choice (points or mission)** — An earn channel may offer a member choice on upload, configured at `earn_channel.config.outcome_choice` (`{ enabled, options: [{ type: 'points' | 'mission', label, mission_id }] }`). `fn_receipt_outcome_options` returns per-option `available` + `unavailable_reason` and is the single gate: both `upload_receipts` and `fn_ocr_persist_channel_receipt` re-validate against it and answer `OUTCOME_UNAVAILABLE`. A mission option is blocked by `not_supported` (deferred CRM), `not_available` (mission access state), `limit_reached` (progress quota gone) or `pending_review` (a pending receipt already holds the slot). **Pending only reserves a slot inside the mission's own limit window** (`fn_mission_calendar_boundary_start` on the merchant timezone), so the option re-enables at merchant-local 00:00 even if that receipt is still unapproved; `all_time` limits keep blocking until approval. A mission pick sets `purchase.earn_currency = false`. Chosen outcome is stored on `purchase_receipt_upload.chosen_outcome_type` / `chosen_outcome_mission_id` and shown to admin only — nothing on the admin side gates on it.
 
 ## Journeys
 
@@ -137,6 +138,7 @@ Live `purchase_receipt_upload.status` ∈ `pending` (default) \| `approved` \| `
 | `chokepoint_post_receipt_event` | Receipt LINE notification chokepoint (`submitted`, `rejected`; `approved` stub—no emit) |
 | `fn_receipt_upload_duplicate_matches`, `fn_receipt_upload_approved_datetime_amount_dup`, `fn_ocr_duplicate_by_receipt_id` | Duplicate detection dimensions beyond transaction number |
 | `fn_check_receipt_upload_daily_image_limit`, `fn_receipt_upload_daily_image_count` | Daily image caps (OCR / merchant policy callers) |
+| `bff_get_receipt_outcome_options`, `fn_receipt_outcome_options` | Member points-or-mission picker: per-option availability + reason; the gate both write paths re-validate (`OUTCOME_UNAVAILABLE`) |
 | `calc_currency_core` | Preview estimate and purchase-time earn (via purchase path) |
 
 ### Flows
