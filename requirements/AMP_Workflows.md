@@ -75,7 +75,7 @@ Graph orchestration, node handlers, cache layer, and historical pipeline notes: 
 | --- | --- |
 | `audience` | Member runs from audience membership (synthetic membership group when `groups` empty). |
 | `condition` | Member runs for users matching entry condition groups. |
-| `all_line_friends` | One LINE **broadcast** run (`run_scope = broadcast`). |
+| `all_line_friends` | One LINE **broadcast** run (`run_scope = broadcast`). Broadcast has no per-recipient member context, so member-only steps (SMS, email, award, push reward, tags, personas, forms, audiences) cannot run on it — the admin blocks saving such a graph (`line_friends_member_step`), and an already-saved one fails at execution with `No phone number available`. |
 | `line_option_selected` | Realtime enrollment on LINE postback (no batch). |
 | `past_line_interaction` | One **push** run per matching LINE user (`run_scope = line`). |
 | `all_line_friends_exclude_members` | On activate or **schedule**: page LINE follower IDs (messaging-service), drop friends linked on `user_accounts.line_id`, one **push** per remaining friend (`run_scope = line`). When `allow_re_enrollment` is off, friends who already have `execution_started` for this workflow (matched by `line_user_id`) are skipped before fan-out. Requires verified/premium LINE OA; members without linked LINE are not excluded. |
@@ -154,7 +154,8 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Schedule on condition/trigger node | `next_run_at` advanced by `fn_amp_compute_next_run_at`; cron picks due rows |
 | Condition preview (audience or node) | Estimated audience size without saving |
 | Export members / node users | `bff_admin_start_user_export` source modes — see Known gaps |
-| Entry type (entry condition node) | Audience, custom condition, all LINE friends, LINE friends excluding members, when a LINE option is selected, or past LINE content interaction — see Entry types |
+| Entry type (entry condition node) | Audience, custom condition, all LINE friends, LINE friends excluding members, when a LINE option is selected, or past LINE content interaction — see Entry types. The entry node has a single **True** output: it gates whether a run starts, so there is no False branch to connect |
+| Workflow description | Optional free text set in the canvas settings panel; shown on the Workflow List as a hover tooltip on the workflow name (`workflow_master.description`) |
 | Interaction router: upstream message + selection mode | Router reads button keys from the chosen upstream LINE message node only (editing the resource in Content Library alone does not add keys); `single` continues on the first key tapped, `multiple` runs one branch per key |
 | Broadcast recipients | Segment, all LINE friends, or LINE friends who are not members |
 | Broadcast content | Content Library resource (can create one inline), custom Flex JSON, or text with quick-reply pills |
@@ -182,7 +183,7 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 
 | Table | Role |
 | --- | --- |
-| `workflow_master` | Workflow identity: `workflow_code`, `name`, `scope`, `domain`, `run_mode`, `is_active`, `config` (incl. re-enrollment), merchant scope |
+| `workflow_master` | Workflow identity: `workflow_code`, `name`, `description` (list hover text), `scope`, `domain`, `run_mode`, `is_active`, `config` (incl. re-enrollment), merchant scope |
 | `workflow_node` | Graph nodes: `node_type`, `node_config` (conditions, messages, schedules, actions) |
 | `workflow_edge` | Directed edges between nodes (handles for branching) |
 | `workflow_trigger` | Realtime (`trigger_table` / `trigger_operation` / `trigger_conditions`) or scheduled (`trigger_type`, `next_run_at`, `last_run_at`, `schedule_status`) |

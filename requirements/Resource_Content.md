@@ -126,7 +126,7 @@ Indexes (live): unique `(merchant_id, resource_code)` where code not null; `(mer
 | Function | Role |
 | --- | --- |
 | `bff_upsert_resource_content_category` | Category CRUD |
-| `bff_list_resource_content_categories` | Category tree for admin |
+| `bff_list_resource_content_categories` | Category tree for admin — returns **roots only**, each with a nested `children[]` (and those children carry no `parent_id`); the admin FE flattens the tree and derives `parent_id` from the parent |
 | `bff_upsert_resource_content` | Resource CRUD (overload with `p_platform_content`, `p_trigger_patterns`; ignores `p_allowed_channels`) |
 | `bff_get_resource_content_details` | New/edit load |
 | `bff_list_resource_content` | Filtered list (type, category, search, active, pagination) |
