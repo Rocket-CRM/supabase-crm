@@ -1,5 +1,6 @@
 ## 2026-10-30
 
+- **Content Library (LINE text + image order)** — The 2026-10-27 one-bubble merge for a `text` + `image` pair is replaced by **two separate messages, image first**: the trailing text message drives the chat-list preview (plain image messages have no `altText` and show as "sent a photo"), and URLs in the copy stay auto-linked, so the merge's footer-button workaround is gone. An image block can keep the authored order via `text_position: "before"` — admin editor checkbox "Send text before this image" (default off). The editor's LINE preview now renders the pair in delivery order, closing the preview-vs-delivery gap behind CONTENTLIBRARY-0283 ("text merges with image + button"). Migration `render_blocks_text_image_separate_messages` (live); loyalty-admin `a0ed349b`. See `requirements/Resource_Content.md` §Rules › Text + image on LINE.
 - **Content Library (LINE preview fidelity)** — The rich-content editor's LINE-tab preview rendered card blocks as image + title + buttons only, while the Flex renderer also delivers a card's description, fields, and badge; a card with body copy looked clean in preview but arrived on LINE with text inside the bubble (CONTENTLIBRARY-0283). The preview now shows description, fields, and badge. loyalty-admin only. See `requirements/Resource_Content.md` §Rules › LINE preview.
 
 ## 2026-10-27
