@@ -14,7 +14,7 @@ Owner surfaces: loyalty-admin, loyalty-user (member app), Front Line
 
 **Quota section** — General (default tier config) plus optional VIP section when the member carries the VIP tag; each section has its own X/Y limit (X = non-deleted instances in section; Y = `asset_limit_per_user` on that config).
 
-**Sync flag** — Local `custom_crm_asset_sync` pending state; external CityPark HTTP sync is not wired in v1 (UI may still show verification copy).
+**Sync flag** — `custom_crm_asset_sync` pending state, drained every 5 min by the CityPark member register sync (see §System › Flows › CityPark member register sync).
 
 Open API / warranty-style assets use overlapping `asset` rows but `api_*` validation and SKU columns — not Exclusive Parking BFFs.
 
@@ -48,9 +48,12 @@ Open API / warranty-style assets use overlapping `asset` rows but `api_*` valida
 
 - VIP tier config is detected when `asset_tier_config.tags` is a JSON array containing an object with `name` ILIKE `VIP` (`fn_asset_config_is_vip`). General configs often store jsonb `null` for `tags` — not SQL NULL; bare `jsonb_array_elements` on jsonb null errors.
 
-**Sync (v1)**
+**Sync**
 
-- Writes call `fn_asset_mark_sync_pending` → `custom_crm_asset_sync.is_sync = false`. Admin “Sync” sets `is_sync = true` locally only — no CityPark HTTP or scheduled job.
+- Writes call `fn_asset_mark_sync_pending` → `custom_crm_asset_sync.is_sync = false`.
+- Tier change / member `is_active` toggle (`trg_custom_futurepark_member_sync` on `user_accounts`) and VIP tag add/remove (`trg_custom_futurepark_vip_sync` on `user_tags`) mark all of the member's CAR assets pending via `custom_futurepark_mark_member_sync_pending` (FuturePark merchant only).
+- CityPark register is a **full member snapshot**, not a delta: only active cars in `list_car`; omitting a plate deactivates it; `list_car: []` clears (member inactive); VIP is a `" VIP"` suffix on `member_type`.
+- Sync target is CityPark **sandbox** (`citypark_base_url` / `citypark_api_key` Vault secrets); production host/key not yet confirmed with CityPark.
 
 ## Journeys
 
@@ -140,6 +143,11 @@ Plate normalize: trim, collapse whitespace, lower (`fn_asset_normalize_plate`).
 | `fn_asset_mark_sync_pending` | Set / upsert sync row with `is_sync = false` |
 | `fn_asset_enforce_quota_after_tier_change` | FIFO `inactive` on downtier |
 | `validate_asset_custom_fields` | Open API field validation |
+| `custom_futurepark_mark_member_sync_pending` | Mark all of a member's CAR assets pending |
+| `custom_futurepark_build_member_register_payload` | Build the CityPark `/member/register` snapshot jsonb for one member |
+| `custom_futurepark_pending_sync_members` | Group pending flag rows by member for the drainer |
+| `custom_futurepark_citypark_config` | service_role-only reader of CityPark Vault secrets |
+| `custom_futurepark_trigger_member_sync` / `custom_futurepark_trigger_vip_sync` | Trigger fns for tier/`is_active`/VIP changes |
 
 **Admin / Front Line BFFs** — `fn_response_*` envelopes; merchant from `get_current_merchant_id()`.
 
@@ -189,16 +197,23 @@ On `apply_tier_change_core` after downgrade / manual / assign_entry paths, `fn_a
 - `ttl_seconds = 600`; `expires_at = now() + 10 minutes`; new `nonce` each call.
 - Payload (until CityPark validates): `CRM-PARKING-V1.<base64(utf8 json)>` with claims `v`, `kind=parking_entrance`, `merchant_id`, `user_id`, `asset_id`, `plate`, `province`, `exp`, `nonce`.
 
+**CityPark member register sync**
+
+1. pg_cron `custom-futurepark-member-register-sync` (every 5 min) → `net.http_post` Edge `custom-futurepark-member-register-sync` (Vault `futurepark_member_register_sync_cron_secret` header).
+2. Edge groups pending rows by member (`custom_futurepark_pending_sync_members`, ≤200/run), builds each snapshot (`custom_futurepark_build_member_register_payload`), POSTs `{citypark_base_url}/member/register` with `x-api-key`, sets `is_sync = true` only on HTTP success; failures stay pending and retry next run.
+3. Payload dates (v1 default, product to confirm): `stamp_time` / `start_date` = sync time (Bangkok), `expire_date` = end of current calendar year.
+4. **Long-term direction:** this flag-drainer is v1. The better pattern is the shared outbox (`chokepoint_event_outbox` → `crm-event-processors`) with a CityPark consumer — promote when a second consumer needs member-asset sync, not speculatively.
+
 ### External services
 
-- **CityPark** — Not integrated in v1 (no HTTP sync, no gate validation of QR payload).
+- **CityPark** — Member register sync live against sandbox (above). Entrance QR payload still not gate-validated by CityPark.
 
 ### Known gaps
 
 | Gap | Notes |
 | --- | --- |
 | Admin masters UI | No UI for `asset_type`, `field_schema`, tier limits, VIP tags |
-| Real sync | No CityPark HTTP; no 02:00 cron; admin Sync is local flag only |
+| CityPark go-live | Production host/key + success/error contract unconfirmed; `stamp_time`/`start_date`/`expire_date` sources are v1 defaults |
 | `quota_notice` | Member get omits post-downtier notice until durable signal exists |
 | DB unique on plate | Blocked until historical duplicate plates cleaned |
 | Thai admin copy | Some Front Line / member keys may lack `ui_translation_admin` rows |

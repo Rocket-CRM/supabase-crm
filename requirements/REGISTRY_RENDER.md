@@ -106,8 +106,10 @@ E: upload-receipts-auto-confirm (public; member token tolerant, stored preview b
 E: upload-receipts-auto-preview (public; member token tolerant)
 E: custom-futurepark-confirm-status (public)
 E: custom-futurepark-ocr-eval (public)
+E: custom-futurepark-member-register-sync (public; requires `x-cron-secret`) — CityPark member register drainer
 E: futurepark-receipt-crm-sync (public; requires `x-cron-secret`)
 C: futurepark-receipt-crm-sync (job 53) — `0 16 * * *` → `net.http_post` futurepark-receipt-crm-sync with Vault `receipt_crm_sync_cron_secret` header
+C: custom-futurepark-member-register-sync — `*/5 * * * *` → `net.http_post` custom-futurepark-member-register-sync with Vault `futurepark_member_register_sync_cron_secret` header
 
 ---
 
@@ -164,8 +166,9 @@ E: webhook-shopee (public)
 E: shopify-create-discount-code (jwt)
 E: shopify-get-discount-products (public)
 E: shopify-list-discounts (public)
-E: shopify-points-to-discount (public)
+E: shopify-points-to-discount (public) — `delivery` selects the payout shape: `metafield` (default, widget path) writes `loyalty.discount_entitlement`; `discount_code` mints a single-use `DiscountCodeBasic` (`LOYALTY`+16, 24 h, usageLimit 1, combines with order/product/shipping) for the headless store. Shopify customer id resolved from `user_accounts.marketplace_external_ids`, never the request body
 E: shopify-proxy (public)
+E: shopify-sweep-points-discount (jwt) — hourly reversal sweep for `discount_code` burns whose 24 h window closed with `asyncUsageCount = 0`; metafield burns and anything before the `SHOPIFY_POINTS_SWEEP_SINCE` cutoff are out of scope (entitlement slot is overwritten, so usage is unverifiable). Backed by partial index `idx_wallet_ledger_shopify_points_discount`
 E: shopify-register-webhooks (jwt) — admin/service-only; idempotent register of orders/* webhooks per shop, stamps `merchant_credentials.webhook_url` + `credentials.webhook_endpoint`
 E: shopify-token-refresh (public)
 E: shopify-webhooks (public) — receives orders/{create,paid,fulfilled,cancelled,updated} from Shopify; HMAC-verified via `api_secret`; normalizes → `upsert_marketplace_order` → `fn_match_marketplace_user` → `fn_claim_marketplace_order_service` (auto-claim when buyer matches). On `orders/paid` also runs the **loyalty entitlement consume path**: reads `_loyalty_intent_id` (canonical) — falls back to `loyalty_intent_id` and legacy `loyalty_intent_id__` for in-flight widget variants — from `note_attributes`, requires a `Loyalty Redemption` discount line on the order, then GraphQL-reads the customer metafield `loyalty.discount_entitlement` and flips `status:"active"` → `status:"consumed"` (adds `consumed_at`, `order_id`) only when the metafield's `intent_id` matches the cart attribute. Idempotent (no-op when already `consumed`). Consume failures log but never fail the webhook (capture + earn-back already succeeded).
@@ -177,6 +180,7 @@ E: bigcommerce-setup-integration (jwt)
 E: inngest-marketplace-serve (public)
 C: marketplace-batch-checker — `* * * * *` → POST to edge fn marketplace-batch-checker
 C: marketplace-token-refresh — `59 * * * *` → POST to edge fn marketplace-token-refresh
+C: shopify-sweep-points-discount-hourly — `35 * * * *` → POST to edge fn shopify-sweep-points-discount (jobid 91)
 C: shopify-token-refresh — `*/30 * * * *` → POST to edge fn shopify-token-refresh
 
 ---
@@ -218,9 +222,9 @@ E: futurepark_ui_translation (public)
 ## Bulk Import / Customer Import
 
 E: admin-user-export-csv (public) — Inngest serve (`crm-user-export`): `export-users-csv` on `export/users-csv` (customer CSV); `export-analytics-csv` on `export/analytics-csv` (report fact extracts → Storage `exports` + messaging-service email).
-E: inngest-bulk-import-currency-serve (public)
+E: inngest-bulk-import-currency-serve (public) [LEGACY — superseded 2026-10-01 by the import worker on R: crm-batch-upload; no producer; retire]
 E: inngest-bulk-import-customers-serve (public)
-E: inngest-bulk-import-purchase-serve (public)
+E: inngest-bulk-import-purchase-serve (public) [LEGACY — superseded 2026-10-01 by the import worker on R: crm-batch-upload; no producer; retire]
 E: inngest-bulk-import-redemptions-serve (public)
 
 ---
@@ -318,6 +322,7 @@ C: expiry-reminder-batch — Render Cron Job `*/15 * * * *` → `fn_list_due_exp
 
 > **Hand-maintained.** Add each Render service below as `R: <name> — <one-line purpose>`. Update on every add/rename/delete.
 
+R: crm-batch-upload — Web service (repo `crm-batch-upload`). Ops import API `/api/import/*` (`x-api-key` = `IMPORT_API_KEY`; 503 when unset): `currency` and `purchases` stage rows via `fn_import_stage_rows` + queue via `fn_import_queue_batch`; `customers` / `redemptions` still emit legacy Inngest events. Hosts the **import worker** in-process (starts when `SUPABASE_DB_DIRECT_URL` is set): LISTEN `import_batch_queued` + 30s poll → claim worker-type batch → one transaction `fn_import_execute_<type>` → migration tier step `fn_import_reevaluate_tiers`. Also FuturePark OCR eval runner and one-off data migrations. See `requirements/architecture/Bulk_Import.md`.
 R: amp-ai-service — Inngest-driven AMP worker (marketing agent + analysis: recommendation generation, distil, refresh crons); source in `amp-analysis-service/` per its README
 R: crm-event-processors — Kafka consumers (Currency, Tier, Mission, AMP, OutcomeAttribution, Reward, Marketplace, Notification) reading CDC topics from Confluent Cloud + chokepoint event topics (`crm.events.purchase{,_item}`, `crm.events.wallet`, `crm.events.tier_change`, `crm.events.user`, `crm.events.redemption` — DB layer live 2026-05-16; consumer-side (`AmpConsumer` + `OutcomeAttributionConsumer`) extended 2026-05-16 with subscribe/predicate/dispatch for redemption events; **Confluent topic provisioning + Render redeploy is the last R-2 step in `.cursor/plans/chokepoint-redemption-event.md`**) when `CHOKEPOINT_EVENTS_ENABLED=true`. `NotificationConsumer` (gated by `NOTIFICATION_CONSUMER_ENABLED`) subscribes to `crm.events.{purchase,purchase_item,wallet,tier_change,user,redemption}`, maps purchase `created`/`completed`, purchase_item item-completion events, and existing wallet/tier/signup/redemption catalog rows; enriches `detail_url` (loyalty-app deep links) + `hero_image_url` (reward/tier/merchant branding); calls `fn_resolve_notification_for_event`, renders flex v2 templates (hero + footer CTA + richer rows), pushes to LINE Messaging API (override via `MESSAGING_SERVICE_URL`), writes `public.notification_log`. Also hosts the OutboxPublisher worker (drains `public.chokepoint_event_outbox` to Kafka via LISTEN/NOTIFY + KafkaJS, gated by `OUTBOX_PUBLISHER_ENABLED`); source in `crm-event-processors/`
 R: currency-expiry-daily — Render Cron Job (`0 19 * * *` UTC ≈ 02:00 ICT); one-shot `npm run job:currency-expiry-daily` on `crm-event-processors` image; loops `process_currency_expiry_batch` until `has_more=false`. Replaces pg_cron `daily-currency-expiry` (retired 2026-09-02).

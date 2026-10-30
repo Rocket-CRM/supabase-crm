@@ -1,3 +1,7 @@
+## 2026-10-30
+
+- **Asset (CityPark member register sync)** — Pending-flag drainer now live against CityPark sandbox: pg_cron (5 min) → Edge `custom-futurepark-member-register-sync` → `POST /member/register` full member snapshot; `is_sync` set only on HTTP success. New triggers close tier-change, member-inactive, and VIP-tag gaps (`trg_custom_futurepark_member_sync`, `trg_custom_futurepark_vip_sync`); new `custom_futurepark_*` functions (payload builder, member pending marker, pending grouper, Vault config reader). Dates are v1 defaults; prod host/key pending CityPark. LT direction: shared outbox. See `requirements/Asset.md` §System › Flows › CityPark member register sync.
+
 ## 2026-10-29
 
 - **AMP Workflows (entry node branch, description field)** — The entry condition node now renders a single **True** output; it previously showed a False branch because `getOutputHandlesForNode` treated every condition as dual-output and the resulting placeholder edge was read back as a real False connection (`isEntry` graphs are now single-output). Workflows gained a `description` field in the canvas settings panel, surfaced on the Workflow List as a hover tooltip on the name instead of a permanent second line. See `requirements/AMP_Workflows.md` §Rules › Admin journey, §System › Data model.
