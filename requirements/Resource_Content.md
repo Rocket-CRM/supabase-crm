@@ -44,7 +44,7 @@ The **content library** is the studio where merchants build content once and reu
 - **Postback data convention** (admin validates on save): `src=resource&resource_id=<uuid>&action=<keys>` where `action` / AMP `a=` is one or more keys `[a-zA-Z0-9._-]{1,64}`, comma-separated, max 5. AMP signs the list; Interaction Router `selection_mode` `single` continues on first key only, `multiple` fans out per key with suffixed `webhook_event_id`.
 - **Marketplace send precedence** on Shopee/Lazada/TikTok conversations: if `platform_content.{platform}.items` is non-empty → send **native catalog cards**; else render `rich_content` with text+image (or weaker) fallbacks per block compatibility matrix.
 - **Non-marketplace channels** (LINE, web chat, Messenger, WhatsApp, SMS): render `rich_content` natively where supported; degrade per matrix (e.g. carousel → separate messages on WhatsApp; buttons → numbered URLs on SMS).
-- **LINE preview**: admin save path validates rich content for LINE constraints before persist where the editor enforces it.
+- **LINE preview**: admin save path validates rich content for LINE constraints before persist where the editor enforces it. The editor's LINE-tab preview mirrors the Flex card render: a card block shows its image, title, subtitle, **description, fields, and badge** plus buttons — not only image/title/buttons — so body copy cannot surprise on delivery.
 - **Engagement**: `bff_get_resource_content_engagement` aggregates send/interaction stats for a resource in admin (date range optional).
 
 Example (link map): a card CTA uses `{ "default": "https://brand.com/p", "shopee": "https://shopee.co.th/..." }` — a Shopee chat receives the Shopee URL; other channels receive `default`.
