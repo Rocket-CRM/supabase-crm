@@ -75,7 +75,7 @@ Graph orchestration, node handlers, cache layer, and historical pipeline notes: 
 | --- | --- |
 | `audience` | Member runs from audience membership (synthetic membership group when `groups` empty). |
 | `condition` | Member runs for users matching entry condition groups. |
-| `all_line_friends` | One LINE **broadcast** run (`run_scope = broadcast`). Broadcast has no per-recipient member context, so member-only steps (SMS, email, award, push reward, tags, personas, forms, audiences) cannot run on it — the admin blocks saving such a graph (`line_friends_member_step`), and an already-saved one fails at execution with `No phone number available`. |
+| `all_line_friends` | One LINE **broadcast** run (`run_scope = broadcast`). Broadcast has no per-recipient member context, so member-only steps (SMS, email, award, push reward, tags, personas, forms, audiences) cannot run on it — the admin hides them from the add-step palette, blocks saving such a graph (`line_friends_member_step`), and an already-saved one fails at execution with `No phone number available`. |
 | `line_option_selected` | Realtime enrollment on LINE postback (no batch). |
 | `past_line_interaction` | One **push** run per matching LINE user (`run_scope = line`). |
 | `all_line_friends_exclude_members` | On activate or **schedule**: page LINE follower IDs (messaging-service), drop friends linked on `user_accounts.line_id`, one **push** per remaining friend (`run_scope = line`). When `allow_re_enrollment` is off, friends who already have `execution_started` for this workflow (matched by `line_user_id`) are skipped before fan-out. Requires verified/premium LINE OA; members without linked LINE are not excluded. |
