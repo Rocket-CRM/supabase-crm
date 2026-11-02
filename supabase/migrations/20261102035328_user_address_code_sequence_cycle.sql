@@ -1,0 +1,24 @@
+-- user_address.code is a smallint identity left over from the legacy import (see the
+-- column comment: "Identity column, legacy import artifact (not an address slot)").
+-- Nothing reads it — bff_get_user_address / fn_get_user_address_snapshot do not
+-- return it; bff_admin_update_member_profile only carries the existing value
+-- forward. But the sequence is an identity column that is NOT NULL with no
+-- default-free path, so once it hit its smallint ceiling every write to
+-- user_address failed outright:
+--
+--   ERROR: 2200H: nextval: reached maximum value of sequence
+--          "user_address_code_seq" (32767)
+--
+-- Reached on 2026-11-02 ~03:38 UTC, the last successful insert. From then on
+-- bff_save_user_profile raised inside its address upsert and returned
+-- profile_save_failed, so members could not save a profile at all — including
+-- the Future Park members whose street the same RPC had been wiping.
+--
+-- CYCLE restarts the sequence at 1 once it passes 32767. It is a metadata-only
+-- change (no table rewrite, no lock on rows) and duplicates are already the
+-- norm here: 1,053,160 of 1,235,113 rows hold code = 1, and no index or
+-- constraint involves the column. Widening to integer would mean an
+-- ACCESS EXCLUSIVE table rewrite on a hot 1.2M-row table, which is not worth
+-- it for a column with no readers.
+
+ALTER SEQUENCE public.user_address_code_seq CYCLE;

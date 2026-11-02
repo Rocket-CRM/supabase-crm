@@ -37,6 +37,7 @@ Survey rewards run as a hidden automation attached to the survey; submission cap
 - Each merchant has rows in **`user_field_config`** per `field_key`. Inactive keys (`active_status = false`) are omitted from member templates; auth-managed keys (e.g. phone, LINE id) stay off the free-text profile form.
 - Required default fields must be non-empty on save; format validation runs when `validate_format` is true (pattern / length from config).
 - **Phone** is stored as `user_accounts.tel`; **email**, names, **birth_date**, **id_card**, **line_id**, **gender**, and related keys map to `user_accounts` columns. Address keys map to **`user_address`** (upserted with the member).
+- **Address saves write only the keys the form submitted.** Because inactive keys are omitted from the member template, a merchant can show city/district/subdistrict/postcode while leaving `addressline_1` or `country_code` off the form. Those absent keys must leave the stored `user_address` values untouched — not overwrite them with NULL. A key that is submitted with an empty value still clears the column, so members can delete a field they were shown. Both save paths follow this: `bff_save_user_profile` (member) and `bff_admin_update_member_profile` (admin).
 - Persona filter: if `persona_ids` is set, the field appears only when the member’s persona is in the list.
 - Admin may edit fields marked `editable_by_admin`; member edit respects `editable_by_user` and visibility flags.
 

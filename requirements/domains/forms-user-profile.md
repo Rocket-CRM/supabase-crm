@@ -40,6 +40,7 @@
 **Key Business Rules (summary):**
 - Default fields stored in `user_accounts` / `user_address`; custom fields in `form_responses`
 - `user_address` is merchant-scoped; one editable profile address is keyed by `(user_id, merchant_id)`, not `user_id` alone
+- Address saves write only the keys the form submitted: a key absent from the template (inactive in `user_field_config`) leaves the stored value alone, while a submitted-but-empty key clears it. Both `bff_save_user_profile` and `bff_admin_update_member_profile` follow this.
 - USER_PROFILE form (code = `USER_PROFILE`) is the special signup/profile form
 - `persona_ids` on fields: show only for specific personas (NULL = universal)
 - Conditional logic: field visibility/requirement changes based on other field values
