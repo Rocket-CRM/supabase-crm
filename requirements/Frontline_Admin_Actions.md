@@ -54,6 +54,8 @@ The member journey runs basic loyalty → engage → analyze → activate. Analy
 6. **Edit Profile** → the same panel as Customer 360, without tier.
 7. A frozen member shows a warning banner, and every tab and Edit Profile become read-only.
 
+**Printed slips** — the 80 mm summary printed from Upload Receipt (on save, and with a COPY watermark on history reprint) and the Redemption Reward slips carry an **Operator name** row. The value is the signed-in admin's `admin_users.name`; a staff row with no name falls back to the account email. Reprinting an older batch therefore shows the operator doing the reprint, not the original uploader.
+
 ---
 
 ## Overview

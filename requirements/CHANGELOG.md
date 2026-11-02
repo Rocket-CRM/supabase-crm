@@ -1,3 +1,7 @@
+## 2026-11-02
+
+- **Frontline Admin Actions (operator name on printed slips)** — the Upload Receipt summary slip and the Redemption Reward slips printed the signed-in admin's **email** in the Operator name row, because `AdminSessionData` carried only `userEmail` while `bff_get_admin_profile` already returned `admin.name`. The session now carries `adminName` and both print paths use `name || email`, so a named staff account prints its display name and an unnamed one still falls back to the email. See `requirements/Frontline_Admin_Actions.md` §Journeys › Staff journey — Front Line › Printed slips.
+
 ## 2026-10-30
 
 - **Content Library (LINE text + image order)** — The 2026-10-27 one-bubble merge for a `text` + `image` pair is replaced by **two separate messages, image first**: the trailing text message drives the chat-list preview (plain image messages have no `altText` and show as "sent a photo"), and URLs in the copy stay auto-linked, so the merge's footer-button workaround is gone. An image block can keep the authored order via `text_position: "before"` — admin editor checkbox "Send text before this image" (default off). The editor's LINE preview now renders the pair in delivery order, closing the preview-vs-delivery gap behind CONTENTLIBRARY-0283 ("text merges with image + button"). Migration `render_blocks_text_image_separate_messages` (live); loyalty-admin `a0ed349b`. See `requirements/Resource_Content.md` §Rules › Text + image on LINE.
