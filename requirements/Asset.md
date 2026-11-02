@@ -53,7 +53,8 @@ Open API / warranty-style assets use overlapping `asset` rows but `api_*` valida
 - Writes call `fn_asset_mark_sync_pending` → `custom_crm_asset_sync.is_sync = false`.
 - Tier change / member `is_active` toggle (`trg_custom_futurepark_member_sync` on `user_accounts`) and VIP tag add/remove (`trg_custom_futurepark_vip_sync` on `user_tags`) mark all of the member's CAR assets pending via `custom_futurepark_mark_member_sync_pending` (FuturePark merchant only).
 - CityPark register is a **full member snapshot**, not a delta: only active cars in `list_car`; omitting a plate deactivates it; `list_car: []` clears (member inactive); VIP is a `" VIP"` suffix on `member_type`.
-- Sync target is CityPark **sandbox** (`citypark_base_url` / `citypark_api_key` Vault secrets); production host/key not yet confirmed with CityPark.
+- Sync target is CityPark **production** (`citypark_base_url` = `https://citypark.futurepark.co.th/api`, `citypark_api_key` Vault secrets). Sandbox was `https://fpr-apisnb.cityparking.app` (no `/api` prefix).
+- `id_card` is mandatory at CityPark; members without one are skipped (flag kept) until CRM holds the national ID.
 
 ## Journeys
 
@@ -201,19 +202,28 @@ On `apply_tier_change_core` after downgrade / manual / assign_entry paths, `fn_a
 
 1. pg_cron `custom-futurepark-member-register-sync` (every 5 min) → `net.http_post` Edge `custom-futurepark-member-register-sync` (Vault `futurepark_member_register_sync_cron_secret` header).
 2. Edge groups pending rows by member (`custom_futurepark_pending_sync_members`, ≤200/run), builds each snapshot (`custom_futurepark_build_member_register_payload`), POSTs `{citypark_base_url}/member/register` with `x-api-key`, sets `is_sync = true` only on HTTP success; failures stay pending and retry next run.
-3. Payload dates (v1 default, product to confirm): `stamp_time` / `start_date` = sync time (Bangkok), `expire_date` = end of current calendar year.
-4. **Long-term direction:** this flag-drainer is v1. The better pattern is the shared outbox (`chokepoint_event_outbox` → `crm-event-processors`) with a CityPark consumer — promote when a second consumer needs member-asset sync, not speculatively.
+3. Payload dates: `start_date` = sync time (Bangkok), `expire_date` = next calendar year `01-01T00:00:00` (CityPark convention). `stamp_time` is sent but CityPark ignores it and keeps its own.
+4. **CityPark API behaviour (verified live 2026-11-02):**
+   - Success is HTTP 200 with `{"result_code":"0000"}`; errors also return HTTP 200 (`"0001"` + `result_msg`). Success is checked on `result_code`, not the status code.
+   - `member_type` takes the plain tier name — CityPark adds the `Exclusive-` prefix itself (`Diamond` → `Exclusive-Diamond`). Do not send the prefix.
+   - CityPark builds `first + " " + last` and splits on the **first whitespace**, silently dropping the rest. A space inside a name destroys it, so the builder strips honorifics (`นางสาว`/`นาง`/`นาย`/`น.ส`/`Mr.`…) and collapses whitespace before sending.
+   - `start_date` / `expire_date` are stored exactly as sent; omitting them wipes the window to `0001-01-01`. Both are always sent.
+   - Only members with cars exist at CityPark; `Getmemberinfo` returns all-null for anyone else. Carless members are still registered as persons (`list_car: []`) per the spec's scenario 1.
+   - `Getmemberinfo` is a **GET carrying a JSON body** (POST → 405 `allow: GET`). Edge/Deno cannot send a GET body, so it is verification-only from outside, not usable from the drainer.
+5. **Long-term direction:** this flag-drainer is v1. The better pattern is the shared outbox (`chokepoint_event_outbox` → `crm-event-processors`) with a CityPark consumer — promote when a second consumer needs member-asset sync, not speculatively.
 
 ### External services
 
-- **CityPark** — Member register sync live against sandbox (above). Entrance QR payload still not gate-validated by CityPark.
+- **CityPark** — Member register sync live against **production** `/api/member/register` (above). Read-only `GET /api/member/Getmemberinfo` (by `id_card`) exists for verification. Entrance QR payload still not gate-validated by CityPark.
 
 ### Known gaps
 
 | Gap | Notes |
 | --- | --- |
 | Admin masters UI | No UI for `asset_type`, `field_schema`, tier limits, VIP tags |
-| CityPark go-live | Production host/key + success/error contract unconfirmed; `stamp_time`/`start_date`/`expire_date` sources are v1 defaults |
+| CityPark `start_date` | Sent as sync time — CityPark's real per-member entitlement start is not modelled in CRM, so each sync resets it |
+| Members without `id_card` | Cannot sync (CityPark rejects); stay pending until CRM holds a national ID |
+| `Getmemberinfo` from Edge | GET-with-body is unsendable from Deno; verification-only from outside the app |
 | `quota_notice` | Member get omits post-downtier notice until durable signal exists |
 | DB unique on plate | Blocked until historical duplicate plates cleaned |
 | Thai admin copy | Some Front Line / member keys may lack `ui_translation_admin` rows |

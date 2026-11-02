@@ -1,6 +1,10 @@
+## 2026-11-02
+
+- **Asset (CityPark member register sync — production live)** — Drainer now posts the full member snapshot to production `https://citypark.futurepark.co.th/api/member/register`; full backlog drained (1,017 members) with one member left pending for a missing `id_card`. Live testing corrected three defects: success is now read from `result_code: "0000"` (CityPark returns errors as HTTP 200), names are normalized before send (CityPark splits `first + " " + last` on the first whitespace and dropped surnames on 2,117 members), and `expire_date` follows their `next-year-01-01T00:00:00` convention. Documented CityPark API behaviour and the `Getmemberinfo` GET-with-body verification path. See `requirements/Asset.md` §System › Flows › CityPark member register sync.
+
 ## 2026-10-30
 
-- **Asset (CityPark member register sync)** — Pending-flag drainer now live against CityPark sandbox: pg_cron (5 min) → Edge `custom-futurepark-member-register-sync` → `POST /member/register` full member snapshot; `is_sync` set only on HTTP success. New triggers close tier-change, member-inactive, and VIP-tag gaps (`trg_custom_futurepark_member_sync`, `trg_custom_futurepark_vip_sync`); new `custom_futurepark_*` functions (payload builder, member pending marker, pending grouper, Vault config reader). Dates are v1 defaults; prod host/key pending CityPark. LT direction: shared outbox. See `requirements/Asset.md` §System › Flows › CityPark member register sync.
+- **Asset (CityPark member register sync)** — Pending-flag drainer built against the CityPark sandbox: pg_cron (5 min) → Edge `custom-futurepark-member-register-sync` → full member snapshot POST. New triggers close tier-change, member-inactive, and VIP-tag gaps (`trg_custom_futurepark_member_sync`, `trg_custom_futurepark_vip_sync`); new `custom_futurepark_*` functions (payload builder, member pending marker, pending grouper, Vault config reader). LT direction: shared outbox. See `requirements/Asset.md` §System › Flows › CityPark member register sync.
 
 ## 2026-10-29
 
