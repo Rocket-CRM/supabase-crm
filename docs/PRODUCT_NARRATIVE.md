@@ -3498,82 +3498,31 @@ To turn the existing member base into an acquisition channel without per-acquisi
 
 ### Check-in
 
-**Overview**
+<!-- feature_key: loyalty.campaign.checkin -->
 
-Check-in is a habit loop that rewards members for returning on a daily or weekly cadence, turning an app open into streak progress and a concrete reward moment. A merchant configures a check-in campaign with a frequency, optional date and time windows, and condition rows that map a member's current streak day to an outcome. Outcomes can be `points`, `tickets`, a free reward, or a 7-day earn-factor multiplier.
+**What it enables**
 
-**Purpose**
+Run repeat-engagement campaigns as daily or weekly streaks, fixed-period goals, rolling targets, or QR treasure hunts. Members can receive points, tickets, free rewards, or temporary earn multipliers for each valid check-in, at a milestone, or when they complete a QR collection.
 
-To drive daily/weekly active-user metrics and to give the brand a low-friction way to reward "showing up." Streaks create loss-aversion ("I'm on day 6, I'd hate to break it now"); milestone days (e.g., day 7) create anticipation for a larger payout. Stackable with other mechanics: the earn-factor outcome makes the next 7 days of purchases earn at a higher rate, which doubles as a soft cross-sell to purchase features.
+**How it works**
 
-**User Journey**
+The merchant chooses the progress model, campaign dates and hours, audience, participation limits, and outcomes. For a QR collection, the merchant generates and labels the campaign's codes, prints them, and can deactivate unneeded codes; members open Check-in from the Earn page and scan each code with their phone. The app shows eligible events, collected codes, progress, and rewards, and preserves a scanned code through login when the member starts logged out.
 
-*Admin journey*
+**What differentiates it**
 
-1. From Check-in List, select "Add check-in" to open Check-in Settings in create mode.
-2. Fill campaign basics: name, description, `frequency_type` (`daily` or `weekly`), timezone, optional time-of-day window, optional campaign date window, `max_streak_days`, `require_condition_match`.
-3. Save the campaign, then configure reward conditions from the campaign edit view.
-4. Add one condition row per streak bracket: start/end streak day, milestone flag, eligibility by tier or user type, outcome entity (`points`, `tickets`, `reward`, `earn_factor`), entity ID where required, amount, priority, active status.
-5. Repeat for base days and milestone days. Example: days 1–6 award 5 points; day 7 is marked as milestone and awards 50 points + a free reward.
-6. Save and verify each condition is active.
+One campaign engine supports both recurring attendance and location-style collection journeys. QR campaigns can reward every scan and grant a separate completion outcome when the final active code is collected; each code counts once per member. Static codes can be photographed and shared, so campaign hours are the on-site control rather than rotating-code protection.
 
-*Member journey*
+**Key controls**
 
-1. Member opens the check-in page or widget.
-2. Frontend calls `get_user_checkin_status`; the response drives the button state: `checked_today` → disabled "Already checked in", `in_window = false` → disabled "Outside check-in hours", `can_checkin = true` → enabled.
-3. Member taps Check In → `process_checkin` runs → response includes streak day, total check-ins, longest streak, reward details, transaction ID, and next-check-in timing.
-4. UI updates streak progress and shows the reward confirmation (points credited, ticket earned, free reward claimed, or "no reward" when no condition matched and that is allowed).
+- Progress model: consecutive streak, fixed-period count, rolling-period count, or QR collection.
+- Schedule: campaign window, timezone, and optional daily hours, including overnight windows.
+- Audience and limits: tier, persona, tag, birth month, plus per-member or campaign-wide caps.
+- Outcomes: points, tickets, free rewards, or earn multipliers, triggered per check-in, at a streak/count milestone, or on collection completion.
+- QR operations: bulk generation, labels, print sheet, active/inactive state, and deletion before a code has been scanned.
 
-*Edge cases*
+**Example**
 
-- Member-facing routes for check-in are not yet fully documented in the loyalty-user repo; the journey describes backend-supported behavior.
-- Daily campaigns reset the streak after a missed calendar day.
-- Weekly campaigns reset when the gap exceeds 7 days.
-- `require_condition_match = true` turns a no-condition-match into "No rewards available for your profile" AND blocks streak progress.
-- `next_deadline` tells the member when they must check in again to preserve the streak.
-
-**Configurations & Rules**
-
-*Campaign settings*
-
-| Setting | Purpose |
-|---|---|
-| **Name / description** | Display |
-| **`frequency_type`** | `daily` or `weekly` |
-| **Timezone** | Determines streak day boundaries |
-| **Time-of-day window** | Optional; supports day-crossing windows (e.g., 22:00–02:00) |
-| **Campaign date window** | Optional start/end dates |
-| **`max_streak_days`** | Cap on streak counter (continues check-ins after but streak stops incrementing) |
-| **`require_condition_match`** | If true, check-in is rejected entirely when no condition matches |
-| **Active status** | On/off |
-
-*Condition settings*
-
-| Setting | Purpose |
-|---|---|
-| **Streak day range** | Start/end day of streak this condition applies to |
-| **`is_milestone`** | Flag for milestone days (UI / analytics) |
-| **Allowed tier IDs** | NULL = all tiers |
-| **Allowed user types** | Empty = unrestricted |
-| **Outcome entity** | `points`, `tickets`, `reward`, `earn_factor` |
-| **Entity ID** | Reward ID or ticket type ID where required |
-| **Amount** | Points / tickets count / multiplier |
-| **Priority** | Tie-breaker when multiple conditions match |
-| **Active status** | On/off |
-
-*Operating rules*
-
-- **One member can check in once per campaign per calendar day.**
-- **Daily streaks** continue only when the last check-in was exactly yesterday; **weekly streaks** continue when the prior check-in was within the past 7 days.
-- **Condition matching** must satisfy streak day range PLUS tier and user-type filters. If multiple conditions match, highest priority wins, then highest outcome amount.
-- **Time windows** use the campaign timezone and support day-crossing.
-- **Outcomes flow through standard ledgers**: `points`/`tickets` credit the wallet; `reward` triggers a free redemption through `redeem_reward_with_points`; `earn_factor` assigns a 7-day multiplier and extends the expiry when the same factor already exists.
-
-*Limitations*
-
-- With `require_condition_match = true`, a missing condition rejects the entire check-in — no ledger entry, no streak update.
-- A reward outcome with an invalid or unavailable reward can fail while the check-in and streak still advance.
-- Streaks reset automatically when the required frequency window is missed; no manual reset/override is defined.
+A brand runs a three-stop store trail. Each QR scan awards 10 points; collecting all three codes grants a free reward. The event appears from the member Earn page only while an eligible QR campaign is active.
 
 ---
 
