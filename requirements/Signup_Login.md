@@ -43,7 +43,7 @@ Signup is the **Join** stage of the member journey: the point where an anonymous
 | --- | --- | --- |
 | `complete_profile_new` | New `user_accounts` row after auth satisfied | Full template (persona, PDPA, all visible fields) |
 | `complete_profile_existing` | Existing user, `is_signup_form_complete = false` | Full template |
-| `complete_profile_existing` | Existing user, flag true but required consent/fields empty | Missing slices only |
+| `complete_profile_existing` | Existing user, flag true but required consent/fields empty | Missing slices only; if any address field is missing, the group's whole address set (province → district → sub-district → postcode) is returned, filled fields with their saved value |
 | `complete` | Auth satisfied and profile/consent complete | `null` |
 
 - Persona on template: universal fields (empty/null `persona_ids`) always shown; non-empty `persona_ids` require matching `user_accounts.persona_id` (or `p_selected_persona_id` during persona step). Empty persona on user → persona-scoped fields omitted until persona chosen.
@@ -186,7 +186,7 @@ Admin: `bff_admin_get_user_profile_config`, `bff_admin_upsert_user_profile_confi
 
 **Linking auth method on existing user:** Hub with first method issues JWT; `verify_*` for second method; second hub call with `access_token` links column without duplicate users.
 
-**Profile re-entry:** Merchant adds required field → hub returns `complete_profile_existing` with missing-only `missing_data` when `is_signup_form_complete` is true.
+**Profile re-entry:** Merchant adds required field → hub returns `complete_profile_existing` with missing-only `missing_data` when `is_signup_form_complete` is true. Address fields are a chain (each needs the one above to be selectable), so when any address field is missing the hub also returns the group's already-filled address fields with their saved values; otherwise a member with a province but no district would see a locked district picker and loop on this step.
 
 **Shopify widget panel open:** `shopify-proxy` verifies proxy signature → `shopify_find_or_create_member` → `issueMemberSession` → widget APIs with member JWT.
 

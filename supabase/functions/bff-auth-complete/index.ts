@@ -104,6 +104,21 @@ function filterFieldsByPersona(fields: any[], userPersonaId: string | null): any
   });
 }
 
+// Address fields chain (province -> district -> sub-district -> postcode): a lower field needs the
+// saved value above it to be selectable. When any address field is missing, keep the group's whole
+// address set (filled ones keep their value) so the form can resolve the chain.
+function pickFieldsToAsk(fields: any[]): { fields: any[]; hasMissingAddress: boolean } {
+  const missing = fields.filter(
+    (field: any) => field.is_required === true && (field.value === null || field.value === '' || field.value === undefined)
+  );
+  const hasMissingAddress = missing.some((field: any) => field.is_address_field === true);
+  if (!hasMissingAddress) return { fields: missing, hasMissingAddress };
+  return {
+    fields: fields.filter((field: any) => missing.includes(field) || field.is_address_field === true),
+    hasMissingAddress
+  };
+}
+
 function filterToMissingOnly(template: any, userPersonaId: string | null): MissingResult {
   const missingData: any = {
     persona: template.persona ? {
@@ -124,13 +139,9 @@ function filterToMissingOnly(template: any, userPersonaId: string | null): Missi
   if (template.default_fields_config && Array.isArray(template.default_fields_config)) {
     for (const group of template.default_fields_config) {
       const personaRelevantFields = filterFieldsByPersona(group.fields || [], userPersonaId);
-      const missingFields = personaRelevantFields.filter((field: any) => {
-        const isMissing = field.is_required === true && (field.value === null || field.value === '' || field.value === undefined);
-        if (isMissing && field.is_address_field === true) {
-          hasMissingAddress = true;
-        }
-        return isMissing;
-      });
+      const picked = pickFieldsToAsk(personaRelevantFields);
+      if (picked.hasMissingAddress) hasMissingAddress = true;
+      const missingFields = picked.fields;
       if (missingFields.length > 0) {
         missingData.default_fields_config.push({ ...group, fields: missingFields });
       }
@@ -140,9 +151,7 @@ function filterToMissingOnly(template: any, userPersonaId: string | null): Missi
   if (template.custom_fields_config && Array.isArray(template.custom_fields_config)) {
     for (const group of template.custom_fields_config) {
       const personaRelevantFields = filterFieldsByPersona(group.fields || [], userPersonaId);
-      const missingFields = personaRelevantFields.filter(
-        (field: any) => field.is_required === true && (field.value === null || field.value === '' || field.value === undefined)
-      );
+      const missingFields = pickFieldsToAsk(personaRelevantFields).fields;
       if (missingFields.length > 0) {
         missingData.custom_fields_config.push({ ...group, fields: missingFields });
       }
