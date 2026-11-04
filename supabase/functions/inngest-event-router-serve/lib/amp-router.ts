@@ -14,6 +14,9 @@
  *   no legacy CDC equivalent). Idempotency = item_id + item_status.
  * - wallet: fires only on transaction_type='earn'. Idempotency = wallet_ledger_id
  *   (one AMP dispatch per ledger row; a row's transaction_type never changes).
+ * - redemption: fires only on sub-event 'issued' (the redemption moment, same
+ *   mapping the notification pipeline uses for reward.redeemed). Idempotency =
+ *   redemption_id + sub-event (a redemption row later transitions to used/cancelled).
  * - tier_change: fires unless skip_cdc. Idempotency = tier_change_ledger_id.
  * - user: fires only on user_event_type='create' and !skip_cdc.
  *
@@ -168,6 +171,52 @@ export const ampWalletRouter = inngest.createFunction(
           transaction_type: data.transaction_type,
           source_type: data.source_type,
           description: data.description,
+        },
+      }),
+    )) as AmpDispatchResult;
+    return { routed: true, ...result };
+  },
+);
+
+export const ampRedemptionRouter = inngest.createFunction(
+  {
+    id: "amp-redemption-router",
+    retries: 3,
+    concurrency: AMP_CONCURRENCY,
+    idempotency: 'event.data.redemption_id + ":" + event.data.event',
+  },
+  { event: "crm/redemption.event" },
+  async ({ event, step }) => {
+    const data = event.data as ChokepointEvent;
+    // The redemption moment is 'issued' — the same sub-event the notification
+    // pipeline maps to reward.redeemed. Usage / cancellation lifecycle changes
+    // are not new redemption entries.
+    if (data.event !== "issued") {
+      return { routed: false, reason: "filter_not_met", event: data.event };
+    }
+    if (!data.user_id || !data.merchant_id || !data.redemption_id) {
+      return { routed: false, reason: "missing_required_fields" };
+    }
+    const result = (await step.run("dispatch-amp", () =>
+      dispatchToAmp({
+        trigger_table: "reward_redemptions_ledger",
+        trigger_operation: "INSERT",
+        merchant_id: data.merchant_id!,
+        user_id: data.user_id!,
+        record_id: data.redemption_id!,
+        record_data: {
+          event: data.event,
+          redemption_id: data.redemption_id,
+          redemption_code: data.redemption_code,
+          reward_id: data.reward_id,
+          redeemed_at: data.redeemed_at,
+          redeemed_status: data.redeemed_status,
+          qty: data.qty,
+          points_deducted: data.points_deducted,
+          source_type: data.source_type,
+          source_id: data.source_id,
+          promo_code: data.promo_code,
+          cancelled: data.cancelled,
         },
       }),
     )) as AmpDispatchResult;

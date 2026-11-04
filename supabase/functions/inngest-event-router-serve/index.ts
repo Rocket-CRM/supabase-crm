@@ -14,7 +14,7 @@
  *   feeds SKU/product/category/brand-scoped purchase conditions)
  * - outcome-purchase-router / outcome-wallet-router           -> amp_outcome_attribution
  * - notification-{purchase,purchase-item,wallet,tier,user,redemption,receipt}-router -> LINE push
- * - amp-{purchase,purchase-item,wallet,tier,user}-router      -> amp-dispatch-realtime-event
+ * - amp-{purchase,purchase-item,wallet,redemption,tier,user}-router -> amp-dispatch-realtime-event
  *   (v3, 2026-07-08: amp-user-router batched + throttled per merchant for signup bursts;
  *   trigger matching cached per merchant by fn_get_active_triggers_cached, 600s)
  *
@@ -60,6 +60,7 @@ import {
   ampPurchaseRouter,
   ampPurchaseItemRouter,
   ampWalletRouter,
+  ampRedemptionRouter,
   ampTierRouter,
   ampUserRouter,
 } from "./lib/amp-router.ts";
@@ -87,6 +88,7 @@ const handler = serve({
     ampPurchaseRouter,
     ampPurchaseItemRouter,
     ampWalletRouter,
+    ampRedemptionRouter,
     ampTierRouter,
     ampUserRouter,
     shopifyRedemptionIssueRouter,
