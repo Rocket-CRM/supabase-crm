@@ -80,6 +80,10 @@ Graph orchestration, node handlers, cache layer, and historical pipeline notes: 
 | `past_line_interaction` | One **push** run per matching LINE user (`run_scope = line`). |
 | `all_line_friends_exclude_members` | On activate or **schedule**: page LINE follower IDs (messaging-service), drop friends linked on `user_accounts.line_id`, one **push** per remaining friend (`run_scope = line`). When `allow_re_enrollment` is off, friends who already have `execution_started` for this workflow (matched by `line_user_id`) are skipped before fan-out. Requires verified/premium LINE OA; members without linked LINE are not excluded. |
 
+### Realtime trigger derivation on save
+
+With no explicit triggers, `bff_upsert_amp_workflow_with_graph` derives `workflow_trigger` rows from the entry condition's collections: `wallet_ledger` / `user_wallet` → `wallet_ledger` INSERT with `transaction_type = earn`; `purchase_ledger` / `purchase_items_ledger` → `purchase_ledger` INSERT; `user_accounts` → `user_accounts` INSERT; audience entry → `amp_audience_member` INSERT; `reward_redemptions_ledger` → `reward_redemptions_ledger` INSERT with `event = issued` (the amp redemption router dispatches only `issued` redemption events). Saving again deletes and re-derives the trigger rows and invalidates the per-merchant trigger cache.
+
 ### Targeted broadcast (one-shot LINE send)
 
 **Targeted broadcast** is a separate admin surface (`/targeted-broadcast`) for a **single identical LINE message** to an audience — not a workflow journey. Use workflows when waits, branches, or per-recipient follow-up matter.
@@ -110,6 +114,7 @@ Admin BFFs: `bff_list/get/upsert_amp_broadcast`, `bff_list_amp_broadcast_batches
 - Per-user path `fn_evaluate_amp_condition_group` — group combination stays in the caller (Inngest). **Conditional Split** nodes use the same SQL evaluator (no client-side filter subset).
 - **Rows inside a `simple` group** combine by the group's `operator`: `AND` (default, also when absent) or `OR`. The builder's separator between rows toggles it, one operator per group, for entry, split, audience and funnel conditions. Both `fn_evaluate_amp_condition_group` and `fn_amp_compile_condition_group` honour it. Aggregate `filters` always AND.
 - **Zero-row aggregates never match** in either path.
+- **Empty placeholder conditions/filters are skipped** — the builder no longer saves the unfilled "Select field…" row, and both evaluators (`fn_evaluate_amp_condition_group`, `fn_amp_compile_condition_group`) skip empty-field rows defensively; they previously compiled to a zero-length quoted identifier that aborted the evaluation, and the Inngest caller then treated the error as `false` — a member over the threshold silently never entered.
 - **Gender** compares case-insensitively for `equals` / `not_equals` / `in` / `not_in` (`fn_amp_build_condition_clause`): stored values follow each merchant's `user_field_config` (e.g. `male`) while metadata emits `MALE` / `FEMALE` / `NOT_SPECIFIED`. NULL semantics unchanged — unset gender does not match `not_equals`.
 - `fn_amp_assert_collection` whitelists all 13 metadata collections plus pseudo-collection `amp_audience_member` (`is_member_of` / `is_not_member_of`).
 - Audience entry: `fn_amp_resolve_entry_groups` synthesizes membership group when `entry_type = audience` and `groups` empty.
@@ -162,6 +167,7 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 | Condition preview (audience or node) | Estimated audience size without saving |
 | Export members / node users | `bff_admin_start_user_export` source modes — see Known gaps |
 | Entry type (entry condition node) | Audience, custom condition, all LINE friends, LINE friends excluding members, when a LINE option is selected, or past LINE content interaction — see Entry types |
+| Audience selectors (entry + audience-membership conditions) | List only active audiences; inactive ones are not offered |
 | Interaction router: upstream message + selection mode | Router reads button keys from the chosen upstream LINE message node only (editing the resource in Content Library alone does not add keys); `single` continues on the first key tapped, `multiple` runs one branch per key |
 | Broadcast recipients | Segment, all LINE friends, or LINE friends who are not members |
 | Broadcast content | Content Library resource (can create one inline), custom Flex JSON, or text with quick-reply pills |
