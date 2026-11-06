@@ -45,7 +45,7 @@ The **content library** is the studio where merchants build content once and reu
 - **Marketplace send precedence** on Shopee/Lazada/TikTok conversations: if `platform_content.{platform}.items` is non-empty → send **native catalog cards**; else render `rich_content` with text+image (or weaker) fallbacks per block compatibility matrix.
 - **Non-marketplace channels** (LINE, web chat, Messenger, WhatsApp, SMS): render `rich_content` natively where supported; degrade per matrix (e.g. carousel → separate messages on WhatsApp; buttons → numbered URLs on SMS).
 - **LINE preview**: admin save path validates rich content for LINE constraints before persist where the editor enforces it. The editor's LINE-tab preview mirrors the Flex card render: a card block shows its image, title, subtitle, **description, fields, and badge** plus buttons — not only image/title/buttons — so body copy cannot surprise on delivery.
-- **Image link on LINE**: an image block with `link` set sends as a flex bubble whose hero carries the URI action, so tapping the image opens the link; resolution = `platform_urls.line` → `default_url` (whitespace-trimmed), same as card blocks. Unlinked images send as plain image messages, which LINE never makes tappable.
+- **Image link on LINE**: an image block with `link` set sends as an `imagemap` (one full-area `uri` action, image served at LINE's widths by Edge `line-imagemap-image`, no white card behind transparent PNGs), so tapping the image opens the link; it falls back to a flex bubble with a tappable hero when the block has no valid `image_aspect_ratio` or the image is not in this project's public storage; resolution = `platform_urls.line` → `default_url` (whitespace-trimmed), same as card blocks. Unlinked images send as plain image messages, which LINE never makes tappable.
 - **Text/image order on LINE**: text + image send as separate messages — image first by default so the trailing text drives the chat-list preview; `text_position: 'before'` (the "Send text before this image" toggle) keeps the authored order. Linked-image flex heroes use the block's stored `image_aspect_ratio` with `aspectMode: fit`, matching the admin preview.
 - **Engagement**: `bff_get_resource_content_engagement` aggregates send/interaction stats for a resource in admin (date range optional).
 
@@ -140,7 +140,7 @@ Indexes (live): unique `(merchant_id, resource_code)` where code not null; `(mer
 | `fn_member_app_deep_link` | Member-app URL shapes from `merchant_code` |
 | `fn_render_blocks_as_text` | Plain-text fallback (SMS, marketplace degrade, previews) |
 | `fn_render_blocks_as_line_flex` | LINE flex generation from blocks (post-resolution) |
-| `fn_render_blocks_as_line_messages` | Rich content → sequential LINE messages: text/image as plain messages, linked image as a flex hero with the tap action, cards/carousels via `fn_render_blocks_as_line_flex` |
+| `fn_render_blocks_as_line_messages` | Rich content → sequential LINE messages: text/image as plain messages, linked image as an imagemap (flex-hero fallback), cards/carousels via `fn_render_blocks_as_line_flex` |
 | `cs_fn_search_resources` | Service-role search for AI/automation |
 | `cs_fn_load_available_resources` | Load catalog for channel context |
 | `cs_fn_match_resource` | `trigger_patterns` match on inbound text |
