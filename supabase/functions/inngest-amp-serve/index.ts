@@ -350,6 +350,11 @@ function ampMessageToOutbound(msg) {
     content: msg.altText || "Message",
     metadata: { altText: msg.altText, template: msg.template }
   };
+  if (msg.type === "imagemap") return {
+    type: "imagemap",
+    content: msg.altText || "Message",
+    metadata: { altText: msg.altText, baseUrl: msg.baseUrl, baseSize: msg.baseSize, actions: msg.actions }
+  };
   return { type: "text", content: msg.text || msg.content || JSON.stringify(msg) };
 }
 let _messagingAuthKey = null;
@@ -408,6 +413,9 @@ function appendBroadcastAttribution(messages: any[], broadcastId: string): any[]
       msg.text = msg.text.replace(/https?:\/\/[^\s]+/g, (match: string)=>appendBcToUrl(match, broadcastId));
     }
     if (msg.type === "flex" && msg.contents) msg.contents = walk(msg.contents);
+    if (msg.type === "imagemap" && Array.isArray(msg.actions)) {
+      msg.actions = msg.actions.map((a: any)=>typeof a?.linkUri === "string" ? { ...a, linkUri: appendBcToUrl(a.linkUri, broadcastId) } : a);
+    }
     return msg;
   });
 }
@@ -735,6 +743,23 @@ function parseDuration(config) {
     return `${config.duration}${unitMap[config.unit] || "h"}`;
   }
   return "1h";
+}
+function resolveWaitUntil(config, context) {
+  const datePath = String(config?.date_path || "").trim();
+  if (!datePath) return { stop: true, reason: "missing_date_path" };
+  let raw = context;
+  for (const key of datePath.split(".")) raw = raw?.[key];
+  if (raw === undefined || raw === null || raw === "") return { stop: true, reason: "date_not_found", date_path: datePath };
+  const base = new Date(String(raw));
+  if (isNaN(base.getTime())) return { stop: true, reason: "invalid_date", date_path: datePath, value: String(raw) };
+  const direction = config?.offset_direction === "after" ? "after" : "before";
+  if (direction === "before" && base.getTime() < Date.now()) {
+    return { stop: true, reason: "date_passed", date_path: datePath, value: base.toISOString() };
+  }
+  const unitMs = { minutes: 60000, hours: 3600000, days: 86400000 }[config?.offset_unit] ?? 86400000;
+  const offset = Math.max(0, Number(config?.offset_value) || 0);
+  const until = new Date(base.getTime() + (direction === "after" ? 1 : -1) * offset * unitMs);
+  return { stop: false, date_path: datePath, base: base.toISOString(), until: until.toISOString() };
 }
 function capWaitDuration(requested, maxAllowed) {
   const toMs = (d)=>{
@@ -1297,7 +1322,23 @@ const workflowExecutor = inngest.createFunction({
     if (node.node_type === "trigger" || node.node_type === "entry") {
     // no-op
     } else if (node.node_type === "wait") {
-      const dur = parseDuration(node.node_config);
+      const untilPlan = node.node_config?.mode === "until_date"
+        ? await step.run(`wait-plan-${node.id}`, async ()=>resolveWaitUntil(node.node_config, userContext))
+        : null;
+      if (untilPlan?.stop) {
+        await step.run(`log-wait-${node.id}`, async ()=>{
+          await supabase.from("workflow_log").insert({
+            merchant_id, workflow_id, user_id, line_user_id, run_scope, inngest_run_id: runId,
+            event_type: "node_executed", node_id: node.id, node_type: "wait",
+            status: "skipped",
+            event_data: { mode: "until_date", ...untilPlan }
+          });
+          return { ok: true };
+        });
+        current = null;
+        continue;
+      }
+      const dur = untilPlan ? null : parseDuration(node.node_config);
       await step.run(`log-wait-${node.id}`, async ()=>{
         await supabase.from("workflow_log").insert({
           merchant_id,
@@ -1310,7 +1351,7 @@ const workflowExecutor = inngest.createFunction({
           node_id: node.id,
           node_type: "wait",
           status: "waiting",
-          event_data: {
+          event_data: untilPlan ? { mode: "until_date", ...untilPlan } : {
             duration: dur
           }
         });
@@ -1318,7 +1359,8 @@ const workflowExecutor = inngest.createFunction({
           ok: true
         };
       });
-      await step.sleep(`sleep-${node.id}`, dur);
+      if (untilPlan) await step.sleepUntil(`sleep-${node.id}`, untilPlan.until);
+      else await step.sleep(`sleep-${node.id}`, dur);
       await step.run(`log-wait-done-${node.id}`, async ()=>{
         await supabase.from("workflow_log").insert({
           merchant_id,
