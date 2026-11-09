@@ -1,3 +1,7 @@
+## 2026-11-09
+
+- **Product catalog** — Weekly run `4d2b9193-ce96-4efd-80f0-a16e463ff379` reverified eight unchanged AMP workflow, lifecycle, targeted-broadcast, and quick-reply rows after this week's requirement changes; three unsupported or roadmap-conflicting GA rows remain unchanged for product review. See `workflows/product-feature-catalog/REFERENCE.md` §9–§10.
+
 ## 2026-11-04
 
 - **Resource Content (linked image is tappable on LINE)** — An image block with an Image link set now sends as a flex bubble whose hero carries the URI action, so tapping the image in LINE opens the link; unlinked images keep the plain image message (plain image messages can never be tappable — a LINE limitation). The hero follows the block's stored aspect ratio with `aspectMode: fit`, matching the admin preview. Fixes CONTENTLIBRARY-0315 / CONTENTLIBRARY-0314 (image link ignored; image not full size). Migration `content_library_linked_image_action` (live). See `requirements/Resource_Content.md` §Rules › Image link on LINE, §System › Functions.
