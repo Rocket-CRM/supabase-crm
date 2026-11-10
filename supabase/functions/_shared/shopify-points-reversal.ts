@@ -13,7 +13,7 @@ export async function reversePointsBurn(
       p_user_id: userId,
       p_currency: "points",
       p_source_type: "redemption_cancellation",
-      p_component: "base",
+      p_component: "reversal",
       p_transaction_type: "earn",
       p_amount: pointsAmount,
       p_transaction_id: crypto.randomUUID(),
