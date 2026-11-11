@@ -183,7 +183,7 @@ Audience BFFs accept optional `p_language` (`en` \| `th`) for envelope titles vi
 ### Member journey
 
 1. **Message** — Receives LINE/SMS (or other channel) from a workflow message node, or an identical LINE message from a targeted broadcast; workflow URLs are tracked redirects, broadcast member-app links carry the broadcast id instead. Members without linked LINE (or opted out of LINE) receive nothing from LINE sends.
-2. **Click** — Browser hits `link-redirect` → click logged → redirect to destination with `rct` query param.
+2. **Click** — Browser hits the merchant-branded `https://{merchant}.rocket-loyalty.app/t/<token>` (proxied to `link-redirect`) → click logged → redirect to destination with `rct` query param.
 3. **Member app** — If destination is Rocket Loyalty app, client sends page view / time on page / scroll depth to `engagement-beacon` (contract: `docs/AMP_ENGAGEMENT_BEACON_SPEC.md`).
 4. **Postback / router** — Tapping a postback button (e.g. card 1 “Price”, card 2 “Promotion”) continues the member down the router branch for that key without the re-enrollment gate; the member simply receives that branch's next message or reward. A tap on a broadcast button can enroll them into a *When LINE option selected* workflow.
 5. **Lifecycle** — On sign-up, tier change, birthday, or anniversary the member receives the configured currency, reward, persona, or tag with no action of their own; it appears in their wallet/history like any other grant.

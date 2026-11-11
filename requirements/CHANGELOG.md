@@ -1,3 +1,7 @@
+## 2026-11-11
+
+- **AMP Workflows (branded click-tracking links)** — Workflow LINE/SMS messages to members showed the raw `wkevmsedchftztoolkmi.supabase.co/functions/v1/link-redirect/<token>` URL in place of the configured link (destination and click tracking were correct; only the visible host was wrong). `fn_amp_create_tracked_link` now returns `https://{merchant}.rocket-loyalty.app/t/<token>` (fallback to the Supabase URL when the merchant has no code), loyalty-user rewrites `/t/:token` to `link-redirect`, and `fn_amp_wrap_tracked_links` collects tokens from both shapes. Already-sent links keep working. Migration `amp_tracked_link_branded_host` (live); loyalty-user `6c38a69` (live). See `requirements/AMP - Rule Based.md` §Engagement Tracking.
+
 ## 2026-11-09
 
 - **Product catalog** — Weekly run `4d2b9193-ce96-4efd-80f0-a16e463ff379` reverified eight unchanged AMP workflow, lifecycle, targeted-broadcast, and quick-reply rows after this week's requirement changes; three unsupported or roadmap-conflicting GA rows remain unchanged for product review. See `workflows/product-feature-catalog/REFERENCE.md` §9–§10.

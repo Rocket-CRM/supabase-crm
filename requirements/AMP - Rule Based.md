@@ -96,9 +96,9 @@ Each status is a separate log entry, enabling funnel analysis:
 
 Per-recipient link/click tracking plus page engagement (time on page, scroll depth) on Rocket Loyalty member-app pages.
 
-**Send path:** `inngest-amp-serve` (v40) calls `fn_amp_wrap_tracked_links(p_messages, p_merchant_id, p_workflow_id, p_node_id, p_user_id, p_channel, p_resource_id)` before dispatching LINE/SMS messages to messaging-service. Every absolute http(s) URL (flex `uri` actions; URLs inside top-level text messages) is replaced with `https://wkevmsedchftztoolkmi.supabase.co/functions/v1/link-redirect/<token>` and one `amp_tracked_link` row is inserted per (recipient, link, send). Wrapping failures never block the send. After the `workflow_log` insert, tokens are backfilled with `workflow_log_id`.
+**Send path:** `inngest-amp-serve` (v40) calls `fn_amp_wrap_tracked_links(p_messages, p_merchant_id, p_workflow_id, p_node_id, p_user_id, p_channel, p_resource_id)` before dispatching LINE/SMS messages to messaging-service. Every absolute http(s) URL (flex `uri` actions; URLs inside top-level text messages) is replaced with the merchant-branded `https://{merchant}.rocket-loyalty.app/t/<token>` (host label = first DNS label of `merchant_code`, same rule as the referral share hop; a merchant without a code falls back to `https://wkevmsedchftztoolkmi.supabase.co/functions/v1/link-redirect/<token>`) and one `amp_tracked_link` row is inserted per (recipient, link, send). Wrapping failures never block the send. After the `workflow_log` insert, tokens are backfilled with `workflow_log_id`.
 
-**Click:** `link-redirect` edge function (public) — token lookup → insert `amp_engagement_event` (`event_type='click'`) → 302 to destination with `rct=<token>` appended.
+**Click:** loyalty-user rewrites `/t/:token` to the `link-redirect` edge function (public) — token lookup → insert `amp_engagement_event` (`event_type='click'`) → 302 to destination with `rct=<token>` appended.
 
 **Page engagement (member app only):** the Rocket Loyalty app reads `rct`, then POSTs `page_view` / `page_time` (seconds) / `scroll_depth` (percent) to the `engagement-beacon` edge function (public, CORS-restricted to `*.rocket-loyalty.app`). Contract: `docs/AMP_ENGAGEMENT_BEACON_SPEC.md`. External destinations get click tracking only (no beacon).
 
