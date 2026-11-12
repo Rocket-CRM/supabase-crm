@@ -285,7 +285,7 @@ F: bff_admin_sync_assets(p_asset_ids uuid[]) -> jsonb
 F: bff_admin_upsert_user_asset(p_user_id uuid, p_asset_type_code text, p_custom_fields jsonb, p_asset_id uuid DEFAULT NULL::uuid, p_section_k...) -> jsonb
 F: bff_get_asset_filters(p_language text DEFAULT 'th'::text) -> jsonb
 F: bff_get_user_assets(p_asset_id uuid DEFAULT NULL::uuid, p_category text DEFAULT NULL::text) -> jsonb
-F: fn_asset_assert_plate_unique(p_merchant_id uuid, p_plate text, p_exclude_asset_id uuid DEFAULT NULL::uuid) -> jsonb
+F: fn_asset_assert_plate_unique(p_merchant_id uuid, p_plate text, p_province text, p_exclude_asset_id uuid DEFAULT NULL::uuid) -> jsonb
 F: fn_asset_config_is_vip(p_tags jsonb) -> boolean
 F: fn_asset_enforce_quota_after_tier_change(p_merchant_id uuid, p_user_id uuid) -> jsonb
 F: fn_asset_mark_sync_pending(p_merchant_id uuid, p_asset_id uuid) -> void

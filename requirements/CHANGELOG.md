@@ -1,5 +1,6 @@
 ## 2026-11-12
 
+- **Asset (duplicate vehicle = plate + province)** — Adding or editing a car blocked any plate already registered on the merchant, even in another province (FuturePark had 21 plates legitimately registered in more than one province). `fn_asset_assert_plate_unique` now takes the province and rejects only when the normalized plate and the province both match a non-deleted vehicle; admin Front Line (`bff_admin_upsert_user_asset`) and member Exclusive Parking (`bff_user_upsert_asset`) pass `car_plate_province`. Message: “ทะเบียนรถและจังหวัดนี้มีการลงทะเบียนแล้ว กรุณาตรวจสอบอีกครั้ง”. Fixes ADMIN-0371. Migration `asset_plate_unique_by_plate_and_province` (live). See `requirements/Asset.md` §Rules › CAR plates.
 - **Front Line (scan My QR on the Member tab)** — The hub's scan button always forced the Reward tab and looked the code up as a redemption, so a member's My QR (plain member code) never reached member search on phones (reported by several stores). The scan now follows the active tab: Member tab → member search; any other tab → Reward lookup as before. The button label shows the target ("Scan QR Code · Member" / "· Reward"). Front-end only (`front-line-search.tsx`); legacy `/front-line/legacy` and the member workspace are unchanged. See `requirements/Frontline_Admin_Actions.md` §Journeys.
 
 ## 2026-11-11

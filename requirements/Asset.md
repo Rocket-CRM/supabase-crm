@@ -32,12 +32,13 @@ Open API / warranty-style assets use overlapping `asset` rows but `api_*` valida
 - Add allowed only when active count in the target section is strictly below `asset_limit_per_user` (Y).
 - Reactivate (`inactive` → `active`) blocked if it would exceed section quota.
 - Edit custom fields allowed only while instance is `active`.
-- Soft delete sets `deleted_at`; deleted rows do not count toward quota or plate uniqueness.
+- Soft delete sets `deleted_at`; deleted rows do not count toward quota or plate + province uniqueness.
 - Tier downgrade (via `apply_tier_change` → `apply_tier_change_core`) may FIFO-inactivate oldest **active** assets per type/section until within the **new** tier limits.
 
 **CAR plates**
 
-- Merchant-scoped uniqueness on normalized plate among non-deleted rows (BFF-enforced via `fn_asset_assert_plate_unique`; no DB unique index yet — historical duplicates block adding an index).
+- Merchant-scoped uniqueness on normalized plate **+ province** (`car_plate_province`, trimmed) among non-deleted rows of any status; the row being edited is excluded. The same plate in a different province is a different vehicle and is allowed. BFF-enforced via `fn_asset_assert_plate_unique`; no DB unique index yet — historical duplicates block adding an index.
+- Duplicate error: code `PLATE_DUPLICATE`, description “ทะเบียนรถและจังหวัดนี้มีการลงทะเบียนแล้ว กรุณาตรวจสอบอีกครั้ง”.
 
 **Auth**
 
@@ -89,7 +90,7 @@ Do **not** use legacy `bff_get_user_assets` — SKU/warranty catalog shape, not 
 
 1. Load Exclusive Parking — sections, X/Y counters, vehicles, `field_schema`, `has_vip` for `CAR` (default type code).
 2. Add vehicle — pick section; fill required fields; blocked at quota (`can_add` false).
-3. Edit vehicle — only while active; duplicate plate surfaces BFF error.
+3. Edit vehicle — only while active; duplicate plate + province surfaces BFF error.
 4. Toggle inactive / reactivate — reactivate blocked at quota.
 5. Delete — soft-delete.
 6. **Entrance QR** — Requires active owned vehicle; 10-minute TTL; each refresh issues new token (`rotated: true`). Countdown at zero → call QR BFF again. Errors: `ASSET_REQUIRED` (no id), `ASSET_INACTIVE`.
@@ -117,8 +118,8 @@ Registry: `REGISTRY_SUPABASE.md` § Asset.
 
 | Slug | UI label | Type |
 | --- | --- | --- |
-| `car_plate` | License plate | STRING (unique) |
-| `car_plate_province` | Province | SELECT_STRING |
+| `car_plate` | License plate | STRING (unique with province) |
+| `car_plate_province` | Province | SELECT_STRING (Thai province name) |
 | `brand` | Car brand | SELECT_STRING |
 | `car_model` | Model | STRING |
 | `car_color` | Color | STRING |
@@ -134,7 +135,7 @@ Plate normalize: trim, collapse whitespace, lower (`fn_asset_normalize_plate`).
 | `fn_asset_normalize_plate` | Normalize plate text |
 | `fn_asset_config_is_vip` | VIP config detector (array-safe) |
 | `fn_asset_user_has_vip` | Member has `tag_master.tag_name = 'VIP'` |
-| `fn_asset_assert_plate_unique` | Merchant + normalized plate among non-deleted |
+| `fn_asset_assert_plate_unique(p_merchant_id, p_plate, p_province, p_exclude_asset_id)` | Merchant + normalized plate + trimmed province among non-deleted |
 | `fn_asset_resolve_sections` | General (+ VIP if eligible) section jsonb for UI |
 | `fn_asset_resolve_auth_member` | Member JWT → `{ok, user_id, merchant_id}` (`user_accounts.id` or `auth_user_id`) |
 | `fn_asset_mark_sync_pending` | Set / upsert sync row with `is_sync = false` |
@@ -175,7 +176,7 @@ Plate normalize: trim, collapse whitespace, lower (`fn_asset_normalize_plate`).
 1. Resolve merchant and permissions (admin) or member id (JWT).
 2. Resolve asset type by `type_code`; sections via `fn_asset_resolve_sections`.
 3. Target section by `p_section_key` (`general` \| `vip`); on create enforce quota.
-4. Validate required fields from section `field_schema`; normalize + assert plate unique for CAR.
+4. Validate required fields from section `field_schema`; normalize + assert plate + province unique for CAR.
 5. Insert or update `asset` (`status` default `active` on create; update only when active); set `asset_tier_config_id`.
 6. `fn_asset_mark_sync_pending`.
 
@@ -200,7 +201,7 @@ On `apply_tier_change_core` after downgrade / manual / assign_entry paths, `fn_a
 | Admin masters UI | No UI for `asset_type`, `field_schema`, tier limits, VIP tags |
 | Real sync | No CityPark HTTP; no 02:00 cron; admin Sync is local flag only |
 | `quota_notice` | Member get omits post-downtier notice until durable signal exists |
-| DB unique on plate | Blocked until historical duplicate plates cleaned |
+| DB unique on plate + province | Blocked until historical duplicates cleaned (FuturePark 2026-11-12: 81 plate + province groups, 23 with 2+ active) |
 | Thai admin copy | Some Front Line / member keys may lack `ui_translation_admin` rows |
 | Open API vs parking | Same `asset` table; different entrypoints and validation |
 
@@ -213,7 +214,7 @@ On `apply_tier_change_core` after downgrade / manual / assign_entry paths, `fn_a
 | Add disabled | `can_add` false when count ≥ limit |
 | Edit disabled | Asset inactive |
 | Reactivate fails | Would exceed section active quota |
-| Duplicate plate | `fn_asset_assert_plate_unique` / BFF error |
+| Duplicate plate | Same plate + same province already registered (any member, active or inactive) — `fn_asset_assert_plate_unique` / BFF error |
 
 ## Related
 
