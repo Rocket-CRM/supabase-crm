@@ -1,3 +1,7 @@
+## 2026-11-12
+
+- **Front Line (scan My QR on the Member tab)** — The hub's scan button always forced the Reward tab and looked the code up as a redemption, so a member's My QR (plain member code) never reached member search on phones (reported by several stores). The scan now follows the active tab: Member tab → member search; any other tab → Reward lookup as before. The button label shows the target ("Scan QR Code · Member" / "· Reward"). Front-end only (`front-line-search.tsx`); legacy `/front-line/legacy` and the member workspace are unchanged. See `requirements/Frontline_Admin_Actions.md` §Journeys.
+
 ## 2026-11-11
 
 - **AMP Workflows (branded click-tracking links)** — Workflow LINE/SMS messages to members showed the raw `wkevmsedchftztoolkmi.supabase.co/functions/v1/link-redirect/<token>` URL in place of the configured link (destination and click tracking were correct; only the visible host was wrong). `fn_amp_create_tracked_link` now returns `https://{merchant}.rocket-loyalty.app/t/<token>` (fallback to the Supabase URL when the merchant has no code), loyalty-user rewrites `/t/:token` to `link-redirect`, and `fn_amp_wrap_tracked_links` collects tokens from both shapes. Already-sent links keep working. Migration `amp_tracked_link_branded_host` (live); loyalty-user `6c38a69` (live). See `requirements/AMP - Rule Based.md` §Engagement Tracking.

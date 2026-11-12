@@ -47,8 +47,8 @@ The member journey runs basic loyalty → engage → analyze → activate. Analy
 | Staff store assignment | Limits which service points the staff member can pick. |
 
 1. **Front Line** → pick the service point. With no stores assigned, staff see *No stores assigned — contact an admin*; with no `front_line` access, a no-access banner.
-2. **Member search** → phone, username, member code, ID card, passport, or a QR scan. *No members found* offers **Add new member** (register on the member's behalf).
-3. **Reward search** (no member needed) → type or scan a redemption code. The reward card shows status (active / used / expired), the member, where it was redeemed, and a **Use** button to mark it used. A frozen member's reward shows a warning.
+2. **Member search** → phone, username, member code, ID card, passport, or a QR scan of the member's **My QR** (the scan button on the Member tab reads the member code and searches members). *No members found* offers **Add new member** (register on the member's behalf).
+3. **Reward search** (no member needed) → type or scan a redemption code (the scan button on any tab other than Member opens Reward search). The reward card shows status (active / used / expired), the member, where it was redeemed, and a **Use** button to mark it used. A frozen member's reward shows a warning.
 4. Open the member → the header shows name, persona, tier and progress, points balance, today's earned and used points, and remarks. The service point is locked for the session.
 5. Work the tabs: Upload Receipt, Redemption Reward (mark used from the member's wallet, or redeem, or redeem-and-use), Adjust Points (add or deduct with reason), Claim Mission, Asset Group, Burn Points for Discount, Push Reward, Store Credit, Check-in. **Push to members** on the hub pushes a reward to several members at once. Upload Receipt records the keyed purchase only — the receipt photo is not stored.
 6. **Edit Profile** → the same panel as Customer 360, without tier.
