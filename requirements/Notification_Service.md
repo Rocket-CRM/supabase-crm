@@ -29,6 +29,7 @@ The notification service tells members what happened in the loyalty program on t
 - **Idempotency** — Inngest router `idempotency` keys (24h) + resolver `ALREADY_SENT` on prior `notification_log.status = sent` + unique `(merchant_id, event_key, sub_event, source_event_id, channel)`.
 - **Retries** — Inngest notification routers use step retries (e.g. 3). Transient resolver/LINE 5xx/network throws so Inngest retries. LINE 429 logs `LINE_RATE_LIMITED` without throw. User blocked bot logs failure and posts `chokepoint_post_user_event` to set `channel_line = false` (no direct user UPDATE). Reminder cron: transient failure leaves merchant unmarked so the next 15-minute tick retries; `ALREADY_SENT` dedups within a run.
 - **Wallet earn mapping** — Only `transaction_type = earn` and `component = base` maps to `currency.earned`. Bonus, adjustment, and reversal earns do not notify.
+- **Wallet burn / expiry mapping** — `transaction_type = burn` with `source_type = expiry` maps to `currency.expired`; all other `burn` rows map to `currency.burned` (the legacy `transaction_type = expire` fallback is retained).
 - **Ticket unit coalesce (LINE wallet only)** — Multi-unit ticket earns emit N wallet chokepoint events; the wallet notification router sends one LINE message per award call (`unit_index === 1`, display amount from `unit_total` when present). Points without `unit_*` unchanged.
 - **Purchase timing** — `purchase.created` can notify (catalog default ON for LINE and Email). Syngenta-style pending orders do not use `completed` until the order actually completes (typically after line-item completion). `promo_applied` and other verbs do not map.
 - **Referral notifications** — Catalog includes `referral.completed`, `referral.friend_rewarded` (from `crm.events.referral` settled/claimed semantics) and `referral.shared` (Email default ON, LINE off; **catalog-only** until share-via-email UI exists — no router maps `action.referral_share`). Klaviyo uses different metric names (`referral.friend_claimed`, `referral.completed`) on the integration path — see `Shopify.md` › Rules › Outbound delivery; do not confuse with notification `(event_key, sub_event)` pairs.
@@ -141,7 +142,7 @@ Publish topic `crm.events.*` → Inngest `crm/<domain>.event`. Only mapped rows 
 | --- | --- | --- | --- |
 | `crm.events.purchase` | `event` ∈ created, completed, cancelled, refunded | `purchase.<event>` | `purchase_id` |
 | `crm.events.purchase_item` | item completed verbs | `purchase_item.completed` | `item_id` |
-| `crm.events.wallet` | earn+base / burn / expire | `currency.*` | `wallet_ledger_id` (unit 1 when ticket expand) |
+| `crm.events.wallet` | earn+base / burn (`source_type = expiry` → `expired`, else `burned`) / expire | `currency.*` | `wallet_ledger_id` (unit 1 when ticket expand) |
 | `crm.events.tier_change` | change_type | `tier.<change_type>` | `tier_change_ledger_id` |
 | `crm.events.user` | `event = create`, `skip_cdc` false | `signup.signup` | `user_id` |
 | `crm.events.redemption` | issued, used, cancelled, entitlement_*, package_entitlement_created | `redemption.*` | `redemption_id` |

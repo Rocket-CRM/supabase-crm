@@ -1,3 +1,7 @@
+## 2026-11-13
+
+- **Notification Service (expiry burns routed to `currency.expired`)** — Daily currency expiry posts `transaction_type = 'burn'` with `source_type = 'expiry'`, and `notificationWalletRouter` previously keyed on `transaction_type` alone, so merchants with `currency.burned` enabled received "Points spent" and merchants with `currency.expired` enabled received nothing. `inngest-event-router-serve` (`notificationWalletRouter`) and `crm-event-processors` (`NotificationConsumer` parity) now route `burn` + `source_type = 'expiry'` to `currency.expired`. See `requirements/Notification_Service.md` §Rules, §System › Router mapping (Inngest).
+
 ## 2026-11-12
 
 - **Asset (duplicate vehicle = plate + province)** — Adding or editing a car blocked any plate already registered on the merchant, even in another province (FuturePark had 21 plates legitimately registered in more than one province). `fn_asset_assert_plate_unique` now takes the province and rejects only when the normalized plate and the province both match a non-deleted vehicle; admin Front Line (`bff_admin_upsert_user_asset`) and member Exclusive Parking (`bff_user_upsert_asset`) pass `car_plate_province`. Message: “ทะเบียนรถและจังหวัดนี้มีการลงทะเบียนแล้ว กรุณาตรวจสอบอีกครั้ง”. Fixes ADMIN-0371. Migration `asset_plate_unique_by_plate_and_province` (live). See `requirements/Asset.md` §Rules › CAR plates.

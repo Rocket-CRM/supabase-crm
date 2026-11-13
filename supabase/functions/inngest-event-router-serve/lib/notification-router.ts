@@ -700,7 +700,7 @@ export const notificationWalletRouter = inngest.createFunction(
     const tt = evt.transaction_type;
     let sub: string | null = null;
     if (tt === "earn" && evt.component === "base") sub = "earned";
-    else if (tt === "burn") sub = "burned";
+    else if (tt === "burn") sub = evt.source_type === "expiry" ? "expired" : "burned";
     else if (tt === "expire") sub = "expired";
     if (!sub || !evt.wallet_ledger_id) {
       return { routed: false, reason: "no_notification_mapping", transaction_type: tt };
